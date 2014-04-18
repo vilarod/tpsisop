@@ -1,0 +1,15 @@
+la UMV tiene la siguiente interfaz (comprende los siguientes mensajes)
+en todos FALTA DEFINIR LA SINTAXIS EXACTA. 
+
+----------------
+NOMBRE: GET BYTES 
+CODIGO: 1
+DESCRIPCION: Este metodo sirve para soliticar bytes desde una posicion de memoria. 
+Si el segmento al que se quiere obtener no se tienen permisos se retornará Segmentation fault
+PARAMETROS: BASE, OFFSET, TAMAÑO.
+RETORNO: BYTES SOLICITADOS  //  ERROR
+
+
+
+
+
