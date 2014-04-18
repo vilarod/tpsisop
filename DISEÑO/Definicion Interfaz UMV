@@ -5,11 +5,65 @@ en todos FALTA DEFINIR LA SINTAXIS EXACTA.
 NOMBRE: GET BYTES 
 CODIGO: 1
 DESCRIPCION: Este metodo sirve para soliticar bytes desde una posicion de memoria. 
-Si el segmento al que se quiere obtener no se tienen permisos se retornará Segmentation fault
+Si el segmento al que se quiere obtener no se tienen permisos o no existe
+se retornará Segmentation fault
+Si no se puede decodificar el mensaje (error de sintaxis en el mensaje) tambien se enviará un error. 
 PARAMETROS: BASE, OFFSET, TAMAÑO.
 RETORNO: BYTES SOLICITADOS  //  ERROR
+----------------
 
+NOMBRE: SET BYTES 
+CODIGO: 2
+DESCRIPCION: Este metodo sirve para almacenar datos en la memoria. Datos que luego podran ser solicitados.
+Si al intentar grabar esos bytes, el UMV se encuentra con que no dispone de espacio 
+se retornará un error Memory Overload
+Si no se puede decodificar el mensaje (error de sintaxis en el mensaje) tambien se enviará un error. 
+PARAMETROS: BASE, OFFSET, TAMAÑO, BUFFER
+RETORNO: OK  //  ERROR
+----------------
 
+NOMBRE: HANDSHAKE
+CODIGO: 3
+DESCRIPCION:  Handshake significa apreton de manos (o saludo). Será el primer mensaje que el UMV
+esperara recibir luego de que se conecté a él un CPU o el PLP. 
+Si no se puede decodificar el mensaje (error de sintaxis en el mensaje) tambien se enviará un error. 
+PARAMETROS: ID_Programa, TIPO (KERNEL / CPU)
+RETORNO: OK  //  ERROR
+
+DUDA: El ID_Programa es el id del programa por el que se está haciendo la conexion?????? 
+----------------
+
+NOMBRE: CAMBIO_PROCESO
+CODIGO: 4
+DESCRIPCION: Con este mensaje el CPU puede avisarle al UMV que se cambio el proceso que el mismo está ejecutando. 
+El UMV necesita ese dato para saber de ahora en mas que las solicitudes de memoria que lleguen van a estar
+relacionadas con el nuevo programa que se está ejecutando. 
+Si no se puede decodificar el mensaje (error de sintaxis en el mensaje) tambien se enviará un error. 
+PARAMETROS: ID_Programa
+RETORNO: OK  //  ERROR
+----------------
+
+NOMBRE: CREAR_SEGMENTO
+CODIGO: 4
+DESCRIPCION: Con este mensaje el PLP puede avisarle al UMV que se necesita crear un nuevo segmento pues se
+incorporó un programa nuevo. 
+Si no se puede decodificar el mensaje (error de sintaxis en el mensaje) tambien se enviará un error. 
+PARAMETROS: ID_Programa, Tamaño_Segmento
+RETORNO: OK  //  ERROR 
+
+DUDA: tengo mis dudas sobre si hace falta retornar algo más como un ID del segmento.  ???????
+----------------
+
+NOMBRE: DESTRUIR_SEGMENTO
+CODIGO: 4
+DESCRIPCION: Con este mensaje el PLP puede avisarle al UMV que se terminó la vida de un programa y se quiere
+destruir su segmento de la memoria. 
+Si no se puede decodificar el mensaje (error de sintaxis en el mensaje) tambien se enviará un error. 
+PARAMETROS: ID_Programa
+RETORNO: OK  //  ERROR 
+
+DUDA: En teoria no deberia poder destruir un segmento si se está corriendo el  programa en una CPU???
+----------------
 
 
 
