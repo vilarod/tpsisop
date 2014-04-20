@@ -5,13 +5,11 @@
  Version     : 1.0
  Copyright   : Garras - UTN FRBA 2014
  Description : Hello World in C, Ansi-style
- Para probarlo es tan simple como ejecutar en el terminator la linea "$ telnet localhost 7000" y empezar a dialogar con el UMV.
+ Testing	 : Para probarlo es tan simple como ejecutar en el terminator la linea "$ telnet localhost 7000" y empezar a dialogar con el UMV.
  ============================================================================
  */
 
-
 #include <fcntl.h>
-#include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
@@ -23,7 +21,13 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <commons/config.h>
 #include <string.h>
+#include <commons/string.h>
+#include "UMV.h"
+
+//Ruta del config
+#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/UMV/src/config.cfg"
 
 //Tipo de cliente conectado
 #define TIPO_KERNEL       1
@@ -37,9 +41,8 @@
 #define MSJ_CREAR_SEGMENTO        5
 #define MSJ_DESTRUIR_SEGMENTO     6
 
-
 /** Puerto  */
-#define PORT       7000
+#define PORT       7001
 
 /** Número máximo de hijos */
 #define MAX_CHILDS 3
@@ -47,19 +50,12 @@
 /** Longitud del buffer  */
 #define BUFFERSIZE 512
 
-int AtiendeCliente(int socket, struct sockaddr_in addr);
-int DemasiadosClientes(int socket, struct sockaddr_in addr);
-void error(int code, char *err);
-void reloj(int loop);
-void HiloOrquestadorDeConexiones();
-void HiloConsola();
-int RecibirDatos(int socket, void *buffer);
-int ObtenerComandoMSJ(char buffer[]);
-void ComandoHandShake(char *buffer, struct in_addr direccionIP );
 
 int main(int argv, char** argc){
 
 	int childConsola;
+
+	LevantarConfig();
 
     //De entrada vamos a necesitar 2 hilos.
 	//Uno dedicado a responder los comandos que se puedan ingresar por CONSOLA
@@ -78,6 +74,13 @@ int main(int argv, char** argc){
               }
 
     return 0;
+}
+
+void LevantarConfig()
+{
+	t_config* config = config_create(PATH_CONFIG);
+
+	printf("\nSe levantó el PROCESS_NAME del config: %s \n", config_get_string_value(config, "PROCESS_NAME"));
 }
 
 void HiloOrquestadorDeConexiones()
@@ -189,13 +192,13 @@ void HiloConsola()
 	 while(1)
 	 {
 	   char cadena [100];
-	   printf ("Si queres poder tiper en consola: ");
+	   printf ("Si queres poder escribir un comando en consola: ");
 	   fgets (cadena, 100, stdin);
 	   printf("El comando que ingresaste es: %s \n", cadena);
 	  }
 }
 
-    /* No usamos addr, pero lo dejamos para el futuro */
+// No usamos addr, pero lo dejamos para el futuro
 int DemasiadosClientes(int socket, struct sockaddr_in addr)
 {
     char buffer[BUFFERSIZE];
@@ -226,18 +229,91 @@ int RecibirDatos(int socket, void *buffer)
      return bytecount;
 }
 
-int ObtenerComandoMSJ(char buffer[])
+int EnviarDatos(int socket, void *buffer)
 {
-	//Hay que obtener el comando dado el buffer. NMR
-	int a = buffer[1];
+	int bytecount;
+
+	  if((bytecount = send(socket, buffer, strlen(buffer), 0))== -1)
+	      error(6, "No puedo enviar información");
+
+     return bytecount;
+}
+
+int chartToInt(char x)
+{
+	char str[1];
+	str[0] = x;
+	int a = atoi(str);
 	return a;
 }
 
-void ComandoHandShake(char *buffer, struct in_addr direccionIP )
+
+int ObtenerComandoMSJ(char buffer[])
 {
-	 memset(buffer, 0, BUFFERSIZE);
-	 sprintf(buffer, "Hola %s, ¿cómo estás?\n", inet_ntoa(direccionIP));
+	//Hay que obtener el comando dado el buffer.
+	//El comando está dado por el primer caracter, que tiene que ser un número.
+	return chartToInt(buffer[0]);
 }
+
+void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente )
+{
+	(*idProg) = chartToInt(buffer[1]);
+	(*tipoCliente) = chartToInt(buffer[2]);
+
+	 memset(buffer, 0, BUFFERSIZE);
+	 sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ", *idProg, *tipoCliente );
+}
+
+void ComandoGetBytes(char *buffer, int idProg)
+{
+	//Retorna los bytes que el programa quiere.
+	//Hay que validar varias cosas, entre ellas que el programa tenga derechos para acceder al segmento que se está pidiendo.
+
+	 memset(buffer, 0, BUFFERSIZE);
+	 sprintf(buffer, "GetBytes: OK! INFO-->  idPRog: %d", idProg);
+}
+
+void ComandoSetBytes(char *buffer, int idProg)
+{
+	//Graba los bytes que el programa quiere.
+	//Hay que validar varias cosas. Seguro que el idProg sirve de algo.
+
+	 memset(buffer, 0, BUFFERSIZE);
+	 sprintf(buffer, "SetBytes: OK! INFO-->  idPRog: %d", idProg);
+}
+
+void ComandoCambioProceso(char *buffer, int *idProg)
+{
+	//Cambia el proceso activo sobre el que el cliente está trabajando. Así el hilo sabe con que proceso trabaja el cliente.
+	//Hay que validar varias cosas seguro
+
+	int idProgViejo = *idProg;
+	(*idProg) = chartToInt(buffer[1]);
+
+	 sprintf(buffer, "SetBytes: OK! INFO-->  idPRog NUEVO: %d, idPRog VIEJO: %d", *idProg, idProgViejo );
+}
+
+void ComandoDestruirSegmento(char *buffer, int idProg)
+{
+	//Graba los bytes que el programa quiere.
+	//NMR: no me queda claro para que quiere el IdProg, se supone que el hilo ya lo sabe por el handshake y el cambioProceso.
+	int idProgParam = chartToInt(buffer[1]);
+	int taman = chartToInt(buffer[2]);
+
+	 sprintf(buffer, "Destruir Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam ,taman);
+}
+
+void ComandoCrearSegmento(char *buffer, int idProg)
+{
+	//Crea un segmento para un programa.
+	//NMR: no me queda claro para que quiere el IdProg, se supone que el hilo ya lo sabe por el handshake y el cambioProceso.
+	int idProgParam = chartToInt(buffer[1]);
+	int taman = chartToInt(buffer[2]);
+
+	 sprintf(buffer, "Crear Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam ,taman);
+}
+
+
 
 int AtiendeCliente(int socket, struct sockaddr_in addr)
 {
@@ -245,10 +321,11 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
 	//Es el ID del programa con el que está trabajando actualmente el HILO.
 	//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
 	//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
-	// int id_Programa;
+	 int id_Programa = 0;
+	 int tipo_Conexion = 0;
 
 	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-	 int tipo_mensaje;
+	 int tipo_mensaje = 0;
 
 	// Dentro del buffer se guarda el mensaje recibido por el cliente.
     char buffer[BUFFERSIZE];
@@ -257,7 +334,7 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
     //char aux[BUFFERSIZE];
 
     // Cantidad de bytes recibidos.
-    int bytecount;
+    //int bytecount;
 
     // La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
     int desconexionCliente=0;
@@ -268,7 +345,7 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
     while (!desconexionCliente)
     {
     	//Recibimos los datos del cliente
-    	bytecount = RecibirDatos(socket, buffer);
+    	RecibirDatos(socket, buffer);
 
     	//Analisamos que peticion nos está haciendo (obtenemos el comando)
         tipo_mensaje = ObtenerComandoMSJ(buffer);
@@ -277,26 +354,26 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
         switch ( tipo_mensaje )
         {
     		case MSJ_GET_BYTES:
-
+    			ComandoGetBytes(buffer, id_Programa);
     			break;
     		case MSJ_SET_BYTES:
-
+    			ComandoSetBytes(buffer, id_Programa);
     			break;
     		case MSJ_HANDSHAKE:
-    			 ComandoHandShake(buffer,  addr.sin_addr);
+    			 ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
     			break;
     		case MSJ_CAMBIO_PROCESO:
-
+    			ComandoCambioProceso(buffer, &id_Programa);
     			break;
-    		case MSJ_CREAR_SEGMENTO:
-
+    		case MSJ_CREAR_SEGMENTO: //NMR: hay que ver quien tiene acceso a estas operaciones, solo el PLP? hace falta que le pase el IDprog? no lo tiene ya con el handshake?
+    			ComandoCrearSegmento(buffer, id_Programa);
     			break;
     		case MSJ_DESTRUIR_SEGMENTO:
-
+    			ComandoDestruirSegmento(buffer, id_Programa);
     			break;
     		default:
     		    memset(buffer, 0, BUFFERSIZE);
-    		        sprintf(buffer, "No no no\n");
+    		        sprintf(buffer, "El ingresado no es un comando válido\n");
     			break;
         }
 
@@ -329,9 +406,9 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
         strcpy(buffer, aux);
       }
 */
-        // NMR:esto ponelo como un metodo.
-    if((bytecount = send(socket, buffer, strlen(buffer), 0))== -1)
-      error(6, "No puedo enviar información");
+        // Enviamos datos al cliente.
+       EnviarDatos(socket, buffer);
+
     }
 
     close(socket);

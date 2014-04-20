@@ -4,5 +4,6 @@
 
 USER_OBJS :=
 
-LIBS :=
+LIBS := /home/utnso/so-commons-library/src/build/libcommons.so
+
 
