@@ -24,6 +24,7 @@
 #include <commons/config.h>
 #include <string.h>
 #include <commons/string.h>
+
 #include "UMV.h"
 
 //Ruta del config
@@ -41,6 +42,7 @@
 #define MSJ_CREAR_SEGMENTO        5
 #define MSJ_DESTRUIR_SEGMENTO     6
 
+
 /** Puerto  */
 #define PORT       7001
 
@@ -53,14 +55,19 @@
 
 int main(int argv, char** argc){
 
-	int childConsola;
-
+	// int childConsola;
 	LevantarConfig();
 
-    //De entrada vamos a necesitar 2 hilos.
+	pthread_t h1, h2;
+	pthread_create(&h1, NULL, (void*) HiloOrquestadorDeConexiones, "hola");
+	pthread_create(&h2, NULL, (void*) HiloConsola, "hola");
+	pthread_join(h1, (void **) NULL);
+	pthread_join(h2, (void **) NULL);
+
+    //De entrada vamos a necesitar 2 subprocesos.
 	//Uno dedicado a responder los comandos que se puedan ingresar por CONSOLA
 	//Otro dedicado a orquestar los clientes que se quieran conectar con la UMV
-    switch ( childConsola=fork() )
+  /*  switch ( childConsola=fork() )
               {
               case -1:  // Error
                 error(4, "No se puede crear el proceso Orquestador De Conexiones");
@@ -71,9 +78,9 @@ int main(int argv, char** argc){
               default:  // Somos proceso padre, el proceso CONSOLA.
             	  HiloConsola();
                 break;
-              }
+              }*/
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void LevantarConfig()
@@ -83,7 +90,7 @@ void LevantarConfig()
 	printf("\nSe levantó el PROCESS_NAME del config: %s \n", config_get_string_value(config, "PROCESS_NAME"));
 }
 
-void HiloOrquestadorDeConexiones()
+void HiloOrquestadorDeConexiones(void* args)
 {
 	 	int socket_host;
 	    struct sockaddr_in client_addr;
@@ -187,7 +194,7 @@ void HiloOrquestadorDeConexiones()
 	    close(socket_host);
 }
 
-void HiloConsola()
+void HiloConsola(void* args)
 {
 	 while(1)
 	 {
@@ -195,7 +202,7 @@ void HiloConsola()
 	   printf ("Si queres poder escribir un comando en consola: ");
 	   fgets (cadena, 100, stdin);
 	   printf("El comando que ingresaste es: %s \n", cadena);
-	  }
+	 }
 }
 
 // No usamos addr, pero lo dejamos para el futuro
@@ -247,7 +254,6 @@ int chartToInt(char x)
 	return a;
 }
 
-
 int ObtenerComandoMSJ(char buffer[])
 {
 	//Hay que obtener el comando dado el buffer.
@@ -293,16 +299,6 @@ void ComandoCambioProceso(char *buffer, int *idProg)
 	 sprintf(buffer, "SetBytes: OK! INFO-->  idPRog NUEVO: %d, idPRog VIEJO: %d", *idProg, idProgViejo );
 }
 
-void ComandoDestruirSegmento(char *buffer, int idProg)
-{
-	//Graba los bytes que el programa quiere.
-	//NMR: no me queda claro para que quiere el IdProg, se supone que el hilo ya lo sabe por el handshake y el cambioProceso.
-	int idProgParam = chartToInt(buffer[1]);
-	int taman = chartToInt(buffer[2]);
-
-	 sprintf(buffer, "Destruir Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam ,taman);
-}
-
 void ComandoCrearSegmento(char *buffer, int idProg)
 {
 	//Crea un segmento para un programa.
@@ -313,7 +309,15 @@ void ComandoCrearSegmento(char *buffer, int idProg)
 	 sprintf(buffer, "Crear Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam ,taman);
 }
 
+void ComandoDestruirSegmento(char *buffer, int idProg)
+{
+	//Graba los bytes que el programa quiere.
+	//NMR: no me queda claro para que quiere el IdProg, se supone que el hilo ya lo sabe por el handshake y el cambioProceso.
+	int idProgParam = chartToInt(buffer[1]);
+	int taman = chartToInt(buffer[2]);
 
+	 sprintf(buffer, "Destruir Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam ,taman);
+}
 
 int AtiendeCliente(int socket, struct sockaddr_in addr)
 {
@@ -380,6 +384,7 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
      /*
 
     // Comando HOLA - Saluda y dice la IP
+
      if (strncmp(buffer, "HOLA", 4)==0)
       {
         memset(buffer, 0, BUFFERSIZE);
@@ -406,7 +411,9 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
         strcpy(buffer, aux);
       }
 */
-        // Enviamos datos al cliente.
+
+       // Enviamos datos al cliente.
+       // NMR: aca luego habra que agregar un retardo segun pide el TP
        EnviarDatos(socket, buffer);
 
     }

@@ -12,3 +12,6 @@ void LevantarConfig();
 void ComandoGetBytes(char *buffer, int idProg);
 void ComandoSetBytes(char *buffer, int idProg);
 void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente );
+void ComandoCambioProceso(char *buffer, int *idProg);
+void ComandoCrearSegmento(char *buffer, int idProg);
+void ComandoDestruirSegmento(char *buffer, int idProg);

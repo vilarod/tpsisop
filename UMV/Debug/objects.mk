@@ -4,6 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := /home/utnso/so-commons-library/src/build/libcommons.so
-
+LIBS := -lcommons -lpthread
 
