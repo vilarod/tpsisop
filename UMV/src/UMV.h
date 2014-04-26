@@ -7,7 +7,7 @@ void HiloOrquestadorDeConexiones();
 void HiloConsola();
 int RecibirDatos(int socket, void *buffer);
 int ObtenerComandoMSJ(char buffer[]);
-void LevantarConfig();
+int ObtenerTamanioMemoriaConfig();
 //Comandos
 void ComandoGetBytes(char *buffer, int idProg);
 void ComandoSetBytes(char *buffer, int idProg);

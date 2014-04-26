@@ -53,44 +53,38 @@
 #define BUFFERSIZE 512
 
 
-int main(int argv, char** argc){
+int main(int argv, char** argc)
+{
 
-	// int childConsola;
-	LevantarConfig();
+	pthread_t hOrquestadorConexiones, hConsola;
+	int* baseMemoria;
 
-	pthread_t h1, h2;
-	pthread_create(&h1, NULL, (void*) HiloOrquestadorDeConexiones, "hola");
-	pthread_create(&h2, NULL, (void*) HiloConsola, "hola");
-	pthread_join(h1, (void **) NULL);
-	pthread_join(h2, (void **) NULL);
+	int tamanioMemoria = ObtenerTamanioMemoriaConfig();
 
-    //De entrada vamos a necesitar 2 subprocesos.
-	//Uno dedicado a responder los comandos que se puedan ingresar por CONSOLA
-	//Otro dedicado a orquestar los clientes que se quieran conectar con la UMV
-  /*  switch ( childConsola=fork() )
-              {
-              case -1:  // Error
-                error(4, "No se puede crear el proceso Orquestador De Conexiones");
-                break;
-              case 0:   // Somos proceso hijo, que se encargará de administrar las conexiones a la UMV y sus peticiones.
-            	  HiloOrquestadorDeConexiones();
-            	  break;
-              default:  // Somos proceso padre, el proceso CONSOLA.
-            	  HiloConsola();
-                break;
-              }*/
+	baseMemoria = (int*) malloc(tamanioMemoria*sizeof(int));
+	if(baseMemoria==NULL)
+	{
+		printf("No se pudo reservar la memoria");
+		exit(EXIT_FAILURE);
+	}
 
+	pthread_create(&hOrquestadorConexiones, NULL, (void*) HiloOrquestadorDeConexiones, NULL);
+	pthread_create(&hConsola, NULL, (void*) HiloConsola, NULL);
+	pthread_join(hOrquestadorConexiones, (void **) NULL);
+	pthread_join(hConsola, (void **) NULL);
+
+	free(baseMemoria);
     return EXIT_SUCCESS;
 }
 
-void LevantarConfig()
+int ObtenerTamanioMemoriaConfig()
 {
 	t_config* config = config_create(PATH_CONFIG);
 
-	printf("\nSe levantó el PROCESS_NAME del config: %s \n", config_get_string_value(config, "PROCESS_NAME"));
+	return config_get_int_value(config, "TAMANIO_MEMORIA");
 }
 
-void HiloOrquestadorDeConexiones(void* args)
+void HiloOrquestadorDeConexiones()
 {
 	 	int socket_host;
 	    struct sockaddr_in client_addr;
@@ -194,7 +188,7 @@ void HiloOrquestadorDeConexiones(void* args)
 	    close(socket_host);
 }
 
-void HiloConsola(void* args)
+void HiloConsola()
 {
 	 while(1)
 	 {
