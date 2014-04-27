@@ -19,7 +19,7 @@
 
 
 //Ruta del config
-#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/UMV/src/config.cfg"
+#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/CPU/src/config.cfg"
 
 
 int main(void) {
