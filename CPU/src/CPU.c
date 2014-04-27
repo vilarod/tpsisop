@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/config.h>
+#include "CPU.h"
 
 
 
@@ -25,8 +26,10 @@ int main(void) {
 
 
 	int tamanioMemoria = ObtenerTamanioMemoriaConfig();
-
-}
+	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
+		return EXIT_SUCCESS;
+	tamanioMemoria ++;
+	}
 
 int ObtenerTamanioMemoriaConfig()
 {
