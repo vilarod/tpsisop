@@ -8,7 +8,10 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/subdir.mk
+-include commons/collections/subdir.mk
+-include commons/Debug/collections/subdir.mk
+-include commons/Debug/subdir.mk
+-include commons/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -23,26 +26,22 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: UMV
-
-dependents:
-	-cd /home/utnso/tp-2014-1c-garras/Commons/commons/Debug && $(MAKE) all
+all: libcommons.so
 
 # Tool invocations
-UMV: $(OBJS) $(USER_OBJS) /home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so
+libcommons.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: Cross GCC Linker'
-	gcc -L"/home/utnso/tp-2014-1c-garras/Commons/commons/Debug" -o "UMV" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: GCC C Linker'
+	gcc -shared -o "libcommons.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) UMV
+	-$(RM) $(OBJS)$(C_DEPS)$(LIBRARIES) libcommons.so
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so:
 
 -include ../makefile.targets
