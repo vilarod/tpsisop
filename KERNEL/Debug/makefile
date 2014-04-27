@@ -25,11 +25,14 @@ endif
 # All Target
 all: KERNEL
 
+dependents:
+	-cd /home/utnso/tp-2014-1c-garras/Commons/commons/Debug && $(MAKE) all
+
 # Tool invocations
-KERNEL: $(OBJS) $(USER_OBJS)
+KERNEL: $(OBJS) $(USER_OBJS) /home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "KERNEL" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/utnso/tp-2014-1c-garras/Commons/commons/Debug" -o "KERNEL" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -40,5 +43,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
+/home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so:
 
 -include ../makefile.targets
