@@ -23,26 +23,26 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: KERNEL
+all: CPU
 
 dependents:
-	-cd /home/utnso/tp-2014-1c-garras/Commons/commons/Debug && $(MAKE) all
+	-cd /home/utnso/tp-2014-1c-garras/Commons/Debug && $(MAKE) clean all
 
 # Tool invocations
-KERNEL: $(OBJS) $(USER_OBJS) /home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so
+CPU: $(OBJS) $(USER_OBJS) /home/utnso/tp-2014-1c-garras/Commons/Debug/libcommons.so
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/tp-2014-1c-garras/Commons/commons/Debug" -o "KERNEL" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/utnso/tp-2014-1c-garras/Commons/Debug" -o "CPU" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) KERNEL
+	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) CPU
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so:
+/home/utnso/tp-2014-1c-garras/Commons/Debug/libcommons.so:
 
 -include ../makefile.targets

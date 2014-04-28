@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>KERNEL</name>
+	<name>Commons</name>
 	<comment></comment>
 	<projects>
-		<project>commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
