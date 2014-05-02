@@ -11,7 +11,7 @@
 int ObtenerPuertoUMV();
 char* ObtenerIPUMV();
 void ConexionConSocket();
-void error(int code, char *err);
+void Cerrar();
 
 #endif /* CPU_H_ */
 

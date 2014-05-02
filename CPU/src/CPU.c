@@ -15,6 +15,14 @@
 #include <parser/parser.h>
 #include <errno.h>
 
+
+
+#include <fcntl.h>
+#include <resolv.h>
+#include <sys/wait.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
 //includes para sockets
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -27,48 +35,44 @@
 #define MI_PUERTO 0 //Que elija cualquier puerto que no esté en uso
 #define MI_IP INADDR_ANY //Que use la IP de la maquina en donde ejecuta
 
-//IP y Puerto destino de UMV, de momento lo pongo como variable global
-//Los tomo por archivo configuracion
+//Puerto destino de UMV, de momento lo pongo como variable global
+//Lo tomo por archivo configuracion
 int UMV_PUERTO;
-char* UMV_IP;
 
 
 void ConexionConSocket()
 {
 	int socketConec;
-	struct sockaddr_in my_addr;
+	//struct hostent *soy_yo;
 	struct sockaddr_in dest_UMV; //Con esto me quiero conectar con UMV
 	socketConec = socket(AF_INET,SOCK_STREAM,0);
 		//Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
 	   if(socketConec == -1)
-		      error(1, "Este socket tiene errores!");
-	//Le pongo mis valores a mi socket
-	my_addr.sin_family=AF_INET;
-	my_addr.sin_port= htons(MI_PUERTO);
-	my_addr.sin_addr.s_addr= MI_IP;
+		      perror("Este socket tiene errores!");
+
 	//Le pongo valores de la UMV
 	dest_UMV.sin_family=AF_INET;
 	dest_UMV.sin_port=htons(UMV_PUERTO);
-	dest_UMV.sin_addr.s_addr= MI_IP; //esto tengo que cambiarlo despues
-		//Controlo si el puerto está en uso (igual me prometio beej que con 0 tomaba un puerto libre)
-	   if ((bind(socketConec,(struct sockaddr*)&my_addr,sizeof(struct sockaddr)))==-1)
-		      error(2,"Este puerto está ocupado!");
+	dest_UMV.sin_addr.s_addr= MI_PUERTO;
+
 	   //Controlo si puedo conectarme
 	   if ((connect(socketConec,(struct sockaddr*)&dest_UMV,sizeof(struct sockaddr)))==-1)
-		      error(3,"No me puedo conectar!");
+		      perror("No me puedo conectar!");
+
+	   puts("Entre a conexionConSocket!");
+
+	}
 
 
 
-}
+
 
 int main(void) {
 
 
 	UMV_PUERTO = ObtenerPuertoUMV();
-	UMV_IP = ObtenerIPUMV();
-	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
 	printf("El puerto de la memoria es: %d ", UMV_PUERTO);
-	printf("El IP de la memoria es: %s ", UMV_IP);
+	ConexionConSocket();
 		return EXIT_SUCCESS;
 
 	}
@@ -80,7 +84,7 @@ int Enviar (int sRemoto, void * buffer)
 	int cantBytes;
 	cantBytes= send(sRemoto,buffer,strlen(buffer),0);
 	if (cantBytes ==-1)
-		error(4,"No lo puedo enviar todo junto!");
+		perror("No lo puedo enviar todo junto!");
 	return cantBytes;
 
 }
@@ -92,11 +96,18 @@ int Recibir (int sRemoto, void * buffer)
 	int cantBytes;
 	cantBytes = recv(sRemoto,buffer,strlen(buffer),0);
 	if (cantBytes == -1)
-		error(5,"Surgió un error al recibir los datos!");
+		perror("Surgió un error al recibir los datos!");
 	if (cantBytes == 0)
-		error(6,"El proceso remoto se desconecto!");
+		perror("El proceso remoto se desconecto!");
 	return cantBytes;
 
+}
+
+//Cerrar conexión
+
+void Cerrar (int sRemoto)
+{
+	close(sRemoto);
 }
 
 //Para leer desde el archivo de configuracion
@@ -108,18 +119,5 @@ int ObtenerPuertoUMV()
 	return config_get_int_value(config, "PUERTO_UMV");
 }
 
-char* ObtenerIPUMV()
-{
-	t_config* config = config_create(PATH_CONFIG);
-
-	return config_get_string_value(config, "IP_UMV");
-}
 
 
-void error(int code, char *err)
-{
-  char *msg=(char*)malloc(strlen(err)+14);
-  sprintf(msg, "Error %d: %s\n", code, err);
-  fprintf(stderr, "%s", msg);
-  exit(1);
-}
