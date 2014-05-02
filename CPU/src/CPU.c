@@ -155,7 +155,7 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 	return valor_asig; //devuelve el valor asignado
 }
 
-t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiqueta, t_puntero_instruccion linea_en_ejecucion)
+t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiqueta)
 {
 	t_puntero_instruccion instr;
      instr=1; //inicializo de prueba
@@ -167,8 +167,7 @@ t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiqueta, t_puntero_ins
 
 
 t_puntero_instruccion llamarConRetorno(t_nombre_etiqueta etiqueta,
-					  t_puntero donde_retornar,
-		              t_puntero_instruccion linea_en_ejecucion)
+					  t_puntero donde_retornar)
 {
 	t_puntero_instruccion instr;
 	instr=1; //inicializo de prueba

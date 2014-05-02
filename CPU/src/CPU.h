@@ -21,10 +21,9 @@ void Cerrar();
 void asignar(t_puntero dir, t_valor_variable val);
 t_valor_variable obtenerValorCompartida(t_nombre_compartida var);
 t_valor_variable asignarValorCompartida(t_nombre_compartida var, t_valor_variable val);
-t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiq, t_puntero_instruccion lineaEjc);
+t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiq);
 t_puntero_instruccion llamarConRetorno(t_nombre_etiqueta etiq,
-					  t_puntero donde_ret,
-		              t_puntero_instruccion linea_ejec);
+					  t_puntero donde_ret);
 t_puntero_instruccion finalizar(void);
 t_puntero_instruccion retornar (t_valor_variable ret);
 int imprimir (t_valor_variable valor_mostrar);
