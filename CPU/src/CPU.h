@@ -8,7 +8,10 @@
 #ifndef CPU_H_
 #define CPU_H_
 
-int ObtenerTamanioMemoriaConfig();
+int ObtenerPuertoUMV();
+char* ObtenerIPUMV();
+void ConexionConSocket();
+void error(int code, char *err);
 
 #endif /* CPU_H_ */
 
