@@ -40,6 +40,8 @@
 int UMV_PUERTO;
 
 
+
+
 void ConexionConSocket()
 {
 	int socketConec;
