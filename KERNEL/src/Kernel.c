@@ -1,10 +1,10 @@
 /*
  ============================================================================
- Name        : UMV.c
+ Name        : Kernel.c
  Author      : Garras
  Version     : 1.0
  Copyright   : Garras - UTN FRBA 2014
- Description : Hello World in C, Ansi-style
+ Description : Ansi-style
  Testing	 : Para probarlo es tan simple como ejecutar en el terminator la linea "$ telnet localhost 7000" y empezar a dialogar con el UMV.
  ============================================================================
  */
@@ -24,6 +24,7 @@
 #include <commons/config.h>
 #include <string.h>
 #include <commons/string.h>
+#include <commons/temporal.h>
 
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/UMV/src/config.cfg"
@@ -54,6 +55,15 @@
 int main(int argv, char** argc)
 {
 		printf("holaaaa gente");
+		int tamanioMemoria = ObtenerTamanioMemoriaConfig();
 		
+
 	   return EXIT_SUCCESS;
+}
+
+int ObtenerTamanioMemoriaConfig()
+{
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "TAMANIO_MEMORIA");
 }
