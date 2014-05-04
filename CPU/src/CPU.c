@@ -68,6 +68,9 @@ void ConexionConSocket()
 
 	   puts("Entre a conexionConSocket!");
 
+      int c=Enviar(socketConec,"1");
+      printf("%d",c);
+      Cerrar(socketConec);
 
 	}
 
@@ -79,6 +82,10 @@ int Enviar (int sRemoto, void * buffer)
 	cantBytes= send(sRemoto,buffer,strlen(buffer),0);
 	if (cantBytes ==-1)
 		perror("No lo puedo enviar todo junto!");
+
+	puts("Entre a ENVIAR!");
+	printf("%d",cantBytes);
+
 	return cantBytes;
 
 }
@@ -142,8 +149,18 @@ void procesoTerminoQuantum()
 
 void parsearYejecutar (char* instr)
 {
+
+	AnSISOP_funciones * funciones=0; //primitivas...pero, que onda??
+		//por lo que vi, tendria que empaquetar todas las primitivas en un tipo
+		//ya que el parser hace  funciones.AnSISOP_lafuncionquesea
+
+	AnSISOP_kernel * f_kernel=0; //esto es wait y signal
+
 	//aca hay que invocar al parser y ejecutar las primitivas que
 	//estan mas abajito
+
+	analizadorLinea(instr,funciones,f_kernel);
+
 }
 
 void salvarContextoProg()
@@ -178,6 +195,20 @@ int main(void) {
 	int tengoProg=0; //esto lo uso para controlar si tengo un prog que ejecutar
 
 	char* sentencia=""; //esto no se de que tipo va a ser, por ahora char*
+
+
+// esto lo vi en campus virtual y es solo de prueba
+	char* prog=malloc(100);
+	strcpy(prog,"begin variables a,b,c\nend\n\n");
+
+	t_medatada_program* datos;
+	datos=metadatada_desde_literal(prog);
+	printf("contidad:%d",datos->instrucciones_size);
+	printf("etiquetas %s",datos->etiquetas);
+	printf("cant func %d",datos->cantidad_de_funciones);
+//termina la prueba
+
+
 
 	//Llegué y quiero leer los datos de conexión
 	//donde esta el kernel?donde esta la umv?
