@@ -13,6 +13,7 @@
 #include <commons/config.h>
 #include "CPU.h"
 #include <parser/parser.h>
+#include <parser/metadata_program.h>
 #include <errno.h>
 
 
@@ -327,7 +328,12 @@ t_valor_variable AnSISOP_dereferenciar(t_puntero direccion_variable)
 t_puntero_instruccion AnSISOP_irAlLabel(t_nombre_etiqueta etiqueta)
 {
 	t_puntero_instruccion primer_instr;
-	primer_instr=1;
+	char* ptr_etiquetas="";
+	t_size tam_etiquetas=0;
+
+
+	primer_instr= metadata_buscar_etiqueta(etiqueta,ptr_etiquetas,tam_etiquetas);
+
 	//busco la primer instruccion ejecutable
 
 	return primer_instr; //devuelve la instruccion encontrada
