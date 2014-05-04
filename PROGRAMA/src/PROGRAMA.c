@@ -11,37 +11,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/config.h>
-#define putchar() putc((c), stdout)
-#define getchar() getc(stdin)
+
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/UMV/src/config.cfg"
-void filecopy(FILE*, FILE*);
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+	printf("Path: %s programa1.ansisop\n", argv[0]);//me imprime la ruta hasta el programa.ansisop
+	return 1;
+    }
 
-	/*int tamanioMemoria = ObtenerTamanioMemoriaConfig();*/
-	FILE* ptr_fichero;                      //creo un puntero de tipo FILE
-	char* ptr_nombre = "programa1.ansisop"; //creo un puntero que apunta a programa1.ansisop
-	ptr_fichero = fopen(ptr_nombre, "r");   //abre el archivo en modo lectura
-	printf("Archivo: %s -> ", ptr_nombre);
-	if(ptr_fichero != NULL)
-	{
-		printf("creado(ABIERTO)\n");      //abre el archivo
-	    filecopy(ptr_fichero, stdout);    //copia el archivo
-	}
-	else
-	{
-		printf("Error\n");
-		return 1;
-	}
+    size_t len;
+    size_t bytesRead;
+    char* contents;
+    FILE* f;
 
+    f = fopen(argv[1], "r");//abre el archivo en modo read
+    if (f == NULL) {
+	fprintf(stderr, "Error opening file: %s", argv[1]);//No existe el archivo
+	return 1;
+    }
+
+
+    fseek(f, 0, SEEK_END);//para saber el tamaño
+    len = ftell(f);
+    rewind(f);
+
+
+    contents = (char*) malloc(sizeof(char) * len + 1);//leer lo que contiene
+    contents[len] = '\0'; // solo es necesario para imprimir la salida con printf
+    if (contents == NULL) {
+	fprintf(stderr, "Failed to allocate memory");//imprime error sino tiene memoria
+	return 2;
+    }
+
+    bytesRead = fread(contents, sizeof(char), len, f);
+
+
+    fclose(f);//cierra el archivo
+
+    printf("File length: %d, bytes read: %d\n", len, bytesRead);
+    printf("Contents:\n%s", contents);
+
+    free(contents);
+    return 0;
 }
-void filecopy(FILE *ifp, FILE *ofp)//quiero copiar el archivo para ver lo que leyo
-{	int c;                         //no me da ningun resultado
-    while((c = getc(ifp))!= EOF)
-          putc((c),ofp);
 
-}
 
 int ObtenerTamanioMemoriaConfig()
 {
