@@ -36,9 +36,15 @@
 //Puerto destino de UMV, de momento lo pongo como variable global
 //Lo tomo por archivo configuracion
 int UMV_PUERTO;
+int KERNEL_PUERTO;
 
 
+//guardo pcb y q
+//struct PCB PCB_prog; //estructura del pcb
+int quantum;
 
+//controlo si estoy conectada
+int CONECTADO;
 
 void ConexionConSocket()
 {
@@ -106,17 +112,120 @@ int ObtenerPuertoUMV()
 	return config_get_int_value(config, "PUERTO_UMV");
 }
 
+int ObtenerPuertoKERNEL()
+{
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTO_KERNEL");
+}
+
+
+int RecibirProceso()
+{
+	//aca voy a intentar recibir un PCB y su Q
+	return 0; //devuelve 0 si no tengo, 1 si tengo
+}
+
+
+/*
+char* PedirSentencia(puntero indiceCodigo)
+{
+	//aca hare algo para enviarle el pedido a la umv y recibir lo solicitado
+}
+*/
+
+void procesoTerminoQuantum()
+{
+	//le aviso al kernel que el proceso termino el Q
+}
+
+void parsearYejecutar (char* instr)
+{
+	//aca hay que invocar al parser y ejecutar las primitivas que
+	//estan mas abajito
+}
+
+void salvarContextoProg()
+{
+	//necesito actualizar los segmentos del programa en la UMV
+	//actualizar el PC en el PCB
+}
+
+void limpiarEstructuras()
+{
+	//destruyo estructuras auxiliares
+}
+
+int seguirConectado()
+
+{
+	//consultare si he recibido la señal SIGUSR1,de ser asi, CHAU!
+	return 1;
+}
+
+void AvisarDescAKernel()
+
+{
+	//aviso al kernel que me voy :(
+}
+
 
 
 
 int main(void) {
 
+	int tengoProg=0; //esto lo uso para controlar si tengo un prog que ejecutar
+
+	char* sentencia=""; //esto no se de que tipo va a ser, por ahora char*
+
+	//Llegué y quiero leer los datos de conexión
+	//donde esta el kernel?donde esta la umv?
 
 	UMV_PUERTO = ObtenerPuertoUMV();
+	KERNEL_PUERTO = ObtenerPuertoKERNEL();
+
 	printf("El puerto de la memoria es: %d ", UMV_PUERTO);
+	//Ahora que se donde estan, me quiero conectar con los dos
+	//tendré que tener los descriptores de socket por fuera?
 	ConexionConSocket();
 
-		return EXIT_SUCCESS;
+	while (CONECTADO) //mientras estoy conectado...
+	{
+		while (tengoProg==0) //me fijo si tengo un prog que ejecutar
+		{
+			tengoProg= RecibirProceso();
+		}
+
+		//una vez que tengo el programa, mientras el quantum sea mayor
+		//a cero tengo que ejecutar las sentencias
+		while (quantum > 0)
+		{
+			//PCB_prog.PC ++; //incremento el program counter
+			//sentencia= PedirSentencia(PCB_prog.indiceCodigo); //le pido a la umv la sentencia a ejecutar
+			parsearYejecutar(sentencia);
+			quantum --; //decremento el Q
+		}
+
+		//una vez que el proceso termino el quantum
+		//quiero salvar el contexto
+		salvarContextoProg();
+		procesoTerminoQuantum(); //ahora le aviso al kernel que el proceso
+								//ha finalizado
+		//el enunciado dice que cuando finalizo la ejecucion de un programa
+		//tengo que destruir las estructuras correspondientes
+		limpiarEstructuras();
+		//cuando termino la ejecución de ese
+		CONECTADO=seguirConectado();
+	}
+
+	//me voy a desconectar, asi que... antes le tengo que
+	//avisar al kernel asi me saca de sus recursos
+
+	AvisarDescAKernel();
+
+	//Cerrar (conexion); //cierro el socket
+
+ return EXIT_SUCCESS;
 
 	}
 

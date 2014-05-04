@@ -9,12 +9,30 @@
 #define CPU_H_
 #include<parser/parser.h>
 
+
+//Obtener datos de conexión
 int ObtenerPuertoUMV();
+int ObtenerPuertoKERNEL();
 char* ObtenerIPUMV();
+
+//Manejo de conexiones
 int Enviar (int sRemoto, void * buffer);
 void ConexionConSocket();
-void Cerrar();
+void Cerrar(int sRemoto);
+int seguirConectado();
+void AvisarDescAKernel();
+void procesoTerminoQuantum();
 
+
+
+//Recibir-Enviar datos con el kernel
+int RecibirProceso(); //para recibir el pcb y el q
+
+
+//Ejecutar
+void parsearYejecutar (char* instr);
+void salvarContextoProg();
+void limpiarEstructuras();
 
 //Primitivas
 
