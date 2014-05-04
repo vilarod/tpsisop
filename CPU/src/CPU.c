@@ -50,25 +50,38 @@ int CONECTADO;
 void ConexionConSocket()
 {
 	int socketConec;
-	//struct hostent *soy_yo;
-	struct sockaddr_in dest_UMV; //Con esto me quiero conectar con UMV
 	socketConec = socket(AF_INET,SOCK_STREAM,0);
 		//Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
 	   if(socketConec == -1)
 		      perror("Este socket tiene errores!");
 
+	struct sockaddr_in dest_UMV; //Con esto me quiero conectar con UMV
 	//Le pongo valores de la UMV
 	dest_UMV.sin_family=AF_INET;
 	dest_UMV.sin_port=htons(UMV_PUERTO);
-	dest_UMV.sin_addr.s_addr= MI_PUERTO;
+	dest_UMV.sin_addr.s_addr= MI_IP;
+
+
+	struct sockaddr_in dest_KERNEL; //Con esto me quiero conectar con KERNEL
+	//Le pongo valores del Kernel
+	dest_KERNEL.sin_family=AF_INET;
+	dest_KERNEL.sin_port=htons(KERNEL_PUERTO);
+	dest_KERNEL.sin_addr.s_addr= MI_IP;
+
 
 	   //Controlo si puedo conectarme
 	   if ((connect(socketConec,(struct sockaddr*)&dest_UMV,sizeof(struct sockaddr)))==-1)
-		      perror("No me puedo conectar!");
+		      perror("No me puedo conectar UMV!");
+
+
+	   //Controlo si puedo conectarme
+	   if ((connect(socketConec,(struct sockaddr*)&dest_KERNEL,sizeof(struct sockaddr)))==-1)
+		      perror("No me puedo conectar KERNEL!");
+
 
 	   puts("Entre a conexionConSocket!");
 
-      int c=Enviar(socketConec,"1");
+      int c=Enviar(socketConec,"49");
       printf("%d",c);
       Cerrar(socketConec);
 
@@ -196,20 +209,6 @@ int main(void) {
 
 	char* sentencia=""; //esto no se de que tipo va a ser, por ahora char*
 
-
-// esto lo vi en campus virtual y es solo de prueba
-	char* prog=malloc(100);
-	strcpy(prog,"begin variables a,b,c\nend\n\n");
-
-	t_medatada_program* datos;
-	datos=metadatada_desde_literal(prog);
-	printf("contidad:%d",datos->instrucciones_size);
-	printf("etiquetas %s",datos->etiquetas);
-	printf("cant func %d",datos->cantidad_de_funciones);
-//termina la prueba
-
-
-
 	//Llegué y quiero leer los datos de conexión
 	//donde esta el kernel?donde esta la umv?
 
@@ -218,7 +217,7 @@ int main(void) {
 
 	printf("El puerto de la memoria es: %d ", UMV_PUERTO);
 	//Ahora que se donde estan, me quiero conectar con los dos
-	//tendré que tener los descriptores de socket por fuera?
+	//tendré que tener los descriptores de socket por fuera?CREO QUE SI..
 	ConexionConSocket();
 
 	while (CONECTADO) //mientras estoy conectado...
