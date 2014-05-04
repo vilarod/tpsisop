@@ -237,12 +237,12 @@ int main(void) {
 //esto es solamente un bosquejo para ir armandolas
 
 
-void asignar(t_puntero direccion_variable, t_valor_variable valor)
+void AnSISOP_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
 	//direccion_variable=valor;
 }
 
-t_valor_variable obtenerValorCompartida(t_nombre_compartida variable)
+t_valor_variable AnSISOP_obtenerValorCompartida(t_nombre_compartida variable)
 {
 	t_valor_variable valor;
 	valor=1; //inicializo de prueba
@@ -253,7 +253,7 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable)
 	return valor; //devuelve el valor de la variable
 }
 
-t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
+t_valor_variable AnSISOP_asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
 {
 	t_valor_variable valor_asig;
 		valor_asig=1; //inicializo de prueba
@@ -264,7 +264,7 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 	return valor_asig; //devuelve el valor asignado
 }
 
-t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiqueta)
+t_puntero_instruccion AnSISOP_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 {
 	t_puntero_instruccion instr;
      instr=1; //inicializo de prueba
@@ -275,7 +275,7 @@ t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiqueta)
 }
 
 
-t_puntero_instruccion llamarConRetorno(t_nombre_etiqueta etiqueta,
+t_puntero_instruccion AnSISOP_llamarConRetorno(t_nombre_etiqueta etiqueta,
 					  t_puntero donde_retornar)
 {
 	t_puntero_instruccion instr;
@@ -286,7 +286,7 @@ t_puntero_instruccion llamarConRetorno(t_nombre_etiqueta etiqueta,
 	return instr;
 }
 
-t_puntero_instruccion finalizar(void)
+t_puntero_instruccion AnSISOP_finalizar(void)
 {
 	t_puntero_instruccion instr;
 	instr=1; //inicializo de prueba
@@ -295,7 +295,7 @@ t_puntero_instruccion finalizar(void)
 	return instr;
 }
 
-t_puntero_instruccion retornar (t_valor_variable retorno)
+t_puntero_instruccion AnSISOP_retornar (t_valor_variable retorno)
 {
 	t_puntero_instruccion instr;
 	instr=1; //inicializo de prueba
@@ -304,7 +304,7 @@ t_puntero_instruccion retornar (t_valor_variable retorno)
 	return instr;
 }
 
-int imprimir (t_valor_variable valor_mostrar)
+int AnSISOP_imprimir (t_valor_variable valor_mostrar)
 {
 	int cant_caracteres;
 	cant_caracteres=1; //inicializo de prueba
@@ -314,7 +314,7 @@ int imprimir (t_valor_variable valor_mostrar)
 	return cant_caracteres;
 }
 
-t_valor_variable dereferenciar(t_puntero direccion_variable)
+t_valor_variable AnSISOP_dereferenciar(t_puntero direccion_variable)
 {
 	t_valor_variable valor;
 	valor=1;//inicializo de prueba
@@ -324,7 +324,7 @@ t_valor_variable dereferenciar(t_puntero direccion_variable)
 	return valor; //devuelve el valor encontrado
 }
 
-t_puntero_instruccion irAlLabel(t_nombre_etiqueta etiqueta)
+t_puntero_instruccion AnSISOP_irAlLabel(t_nombre_etiqueta etiqueta)
 {
 	t_puntero_instruccion primer_instr;
 	primer_instr=1;
@@ -333,7 +333,7 @@ t_puntero_instruccion irAlLabel(t_nombre_etiqueta etiqueta)
 	return primer_instr; //devuelve la instruccion encontrada
 }
 
-t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable)
+t_puntero AnSISOP_obtenerPosicionVariable(t_nombre_variable identificador_variable)
 {
 	t_puntero posicion;
 	posicion=1; //inicializo de prueba
@@ -342,7 +342,7 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable)
 	return posicion; //devuelvo la posicion
 }
 
-t_puntero definirVariable(t_nombre_variable identificador_variable)
+t_puntero AnSISOP_definirVariable(t_nombre_variable identificador_variable)
 {
 	t_puntero pos_var_stack;
 	pos_var_stack=1; //inicializo de prueba
@@ -352,7 +352,7 @@ t_puntero definirVariable(t_nombre_variable identificador_variable)
 	return pos_var_stack; //devuelvo la pos en el stack
 }
 
-int imprimirTexto(char* texto)
+int AnSISOP_imprimirTexto(char* texto)
 {
 	int cant_caracteres;
 		cant_caracteres=1; //inicializo de prueba
@@ -362,7 +362,7 @@ int imprimirTexto(char* texto)
 		return cant_caracteres;
 }
 
-int entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
+int AnSISOP_entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 {
 	int tiempo2;
 	tiempo2=1; //inicializo de prueba
@@ -373,8 +373,8 @@ int entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 	return tiempo2;
 }
 
-/*
-int wait(t_nombre_semaforo identificador_semaforo)
+
+int AnSISOP_wait(t_nombre_semaforo identificador_semaforo)
 {
 	int bloquea;
 	bloquea=0;//incializo de prueba
@@ -385,7 +385,7 @@ int wait(t_nombre_semaforo identificador_semaforo)
 	return bloquea;
 }
 
-int signal(t_nombre_semaforo identificador_semaforo)
+int AnSISOP_signal(t_nombre_semaforo identificador_semaforo)
 {
 	int desbloquea;
 	desbloquea=1; //inicializo de prueba
@@ -395,4 +395,3 @@ int signal(t_nombre_semaforo identificador_semaforo)
 
 	return desbloquea;
 }
-*/
