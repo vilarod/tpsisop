@@ -13,20 +13,17 @@
 #include <commons/config.h>
 
 //Ruta del config
-#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/UMV/src/config.cfg"
+#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/PROGRAMA/src/config.cfg"
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-	printf("Path: %s programa1.ansisop\n", argv[0]);//me imprime la ruta hasta el programa.ansisop
-	return 1;
-    }
 
-    size_t len;
+	size_t len;
     size_t bytesRead;
     char* contents;
     FILE* f;
+    printf("Path: %s programa1.ansisop\n", argv[0]);//me imprime la ruta hasta el programa.ansisop
 
-    f = fopen(argv[1], "r");//abre el archivo en modo read
+    f = fopen("programa1.ansisop", "r");//abre el archivo en modo read
     if (f == NULL) {
 	fprintf(stderr, "Error opening file: %s", argv[1]);//No existe el archivo
 	return 1;
@@ -51,7 +48,7 @@ int main(int argc, char* argv[]) {
     fclose(f);//cierra el archivo
 
     printf("File length: %d, bytes read: %d\n", len, bytesRead);
-    printf("Contents:\n%s", contents);
+    printf("Contents:\n %s", contents);
 
     free(contents);
     return 0;
