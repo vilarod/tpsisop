@@ -29,7 +29,7 @@ all: UMV
 UMV: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross GCC Linker'
-	gcc -L"/home/utnso/tp-2014-1c-garras/Commons/commons/Debug" -o "UMV" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc  -o "UMV" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

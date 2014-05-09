@@ -2,6 +2,14 @@
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 <<<<<<< HEAD
+<<<<<<< HEAD
+		<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.1097261845">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.1097261845" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+=======
+		<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.1515586877">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.1515586877" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
+=======
 		<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.669583110">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.669583110" moduleId="org.eclipse.cdt.core.settings" name="Debug">
 =======
@@ -13,6 +21,7 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.1515586877" moduleId="org.eclipse.cdt.core.settings" name="Debug">
 >>>>>>> 34b9c715f61f919c2205beae0224954a939f8ab6
 >>>>>>> c70e8de54b2ec0f9e6d7077a081b46392c47ec03
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/commons"/>
@@ -31,6 +40,27 @@
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 <<<<<<< HEAD
+<<<<<<< HEAD
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.1097261845" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.1097261845." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.2035897026" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.1307354705" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
+							<builder buildPath="${workspace_loc:/commons}/Debug" id="cdt.managedbuild.target.gnu.builder.so.debug.655563572" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.242457515" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.371123580" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
+								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.501068300" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.1085868588" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.913462631" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.262564844" name="Optimization Level" superClass="gnu.c.compiler.so.debug.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.so.debug.option.debugging.level.88660683" name="Debug Level" superClass="gnu.c.compiler.so.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.misc.pic.566310205" superClass="gnu.c.compiler.option.misc.pic" value="true" valueType="boolean"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1613592092" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.debug.2020548260" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
+								<option defaultValue="true" id="gnu.c.link.so.debug.option.shared.1043723456" name="Shared (-shared)" superClass="gnu.c.link.so.debug.option.shared" valueType="boolean"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.112424589" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+=======
 				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.669583110" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.669583110." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.1483858927" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
@@ -71,6 +101,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.debug.534022894" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
 								<option defaultValue="true" id="gnu.c.link.so.debug.option.shared.1948459214" name="Shared (-shared)" superClass="gnu.c.link.so.debug.option.shared" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1189036876" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 =======
 				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.1515586877" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.1515586877." name="/" resourcePath="">
@@ -91,13 +122,24 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.debug.1193510639" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
 								<option defaultValue="true" id="gnu.c.link.so.debug.option.shared.1400284654" name="Shared (-shared)" superClass="gnu.c.link.so.debug.option.shared" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1483440860" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+<<<<<<< HEAD
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
+=======
 >>>>>>> 34b9c715f61f919c2205beae0224954a939f8ab6
 >>>>>>> c70e8de54b2ec0f9e6d7077a081b46392c47ec03
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
 <<<<<<< HEAD
+<<<<<<< HEAD
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1250792125" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
+								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.821864682" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.1181054162" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1114555580" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+=======
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.199833405" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
 								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.1310634686" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
 							</tool>
@@ -110,14 +152,19 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.836109222" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1758642101" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 =======
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.272175143" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
 								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.425297612" name="Shared (-shared)" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.1572532965" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.444499795" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+<<<<<<< HEAD
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
+=======
 >>>>>>> 34b9c715f61f919c2205beae0224954a939f8ab6
 >>>>>>> c70e8de54b2ec0f9e6d7077a081b46392c47ec03
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 							</tool>
 						</toolChain>
 					</folderInfo>
@@ -126,6 +173,14 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 <<<<<<< HEAD
+<<<<<<< HEAD
+		<cconfiguration id="cdt.managedbuild.config.gnu.so.release.1404458497">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.release.1404458497" moduleId="org.eclipse.cdt.core.settings" name="Release">
+=======
+		<cconfiguration id="cdt.managedbuild.config.gnu.so.release.569387866">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.release.569387866" moduleId="org.eclipse.cdt.core.settings" name="Release">
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
+=======
 		<cconfiguration id="cdt.managedbuild.config.gnu.so.release.1525574294">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.release.1525574294" moduleId="org.eclipse.cdt.core.settings" name="Release">
 =======
@@ -137,6 +192,7 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.release.569387866" moduleId="org.eclipse.cdt.core.settings" name="Release">
 >>>>>>> 34b9c715f61f919c2205beae0224954a939f8ab6
 >>>>>>> c70e8de54b2ec0f9e6d7077a081b46392c47ec03
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 				<externalSettings>
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/commons"/>
@@ -155,6 +211,26 @@
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 <<<<<<< HEAD
+<<<<<<< HEAD
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.1404458497" name="Release" parent="cdt.managedbuild.config.gnu.so.release">
+					<folderInfo id="cdt.managedbuild.config.gnu.so.release.1404458497." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.so.release.1998195753" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.release">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.release.156251193" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.release"/>
+							<builder buildPath="${workspace_loc:/commons}/Release" id="cdt.managedbuild.target.gnu.builder.so.release.729056578" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.so.release"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.132272359" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.release.1095860171" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.release">
+								<option id="gnu.cpp.compiler.so.release.option.optimization.level.444290313" name="Optimization Level" superClass="gnu.cpp.compiler.so.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.so.release.option.debugging.level.1776739832" name="Debug Level" superClass="gnu.cpp.compiler.so.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.401398062" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.so.release.option.optimization.level.1857430482" name="Optimization Level" superClass="gnu.c.compiler.so.release.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.so.release.option.debugging.level.1787992222" name="Debug Level" superClass="gnu.c.compiler.so.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1405550111" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.release.473701048" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.release">
+								<option defaultValue="true" id="gnu.c.link.so.release.option.shared.1352483634" name="Shared (-shared)" superClass="gnu.c.link.so.release.option.shared" valueType="boolean"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.960020753" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+=======
 				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.1525574294" name="Release" parent="cdt.managedbuild.config.gnu.so.release">
 					<folderInfo id="cdt.managedbuild.config.gnu.so.release.1525574294." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.so.release.2145567032" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.release">
@@ -193,6 +269,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.release.1046555172" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.release">
 								<option defaultValue="true" id="gnu.c.link.so.release.option.shared.252298421" name="Shared (-shared)" superClass="gnu.c.link.so.release.option.shared" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1847732102" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 =======
 				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.569387866" name="Release" parent="cdt.managedbuild.config.gnu.so.release">
 					<folderInfo id="cdt.managedbuild.config.gnu.so.release.569387866." name="/" resourcePath="">
@@ -212,13 +289,24 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.so.release.34246382" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.release">
 								<option defaultValue="true" id="gnu.c.link.so.release.option.shared.902267861" name="Shared (-shared)" superClass="gnu.c.link.so.release.option.shared" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1129896517" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+<<<<<<< HEAD
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
+=======
 >>>>>>> 34b9c715f61f919c2205beae0224954a939f8ab6
 >>>>>>> c70e8de54b2ec0f9e6d7077a081b46392c47ec03
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
 <<<<<<< HEAD
+<<<<<<< HEAD
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.1013815365" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
+								<option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.1998936152" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.so.release.1968712334" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.release">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.832932035" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+=======
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.1574318045" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
 								<option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.640063963" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
 							</tool>
@@ -231,14 +319,19 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.so.release.1882076579" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.release">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.707597170" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 =======
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.161761809" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
 								<option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.1996634887" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.so.release.1572320869" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.release">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1208366542" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+<<<<<<< HEAD
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
+=======
 >>>>>>> 34b9c715f61f919c2205beae0224954a939f8ab6
 >>>>>>> c70e8de54b2ec0f9e6d7077a081b46392c47ec03
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 							</tool>
 						</toolChain>
 					</folderInfo>
@@ -249,6 +342,16 @@
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 <<<<<<< HEAD
+<<<<<<< HEAD
+		<project id="commons.cdt.managedbuild.target.gnu.so.2015654495" name="Shared Library" projectType="cdt.managedbuild.target.gnu.so"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.release.1404458497;cdt.managedbuild.config.gnu.so.release.1404458497.;cdt.managedbuild.tool.gnu.c.compiler.so.release.401398062;cdt.managedbuild.tool.gnu.c.compiler.input.1405550111">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.1097261845;cdt.managedbuild.config.gnu.so.debug.1097261845.;cdt.managedbuild.tool.gnu.c.compiler.so.debug.913462631;cdt.managedbuild.tool.gnu.c.compiler.input.1613592092">
+=======
 		<project id="commons.cdt.managedbuild.target.gnu.so.414788720" name="Shared Library" projectType="cdt.managedbuild.target.gnu.so"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
@@ -273,6 +376,7 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.1530159402;cdt.managedbuild.config.gnu.so.debug.1530159402.;cdt.managedbuild.tool.gnu.c.compiler.so.debug.624886151;cdt.managedbuild.tool.gnu.c.compiler.input.200389739">
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 =======
 		<project id="commons.cdt.managedbuild.target.gnu.so.1536630000" name="Shared Library" projectType="cdt.managedbuild.target.gnu.so"/>
 	</storageModule>
@@ -288,11 +392,26 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.2002819041;cdt.managedbuild.config.gnu.so.debug.2002819041.;cdt.managedbuild.tool.gnu.c.compiler.so.debug.1658118919;cdt.managedbuild.tool.gnu.c.compiler.input.1729168762">
+<<<<<<< HEAD
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
+=======
 >>>>>>> 34b9c715f61f919c2205beae0224954a939f8ab6
 >>>>>>> c70e8de54b2ec0f9e6d7077a081b46392c47ec03
+>>>>>>> 40c00fbcdae7e97c86f30b6dd928e0d7e147778a
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+<<<<<<< HEAD
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/commons"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/commons"/>
+		</configuration>
+	</storageModule>
+=======
 	<storageModule moduleId="refreshScope"/>
+>>>>>>> 2e4e0a67f7f069b64b259fdb88780b6bd1130a32
 </cproject>
