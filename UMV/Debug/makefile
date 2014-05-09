@@ -25,11 +25,8 @@ endif
 # All Target
 all: UMV
 
-dependents:
-	-cd /home/utnso/tp-2014-1c-garras/Commons/commons/Debug && $(MAKE) all
-
 # Tool invocations
-UMV: $(OBJS) $(USER_OBJS) /home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so
+UMV: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross GCC Linker'
 	gcc -L"/home/utnso/tp-2014-1c-garras/Commons/commons/Debug" -o "UMV" $(OBJS) $(USER_OBJS) $(LIBS)
@@ -43,6 +40,5 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/utnso/tp-2014-1c-garras/Commons/commons/Debug/libcommons.so:
 
 -include ../makefile.targets
