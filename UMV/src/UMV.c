@@ -42,9 +42,16 @@
 #define MSJ_CREAR_SEGMENTO        5
 #define MSJ_DESTRUIR_SEGMENTO     6
 
+//Comandos Consola aceptados
+#define COMANDO_CONSOLA_HELP				1
+#define COMANDO_CONSOLA_LEER_MEMORIA		2
+#define COMANDO_CONSOLA_ESCRIBIR_MEMORIA	3
+#define COMANDO_CONSOLA_CREAR_SEGMENTO		4
+#define COMANDO_CONSOLA_DESTRUIR_SEGMENTO	5
 
-/** Puerto  */
-#define PORT       7001
+char CMD_HELP[4] = {'H', 'E', 'L', 'P'};
+char CMD_LEER_MEMORIA[7] = {'M', 'E', 'M', 'L', 'E', 'E', 'R'};
+
 
 /** Número máximo de hijos */
 #define MAX_CHILDS 3
@@ -52,29 +59,86 @@
 /** Longitud del buffer  */
 #define BUFFERSIZE 512
 
+// - Variables globales
+char* BaseMemoria;
+int Puerto;
+
+
+
+
+// Estructura para manejar los segmentos de los programas.
+
+struct Segmento
+{
+	char IdSegmento[5];
+	int Inicio;
+	int Tamanio;
+	char* UnicacionMP;
+	struct Segmento * sig;
+};
+
+struct Programa
+{
+	int IdPrograma;
+	struct Segmento * segmentos;
+	struct Programa * sig;
+};
+
+// Listado de programas.
+struct Programa * listaProgramas;
 
 int main(int argv, char** argc)
 {
-
+	// Definimos los hilos principales
 	pthread_t hOrquestadorConexiones, hConsola;
-	int* baseMemoria;
 
-	int tamanioMemoria = ObtenerTamanioMemoriaConfig();
+	// Intentamos reservar la memoria principal
+	reservarMemoriaPrincipal();
 
-	baseMemoria = (int*) malloc(tamanioMemoria*sizeof(int));
-	if(baseMemoria==NULL)
-	{
-		printf("No se pudo reservar la memoria");
-		exit(EXIT_FAILURE);
-	}
+	// Obtenemos el puerto de la configuración
+	Puerto = ObtenerPuertoConfig();
+
+	InstanciarTablaSegmentos();
 
 	pthread_create(&hOrquestadorConexiones, NULL, (void*) HiloOrquestadorDeConexiones, NULL);
 	pthread_create(&hConsola, NULL, (void*) HiloConsola, NULL);
 	pthread_join(hOrquestadorConexiones, (void **) NULL);
 	pthread_join(hConsola, (void **) NULL);
 
-	free(baseMemoria);
+	free(BaseMemoria);
+
     return EXIT_SUCCESS;
+}
+
+void InstanciarTablaSegmentos()
+{
+	listaProgramas = NULL;
+}
+
+void reservarMemoriaPrincipal()
+{
+	// Obtenemos el tamaño de la memoria del config
+	int tamanioMemoria = ObtenerTamanioMemoriaConfig();
+	// Reservamos la memoria
+	BaseMemoria = (char*) malloc(tamanioMemoria);
+
+	// si no podemos salimos y cerramos el programa.
+	if (BaseMemoria == NULL)
+	{
+		ErrorFatal("No se pudo reservar la memoria.");
+	}
+
+}
+
+void ErrorFatal(char mensaje[])
+{
+	char cadena [100];
+	printf("%s\n",mensaje);
+
+	printf("El programa se cerrara. Presione ENTER para finalizar la ejecución.");
+	fgets (cadena, 100, stdin);
+
+	exit(EXIT_FAILURE);
 }
 
 int ObtenerTamanioMemoriaConfig()
@@ -82,6 +146,12 @@ int ObtenerTamanioMemoriaConfig()
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_int_value(config, "TAMANIO_MEMORIA");
+}
+int ObtenerPuertoConfig()
+{
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTO");
 }
 
 void HiloOrquestadorDeConexiones()
@@ -111,7 +181,7 @@ void HiloOrquestadorDeConexiones()
 	      error(1, "No puedo inicializar el socket");
 
 	    my_addr.sin_family = AF_INET ;
-	    my_addr.sin_port = htons(PORT);
+	    my_addr.sin_port = htons(Puerto);
 	    my_addr.sin_addr.s_addr = INADDR_ANY ;
 
 
@@ -188,14 +258,107 @@ void HiloOrquestadorDeConexiones()
 	    close(socket_host);
 }
 
+void ConsolaComandoHelp()
+{
+	  printf ("Aca se imprime la ayuda con los comandos. IMPLEMENTAR");
+}
+
+void ConsolaComandoLeerMemoria()
+{
+
+}
+
+void ConsolaComandoEscribirMemoria()
+{
+
+}
+
+void ConsolaComandoCrearSegmento()
+{
+	int idPrograma;
+	int tamanio;
+	printf ("--> Id de programa?");
+	scanf("%d",&idPrograma);
+	printf ("--> Tamaño segmento");
+	scanf("%d",&tamanio);
+
+	AgregarSegmentoALista(idPrograma, tamanio);
+}
+
+void AgregarSegmentoALista(int idPrograma, int tamanio)
+{
+	listaProgramas = malloc(sizeof(struct Programa));
+	listaProgramas->IdPrograma = idPrograma;
+	listaProgramas->segmentos = malloc(sizeof(struct Segmento ));
+	listaProgramas->segmentos->Inicio = 1;
+	listaProgramas->segmentos->Tamanio  = tamanio;
+	listaProgramas->segmentos->UnicacionMP  = BaseMemoria + 1;
+}
+
+void ConsolaComandoDestruirSegmento()
+{
+
+}
+
+int ObtenerComandoConsola(char buffer[])
+{
+	// NMR TERMINAR DE DEFINIRLOS COMO LA GENTE
+	int compareLimit = 4;
+
+	if(strncmp(buffer, CMD_HELP,  sizeof(CMD_HELP)) == 0)
+		return COMANDO_CONSOLA_HELP;
+
+	if(strncmp(buffer, CMD_LEER_MEMORIA,  sizeof(CMD_LEER_MEMORIA)) == 0)
+		return COMANDO_CONSOLA_LEER_MEMORIA;
+
+	if(strncmp(buffer, "MEMESCRIBIR", compareLimit) == 0)
+		return COMANDO_CONSOLA_ESCRIBIR_MEMORIA;
+
+	if(strncmp(buffer, "SEGCREAR", compareLimit) == 0)
+		return COMANDO_CONSOLA_CREAR_SEGMENTO;
+
+	if(strncmp(buffer, "SEGDESTRUIR", compareLimit) == 0)
+		return COMANDO_CONSOLA_DESTRUIR_SEGMENTO;
+
+	return 0;
+}
+
 void HiloConsola()
 {
 	 while(1)
 	 {
-	   char cadena [100];
-	   printf ("Si queres poder escribir un comando en consola: ");
-	   fgets (cadena, 100, stdin);
-	   printf("El comando que ingresaste es: %s \n", cadena);
+	   char comando [100];
+	   printf ("Escribir comando. (HELP para obtener una lista con los comandos)");
+	   fgets (comando, 100, stdin);
+
+	   int comando_introducido = 0;
+	   comando_introducido = ObtenerComandoConsola(comando);
+
+	   //Evaluamos los comandos
+	        switch ( comando_introducido )
+	        {
+	        	case COMANDO_CONSOLA_HELP:
+	        		ConsolaComandoHelp();
+	        		break;
+	    		case COMANDO_CONSOLA_LEER_MEMORIA:
+	    			ConsolaComandoLeerMemoria();
+	    			break;
+	    		case COMANDO_CONSOLA_ESCRIBIR_MEMORIA:
+	    			ConsolaComandoEscribirMemoria();
+	    			break;
+	    		case COMANDO_CONSOLA_CREAR_SEGMENTO:
+	    			ConsolaComandoCrearSegmento();
+	    			break;
+	    		case COMANDO_CONSOLA_DESTRUIR_SEGMENTO:
+	    			ConsolaComandoDestruirSegmento();
+	    			break;
+
+	    		// ACA FALTAN VARIOS COMANDOS PARA IMPLEMENTAR
+	    		default:
+	    			 printf(" -- COMANDO INVALIDO -- ");
+	    			break;
+	        }
+
 	 }
 }
 
