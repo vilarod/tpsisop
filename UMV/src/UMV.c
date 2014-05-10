@@ -513,7 +513,7 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
     {
     	//Recibimos los datos del cliente
     	RecibirDatos(socket, buffer);
-    	EnviarDatos(socket, buffer);
+        printf("%s", buffer);
     	//Analisamos que peticion nos está haciendo (obtenemos el comando)
         tipo_mensaje = ObtenerComandoMSJ(buffer);
 
