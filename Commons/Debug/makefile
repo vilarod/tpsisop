@@ -12,6 +12,8 @@ RM := rm -rf
 -include commons/Debug/collections/subdir.mk
 -include commons/Debug/subdir.mk
 -include commons/subdir.mk
+-include build/commons/collections/subdir.mk
+-include build/commons/subdir.mk
 -include subdir.mk
 -include objects.mk
 

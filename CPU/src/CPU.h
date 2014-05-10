@@ -22,7 +22,7 @@ void Cerrar(int sRemoto);
 int seguirConectado();
 void AvisarDescAKernel();
 void procesoTerminoQuantum();
-
+int Recibir (int sRemoto, void * buffer);
 
 
 //Recibir-Enviar datos con el kernel
