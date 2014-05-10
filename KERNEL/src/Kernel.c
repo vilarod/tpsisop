@@ -26,20 +26,19 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
+
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
 
 //Tipo de cliente conectado
-#define TIPO_KERNEL       1
-#define TIPO_CPU       	  2
+#define TIPO_CPU       	  1
+#define TIPO_PROGRAMA     2
+#define TIPO_MEMORIA      3
+
 
 //Mensajes aceptados
-#define MSJ_GET_BYTES             1
-#define MSJ_SET_BYTES             2
-#define MSJ_HANDSHAKE             3
-#define MSJ_CAMBIO_PROCESO        4
-#define MSJ_CREAR_SEGMENTO        5
-#define MSJ_DESTRUIR_SEGMENTO     6
+#define MSJ_HANDSHAKE             1
+#define MSJ_RECIBO_PROGRAMA       2
 
 /** Puerto  */
 #define PORT       7001
@@ -49,9 +48,6 @@
 
 /** Longitud del buffer  */
 #define BUFFERSIZE 512
-
-/* Grado de Multiprogramacion*/
-#define Grado_de_multiprogramacion 10
 
 /* Definición del pcb */
 typedef struct PCBs
@@ -79,13 +75,10 @@ typedef struct punterosIdentificar {
 	int cantidad;
 	nodo *inicio;
 	nodo *fin;
-
 }puntero;
 
-
-
-
-pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER; /* mutex que controla acceso a la variable global */
+/* mutex que controla acceso a la seccion critica */
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 
 
 int main(int argv, char** argc)
@@ -108,10 +101,9 @@ int main(int argv, char** argc)
 /* Hilo de PLP (lo que ejecuta) */
 void *PLP(void *arg)
 {
-	pthread_t escuchaActiva;
+	pthread_t escuchaYopera;
 
-			pthread_create(&escuchaActiva, NULL , escucha , NULL);
-
+			pthread_create(&escuchaYopera, NULL , escuchaPLP , NULL);
 
 return NULL;
 }
@@ -119,22 +111,36 @@ return NULL;
 /* Hilo de PCP (lo que ejecuta) */
 void *PCP(void *arg)
 {
-
 	return NULL;
 }
 
 
-
+/*
 int ObtenerTamanioMemoriaConfig()
 {
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_int_value(config, "TAMANIO_MEMORIA");
 }
+*/
 
-
-void *escucha(void *arg)
+void *escuchaPLP(void *arg)
 {
+		/*Solicitar coneccion umv(); si no se conecta se aborta todo*/
+		/* ip y puerto esta en mi config */
+
+		/*hanshake 1°char: cod mensaje (3)
+		 * 2° char: tipo  (1)
+		 * RESPUESTA GENERICA que dice 1° char es 1 o 0 (1 ok, 0 todo mal luego del 0 todo el mensaje termina en /o)
+		 *
+		 * Crear segmento 1° cod mensaje (5)
+		 * Parametros a pasar 2° cantidad de dijitos del id programa
+		 *  3° id programa
+		 *  4° cantidad dijitos tamaño
+		 *  5° tamaño
+		 *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
+
+
 	 	int socket_host;
 	    struct sockaddr_in client_addr;
 	    struct sockaddr_in my_addr;
@@ -145,14 +151,9 @@ void *escucha(void *arg)
 
 	    int socket_client;
 	    fd_set rfds;        // Conjunto de descriptores a vigilar
-	    int childcount=0;
-
-
-	    int childpid;
-
-	    int pidstatus;
 
 	    int activated=1;
+
 	    int loop=0;
 
 	    socket_host = socket(AF_INET, SOCK_STREAM, 0);
@@ -192,27 +193,8 @@ void *escucha(void *arg)
 	            	          	            	            }
 	            	          else
 	            	            fprintf(stderr, "ERROR AL ACEPTAR LA CONEXIÓN\n");
-	            	        }
 
-	            	      // Miramos si se ha cerrado algún hijo últimamente
-	            	      childpid=waitpid(0, &pidstatus, WNOHANG);
-	            	      if (childpid>0)
-	            	        {
-	            	          childcount--;   // Se acaba de morir un hijo, que en paz descance
-
-	            	          // Muchas veces nos dará 0 si no se ha muerto ningún hijo, o -1 si no tenemos hijos con errno=10 (No child process). Así nos quitamos esos mensajes
-
-	            	          if (WIFEXITED(pidstatus))
-	            	            {
-
-	            	          // Tal vez querremos mirar algo cuando se ha cerrado un hijo correctamente
-	            	          if (WEXITSTATUS(pidstatus)==99)
-	            	            {
-	            	              printf("\nSe ha pedido el cierre del programa\n");
-	            	              activated=0;
 	            	            }
-	            	            }
-	            	        }
 	            	      loop++;
 	            	      }
 
