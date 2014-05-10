@@ -10,6 +10,8 @@ RM := rm -rf
 -include sources.mk
 -include commons/collections/subdir.mk
 -include commons/subdir.mk
+-include build/commons/collections/subdir.mk
+-include build/commons/subdir.mk
 -include subdir.mk
 -include objects.mk
 
