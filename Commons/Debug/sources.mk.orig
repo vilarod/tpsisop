@@ -15,8 +15,11 @@ LIBRARIES :=
 SUBDIRS := \
 commons \
 commons/collections \
+<<<<<<< HEAD
+=======
 commons/Debug \
 commons/Debug/collections \
 build/commons \
 build/commons/collections \
+>>>>>>> 7e04b3797cd6ddb75441ce74665a57371ec74834
 

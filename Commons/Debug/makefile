@@ -9,9 +9,9 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include commons/collections/subdir.mk
--include commons/Debug/collections/subdir.mk
--include commons/Debug/subdir.mk
 -include commons/subdir.mk
+-include build/commons/collections/subdir.mk
+-include build/commons/subdir.mk
 -include subdir.mk
 -include objects.mk
 

@@ -15,9 +15,6 @@
 #include <parser/parser.h>
 #include <parser/metadata_program.h>
 #include <errno.h>
-
-
-
 #include <fcntl.h>
 #include <resolv.h>
 #include <sys/wait.h>
@@ -81,15 +78,41 @@ void ConexionConSocket()
 
 	   puts("Entre a conexionConSocket!");
 
-      int c=Enviar(socketConec,"49");
+
+
+	 char* mensaje="";
+
+	 /*
+	  int r=Recibir(socketConec,mensaje);
+	       printf("%s",mensaje);
+	       printf("%d",r);*/
+
+
+
+      int c=Enviar(socketConec,"124");
       printf("%d",c);
-      Cerrar(socketConec);
+      int r=Recibir(socketConec,mensaje);
+              printf("%s",mensaje);
+              printf("%d",r);
+
+
+      c=Enviar(socketConec,"322");
+         printf("%d",c);
+          r=Recibir(socketConec,mensaje);
+          printf("%s",mensaje);
+          printf("%d",r);
+
+
+
+
+
 
 	}
 
 //Para enviar datos
 
 int Enviar (int sRemoto, void * buffer)
+
 {
 	int cantBytes;
 	cantBytes= send(sRemoto,buffer,strlen(buffer),0);
@@ -203,7 +226,9 @@ void AvisarDescAKernel()
 
 
 
-int main(void) {
+int main(void)
+
+{
 
 	int tengoProg=0; //esto lo uso para controlar si tengo un prog que ejecutar
 

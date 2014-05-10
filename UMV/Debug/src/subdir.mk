@@ -16,8 +16,8 @@ C_DEPS += \
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.c
 	@echo 'Building file: $<'
-	@echo 'Invoking: Cross GCC Compiler'
-	gcc -I"/home/utnso/tp-2014-1c-garras/Commons/commons" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	@echo 'Invoking: GCC C Compiler'
+	gcc -I"/home/utnso/tp-2014-1c-garras/Commons" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
