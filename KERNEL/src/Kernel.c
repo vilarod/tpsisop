@@ -79,7 +79,7 @@ typedef struct punterosIdentificar {
 
 /* mutex que controla acceso a la seccion critica */
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
-
+int UMV_PUERTO;
 
 int main(int argv, char** argc)
 {
@@ -92,7 +92,7 @@ int main(int argv, char** argc)
 		pthread_join (plp,NULL);
 		pthread_join(pcp,NULL);
 
-		printf("Finalizado");
+		printf("Finalizado\n");
 
 	   return EXIT_SUCCESS;
 }
@@ -104,7 +104,7 @@ void *PLP(void *arg)
 	pthread_t escuchaYopera;
 
 			pthread_create(&escuchaYopera, NULL , escuchaPLP , NULL);
-
+			pthread_join (escuchaYopera,NULL);
 return NULL;
 }
 
@@ -115,17 +115,10 @@ void *PCP(void *arg)
 }
 
 
-/*
-int ObtenerTamanioMemoriaConfig()
-{
-	t_config* config = config_create(PATH_CONFIG);
-
-	return config_get_int_value(config, "TAMANIO_MEMORIA");
-}
-*/
-
 void *escuchaPLP(void *arg)
 {
+		UMV_PUERTO = ObtenerPuertoUMV();
+		ConexionConSocket();
 		/*Solicitar coneccion umv(); si no se conecta se aborta todo*/
 		/* ip y puerto esta en mi config */
 
@@ -208,4 +201,60 @@ void error(int code, char *err)
   sprintf(msg, "Error %d: %s\n", code, err);
   fprintf(stderr, "%s", msg);
   exit(1);
+}
+
+int ObtenerPuertoUMV()
+{
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTO_UMV");
+}
+
+void ConexionConSocket()
+{
+	int socketConec;
+	socketConec = socket(AF_INET,SOCK_STREAM,0);
+		//Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
+	   if(socketConec == -1)
+		      perror("Este socket tiene errores!");
+
+	struct sockaddr_in dest_UMV; //Con esto me quiero conectar con UMV
+	//Le pongo valores de la UMV
+	dest_UMV.sin_family=AF_INET;
+	dest_UMV.sin_port=htons(UMV_PUERTO);
+	dest_UMV.sin_addr.s_addr= INADDR_ANY;
+
+
+
+	   //Controlo si puedo conectarme
+	   if ((connect(socketConec,(struct sockaddr*)&dest_UMV,sizeof(struct sockaddr)))==-1)
+		      perror("No me puedo conectar UMV!");
+
+	   puts("Entre a conexionConSocket!");
+
+      int c=Enviar(socketConec,"31");
+      printf("%d",c);
+      char comando [100];
+      fgets (comando, 100, stdin);
+      Cerrar(socketConec);
+
+	}
+
+int Enviar (int sRemoto, void * buffer)
+{
+	int cantBytes;
+	cantBytes= send(sRemoto,buffer,strlen(buffer),0);
+	if (cantBytes ==-1)
+		perror("No lo puedo enviar todo junto!");
+
+	puts("Entre a ENVIAR!");
+	printf("%d",cantBytes);
+
+	return cantBytes;
+
+}
+
+void Cerrar (int sRemoto)
+{
+	close(sRemoto);
 }
