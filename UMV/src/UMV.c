@@ -282,6 +282,12 @@ void ConsolaComandoCrearSegmento()
 	printf ("--> Tamaño segmento");
 	scanf("%d",&tamanio);
 
+	CrearSegmento(idPrograma, tamanio);
+
+}
+
+void CrearSegmento(int idPrograma, int tamanio)
+{
 	AgregarSegmentoALista(idPrograma, tamanio);
 }
 
@@ -507,7 +513,7 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
     {
     	//Recibimos los datos del cliente
     	RecibirDatos(socket, buffer);
-
+    	EnviarDatos(socket, buffer);
     	//Analisamos que peticion nos está haciendo (obtenemos el comando)
         tipo_mensaje = ObtenerComandoMSJ(buffer);
 

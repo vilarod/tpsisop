@@ -12,6 +12,7 @@ void InstanciarTablaSegmentos();
 void reservarMemoriaPrincipal();
 void ErrorFatal(char mensaje[]);
 void AgregarSegmentoALista(int idPrograma, int tamanio);
+void CrearSegmento(int idPrograma, int tamanio);
 //Comandos mensajes
 int ObtenerComandoMSJ(char buffer[]);
 void ComandoGetBytes(char *buffer, int idProg);
