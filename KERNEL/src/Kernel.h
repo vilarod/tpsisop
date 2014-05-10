@@ -1,13 +1,5 @@
-/*
- * Kernel.h
- *
- *  Created on: 26/04/2014
- *      Author: utnso
- */
-
-#ifndef KERNEL_H_
-#define KERNEL_H_
 int ObtenerTamanioMemoriaConfig();
-
-
-#endif /* KERNEL_H_ */
+void *PLP(void *arg);
+void *PCP(void *arg);
+void *escucha(void *arg);
+void error(int code, char *err);
