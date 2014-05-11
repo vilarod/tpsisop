@@ -59,7 +59,7 @@ void ConexionConSocket(int *Conec,int socketConec,struct sockaddr_in destino)
 
 //Para enviar datos
 
-int Enviar (int sRemoto, void * buffer)
+int Enviar (int sRemoto, char * buffer)
 
 {
 	int cantBytes;
@@ -76,7 +76,7 @@ int Enviar (int sRemoto, void * buffer)
 
 //Para recibir datos
 
-int Recibir (int sRemoto, void * buffer)
+int Recibir (int sRemoto, char * buffer)
 {
 	int cantBytes;
 	cantBytes = recv(sRemoto,buffer,strlen(buffer),0);
