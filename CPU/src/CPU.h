@@ -8,7 +8,9 @@
 #ifndef CPU_H_
 #define CPU_H_
 #include<parser/parser.h>
-
+#include <stdlib.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 
 //Obtener datos de conexión
 int ObtenerPuertoUMV();
@@ -16,13 +18,15 @@ int ObtenerPuertoKERNEL();
 char* ObtenerIPUMV();
 
 //Manejo de conexiones
-int Enviar (int sRemoto, void * buffer);
-void ConexionConSocket();
+int Enviar (int sRemoto, char * buffer);
+void ConexionConSocket(int *Conec,int socketConec,struct sockaddr_in dest);
 void Cerrar(int sRemoto);
 int seguirConectado();
 void AvisarDescAKernel();
 void procesoTerminoQuantum();
-int Recibir (int sRemoto, void * buffer);
+int Recibir (int sRemoto, char * buffer);
+int crearSocket(int socketConec);
+struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,int ip);
 
 
 //Recibir-Enviar datos con el kernel

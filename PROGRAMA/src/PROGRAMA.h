@@ -7,7 +7,7 @@
 
 #ifndef PROGRAMA_H_
 #define PROGRAMA_H_
-
 int ObtenerTamanioMemoriaConfig();
+int conectar();
 
 #endif /* PROGRAMA_H_ */

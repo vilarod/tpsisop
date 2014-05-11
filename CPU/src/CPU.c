@@ -41,77 +41,25 @@ int KERNEL_PUERTO;
 //struct PCB PCB_prog; //estructura del pcb
 int quantum;
 
-//controlo si estoy conectada
-int CONECTADO;
 
-void ConexionConSocket()
+
+void ConexionConSocket(int *Conec,int socketConec,struct sockaddr_in destino)
 {
-	int socketConec;
-	socketConec = socket(AF_INET,SOCK_STREAM,0);
-		//Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
-	   if(socketConec == -1)
-		      perror("Este socket tiene errores!");
-
-	struct sockaddr_in dest_UMV; //Con esto me quiero conectar con UMV
-	//Le pongo valores de la UMV
-	dest_UMV.sin_family=AF_INET;
-	dest_UMV.sin_port=htons(UMV_PUERTO);
-	dest_UMV.sin_addr.s_addr= MI_IP;
 
 
-	struct sockaddr_in dest_KERNEL; //Con esto me quiero conectar con KERNEL
-	//Le pongo valores del Kernel
-	dest_KERNEL.sin_family=AF_INET;
-	dest_KERNEL.sin_port=htons(KERNEL_PUERTO);
-	dest_KERNEL.sin_addr.s_addr= MI_IP;
+   *Conec=1;
+   //Controlo si puedo conectarme
+   if ((connect(socketConec,(struct sockaddr*)&destino,sizeof(struct sockaddr)))==-1)
+       perror("No me puedo conectar UMV!");
 
-
-	   //Controlo si puedo conectarme
-	   if ((connect(socketConec,(struct sockaddr*)&dest_UMV,sizeof(struct sockaddr)))==-1)
-		      perror("No me puedo conectar UMV!");
-
-
-	   //Controlo si puedo conectarme
-	   if ((connect(socketConec,(struct sockaddr*)&dest_KERNEL,sizeof(struct sockaddr)))==-1)
-		      perror("No me puedo conectar KERNEL!");
-
-
-	   puts("Entre a conexionConSocket!");
-
-
-
-	 char* mensaje="";
-
-	 /*
-	  int r=Recibir(socketConec,mensaje);
-	       printf("%s",mensaje);
-	       printf("%d",r);*/
-
-
-
-      int c=Enviar(socketConec,"124");
-      printf("%d",c);
-      int r=Recibir(socketConec,mensaje);
-              printf("%s",mensaje);
-              printf("%d",r);
-
-
-      c=Enviar(socketConec,"322");
-         printf("%d",c);
-          r=Recibir(socketConec,mensaje);
-          printf("%s",mensaje);
-          printf("%d",r);
-
-
-
-
+   puts("Entre a conexionConSocket!");
 
 
 	}
 
 //Para enviar datos
 
-int Enviar (int sRemoto, void * buffer)
+int Enviar (int sRemoto, char * buffer)
 
 {
 	int cantBytes;
@@ -128,7 +76,7 @@ int Enviar (int sRemoto, void * buffer)
 
 //Para recibir datos
 
-int Recibir (int sRemoto, void * buffer)
+int Recibir (int sRemoto, char * buffer)
 {
 	int cantBytes;
 	cantBytes = recv(sRemoto,buffer,strlen(buffer),0);
@@ -223,15 +171,34 @@ void AvisarDescAKernel()
 	//aviso al kernel que me voy :(
 }
 
+int crearSocket(int socketConec)
+{
 
+	socketConec = socket(AF_INET,SOCK_STREAM,0);
+	//Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
+	if(socketConec == -1)
+		perror("Este socket tiene errores!");
+return socketConec;
+}
 
+struct sockaddr_in prepararDestino(struct sockaddr_in destino,int puerto,int ip)
+{
+
+	 //Con esto me quiero conectar con UMV o KERNEL
+	destino.sin_family=AF_INET;
+	destino.sin_port=htons(puerto);
+	destino.sin_addr.s_addr= ip;
+
+return destino;
+}
 
 int main(void)
 
 {
-
+	int socketConexion=0;
+	int CONECTADO_UMV=0;
 	int tengoProg=0; //esto lo uso para controlar si tengo un prog que ejecutar
-
+	struct sockaddr_in dest_UMV;
 	char* sentencia=""; //esto no se de que tipo va a ser, por ahora char*
 
 	//Llegué y quiero leer los datos de conexión
@@ -240,13 +207,37 @@ int main(void)
 	UMV_PUERTO = ObtenerPuertoUMV();
 	KERNEL_PUERTO = ObtenerPuertoKERNEL();
 
-	printf("El puerto de la memoria es: %d ", UMV_PUERTO);
+	socketConexion=crearSocket(socketConexion);
+	dest_UMV=prepararDestino(dest_UMV,UMV_PUERTO,MI_IP);
+
+
 	//Ahora que se donde estan, me quiero conectar con los dos
 	//tendré que tener los descriptores de socket por fuera?CREO QUE SI..
-	ConexionConSocket();
+	ConexionConSocket(&CONECTADO_UMV,socketConexion,dest_UMV);
 
-	while (CONECTADO) //mientras estoy conectado...
+	while (CONECTADO_UMV==1) //mientras estoy conectado...
 	{
+
+	    printf("estoy en el while de conectado_umv!!");
+
+	         char* mensaje="";
+
+	      int c=Enviar(socketConexion,"124");
+	      printf("%d",c);
+	      int r=Recibir(socketConexion,mensaje);
+	              printf("%s",mensaje);
+	              printf("%d",r);
+
+
+	      c=Enviar(socketConexion,"322");
+	         printf("%d",c);
+	          r=Recibir(socketConexion,mensaje);
+	          printf("%s",mensaje);
+	          printf("%d",r);
+	      char* chh="";
+	       scanf("%c",chh);
+
+
 		while (tengoProg==0) //me fijo si tengo un prog que ejecutar
 		{
 			tengoProg= RecibirProceso();
@@ -271,7 +262,7 @@ int main(void)
 		//tengo que destruir las estructuras correspondientes
 		limpiarEstructuras();
 		//cuando termino la ejecución de ese
-		CONECTADO=seguirConectado();
+		CONECTADO_UMV=seguirConectado();
 	}
 
 	//me voy a desconectar, asi que... antes le tengo que
