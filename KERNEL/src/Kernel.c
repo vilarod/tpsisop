@@ -218,7 +218,7 @@ int ObtenerPuertoUMV()
 void ConexionConSocket()
 {
 	int sockfd;
-	//Ip de lo que quieres enviar: ifconfig desde terminator
+	//Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
 	struct hostent *he, *gethostbyname();
 	struct sockaddr_in their_addr;
 	he=gethostbyname("10.5.2.192");
@@ -241,26 +241,27 @@ void ConexionConSocket()
 	//conexion que funciona envia y recibe, envia comando por teclado y lo recibe.
 	int numbytes;
 	char mensaje[100];
-	Enviar(sockfd,"Hola");
-	numbytes=recv(sockfd, mensaje, 99, 0);
-	mensaje[numbytes] = '\0';
+
+	/*Enviar(sockfd,"hola");
+	mensaje[Recibir(sockfd,mensaje)] = '\0';
 	printf("Recibi: %s \n",mensaje);
 
 	Enviar(sockfd,"como estas");
 	numbytes=recv(sockfd, mensaje, 99, 0);
 	mensaje[numbytes] = '\0';
 	printf("Recibi: %s \n",mensaje);
-
+	*/
+	//el while de prueba para conectarse
+	while(1){
 	char comando[20];
 	fgets(comando,20,stdin);
 	Enviar(sockfd,comando);
-	numbytes=recv(sockfd, mensaje, 99, 0);
-	mensaje[numbytes] = '\0';
+	Recibir(sockfd,mensaje);
 	printf("Recibi: %s \n",mensaje);
-
-     Cerrar(sockfd);
-
 	}
+     Cerrar(sockfd);
+}
+
 
 int Enviar (int sRemoto, char *buffer)
 {
@@ -279,10 +280,10 @@ int Enviar (int sRemoto, char *buffer)
 int Recibir (int socks, char * buffer)
 {
 	int numbytes;
-	char mensaje[100];
-	numbytes=recv(socks, mensaje, 99, 0);
-	mensaje[numbytes] = '\0';
-	printf("Recibi: %s \n",mensaje);
+
+	numbytes=recv(socks, buffer, 99, 0);
+	buffer[numbytes] = '\0';
+
 	return numbytes;
 }
 
