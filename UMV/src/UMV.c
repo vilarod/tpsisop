@@ -164,13 +164,13 @@ void HiloOrquestadorDeConexiones()
 	 	int socket_host;
 	    struct sockaddr_in client_addr;
 	    struct sockaddr_in my_addr;
-
-	    struct timeval tv;      /// Para el timeout del accept
-
+	    int yes=1;
+	    //struct timeval tv;      /// Para el timeout del accept
 	    socklen_t size_addr = 0;
+	  //  int sin_size;
 
-	    int socket_client;
-	    fd_set rfds;        // Conjunto de descriptores a vigilar
+
+	    //fd_set rfds;        // Conjunto de descriptores a vigilar
 
 
 	    int activated=1;
@@ -179,45 +179,53 @@ void HiloOrquestadorDeConexiones()
 	    if(socket_host == -1)
 	      error(1, "No puedo inicializar el socket");
 
+	    if (setsockopt(socket_host,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1) {
+	               perror("setsockopt");
+	               exit(1);
+	           }
+
 	    my_addr.sin_family = AF_INET ;
 	    my_addr.sin_port = htons(Puerto);
-	    my_addr.sin_addr.s_addr = INADDR_ANY ;
+	    my_addr.sin_addr.s_addr = htons(INADDR_ANY) ;
+	    memset(&(my_addr.sin_zero), '\0', 8);
 
 
 	    if( bind( socket_host, (struct sockaddr*)&my_addr, sizeof(my_addr)) == -1 )
 	      error(2, "El puerto está en uso"); /* Error al hacer el bind() */
 
-	    if(listen( socket_host, 10) == -1 )
+	    if(listen( socket_host, 10) == -1 ) // el "10" es el tamaño de la cola de conexiones.
 	      error(3, "No puedo escuchar en el puerto especificado");
 
-	    size_addr = sizeof(struct sockaddr_in);
 
 	    while(activated)
 	    {
+	    	int socket_client;
+
 	       // select() se carga el valor de rfds
-	       FD_ZERO(&rfds);
-	       FD_SET(socket_host, &rfds);
+	       //FD_ZERO(&rfds);
+	       //FD_SET(socket_host, &rfds);
 
 	       // select() se carga el valor de tv
-	       tv.tv_sec = 0;
-	       tv.tv_usec = 500000;    // Tiempo de espera
+	       //tv.tv_sec = 0;
+	       //tv.tv_usec = 500000;    // Tiempo de espera
 
-	       if (select(socket_host+1, &rfds, NULL, NULL, &tv))
-	       {
-	           if((socket_client = accept( socket_host, (struct sockaddr*)&client_addr, &size_addr))!= -1)
+	     //  if (select(socket_host+1, &rfds, NULL, NULL, &tv))
+	     //  {
+	    	  size_addr = sizeof(struct sockaddr_in);
+
+	           if((socket_client = accept(socket_host, (struct sockaddr *)&client_addr, &size_addr)) != -1)
 	           {
 	        	   // Aca hay que crear un nuevo hilo.. NMR
 
 	            	printf("\nSe ha conectado %s por su puerto %d\n", inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
 	            	pthread_t hNuevoCliente;
 	            	pthread_create(&hNuevoCliente, NULL, (void*) AtiendeCliente, (void *)socket_client);
-
 	           }
 	           else
 	           {
 	            	fprintf(stderr, "ERROR AL ACEPTAR LA CONEXIÓN\n");
 	           }
-	        }
+	      //  }
 	   }
 
 	    close(socket_host);
@@ -344,9 +352,9 @@ int RecibirDatos(int socket, void *buffer)
 {
 	int bytecount;
 	// memset se usa para llenar el buffer con 0s
-    	// NMR memset(buffer, 0, BUFFERSIZE);
+     memset(buffer, 0, BUFFERSIZE);
 
-     //Nos ponemos a la escucha de las peticiones que nos envie el cliente.
+     //Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
      if((bytecount = recv(socket, buffer, BUFFERSIZE, 0))== -1)
     		error(5, "Ocurrio un error al intentar recibir datos desde uno de los clientes.");
 
@@ -413,7 +421,7 @@ void ComandoCambioProceso(char *buffer, int *idProg)
 	int idProgViejo = *idProg;
 	(*idProg) = chartToInt(buffer[1]);
 
-	 sprintf(buffer, "SetBytes: OK! INFO-->  idPRog NUEVO: %d, idPRog VIEJO: %d", *idProg, idProgViejo );
+	 sprintf(buffer, "Cambio proceso: OK! INFO-->  idPRog NUEVO: %d, idPRog VIEJO: %d", *idProg, idProgViejo );
 }
 
 void ComandoCrearSegmento(char *buffer, int idProg)
