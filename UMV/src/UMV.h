@@ -1,5 +1,5 @@
 
-int AtiendeCliente(int socket, struct sockaddr_in addr);
+int AtiendeCliente(void * arg);
 int DemasiadosClientes(int socket, struct sockaddr_in addr);
 void error(int code, char *err);
 void reloj(int loop);

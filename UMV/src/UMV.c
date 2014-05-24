@@ -24,6 +24,7 @@
 #include <commons/config.h>
 #include <string.h>
 #include <commons/string.h>
+#include <commons/collections/dictionary.h>
 
 #include "UMV.h"
 
@@ -57,35 +58,26 @@ char CMD_LEER_MEMORIA[7] = {'M', 'E', 'M', 'L', 'E', 'E', 'R'};
 #define MAX_CHILDS 3
 
 /** Longitud del buffer  */
-#define BUFFERSIZE 512
+#define BUFFERSIZE 64
 
 // - Variables globales
 char* BaseMemoria;
 int Puerto;
 
-
-
+// Diccionario con todos los programas
+t_dictionary *programasDiccionario;
 
 // Estructura para manejar los segmentos de los programas.
-
-struct Segmento
+struct t_segmento
 {
-	char IdSegmento[5];
+	int IdSegmento;
 	int Inicio;
 	int Tamanio;
-	char* UnicacionMP;
-	struct Segmento * sig;
-};
+	char* UbicacionMP;
+	struct t_segmento *sig;
+} ;
 
-struct Programa
-{
-	int IdPrograma;
-	struct Segmento * segmentos;
-	struct Programa * sig;
-};
 
-// Listado de programas.
-struct Programa * listaProgramas;
 
 int main(int argv, char** argc)
 {
@@ -110,9 +102,21 @@ int main(int argv, char** argc)
     return EXIT_SUCCESS;
 }
 
+/*
+static t_segmento *segmento_create(char id[], int inicio, int tamanio, char* ubicacionMP){
+	t_segmento *new = malloc( sizeof(t_segmento) );
+
+	new->IdSegmento = id;
+	new->Inicio = inicio;
+	new->Tamanio = tamanio;
+	new->UbicacionMP = ubicacionMP;
+
+	return new;
+}*/
+
 void InstanciarTablaSegmentos()
 {
-	listaProgramas = NULL;
+	programasDiccionario = dictionary_create();
 }
 
 void reservarMemoriaPrincipal()
@@ -147,6 +151,7 @@ int ObtenerTamanioMemoriaConfig()
 
 	return config_get_int_value(config, "TAMANIO_MEMORIA");
 }
+
 int ObtenerPuertoConfig()
 {
 	t_config* config = config_create(PATH_CONFIG);
@@ -166,15 +171,9 @@ void HiloOrquestadorDeConexiones()
 
 	    int socket_client;
 	    fd_set rfds;        // Conjunto de descriptores a vigilar
-	    int childcount=0;
-	    int exitcode;
 
-	    int childpid;
-
-	    int pidstatus;
 
 	    int activated=1;
-	    int loop=0;
 
 	    socket_host = socket(AF_INET, SOCK_STREAM, 0);
 	    if(socket_host == -1)
@@ -194,66 +193,32 @@ void HiloOrquestadorDeConexiones()
 	    size_addr = sizeof(struct sockaddr_in);
 
 	    while(activated)
-	            	      {
-	            	      reloj(loop);
-	            	      // select() se carga el valor de rfds
-	            	      FD_ZERO(&rfds);
-	            	      FD_SET(socket_host, &rfds);
+	    {
+	       // select() se carga el valor de rfds
+	       FD_ZERO(&rfds);
+	       FD_SET(socket_host, &rfds);
 
-	            	      // select() se carga el valor de tv
-	            	      tv.tv_sec = 0;
-	            	      tv.tv_usec = 500000;    // Tiempo de espera
+	       // select() se carga el valor de tv
+	       tv.tv_sec = 0;
+	       tv.tv_usec = 500000;    // Tiempo de espera
 
-	            	      if (select(socket_host+1, &rfds, NULL, NULL, &tv))
-	            	        {
-	            	          if((socket_client = accept( socket_host, (struct sockaddr*)&client_addr, &size_addr))!= -1)
-	            	            {
-	            	          loop=-1;        // Para reiniciar el mensaje de Esperando conexión...
-	            	          printf("\nSe ha conectado %s por su puerto %d\n", inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
-	            	          switch ( childpid=fork() )
-	            	            {
-	            	            case -1:  // Error
-	            	              error(4, "No se puede crear el proceso hijo");
-	            	              break;
-	            	            case 0:   // Somos proceso hijo, el encargado de administrar el hilo que atenderá al cliente conectado
-	            	              if (childcount<MAX_CHILDS)
-	            	                exitcode=AtiendeCliente(socket_client, client_addr);
-	            	              else
-	            	                exitcode=DemasiadosClientes(socket_client, client_addr);
+	       if (select(socket_host+1, &rfds, NULL, NULL, &tv))
+	       {
+	           if((socket_client = accept( socket_host, (struct sockaddr*)&client_addr, &size_addr))!= -1)
+	           {
+	        	   // Aca hay que crear un nuevo hilo.. NMR
 
-	            	              exit(exitcode); // Código de salida
+	            	printf("\nSe ha conectado %s por su puerto %d\n", inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
+	            	pthread_t hNuevoCliente;
+	            	pthread_create(&hNuevoCliente, NULL, (void*) AtiendeCliente, (void *)socket_client);
 
-	            	            default:  // Somos proceso padre, osea el proceso que orquesta todos los hilos que atienden a los clientes.
-	            	              childcount++; // Acabamos de tener un hijo
-	            	              close(socket_client); // Nuestro hijo se las apaña con el cliente que entró, para nosotros ya no existe.
-	            	              break;
-	            	            }
-	            	            }
-	            	          else
-	            	            fprintf(stderr, "ERROR AL ACEPTAR LA CONEXIÓN\n");
-	            	        }
-
-	            	      // Miramos si se ha cerrado algún hijo últimamente
-	            	      childpid=waitpid(0, &pidstatus, WNOHANG);
-	            	      if (childpid>0)
-	            	        {
-	            	          childcount--;   // Se acaba de morir un hijo, que en paz descance
-
-	            	          // Muchas veces nos dará 0 si no se ha muerto ningún hijo, o -1 si no tenemos hijos con errno=10 (No child process). Así nos quitamos esos mensajes
-
-	            	          if (WIFEXITED(pidstatus))
-	            	            {
-
-	            	          // Tal vez querremos mirar algo cuando se ha cerrado un hijo correctamente
-	            	          if (WEXITSTATUS(pidstatus)==99)
-	            	            {
-	            	              printf("\nSe ha pedido el cierre del programa\n");
-	            	              activated=0;
-	            	            }
-	            	            }
-	            	        }
-	            	      loop++;
-	            	      }
+	           }
+	           else
+	           {
+	            	fprintf(stderr, "ERROR AL ACEPTAR LA CONEXIÓN\n");
+	           }
+	        }
+	   }
 
 	    close(socket_host);
 }
@@ -283,22 +248,30 @@ void ConsolaComandoCrearSegmento()
 	scanf("%d",&tamanio);
 
 	CrearSegmento(idPrograma, tamanio);
-
 }
 
 void CrearSegmento(int idPrograma, int tamanio)
 {
+	// dado un id de programa y un tamaño del segmento tengo que:
+	// Obtener el Id del segmento.
+	// Obtener su inicio (base virtual)
+	// Obtener su ubicacion en la MP (Base real)
+	// Agregar el nodo en la lista
+
 	AgregarSegmentoALista(idPrograma, tamanio);
 }
 
 void AgregarSegmentoALista(int idPrograma, int tamanio)
 {
+	// Validar que el idPrograma tenga una entrada dentro del diccionario.
+
+/*
 	listaProgramas = malloc(sizeof(struct Programa));
 	listaProgramas->IdPrograma = idPrograma;
 	listaProgramas->segmentos = malloc(sizeof(struct Segmento ));
 	listaProgramas->segmentos->Inicio = 1;
 	listaProgramas->segmentos->Tamanio  = tamanio;
-	listaProgramas->segmentos->UnicacionMP  = BaseMemoria + 1;
+	listaProgramas->segmentos->UnicacionMP  = BaseMemoria + 1;*/
 }
 
 void ConsolaComandoDestruirSegmento()
@@ -364,33 +337,14 @@ void HiloConsola()
 	    			 printf(" -- COMANDO INVALIDO -- ");
 	    			break;
 	        }
-
 	 }
-}
-
-// No usamos addr, pero lo dejamos para el futuro
-int DemasiadosClientes(int socket, struct sockaddr_in addr)
-{
-    char buffer[BUFFERSIZE];
-    int bytecount;
-
-    memset(buffer, 0, BUFFERSIZE);
-
-    sprintf(buffer, "Demasiados clientes conectados. Por favor, espere unos minutos\n");
-
-    if((bytecount = send(socket, buffer, strlen(buffer), 0))== -1)
-      error(6, "No puedo enviar información");
-
-    close(socket);
-
-    return 0;
 }
 
 int RecibirDatos(int socket, void *buffer)
 {
 	int bytecount;
 	// memset se usa para llenar el buffer con 0s
-    	memset(buffer, 0, BUFFERSIZE);
+    	// NMR memset(buffer, 0, BUFFERSIZE);
 
      //Nos ponemos a la escucha de las peticiones que nos envie el cliente.
      if((bytecount = recv(socket, buffer, BUFFERSIZE, 0))== -1)
@@ -482,9 +436,10 @@ void ComandoDestruirSegmento(char *buffer, int idProg)
 	 sprintf(buffer, "Destruir Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam ,taman);
 }
 
-int AtiendeCliente(int socket, struct sockaddr_in addr)
+int AtiendeCliente(void * arg)
 {
 
+	int socket = (int)arg;
 	//Es el ID del programa con el que está trabajando actualmente el HILO.
 	//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
 	//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
@@ -544,64 +499,23 @@ int AtiendeCliente(int socket, struct sockaddr_in addr)
     			break;
         }
 
-     /*
 
-    // Comando HOLA - Saluda y dice la IP
-
-     if (strncmp(buffer, "HOLA", 4)==0)
-      {
-        memset(buffer, 0, BUFFERSIZE);
-        sprintf(buffer, "Hola %s, ¿cómo estás?\n", inet_ntoa(addr.sin_addr));
-      }
-    //Comando EXIT - Cierra la conexión actual
-    else if (strncmp(buffer, "EXIT", 4)==0)
-      {
-        memset(buffer, 0, BUFFERSIZE);
-        sprintf(buffer, "Hasta luego. Vuelve pronto %s\n", inet_ntoa(addr.sin_addr));
-        desconexionCliente=1;
-      }
-   // Comando CERRAR - Cierra el servidor
-    else if (strncmp(buffer, "CERRAR", 6)==0)
-      {
-        memset(buffer, 0, BUFFERSIZE);
-        sprintf(buffer, "Adiós. Cierro el servidor\n");
-        desconexionCliente=1;
-        code=99;        // Salir del programa
-      }
-    else
-      {
-        sprintf(aux, "ECHO: %s\n", buffer);
-        strcpy(buffer, aux);
-      }
-*/
 
        // Enviamos datos al cliente.
-       // NMR: aca luego habra que agregar un retardo segun pide el TP
+       // NMR: aca luego habra que agregar un retardo segun pide el TP  int pthread_detach(pthread_self());
        EnviarDatos(socket, buffer);
 
     }
 
-    close(socket);
-    return code;
-}
+  // habria que verificar que el cliente siga conectado, sino este hilo ya no tiene sentido.
 
-void reloj(int loop)
-{
-  if (loop==0)
-    printf("[SERVIDOR] Esperando conexión  ");
-/*
-  printf("\033[1D");        //Introducimos código ANSI para retroceder 2 caracteres
- switch (loop%4)
-    {
-    case 0: printf("|"); break;
-    case 1: printf("/"); break;
-    case 2: printf("-"); break;
-    case 3: printf("\\"); break;
-    default:           // No debemos estar aquí
-    break;
-    }
-*/
-  fflush(stdout);       /* Actualizamos la pantalla */
+    close(socket);
+
+    /* Esto es para finalizar el hilo, o basta con retornar?
+        pthread_t         self;
+        self = pthread_self();
+        pthread_detach(self); */
+    return code;
 }
 
 void error(int code, char *err)
