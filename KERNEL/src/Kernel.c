@@ -9,6 +9,11 @@
  ============================================================================
  */
 
+
+
+
+
+#include <netdb.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -26,7 +31,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
-
+#define MAXDATASIZE 100
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
 
@@ -41,7 +46,7 @@
 #define MSJ_RECIBO_PROGRAMA       2
 
 /** Puerto  */
-#define PORT       7001
+#define PORT       7000
 
 /** Número máximo de hijos */
 #define MAX_CHILDS 3
@@ -78,7 +83,7 @@ typedef struct punterosIdentificar {
 }puntero;
 
 /* mutex que controla acceso a la seccion critica */
-pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 int UMV_PUERTO;
 
 int main(int argv, char** argc)
@@ -212,35 +217,53 @@ int ObtenerPuertoUMV()
 
 void ConexionConSocket()
 {
-	int socketConec;
-	socketConec = socket(AF_INET,SOCK_STREAM,0);
-		//Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
-	   if(socketConec == -1)
-		      perror("Este socket tiene errores!");
+	int sockfd;
+	//Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
+	struct hostent *he, *gethostbyname();
+	struct sockaddr_in their_addr;
+	he=gethostbyname("10.5.2.192");
 
-	struct sockaddr_in dest_UMV; //Con esto me quiero conectar con UMV
-	//Le pongo valores de la UMV
-	dest_UMV.sin_family=AF_INET;
-	dest_UMV.sin_port=htons(UMV_PUERTO);
-	dest_UMV.sin_addr.s_addr= INADDR_ANY;
-
-
-
-	   //Controlo si puedo conectarme
-	   if ((connect(socketConec,(struct sockaddr*)&dest_UMV,sizeof(struct sockaddr)))==-1)
-		      perror("No me puedo conectar UMV!");
-
-	   puts("Entre a conexionConSocket!");
-
-      int c=Enviar(socketConec,"31");
-      printf("%d",c);
-      char comando [100];
-      fgets (comando, 100, stdin);
-      Cerrar(socketConec);
-
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	perror("socket");
+	exit(1);
 	}
+	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
+	their_addr.sin_port = htons(PORT); // short, Ordenación de bytes de la red
+	bcopy (he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length);
+//	their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+	memset(&(their_addr.sin_zero),'\0', 8); // poner a cero el resto de laestructura
 
-int Enviar (int sRemoto, void * buffer)
+	if (connect(sockfd, (struct sockaddr *)&their_addr,
+	sizeof(struct sockaddr)) == -1) {
+	perror("connect");
+	exit(1);
+		}
+	//conexion que funciona envia y recibe, envia comando por teclado y lo recibe.
+	int numbytes;
+	char mensaje[100];
+
+	/*Enviar(sockfd,"hola");
+	mensaje[Recibir(sockfd,mensaje)] = '\0';
+	printf("Recibi: %s \n",mensaje);
+
+	Enviar(sockfd,"como estas");
+	numbytes=recv(sockfd, mensaje, 99, 0);
+	mensaje[numbytes] = '\0';
+	printf("Recibi: %s \n",mensaje);
+	*/
+	//el while de prueba para conectarse
+	while(1){
+	char comando[20];
+	fgets(comando,20,stdin);
+	Enviar(sockfd,comando);
+	Recibir(sockfd,mensaje);
+	printf("Recibi: %s \n",mensaje);
+	}
+     Cerrar(sockfd);
+}
+
+
+int Enviar (int sRemoto, char *buffer)
 {
 	int cantBytes;
 	cantBytes= send(sRemoto,buffer,strlen(buffer),0);
@@ -248,10 +271,20 @@ int Enviar (int sRemoto, void * buffer)
 		perror("No lo puedo enviar todo junto!");
 
 	puts("Entre a ENVIAR!");
-	printf("%d",cantBytes);
+	//printf("%d",cantBytes);
 
 	return cantBytes;
 
+}
+
+int Recibir (int socks, char * buffer)
+{
+	int numbytes;
+
+	numbytes=recv(socks, buffer, 99, 0);
+	buffer[numbytes] = '\0';
+
+	return numbytes;
 }
 
 void Cerrar (int sRemoto)
