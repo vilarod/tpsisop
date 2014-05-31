@@ -111,10 +111,17 @@ int ObtenerPuertoKERNEL()
 }
 
 
-int RecibirProceso(PCB prog)
+int RecibirProceso(PCB prog,int quantum,int sRemoto)
 {
+  char estructura[200];
+  int r=Recibir (sRemoto,estructura);
+  if (r > 0)
+  {
+      //deserializar(estructura,prog,quantum);
+  }
 	//aca voy a intentar recibir un PCB y su Q
-	return 0; //devuelve 0 si no tengo, 1 si tengo
+
+  return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
 }
 
 
@@ -224,6 +231,8 @@ int main(void)
 	//Control programa
 	int tengoProg=0;
 	PCB programa;
+	int quantum;
+
 	while (CONECTADO_KERNEL==1)
 	  {
 
@@ -232,7 +241,7 @@ int main(void)
 
 	    while (tengoProg==0) //me fijo si tengo un prog que ejecutar
 	      {
-	          tengoProg= RecibirProceso(programa);
+	          tengoProg= RecibirProceso(programa,quantum,dest_KERNEL);
 	      }
 
 
