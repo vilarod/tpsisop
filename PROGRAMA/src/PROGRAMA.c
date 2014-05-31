@@ -12,11 +12,11 @@
 #include <stdlib.h>
 #include <commons/config.h>
 #include<commons/txt.h>
+#include<commons/string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
 #include <string.h>
-#include <unistd.h> //stat(), fstat(), lstat()
 #include "PROGRAMA.h"
 
 #include <sys/stat.h>
@@ -37,22 +37,24 @@
 #define PORT "6007"
 #define PUERTO_KERNEL "7001"
 #define PACKAGESIZE 10240
-#define MAXLONG 1000
-//int conectar();
+#define MAXLONG 1024
+#define N 1000
 //FILE* txt_open_for_append(char* );
 void txt_close_file(FILE* file);
 
+
+
 int main(int argc, char* argv[]) {
-    /*int i;
-	size_t len;
-    size_t bytesRead;
-    char* contents;
-    FILE* f;*/
+    //int i;
+	//size_t len;
+    //size_t bytesRead;
+    //char* contents;
+    //FILE* f;
 
 
-    int index;    //para interprete
+    int index;    //para parametros
 
-    for(index = 0; index < argc; index++)//interprete
+    for(index = 0; index < argc; index++)//parametros
      	printf("  Parametro %d: %s\n", index, argv[index]);
 
         //argv[0] es el path: /home/utnso/tp-2014/1c-garras/PROGRAMA/Debug/PROGRAM/
@@ -63,65 +65,48 @@ int main(int argc, char* argv[]) {
     	/*El symbolic link se hizo por consola:
       	  sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
 
-    	char* path;
+    	/*char* path;
     	char* path1 = "/home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/";
-    	path = strcat(path1, argv[1]);
+    	path = strcat(path1, argv[1]);*/
 
-        struct stat stat_file;
-    	stat(path, &stat_file);  //ver que es lo que hace???
-    	FILE* file = NULL;
+        FILE* file;
+        //char* programa=NULL;
+          char** lineas;
+          int i = 0;
 
-    	file = fopen(path, "r");
+
+
+    	file = fopen(argv[1], "r");//abre el archivo en modo read
+        //programa = (char*)malloc((1024 * sizeof(char))+ 1);
 
     	if (file != NULL) {
-    					char* buffer = calloc(1, stat_file.st_size + 1);
-    					fread(buffer, stat_file.st_size, 1, file);
+    					char* buffer = calloc(1,(1024*sizeof(char) + 1));
+    					fread(buffer, (1024*sizeof(char) + 1), 1, file);
     					//aca esta el buffer con el archivo ya cargado. falta sacarle la primer linea.
-
-    		}
-
-    	/*f = malloc(MAXLONG * (sizeof(char)));//asigno memoria al programa.ansisop
-
+                        printf(" %s\n", buffer);
+                        printf("longitud del buffer: %d\n", strlen(buffer));
+                        lineas = string_split(buffer, "\n");
 
 
-    	f = fopen(argv[1], "r");//abre el archivo en modo read
-        	if (f == NULL) {
-    	fprintf(stderr, "Error opening file: %s", argv[1]);//No existe el archivo
-    	//return 1;
-        }
+   		}
+    	else
+    		printf("El archivo no existe o esta vacio\n");
+    	for(i= 1; lineas[i]!= '\0'; i++)
+    	{
+    		printf("%s", lineas[i]);
+    	    printf("\\n");
+    	}
+    	printf("\n");
+    	//tengo que concatenar las lineas[i] para tener el char* para el kernel
 
 
 
-        fseek(f, 0, SEEK_END);//para saber el tamaño
-        len = ftell(f);
-        rewind(f);
 
-
-        contents = (char*) malloc(sizeof(char) * len + 1);//leer lo que contiene
-        contents[len] = '\0'; // solo es necesario para imprimir la salida con printf
-        if (contents == NULL) {
-    	fprintf(stderr, "Failed to allocate memory");//imprime error sino tiene memoria
-    	//return 2;
-        }
-
-        bytesRead = fread(contents, sizeof(char), len, f);
-
-        txt_close_file(f); //cierra el archivo
-
-
-        printf("File length: %d, bytes read: %d\n", len, bytesRead);
-        printf("Contents:\n");
-        //tengo que hacer que lea por lineas
-        if((contents[0]=='#') && (contents[1]=='!')){
-        	for(i=2; i <= len; i++)
-        	printf("%c", contents[i]);//muestra en pantalla el programa1.ansisop sin #!
-
-        free(contents);
-        }*/
-        ConexionConSocket();
+        //ConexionConSocket();
 
         return 0;
 }
+
 
 int ObtenerTamanioMemoriaConfig()
 {
@@ -149,7 +134,7 @@ void ConexionConSocket()
 	exit(1);
 	}
 	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
-	their_addr.sin_port = htons(PORT); // short, Ordenación de bytes de la red
+	//their_addr.sin_port = htons(PORT); // short, Ordenación de bytes de la red
 	bcopy (he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length);
 //	their_addr.sin_addr = *((struct in_addr *)he->h_addr);
 	memset(&(their_addr.sin_zero),'\0', 8); // poner a cero el resto de laestructura
@@ -160,7 +145,7 @@ void ConexionConSocket()
 	exit(1);
 		}
 	//conexion que funciona envia y recibe, envia comando por teclado y lo recibe.
-	int numbytes;
+	//int numbytes;
 	char mensaje[100];
 
 	/*Enviar(sockfd,"hola");
@@ -176,11 +161,11 @@ void ConexionConSocket()
 	while(1){
 	char comando[20];
 	fgets(comando,20,stdin);
-	Enviar(sockfd,comando);
-	Recibir(sockfd,mensaje);
+	//Enviar(sockfd,comando);
+	//Recibir(sockfd,mensaje);
 	printf("Recibi: %s \n",mensaje);
 	}
-     Cerrar(sockfd);
+     //Cerrar(sockfd);
 }
 
 
@@ -210,5 +195,5 @@ int Recibir (int socks, char * buffer)
 
 void Cerrar (int sRemoto)
 {
-	close(sRemoto);
+	//close(sRemoto);
 }
