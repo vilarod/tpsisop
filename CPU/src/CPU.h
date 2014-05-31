@@ -46,13 +46,15 @@ struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,int ip);
 
 
 //Recibir-Enviar datos con el kernel
-int RecibirProceso(); //para recibir el pcb y el q
+int RecibirProceso(PCB prog,int quantum,int sRemoto); //para recibir el pcb y el q
+int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia); //para recibir la instruccion
 
 
 //Ejecutar
 void parsearYejecutar (char* instr);
 void salvarContextoProg();
 void limpiarEstructuras();
+
 
 //Primitivas
 
