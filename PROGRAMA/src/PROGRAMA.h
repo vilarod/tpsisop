@@ -10,4 +10,5 @@
 int ObtenerTamanioMemoriaConfig();
 int conectar();
 
+
 #endif /* PROGRAMA_H_ */
