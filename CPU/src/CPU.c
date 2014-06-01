@@ -32,6 +32,13 @@
 #define MI_IP INADDR_ANY //Que use la IP de la maquina en donde ejecuta
 
 
+
+//hasta ver que hago con las primitivas..las uso globales:
+int socketUMV=0;
+int socketKERNEL=0;
+
+
+
 void ConexionConSocket(int *Conec,int socketConec,struct sockaddr_in destino)
 {
    //Controlo si puedo conectarme
@@ -112,21 +119,15 @@ int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia)
 
   char pedido []= "1"; //lo inicializo en 1=getbyte
   char aux[20];
-  //char taux[];
 
   //esto hay que modificarlo cuando corrija el pcb
   sprintf(aux,"%d",indiceCodigo);
 
   /* sprintf(aux,"%d",indiceCodigo.desplInicio);
-   * sprintf(taux,"%d",strlen(aux));
-   * strcat(pedido,taux);
-   * sprintf(pedido,aux);
+   * serCadena(pedido,aux);
    * aux="";
-   * taux="";
    * sprintf(aux,"%d",indiceCodigo.desplfin);
-   * sprintf(taux,"%d",strlen(aux));
-   * strcat(pedido,taux);
-   * sprintf(pedido,aux);
+   * serCadena(pedido,aux);
    *
    */
 
@@ -137,6 +138,34 @@ int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia)
 
 }
 
+//serializar en cadena, a un mensaje le agrega algo mas y tamaño de algo mas
+void serCadena(char * msj, char* agr)
+{
+    char* taux="";
+    sprintf(taux,"%d",strlen(agr));
+    strcat(msj,taux);
+    strcat(msj,agr);
+}
+
+
+//primitivas al kernel
+
+t_valor_variable  obtener_valor(t_nombre_compartida variable)
+{
+  t_valor_variable valor;
+  char* pedido= "1"; //o el numero que sea que interprete el kernel
+  char* recibo="";
+  strcat(pedido,variable);
+  Enviar(socketKERNEL,pedido);
+  Recibir(socketKERNEL,recibo);
+  valor=atoi(recibo);
+  return valor;
+}
+
+t_valor_variable  grabar_valor(t_nombre_compartida variable)
+{
+ return 1;
+}
 
 void procesoTerminoQuantum()
 {
@@ -183,6 +212,8 @@ void AvisarDescAKernel()
 	//aviso al kernel que me voy :(
 }
 
+
+
 int crearSocket(int socketConec)
 {
 
@@ -209,8 +240,6 @@ int main(void)
 {
         int UMV_PUERTO;
         int KERNEL_PUERTO;
-        int socketUMV=0;
-	int socketKERNEL=0;
 	int CONECTADO_UMV=0;
 	int CONECTADO_KERNEL=0;
 	struct sockaddr_in dest_UMV;
@@ -283,38 +312,26 @@ int main(void)
 	}
 
 
-
-
-
 // Primitivas
 //esto es solamente un bosquejo para ir armandolas
 
 
-void AnSISOP_asignar(t_puntero direccion_variable, t_valor_variable valor)
+void asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
 	//direccion_variable=valor;
 }
 
-t_valor_variable AnSISOP_obtenerValorCompartida(t_nombre_compartida variable)
+t_valor_variable obtenerValorCompartida(t_nombre_compartida variable)
 {
-	t_valor_variable valor;
-	valor=1; //inicializo de prueba
-
-	//Acá tengo que obtener el valor de la variable mediante la sys call al kernel
-	// obtener_valor(variable);
-
-	return valor; //devuelve el valor de la variable
+	return obtener_valor(variable); //devuelve el valor de la variable
 }
 
-t_valor_variable AnSISOP_asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
+t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
 {
-	t_valor_variable valor_asig;
-		valor_asig=1; //inicializo de prueba
 
-	//Acá también uso sys call a kernel
-	// grabar_valor(variable,valor);
+	//como hago para identificar variable - valor? tengo que crear una estructura
 
-	return valor_asig; //devuelve el valor asignado
+	return grabar_valor(variable); //devuelve el valor asignado
 }
 
 t_puntero_instruccion AnSISOP_llamarSinRetorno(t_nombre_etiqueta etiqueta)

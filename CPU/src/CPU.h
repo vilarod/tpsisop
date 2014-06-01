@@ -40,7 +40,7 @@ void Cerrar(int sRemoto);
 int seguirConectado();
 void AvisarDescAKernel();
 void procesoTerminoQuantum();
-int Recibir (int sRemoto, char * buffer);
+int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
 struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,int ip);
 
