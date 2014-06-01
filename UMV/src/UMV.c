@@ -8,10 +8,8 @@
  Testing	 : Para probarlo es tan simple como ejecutar en el terminator la linea "$ telnet localhost 7000" y empezar a dialogar con el UMV.
  A tener en cuenta: organizar codigo : ctrl+Mayúscula+f
  PARA HACER
- - Compactar
  - Varios dump
  - Interfaz con cliente en solicitudes
- - retardo
  ============================================================================
  */
 
@@ -113,7 +111,10 @@ t_list * g_ListaSegmentos;
 sem_t s_AccesoAListadoSegmentos;
 
 //Mensaje de error global.
-char g_MensajeError[200];
+char* g_MensajeError = "/0";
+
+// Retardo (en milisegundos) para contestar una solicitud a un cliente
+int g_Retardo = 0;
 
 #endif
 
@@ -281,7 +282,6 @@ int ObtenerComandoConsola(char buffer[])
 void ConsolaComandoHelp()
 {
 	char *mensajeHelp = string_new();
-	// NMR: hará falta que los comandos terminen en /0 ??
 
 	string_append(&mensajeHelp, "Listado de comandos posibles: \n");
 	string_append_with_format(&mensajeHelp, "%s: Retorna una lista con los comandos \n", CMD_HELP);
@@ -357,30 +357,6 @@ void ConsolaComandoEscribirMemoria()
 	ImprimirResuladoDeEscribirMemoria(ok, idPrograma, base, desplazamiento, longitudBuffer, buffer, TraducirSiNo(grabarArchivo[0]));
 }
 
-void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo)
-{
-	if (ok)
-	{
-		printf("Se escribió en la memoria correctamente");
-	}
-	else
-	{
-		printf("Ocurrio un error al intentar escribir la memoria./n Error: %s", g_MensajeError);
-	}
-}
-
-void ImprimirResuladoDeLeerMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo)
-{
-	if (ok)
-	{
-		printf("Bytes Leidos: %s", buffer);
-	}
-	else
-	{
-		printf("Ocurrio un error al intentar escribir la memoria./n Error: %s", g_MensajeError);
-	}
-}
-
 void ConsolaComandoCrearSegmento()
 {
 	int idPrograma;
@@ -436,12 +412,25 @@ void ConsolaComandoDefinirAlgoritmo()
 
 void ConsolaComandoDefinirRetardo()
 {
-
+	printf("\n--> Retardo actual (milisegundos): %d", g_Retardo);
+	printf("\n--> Retardo nuevo (milisegundos):   ");
+	scanf("%d", &g_Retardo);
+	printf("--> Seteo OK. Retardo actual (milisegundos): %d", g_Retardo);
 }
 
 void ConsolaComandoCompactarMemoria()
 {
+	char grabarArchivo[2];
+	printf("\n--> ¿Grabar en archivo? (S/N):   ");
+	scanf("%s", grabarArchivo);
 
+	printf("\n--> MEMORIA ANTES DE COMPACTACION:   \n");
+	ImprimirListadoSegmentos(TraducirSiNo(grabarArchivo[0]));
+	printf("\n--> COMPACTANDO...  ");
+	CompactarMemoria();
+	printf("\n--> FIN COMPACTACION.   \n");
+	printf("\n--> MEMORIA DESPUES DE COMPACTACION:   \n");
+	ImprimirListadoSegmentos(TraducirSiNo(grabarArchivo[0]));
 }
 
 void ConsolaComandoDumpEstructuras()
@@ -567,6 +556,30 @@ void ImprimirResumenUsoMemoria(int imprimirArchivo)
 	printf("MEMORIA USADA (Bytes): %d\n", obtenerTotalMemoriaEnUso());
 }
 
+void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo)
+{
+	if (ok)
+	{
+		printf("Se escribió en la memoria correctamente");
+	}
+	else
+	{
+		printf("Ocurrio un error al intentar escribir la memoria.\n Error: %s", g_MensajeError);
+	}
+}
+
+void ImprimirResuladoDeLeerMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo)
+{
+	if (ok)
+	{
+		printf("Bytes Leidos: %s", buffer);
+	}
+	else
+	{
+		printf("Ocurrio un error al intentar escribir la memoria.\n Error: %s", g_MensajeError);
+	}
+}
+
 #endif
 
 #if 1 // METODOS MANEJO DE ERRORES
@@ -580,7 +593,7 @@ void Error(const char* mensaje, ...)
 	fprintf(stderr, "\nERROR: %s\n", nuevo);
 
 	va_end(arguments);
-
+	free(nuevo);
 }
 
 void Traza(const char* mensaje, ...)
@@ -595,19 +608,35 @@ void Traza(const char* mensaje, ...)
 		printf("TRAZA--> %s \n", nuevo);
 
 		va_end(arguments);
-
+		free(nuevo);
 	}
 }
 
-void ErrorFatal(char mensaje[])
+void ErrorFatal(const char* mensaje, ...)
 {
-	Error(mensaje);
+	char* nuevo;
+	va_list arguments;
+	va_start(arguments, mensaje);
+	nuevo = string_from_vformat(mensaje, arguments);
+
+	printf("ERRO FATAL--> %s \n", nuevo);
+	va_end(arguments);
+	free(nuevo);
+
 	char fin;
 
 	printf("El programa se cerrara. Presione ENTER para finalizar la ejecución.");
 	scanf("%c", &fin);
 
 	exit(EXIT_FAILURE);
+}
+
+void SetearErrorGlobal(const char* mensaje, ...)
+{
+	va_list arguments;
+	va_start(arguments, mensaje);
+	g_MensajeError = string_from_vformat(mensaje, arguments);
+	va_end(arguments);
 }
 
 #endif
@@ -683,6 +712,9 @@ int RecibirDatos(int socket, void *buffer)
 
 int EnviarDatos(int socket, void *buffer)
 {
+	// Retardo antes de contestar una solicitud (Se solicita en enunciado de TP)
+	sleep(g_Retardo / 1000);
+
 	int bytecount;
 
 	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
@@ -750,8 +782,6 @@ void reservarMemoriaPrincipal()
 // Si esta ok retorna id del segmento. si no retorna -1
 int CrearSegmento(int idPrograma, int tamanio)
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
-
 	// Atributos a calcular:
 	int idSegmento = -1;
 	int inicioSegmento;
@@ -782,8 +812,6 @@ int CrearSegmento(int idPrograma, int tamanio)
 	else
 		Traza("No se pudo crear un segmento en la memoria. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
 
-	sem_post(&s_AccesoAListadoSegmentos);
-
 	return idSegmento;
 }
 
@@ -810,6 +838,44 @@ void CompactarMemoria()
 {
 	sem_wait(&s_AccesoAListadoSegmentos);
 
+	int index = 0;
+	int esElPrimero = 1;
+	char* inicioSegmentoAnterior;
+	char* inicioSegmentoNuevo;
+	char* finSegmentoAnterior;
+
+	void _list_elements(t_segmento *seg) // -> voy a recorrer todos los elementos de la lista
+	{
+		if (esElPrimero) // --> si es el primer segmento, lo mando al principio de la la memoria
+		{
+			inicioSegmentoAnterior = seg->UbicacionMP; // --> el viejo inicio de segmento
+			inicioSegmentoNuevo = g_BaseMemoria; // --> el nuevo inicio de segmento es el origen de la memoria
+
+			memcpy(inicioSegmentoNuevo, inicioSegmentoAnterior, seg->Tamanio); // --> copiamos la memoria
+
+			seg->UbicacionMP = inicioSegmentoNuevo; // --> la vieja base ahora es la nueva
+
+			finSegmentoAnterior = seg->UbicacionMP + seg->Tamanio - 1; // Calculamos el fin del segmento.
+			esElPrimero = 0;
+		}
+		else // --> si no es el primero, lo mando al final del anterior segmento
+		{
+			inicioSegmentoAnterior = seg->UbicacionMP; // --> el viejo inicio de segmento
+			inicioSegmentoNuevo = finSegmentoAnterior + 1; // --> el nuevo inicio de segmento es el fin del anterior + 1
+
+			memcpy(inicioSegmentoNuevo, inicioSegmentoAnterior, seg->Tamanio); // --> copiamos la memoria
+
+			seg->UbicacionMP = inicioSegmentoNuevo; // --> la vieja base ahora es la nueva
+
+			finSegmentoAnterior = seg->UbicacionMP + seg->Tamanio - 1;  // Calculamos el fin del segmento.
+		}
+
+		index++;
+	}
+
+	// Realizo la busqueda de un lugar para el segmento
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
 	// Mover el primer elemento al principio, actualizar su ubicacion en MP
 	// Por cada elemnto moverlo hasta el fin (ubicacionMP + tamaño) del anterior
 
@@ -818,6 +884,8 @@ void CompactarMemoria()
 
 void AgregarSegmentoALista(int idPrograma, int idSegmento, int inicio, int tamanio, char* ubicacionMP)
 {
+	sem_wait(&s_AccesoAListadoSegmentos);
+
 	// Lo agregamos a la lista (al final)
 	list_add(g_ListaSegmentos, segmento_create(idPrograma, idSegmento, inicio, tamanio, ubicacionMP));
 
@@ -829,6 +897,7 @@ void AgregarSegmentoALista(int idPrograma, int idSegmento, int inicio, int taman
 
 	list_sort(g_ListaSegmentos, (void*) _ubicacion_mp);
 
+	sem_post(&s_AccesoAListadoSegmentos);
 }
 
 int CalcularIdSegmento(int idPrograma)
@@ -879,6 +948,8 @@ int CalcularInicioSegmento(int idPrograma)
 
 t_segmento* ObtenerInfoSegmento(int idPrograma, int idSegmento)
 {
+	sem_wait(&s_AccesoAListadoSegmentos);
+
 	t_segmento* aux = NULL;
 	int index = 0;
 
@@ -891,6 +962,8 @@ t_segmento* ObtenerInfoSegmento(int idPrograma, int idSegmento)
 	}
 
 	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	sem_post(&s_AccesoAListadoSegmentos);
 
 	return aux;
 }
@@ -910,6 +983,8 @@ char* CalcularUbicacionMP(int tamanioSegmento)
 char* CalcularUbicacionMP_WorstFit(int tamanioRequeridoSegmento)
 {
 	char* retorno = NULL;
+
+	sem_wait(&s_AccesoAListadoSegmentos);
 
 	// Obtenemos la canitdad de segmentos deifnidos
 	int cantidadSegmentos = ObtenerCantidadSegmentos();
@@ -975,11 +1050,14 @@ char* CalcularUbicacionMP_WorstFit(int tamanioRequeridoSegmento)
 			retorno = NULL;
 	}
 
+	sem_post(&s_AccesoAListadoSegmentos);
 	return retorno;
 }
 
 char* CalcularUbicacionMP_FirstFit(int tamanioRequeridoSegmento)
 {
+	sem_wait(&s_AccesoAListadoSegmentos);
+
 	char* retorno = NULL;
 	// Obtenemos la canitdad de segmentos deifnidos
 	int cantidadSegmentos = ObtenerCantidadSegmentos();
@@ -1038,6 +1116,8 @@ char* CalcularUbicacionMP_FirstFit(int tamanioRequeridoSegmento)
 		list_iterate(g_ListaSegmentos, (void*) _list_elements);
 	}
 
+	sem_post(&s_AccesoAListadoSegmentos);
+
 	return retorno;
 }
 
@@ -1069,6 +1149,8 @@ int obtenerTotalMemoriaEnUso()
 
 int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer)
 {
+	sem_wait(&s_AccesoAListadoSegmentos);
+
 	// Primero verificamos que el programa pueda acceder a ese lugar de memoria
 	int ok = VerificarAccesoMemoria(idPrograma, base, desplazamiento, cantidadBytes);
 
@@ -1080,11 +1162,15 @@ int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBy
 		memcpy((baseSegmento + desplazamiento), buffer, cantidadBytes);
 	}
 
+	sem_post(&s_AccesoAListadoSegmentos);
+
 	return ok;
 }
 
 int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer)
 {
+	sem_wait(&s_AccesoAListadoSegmentos);
+
 	// Primero verificamos que el programa pueda acceder a ese lugar de memoria
 	int ok = VerificarAccesoMemoria(idPrograma, base, desplazamiento, cantidadBytes);
 
@@ -1095,6 +1181,8 @@ int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes,
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
 		memcpy(buffer, (baseSegmento + desplazamiento), cantidadBytes);
 	}
+
+	sem_post(&s_AccesoAListadoSegmentos);
 
 	return ok;
 }
@@ -1140,14 +1228,15 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 
 	if (aux == NULL )
 	{
-		sprintf(g_MensajeError, "SEGMENTATION FAULT. El programa (%d) no tiene asignado un segmento con base %d", idPrograma, base);
+
+		SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no tiene asignado un segmento con base %d", idPrograma, base);
 	}
 	else
 	{
 		int posicionSolicitada = base + desplazamiento + cantidadBytes;
 		int posicionMaximaDelSegmento = aux->Inicio + aux->Tamanio;
 		if (posicionSolicitada > posicionMaximaDelSegmento)
-			sprintf(g_MensajeError, "SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", idPrograma, posicionSolicitada, posicionMaximaDelSegmento);
+			SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", idPrograma, posicionSolicitada, posicionMaximaDelSegmento);
 		else
 			accesoOk = 1;
 	}
@@ -1162,31 +1251,30 @@ int AtiendeCliente(void * arg)
 {
 	int socket = (int) arg;
 
-//Es el ID del programa con el que está trabajando actualmente el HILO.
-//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
-//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
+	//Es el ID del programa con el que está trabajando actualmente el HILO.
+	//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
+	//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
 	int id_Programa = 0;
+	int tipo_Cliente = 0;
 
-	int tipo_Conexion = 0;
-
-// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
 	int tipo_mensaje = 0;
 
-// Dentro del buffer se guarda el mensaje recibido por el cliente.
+	// Dentro del buffer se guarda el mensaje recibido por el cliente.
 	char buffer[BUFFERSIZE];
 
-// Cantidad de bytes recibidos.
+	// Cantidad de bytes recibidos.
 	int bytesRecibidos;
 
-// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
+	// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
 	int desconexionCliente = 0;
 
-// Código de salida por defecto
+	// Código de salida por defecto
 	int code = 0;
 
 	while ((!desconexionCliente) & g_Ejecutando)
 	{
-//Recibimos los datos del cliente
+		//Recibimos los datos del cliente
 		bytesRecibidos = RecibirDatos(socket, buffer);
 
 		if (bytesRecibidos > 0)
@@ -1198,22 +1286,22 @@ int AtiendeCliente(void * arg)
 			switch (tipo_mensaje)
 			{
 				case MSJ_GET_BYTES:
-					ComandoGetBytes(buffer, id_Programa);
+					ComandoGetBytes(buffer, id_Programa, tipo_Cliente);
 					break;
 				case MSJ_SET_BYTES:
-					ComandoSetBytes(buffer, id_Programa);
+					ComandoSetBytes(buffer, id_Programa, tipo_Cliente);
 					break;
 				case MSJ_HANDSHAKE:
-					ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
+					ComandoHandShake(buffer, &tipo_Cliente);
 					break;
 				case MSJ_CAMBIO_PROCESO:
 					ComandoCambioProceso(buffer, &id_Programa);
 					break;
-				case MSJ_CREAR_SEGMENTO: //NMR: hay que ver quien tiene acceso a estas operaciones, solo el PLP? hace falta que le pase el IDprog? no lo tiene ya con el handshake?
-					ComandoCrearSegmento(buffer, id_Programa);
+				case MSJ_CREAR_SEGMENTO:
+					ComandoCrearSegmento(buffer, tipo_Cliente);
 					break;
 				case MSJ_DESTRUIR_SEGMENTO:
-					ComandoDestruirSegmento(buffer, id_Programa);
+					ComandoDestruirSegmento(buffer, tipo_Cliente);
 					break;
 				default:
 					memset(buffer, 0, BUFFERSIZE);
@@ -1222,7 +1310,6 @@ int AtiendeCliente(void * arg)
 			}
 
 			// Enviamos datos al cliente.
-			// NMR: aca luego habra que agregar un retardo segun pide el TP int pthread_detach(pthread_self());
 			EnviarDatos(socket, buffer);
 		}
 		else
@@ -1242,16 +1329,26 @@ int ObtenerComandoMSJ(char buffer[])
 	return chartToInt(buffer[0]);
 }
 
-void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente)
+void ComandoHandShake(char *buffer, int *tipoCliente)
 {
-	(*idProg) = chartToInt(buffer[1]);
-	(*tipoCliente) = chartToInt(buffer[2]);
+	// Formato del mensaje: CD
+	// C = codigo de mensaje ( = 3)
+	// D = Tipo cliente (1  = KERNEL , 2 = CPU)
 
-	memset(buffer, 0, BUFFERSIZE);
-	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ", *idProg, *tipoCliente);
+	if (EsTipoClienteValido(chartToInt(buffer[1])))
+	{
+		*tipoCliente = chartToInt(buffer[1]);
+		RespuestaClienteOk(buffer);
+	}
+	else
+	{
+		*tipoCliente = 0;
+		SetearErrorGlobal("HANDSHAKE ERROR. Tipo de cliente invalido (%d). Solo puede ser '1' = KERNEL o '2' = CPU.", chartToInt(buffer[1]));
+		RespuestaClienteError(buffer, g_MensajeError);
+	}
 }
 
-void ComandoGetBytes(char *buffer, int idProg)
+void ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 {
 //Retorna los bytes que el programa quiere.
 //Hay que validar varias cosas, entre ellas que el programa tenga derechos para acceder al segmento que se está pidiendo.
@@ -1260,44 +1357,179 @@ void ComandoGetBytes(char *buffer, int idProg)
 	sprintf(buffer, "GetBytes: OK! INFO-->  idPRog: %d", idProg);
 }
 
-void ComandoSetBytes(char *buffer, int idProg)
+void ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 {
-//Graba los bytes que el programa quiere.
-//Hay que validar varias cosas. Seguro que el idProg sirve de algo.
 
-	memset(buffer, 0, BUFFERSIZE);
-	sprintf(buffer, "SetBytes: OK! INFO-->  idPRog: %d", idProg);
+	// Escribe en memoria
+	// Formato del mensaje: CABBBBBBBBBCDDDDDDDDDFOOOOOOOOOMMMMMMMM....
+	// C = codigo de mensaje ( = 2)
+	// A = Cantidad de digitos que tiene la base
+	// BBBBBBBBB = Base del segmento (hasta 9 digitos)
+	// C = Cantidad de digitos que tiene el desplazamiento
+	// DDDDDDDDD = desplazamiento (hasta 9 digitos)
+	// F = Cantidad de digitos que tiene la cantidad de caracteres del mensaje
+	// OOOOOOOOO = Cantidad de caracteres del mensaje (hasta 9 digitos)
+	// MMMMMMMM... Mensaje, hasta OOOOOOOOO caraceteres
+
+	if (tipoCliente == TIPO_CPU)
+	{
+		int ok = 0;
+
+		int base = 0;
+		int desplazamiento = 0;
+		int longitudBuffer = 0;
+		char* mensaje = 0;
+
+		int cantidadDigitosBase = 0;
+		int cantidadDigitosDesplazamiento = 0;
+		int cantidadDigitoslongitudBuffer = 0;
+
+		cantidadDigitosBase = chartToInt(buffer[1]);
+		base = atoi(string_substring(buffer, 2, cantidadDigitosBase));
+
+		cantidadDigitosDesplazamiento = chartToInt(buffer[2 + cantidadDigitosBase]);
+		desplazamiento = atoi(string_substring(buffer, 2 + cantidadDigitosBase + 1, cantidadDigitosDesplazamiento));
+
+		cantidadDigitoslongitudBuffer = chartToInt(buffer[2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento]);
+		longitudBuffer = atoi(string_substring(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1, cantidadDigitoslongitudBuffer));
+
+		mensaje = string_substring(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1 + cantidadDigitoslongitudBuffer, longitudBuffer);
+
+		ok = EscribirMemoria(idProg, base, desplazamiento, longitudBuffer, mensaje);
+
+		if (ok)
+		{
+			RespuestaClienteOk(buffer);
+		}
+		else
+		{
+			SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d, buffer: %s.", g_MensajeError, idProg, base, desplazamiento, longitudBuffer, mensaje);
+			RespuestaClienteError(buffer, g_MensajeError);
+		}
+	}
+	else
+	{
+		SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. El tipo de cliente que puede solicitar esta operacion solo puede ser CPU (2), usted es del tipo (%d) ", tipoCliente);
+		RespuestaClienteError(buffer, g_MensajeError);
+	}
+
 }
 
 void ComandoCambioProceso(char *buffer, int *idProg)
 {
-//Cambia el proceso activo sobre el que el cliente está trabajando. Así el hilo sabe con que proceso trabaja el cliente.
-//Hay que validar varias cosas seguro
+	//Cambia el proceso activo sobre el que el cliente está trabajando. Así el hilo sabe con que proceso trabaja el cliente.
 
-	int idProgViejo = *idProg;
-	(*idProg) = chartToInt(buffer[1]);
+	// Formato del mensaje: CDPPPPPPPPP
+	// C = codigo de mensaje ( = 4)
+	// D = Cantidad de digitos que tiene el Id del programa
+	// PPPPPPPPP = ID del programa (hasta 9 digitos)
+	int cantidadDigitosCodProg = chartToInt(buffer[1]);
+	char* idPrograma = string_substring(buffer, 2, cantidadDigitosCodProg);
+	*idProg = atoi(idPrograma);
 
-	sprintf(buffer, "Cambio proceso: OK! INFO-->  idPRog NUEVO: %d, idPRog VIEJO: %d", *idProg, idProgViejo);
+	if (*idProg > 0)
+	{
+		RespuestaClienteOk(buffer);
+	}
+	else
+	{
+		SetearErrorGlobal("ERROR CAMBIO PROGRAMA ACTIVO. MENSAJE ENVIADO = %s", buffer);
+		RespuestaClienteError(buffer, g_MensajeError);
+	}
 }
 
-void ComandoCrearSegmento(char *buffer, int idProg)
+void ComandoCrearSegmento(char *buffer, int tipoCliente)
 {
-//Crea un segmento para un programa.
-//NMR: no me queda claro para que quiere el IdProg, se supone que el hilo ya lo sabe por el handshake y el cambioProceso.
-	int idProgParam = chartToInt(buffer[1]);
-	int taman = chartToInt(buffer[2]);
+	//Crea un segmento para un programa.
+	// Formato del mensaje: CDPPPPPPPPPETTTTTTTTT
+	// C = codigo de mensaje ( = 5)
+	// D = Cantidad de digitos que tiene el Id del programa
+	// PPPPPPPPP = ID del programa (hasta 9 digitos)
+	// E = Cantidad de digitos que tiene el Tamaño del segmento
+	// TTTTTTTTT = tamaño del segmento (hasta 9 digitos)
 
-	sprintf(buffer, "Crear Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam, taman);
+	// Retorno:
+	// 0: error (continuado del msj)
+	// Sino retorna la base del segmento
+	if (tipoCliente == TIPO_KERNEL)
+	{
+		int idPrograma = 0;
+		int idSegmento = 0;
+		int tamanio = 0;
+		int cantidadDigitosCodProg = 0;
+		int cantidadDigitosTamanio = 0;
+
+		cantidadDigitosCodProg = chartToInt(buffer[1]);
+		idPrograma = atoi(string_substring(buffer, 2, cantidadDigitosCodProg));
+		cantidadDigitosTamanio = chartToInt(buffer[1 + 1 + cantidadDigitosCodProg]);
+		tamanio = atoi(string_substring(buffer, 1 + 1 + cantidadDigitosCodProg + 1, cantidadDigitosTamanio));
+
+		idSegmento = CrearSegmento(idPrograma, tamanio);
+
+		if (idSegmento == -1)
+		{
+			SetearErrorGlobal("No se pudo crear un segmento en la memoria. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+			RespuestaClienteError(buffer, g_MensajeError);
+		}
+		else
+		{
+			t_segmento* aux = ObtenerInfoSegmento(idPrograma, idSegmento);
+			sprintf(buffer, "%d", aux->Inicio);
+		}
+	}
+	else
+	{
+		SetearErrorGlobal("ERROR CREAR SEGMENTO. El tipo de cliente que puede solicitar esta operacion solo puede ser KERNEL (1), usted es del tipo (%d) ", tipoCliente);
+		RespuestaClienteError(buffer, g_MensajeError);
+	}
 }
 
-void ComandoDestruirSegmento(char *buffer, int idProg)
+void ComandoDestruirSegmento(char *buffer, int tipoCliente)
 {
-//Graba los bytes que el programa quiere.
-//NMR: no me queda claro para que quiere el IdProg, se supone que el hilo ya lo sabe por el handshake y el cambioProceso.
-	int idProgParam = chartToInt(buffer[1]);
-	int taman = chartToInt(buffer[2]);
+	// Destruye los segmentos de un programa.
+	// Formato del mensaje: CDPPPPPPPPP
+	// C = codigo de mensaje ( = 6)
+	// D = Cantidad de digitos que tiene el Id del programa
+	// PPPPPPPPP = ID del programa (hasta 9 digitos)
 
-	sprintf(buffer, "Destruir Segmento: OK! INFO-->  idPRog: %d, idPRog-Parametro: %d, tamaño: %d", idProg, idProgParam, taman);
+	if (tipoCliente == TIPO_KERNEL)
+	{
+		int ok = 0;
+		int idPrograma = 0;
+		int cantidadDigitosCodProg = 0;
+
+		cantidadDigitosCodProg = chartToInt(buffer[1]);
+		idPrograma = atoi(string_substring(buffer, 2, cantidadDigitosCodProg));
+
+		ok = DestruirSegmentos(idPrograma);
+
+		if (ok)
+		{
+			RespuestaClienteOk(buffer);
+		}
+		else
+		{
+			SetearErrorGlobal("No se pudo destruir los segmentos. Id programa: %d", idPrograma);
+			RespuestaClienteError(buffer, g_MensajeError);
+		}
+	}
+	else
+	{
+		SetearErrorGlobal("ERROR CREAR SEGMENTO. El tipo de cliente que puede solicitar esta operacion solo puede ser KERNEL (1), usted es del tipo (%d) ", tipoCliente);
+		RespuestaClienteError(buffer, g_MensajeError);
+	}
+}
+
+void RespuestaClienteOk(char *buffer)
+{
+	memset(buffer, 0, BUFFERSIZE);
+	sprintf(buffer, "%s", "1");
+}
+
+void RespuestaClienteError(char *buffer, char *msj)
+{
+	memset(buffer, 0, BUFFERSIZE);
+	sprintf(buffer, "%s%s", "0", msj);
 }
 
 #endif
@@ -1322,9 +1554,10 @@ char* NombreDeAlgoritmo(char idAlgorit)
 			return "First-Fit";
 			break;
 		default:
-			return "Error, codigo de algoritmo invalido.";
 			break;
 	}
+
+	return "Error, codigo de algoritmo invalido.";
 }
 
 int ValidarCodigoAlgoritmo(char idAlgorit)
@@ -1338,9 +1571,29 @@ int ValidarCodigoAlgoritmo(char idAlgorit)
 			return 1;
 			break;
 		default:
-			return 0;
+
 			break;
 	}
+
+	return 0;
+}
+
+int EsTipoClienteValido(int tipoCliente)
+{
+	switch (tipoCliente)
+	{
+		case TIPO_KERNEL:
+			return 1;
+			break;
+		case TIPO_CPU:
+			return 1;
+			break;
+		default:
+
+			break;
+	}
+
+	return 0;
 }
 
 int TraducirSiNo(char caracter)
@@ -1354,9 +1607,11 @@ int TraducirSiNo(char caracter)
 			return 0;
 			break;
 		default:
-			return 0;
+
 			break;
 	}
+
+	return 0;
 }
 
 int numeroAleatorio(int desde, int hasta)
