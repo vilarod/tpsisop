@@ -1,4 +1,7 @@
 
+struct _t_segmento;
+typedef struct _t_segmento t_segmento;
+
 int AtiendeCliente(void * arg);
 int DemasiadosClientes(int socket, struct sockaddr_in addr);
 void Error(const char* mensaje, ...);
@@ -11,13 +14,36 @@ int ObtenerPuertoConfig();
 void InstanciarTablaSegmentos();
 void reservarMemoriaPrincipal();
 void ErrorFatal(char mensaje[]);
-void AgregarSegmentoALista(int idPrograma, int tamanio);
+void AgregarSegmentoALista(int idPrograma, int idSegmento, int inicio, int tamanio, char* ubicacionMP);
+char* CalcularUbicacionMP(int tamanioSegmento);
 int CrearSegmento(int idPrograma, int tamanio);
 int chartToInt(char x);
 void CerrarSocket(int socket);
 char* NombreDeAlgoritmo(char idAlgorit);
 int ValidarCodigoAlgoritmo(char idAlgorit);
 int TraducirSiNo(char caracter);
+int CalcularIdSegmento(int idPrograma);
+int numeroAleatorio(int desde, int hasta);
+int CalcularInicioSegmento(int idPrograma);
+char* CalcularUbicacionMP_FirstFit(int tamanioRequeridoSegmento);
+char* CalcularUbicacionMP_WorstFit(int tamanioRequeridoSegmento);
+void ImprimirListadoSegmentosDeProgramaTSeg(int imprimirArchivo, t_segmento *Programa);
+void ImprimirListadoSegmentosDePrograma(int imprimirArchivo, int idPrograma);
+int ObtenerCantidadSegmentos();
+void ImprimirListadoSegmentos(int imprimirArchivo);
+int DestruirSegmentos(int idPrograma);
+t_segmento* ObtenerInfoSegmento(int idPrograma, int idSegmento);
+void ImprimirEncabezadoDeListadoSegmentos(int imprimirArchivo);
+void ImprimirResuladoDeCrearSegmento(int idPrograma, int idSegmento, int tamanio, int imprimirArchivo);
+void ImprimirBaseMemoria(int imprimirArchivo);
+void ImprimirResumenUsoMemoria(int imprimirArchivo);
+int obtenerTotalMemoriaEnUso();
+void ImprimirResuladoDeDestruirSegmento(int idPrograma, int ok, int imprimirArchivo);
+void CompactarMemoria();
+void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo);
+char * ObtenerUbicacionMPEnBaseAUbicacionVirtual(int idPrograma, int base);
+int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes);
+int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer);
 //Comandos mensajes
 int ObtenerComandoMSJ(char buffer[]);
 void ComandoGetBytes(char *buffer, int idProg);

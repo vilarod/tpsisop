@@ -25,7 +25,7 @@
 #include <commons/config.h>
 #include <string.h>
 #include <commons/string.h>
-#include <commons/collections/dictionary.h>
+#include <commons/collections/list.h>
 #include <semaphore.h>
 
 #include "UMV.h"
@@ -80,42 +80,64 @@ char CMD_DUMP_CERRAR_PROGRAMA[6] = { 'C', 'L', 'O', 'S', 'E', '\0' };
 #define ALGORITMO_WORST_FIT       'W'
 #define ALGORITMO_FIRST_FIT       'F'
 
-//Mensaje de error global.
-char* MensajeError;
-
 #endif
 
 #if 1 // VARIABLES GLOBALES //
 // - Base de la memoria principal de la UMV
-char* BaseMemoria;
+char* g_BaseMemoria;
+
+// Tamaño de la memoria
+int g_TamanioMemoria;
 
 // - Puerto por el cual escucha el programa
-int Puerto;
+int g_Puerto;
 
 // - Bandera que controla la ejecución o no del programa. Si está en 0 el programa se cierra.
-int Ejecutando = 1;
+int g_Ejecutando = 1;
 
 // - Bandera que controla si se imprimen comentarios adicionales durante la ejecución..
-int ImprimirTrazaPorConsola = 1;
+int g_ImprimirTrazaPorConsola = 1;
 
-// - Algoritmo utilizado para asignacion de memoria
-char AlgoritmoAsignacion = ALGORITMO_WORST_FIT;
+// - Algoritmo utilizado para asignacion de memoria (Por defecto FIRST FIT)
+char g_AlgoritmoAsignacion = ALGORITMO_FIRST_FIT;
 
-// Diccionario con todos los segmentos de los programas.
-t_dictionary *programasDiccionario;
+// Listado con todos los segmentos de los programas.
+t_list * g_ListaSegmentos;
+
+// Semaforo mutex para controlar que nadie quiera acceder a la memoria mientras esta se compacta.
+sem_t s_AccesoAListadoSegmentos;
+
+//Mensaje de error global.
+char* g_MensajeError;
 
 #endif
 
 #if 1 // ESTRUCTURAS //
 // Estructura para manejar los segmentos de los programas.
-struct t_segmento
+struct _t_segmento
 {
+	int IdPrograma;
 	int IdSegmento;
 	int Inicio;
 	int Tamanio;
 	char* UbicacionMP;
-	struct t_segmento *sig;
 };
+
+static t_segmento *segmento_create(int idPrograma, int idSegmento, int inicio, int tamanio, char* ubicacionMP)
+{
+	t_segmento *new = malloc(sizeof(t_segmento));
+	new->IdPrograma = idPrograma;
+	new->IdSegmento = idSegmento;
+	new->Inicio = inicio;
+	new->Tamanio = tamanio;
+	new->UbicacionMP = ubicacionMP;
+	return new;
+}
+
+static void segmento_destroy(t_segmento *self)
+{
+	free(self);
+}
 
 #endif
 
@@ -128,7 +150,7 @@ int main(int argv, char** argc)
 	reservarMemoriaPrincipal();
 
 	// Obtenemos el puerto de la configuración
-	Puerto = ObtenerPuertoConfig();
+	g_Puerto = ObtenerPuertoConfig();
 
 	InstanciarTablaSegmentos();
 
@@ -138,7 +160,8 @@ int main(int argv, char** argc)
 	pthread_join(hConsola, (void **) NULL );
 	// pthread_join(hOrquestadorConexiones, (void **) NULL );
 
-	free(BaseMemoria);
+	free(g_BaseMemoria);
+	list_clean_and_destroy_elements(g_ListaSegmentos, (void*) segmento_destroy);
 
 	return EXIT_SUCCESS;
 }
@@ -147,7 +170,7 @@ int main(int argv, char** argc)
 void HiloConsola()
 {
 
-	while (Ejecutando)
+	while (g_Ejecutando)
 	{
 		printf("\r\n --> Ingresar comando. (HELP para obtener una lista con los comandos)\n");
 
@@ -197,7 +220,7 @@ void HiloConsola()
 				ConsolaComandoDumpContenidoMemoriaPrincipal();
 				break;
 			case COMANDO_CONSOLA_CERRAR_PROGRAMA:
-				Ejecutando = 0;
+				g_Ejecutando = 0;
 				break;
 			default:
 				Error("COMANDO INVALIDO");
@@ -279,13 +302,47 @@ void ConsolaComandoLeerMemoria()
 
 void ConsolaComandoEscribirMemoria()
 {
+	int ok = 0;
 
+	int idPrograma;
+	int base;
+	int desplazamiento;
+	char* buffer = NULL;
+	char grabarArchivo[2];
+
+	printf("\n--> Ingrese ID de programa:   ");
+	scanf("%d", &idPrograma);
+	printf("\n--> Ingrese la base del segmento:   ");
+	scanf("%d", &base);
+	printf("\n--> Ingrese el desplazamiento:   ");
+	scanf("%d", &desplazamiento);
+	printf("\n--> Ingrese los bytes que desea grabar:   ");
+	scanf("%s", buffer);
+	printf("\n--> ¿Grabar en archivo? (S/N):   ");
+	scanf("%s", grabarArchivo);
+
+	ok = EscribirMemoria(idPrograma, base, desplazamiento, strlen(buffer), buffer);
+
+	ImprimirResuladoDeEscribirMemoria(ok, idPrograma, base, desplazamiento, strlen(buffer), buffer, TraducirSiNo(grabarArchivo[0]));
+}
+
+void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo)
+{
+	if (ok)
+	{
+		printf("Se escribió en la memoria correctamente");
+	}
+	else
+	{
+		printf("Ocurrio un error al intentar escribir la memoria./n Error: %s", g_MensajeError);
+	}
 }
 
 void ConsolaComandoCrearSegmento()
 {
 	int idPrograma;
 	int tamanio;
+	int idSegmento;
 	char grabarArchivo[2];
 
 	printf("\n--> Ingrese ID de programa:   ");
@@ -295,31 +352,39 @@ void ConsolaComandoCrearSegmento()
 	printf("\n--> ¿Grabar en archivo? (S/N):   ");
 	scanf("%s", grabarArchivo);
 
-	CrearSegmento(idPrograma, tamanio);
+	idSegmento = CrearSegmento(idPrograma, tamanio);
 
-	if (TraducirSiNo(grabarArchivo[0]))
-	{
-		// Grabo lo realizado en un archivo
-	}
+	ImprimirResuladoDeCrearSegmento(idPrograma, idSegmento, tamanio, TraducirSiNo(grabarArchivo[0]));
 }
 
 void ConsolaComandoDestruirSegmento()
 {
+	int idPrograma;
+	int ok;
+	char grabarArchivo[2];
 
+	printf("\n--> Ingrese ID de programa:   ");
+	scanf("%d", &idPrograma);
+	printf("\n--> ¿Grabar en archivo? (S/N):   ");
+	scanf("%s", grabarArchivo);
+
+	ok = DestruirSegmentos(idPrograma);
+
+	ImprimirResuladoDeDestruirSegmento(idPrograma, ok, TraducirSiNo(grabarArchivo[0]));
 }
 
 void ConsolaComandoDefinirAlgoritmo()
 {
 	char algoritmo[2];
 
-	printf("\n--> Algoritmo actual: %s", NombreDeAlgoritmo(AlgoritmoAsignacion));
+	printf("\n--> Algoritmo actual: %s", NombreDeAlgoritmo(g_AlgoritmoAsignacion));
 	printf("\n--> Algoritmo a definir (W = Worst-fit, F = First-fit):   ");
 	scanf("%s", algoritmo);
 
 	if (ValidarCodigoAlgoritmo(algoritmo[0]))
 	{
-		AlgoritmoAsignacion = algoritmo[0];
-		printf("--> Seteo OK. Algoritmo actual: %s", NombreDeAlgoritmo(AlgoritmoAsignacion));
+		g_AlgoritmoAsignacion = algoritmo[0];
+		printf("--> Seteo OK. Algoritmo actual: %s", NombreDeAlgoritmo(g_AlgoritmoAsignacion));
 	}
 	else
 		printf("--> Código de algoritmo incorrecto. Solo se admite W o F (W = Worst-fit, F = First-fit)");
@@ -338,7 +403,30 @@ void ConsolaComandoCompactarMemoria()
 
 void ConsolaComandoDumpEstructuras()
 {
+	int idPrograma;
+	char todosLosSegmentos[2];
+	char grabarArchivo[2];
 
+	printf("\n--> ¿Quiere imprimir información todos los segmentos? (S/N):   ");
+	scanf("%s", todosLosSegmentos);
+
+	if (TraducirSiNo(todosLosSegmentos[0]))
+	{
+		printf("\n--> ¿Grabar en archivo? (S/N):   ");
+		scanf("%s", grabarArchivo);
+
+		ImprimirListadoSegmentos(TraducirSiNo(grabarArchivo[0]));
+
+	}
+	else
+	{
+		printf("\n--> Ingrese el id de programa del cual quiere imprimir informacion de sus segmentos:   ");
+		scanf("%d", &idPrograma);
+		printf("\n--> ¿Grabar en archivo? (S/N):   ");
+		scanf("%s", grabarArchivo);
+
+		ImprimirListadoSegmentosDePrograma(TraducirSiNo(grabarArchivo[0]), idPrograma);
+	}
 }
 
 void ConsolaComandoDumpMemoriaPrincipal()
@@ -349,6 +437,91 @@ void ConsolaComandoDumpMemoriaPrincipal()
 void ConsolaComandoDumpContenidoMemoriaPrincipal()
 {
 
+}
+
+#endif
+
+#if 1 // METODOS QUE IMPRIMEN
+void ImprimirResuladoDeCrearSegmento(int idPrograma, int idSegmento, int tamanio, int imprimirArchivo)
+{
+	if (idSegmento == -1)
+		printf("\nNo se pudo crear un segmento en la memoria. Id programa: %d, Tamaño solicitado segmento: %d\n", idPrograma, tamanio);
+	else
+	{
+		printf("%s", "\nSe creó el siguiente segmento en la memoria: \n");
+		t_segmento* aux = ObtenerInfoSegmento(idPrograma, idSegmento);
+		ImprimirEncabezadoDeListadoSegmentos(imprimirArchivo);
+		ImprimirListadoSegmentosDeProgramaTSeg(imprimirArchivo, aux);
+	}
+}
+
+void ImprimirResuladoDeDestruirSegmento(int idPrograma, int ok, int imprimirArchivo)
+{
+	if (ok)
+		printf("\nSe destruyeron los segmentos asociados al programa. Id programa: %d\n", idPrograma);
+	else
+		printf("\nNo se pudieron destruir los segmentos asociados al programa. Id programa: %d\n", idPrograma);
+
+	ImprimirResumenUsoMemoria(imprimirArchivo);
+}
+
+void ImprimirListadoSegmentos(int imprimirArchivo)
+{
+	int index = 0;
+
+	ImprimirBaseMemoria(imprimirArchivo);
+	ImprimirEncabezadoDeListadoSegmentos(imprimirArchivo);
+
+	void _list_elements(t_segmento *seg)
+	{
+		ImprimirListadoSegmentosDeProgramaTSeg(imprimirArchivo, seg);
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	ImprimirResumenUsoMemoria(imprimirArchivo);
+}
+
+void ImprimirListadoSegmentosDePrograma(int imprimirArchivo, int idPrograma)
+{
+	int index = 0;
+
+	ImprimirBaseMemoria(imprimirArchivo);
+	ImprimirEncabezadoDeListadoSegmentos(imprimirArchivo);
+
+	void _list_elements(t_segmento *seg)
+	{
+		if (seg->IdPrograma == idPrograma)
+		{
+			ImprimirListadoSegmentosDeProgramaTSeg(imprimirArchivo, seg);
+		}
+
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+}
+
+void ImprimirListadoSegmentosDeProgramaTSeg(int imprimirArchivo, t_segmento *seg)
+{
+	printf("|%11d|%11d|%11d|%11d|%22u|\n", seg->IdPrograma, seg->IdSegmento, seg->Inicio, seg->Tamanio, (unsigned int) seg->UbicacionMP);
+}
+
+void ImprimirEncabezadoDeListadoSegmentos(int imprimirArchivo)
+{
+	printf("%s\n", "|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |");
+}
+
+void ImprimirBaseMemoria(int imprimirArchivo)
+{
+	printf("BASE MEMORIA: %u\n", (unsigned int) g_BaseMemoria);
+}
+
+void ImprimirResumenUsoMemoria(int imprimirArchivo)
+{
+	printf("MEMORIA TOTAL (Bytes): %d\n", g_TamanioMemoria);
+	printf("MEMORIA USADA (Bytes): %d\n", obtenerTotalMemoriaEnUso());
 }
 
 #endif
@@ -369,7 +542,7 @@ void Error(const char* mensaje, ...)
 
 void Traza(const char* mensaje, ...)
 {
-	if (ImprimirTrazaPorConsola)
+	if (g_ImprimirTrazaPorConsola)
 	{
 		char* nuevo;
 		va_list arguments;
@@ -415,7 +588,7 @@ void HiloOrquestadorDeConexiones()
 	}
 
 	my_addr.sin_family = AF_INET;
-	my_addr.sin_port = htons(Puerto);
+	my_addr.sin_port = htons(g_Puerto);
 	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
 	memset(&(my_addr.sin_zero), '\0', 8);
 
@@ -425,9 +598,9 @@ void HiloOrquestadorDeConexiones()
 	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
 		ErrorFatal("Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
 
-	Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, Puerto);
+	Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, g_Puerto);
 
-	while (Ejecutando)
+	while (g_Ejecutando)
 	{
 		int socket_client;
 
@@ -453,10 +626,10 @@ void HiloOrquestadorDeConexiones()
 int RecibirDatos(int socket, void *buffer)
 {
 	int bytecount;
-	// memset se usa para llenar el buffer con 0s
+// memset se usa para llenar el buffer con 0s
 	memset(buffer, 0, BUFFERSIZE);
 
-	//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
 		Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
 
@@ -505,70 +678,419 @@ int ObtenerPuertoConfig()
 #if 1 // METODOS MANEJO MEMORIA //
 void InstanciarTablaSegmentos()
 {
-	programasDiccionario = dictionary_create();
+	g_ListaSegmentos = list_create();
+	srand(getpid()); // --> esto inicializa la semilla para la generacion de numeros aleatorios.
+	sem_init(&s_AccesoAListadoSegmentos, 0, 1); //-> inicializamos en 1 el semaforo para controlar el acceso a la memoria mientras se compacta.
 }
 
 void reservarMemoriaPrincipal()
 {
-	// Obtenemos el tamaño de la memoria del config
-	int tamanioMemoria = ObtenerTamanioMemoriaConfig();
-	// Reservamos la memoria
-	BaseMemoria = (char*) malloc(tamanioMemoria);
+// Obtenemos el tamaño de la memoria del config
+	g_TamanioMemoria = ObtenerTamanioMemoriaConfig();
+// Reservamos la memoria
+	g_BaseMemoria = (char*) malloc(g_TamanioMemoria);
 
-	// si no podemos salimos y cerramos el programa.
-	if (BaseMemoria == NULL )
+// si no podemos salimos y cerramos el programa.
+	if (g_BaseMemoria == NULL )
 	{
 		ErrorFatal("No se pudo reservar la memoria.");
 	}
 	else
 	{
-		Traza("Se reservó la memoria principal OK. Tamaño de la memoria (%d)", tamanioMemoria);
+		Traza("Se reservó la memoria principal OK. Tamaño de la memoria (%d)", g_TamanioMemoria);
 	}
 
 }
 
+// Si esta ok retorna id del segmento. si no retorna -1
 int CrearSegmento(int idPrograma, int tamanio)
 {
-	// dado un ID de programa y un tamaño del segmento tengo que:
+	sem_wait(&s_AccesoAListadoSegmentos);
 
-	// Buscar el programa en el diccionario
-		// Si está obtengo su lista de programas
-		// si no está lo creo en el diccionario e instancio su lista de programas.
-
-
-	// Obtener el Id del segmento.
-		// Cantidad de segmentos en la lista + 1
-
-
-	// Obtener su inicio (base virtual)
-		// Agarro el ultimo segmento de la lista y hago (inicio + tamaño + numero aleatorio entre 0 y 500)
+	// Atributos a calcular:
+	int idSegmento = -1;
+	int inicioSegmento;
+	char* ubicacionMP;
 
 	// Obtener su ubicacion en la MP (Base real)
-		// Si el algoritmo es First-fit
-			//
+	ubicacionMP = CalcularUbicacionMP(tamanio);
 
-	// si no pude compacto
-		// Vuelvo a intentar
-		// Si no puedo de nuevo es un error.
+	if (ubicacionMP == NULL )
+	{
+		// Si no se pudo asignar, trato de compactar e intentar de nuevo
+		CompactarMemoria();
 
-	//si pude
+		ubicacionMP = CalcularUbicacionMP(tamanio);
+	}
 
-	// Agregar el nodo en la lista
+	if (ubicacionMP != NULL ) 		// Si la direccion se pudo calcular
+	{
+		// Calcular el ID del segmento:
+		idSegmento = CalcularIdSegmento(idPrograma);
 
-	AgregarSegmentoALista(idPrograma, tamanio);
+		// Obtener su inicio (base virtual)
+		inicioSegmento = CalcularInicioSegmento(idPrograma);
+
+		// Agregar el nodo en la lista 	(La insersion siempre es ordenada por ubicacion en MP)
+		AgregarSegmentoALista(idPrograma, idSegmento, inicioSegmento, tamanio, ubicacionMP);
+	}
+	else
+		Traza("No se pudo crear un segmento en la memoria. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+
+	sem_post(&s_AccesoAListadoSegmentos);
+
+	return idSegmento;
 }
 
-void AgregarSegmentoALista(int idPrograma, int tamanio)
+int DestruirSegmentos(int idPrograma)
 {
-	// Validar que el idPrograma tenga una entrada dentro del diccionario.
+	sem_wait(&s_AccesoAListadoSegmentos);
 
-	/*
-	 listaProgramas = malloc(sizeof(struct Programa));
-	 listaProgramas->IdPrograma = idPrograma;
-	 listaProgramas->segmentos = malloc(sizeof(struct Segmento ));
-	 listaProgramas->segmentos->Inicio = 1;
-	 listaProgramas->segmentos->Tamanio  = tamanio;
-	 listaProgramas->segmentos->UnicacionMP  = BaseMemoria + 1;*/
+	bool _is_program(t_segmento *p)
+	{
+		return p->IdPrograma == idPrograma;
+	}
+
+	while (list_remove_by_condition(g_ListaSegmentos, (void*) _is_program) != NULL )
+	{
+		// borra el segmento
+	}
+
+	sem_post(&s_AccesoAListadoSegmentos);
+
+	return 1;
+}
+
+void CompactarMemoria()
+{
+	sem_wait(&s_AccesoAListadoSegmentos);
+
+	// Mover el primer elemento al principio, actualizar su ubicacion en MP
+	// Por cada elemnto moverlo hasta el fin (ubicacionMP + tamaño) del anterior
+
+	sem_post(&s_AccesoAListadoSegmentos);
+}
+
+void AgregarSegmentoALista(int idPrograma, int idSegmento, int inicio, int tamanio, char* ubicacionMP)
+{
+	// Lo agregamos a la lista (al final)
+	list_add(g_ListaSegmentos, segmento_create(idPrograma, idSegmento, inicio, tamanio, ubicacionMP));
+
+	// Ordenamos la lista por ubicacion en MP (La lista siempre tiene que estar ordenada por ubicacion en MP
+	bool _ubicacion_mp(t_segmento *primero, t_segmento *segundo)
+	{
+		return primero->UbicacionMP < segundo->UbicacionMP;
+	}
+
+	list_sort(g_ListaSegmentos, (void*) _ubicacion_mp);
+
+}
+
+int CalcularIdSegmento(int idPrograma)
+{
+// Buscar en la lista la cantidad de programas que hay con el mismo IDprog y sumarle 1
+
+	int index = 0;
+	int cantidadSegmentosDePrograma = 0;
+
+	void _list_elements(t_segmento *seg)
+	{
+		if (seg->IdPrograma == idPrograma)
+			cantidadSegmentosDePrograma++;
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	return cantidadSegmentosDePrograma + 1;
+}
+
+int CalcularInicioSegmento(int idPrograma)
+{
+	// Agarro el segmento correspondiente al programa que tiene mayot inicio y hago (inicio + tamaño + numero aleatorio entre 0 y 1000)
+
+	int index = 0;
+	int inicio = 0;
+	int tamanio = 0;
+
+	void _list_elements(t_segmento *seg)
+	{
+		if (seg->IdPrograma == idPrograma)
+			if (inicio < seg->Inicio)
+			{
+				inicio = seg->Inicio;
+				tamanio = seg->Tamanio;
+			}
+
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	inicio = inicio + tamanio + numeroAleatorio(0, 1000);
+
+	return inicio;
+}
+
+t_segmento* ObtenerInfoSegmento(int idPrograma, int idSegmento)
+{
+	t_segmento* aux = NULL;
+	int index = 0;
+
+	void _list_elements(t_segmento *seg)
+	{
+		if ((seg->IdPrograma == idPrograma) & (seg->IdSegmento == idSegmento))
+			aux = seg;
+
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	return aux;
+}
+
+char* CalcularUbicacionMP(int tamanioSegmento)
+{
+	if (g_AlgoritmoAsignacion == ALGORITMO_WORST_FIT)
+	{
+		return CalcularUbicacionMP_WorstFit(tamanioSegmento);
+	}
+	else
+	{
+		return CalcularUbicacionMP_FirstFit(tamanioSegmento);
+	}
+}
+
+char* CalcularUbicacionMP_WorstFit(int tamanioRequeridoSegmento)
+{
+	char* retorno = NULL;
+
+	// Obtenemos la canitdad de segmentos deifnidos
+	int cantidadSegmentos = ObtenerCantidadSegmentos();
+	if (cantidadSegmentos == 0)
+	{
+		// -> si no hay quiere decir que este es el primer segmento, le damos la primer ubicacion en MP
+		if (tamanioRequeridoSegmento < g_TamanioMemoria) // -> siempre y cuando tengamos memoria suficiente
+			retorno = g_BaseMemoria;
+	}
+	else
+	{
+		// Necesitamos encontrar el "peor" lugar para ubicar el segmento.
+		// nos conviene recorrer la lista e ir analizando el espacio entre un segmento y otro.
+		// De todos esos quedarse con el mayor (el inicio de ese espacio = fin segmento anterior + tamaño)
+
+		// Sino... hay que calcularla...
+
+		int index = 0;
+		char* finSegmentoActual;
+		char* inicioProximoSegmento;
+		int espacioEntreSegmentos;
+		int mayorEspacio = 0;
+		t_segmento *aux;
+
+		void _list_elements(t_segmento *seg) // -> voy a recorrer todos los elementos de la lista
+		{
+			// Calculo donde va a terminar el segmento seg
+			finSegmentoActual = seg->UbicacionMP + seg->Tamanio - 1;
+
+			// Calculo donde empieza el proximo segmento
+			if (cantidadSegmentos > index + 1)
+			{
+				// Si no es el ultimo segmento de la lista
+				// Se calcula como la ubicacion del proximo segmento
+				aux = list_get(g_ListaSegmentos, index + 1);
+				inicioProximoSegmento = aux->UbicacionMP;
+			}
+			else
+			{
+				// Si es el ultimo segmento de la lista
+				// Se calcula como el fin de la memoria (ultima posicion de memoria) (BaseMemoria + TamañoTotalMEeoria)
+				inicioProximoSegmento = g_BaseMemoria + g_TamanioMemoria;
+			}
+
+			// Calculo espacio entre segmentos
+			espacioEntreSegmentos = inicioProximoSegmento - finSegmentoActual;
+
+			// Si es mayor al mayor, lo anoto como nuevo mayor espacio libre.
+			if (espacioEntreSegmentos > mayorEspacio)
+			{
+				mayorEspacio = espacioEntreSegmentos;
+				retorno = finSegmentoActual + 1; //-> el retorno es el inicio de ese espacio libre
+			}
+
+			index++;
+		}
+
+		// Realizo la busqueda de un lugar para el segmento
+		list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+		// Si el mayor espacio es menor al tamaño del segmento que se quiere ubicar, entonces no hay lugar para el segmento.
+		if (mayorEspacio < tamanioRequeridoSegmento)
+			retorno = NULL;
+	}
+
+	return retorno;
+}
+
+char* CalcularUbicacionMP_FirstFit(int tamanioRequeridoSegmento)
+{
+	char* retorno = NULL;
+	// Obtenemos la canitdad de segmentos deifnidos
+	int cantidadSegmentos = ObtenerCantidadSegmentos();
+	if (cantidadSegmentos == 0)
+	{
+		// -> si no hay quiere decir que este es el primer segmento, le damos la primer ubicacion en MP
+		if (tamanioRequeridoSegmento < g_TamanioMemoria) // -> siempre y cuando tengamos memoria suficiente
+			retorno = g_BaseMemoria;
+	}
+	else
+	{
+		// Sino... hay que calcularla...
+
+		int ubicado = 0;
+		int index = 0;
+		char* finSegmentoActual;
+		char* inicioProximoSegmento;
+		int espacioEntreSegmentos;
+		t_segmento *aux;
+
+		void _list_elements(t_segmento *seg) // -> voy a recorrer todos los elementos de la lista
+		{
+			if (ubicado == 0) // --> si ya lo pude ubicar en MP, listo, no hago nada.. sino lo trato de ubicar
+			{
+				// Calculo donde va a terminar el segmento seg
+				finSegmentoActual = seg->UbicacionMP + seg->Tamanio - 1;
+
+				// Calculo donde empieza el proximo segmento
+				if (cantidadSegmentos > index + 1)
+				{
+					// Si no es el ultimo segmento de la lista
+					// Se calcula como la ubicacion del proximo segmento
+					aux = list_get(g_ListaSegmentos, index + 1);
+					inicioProximoSegmento = aux->UbicacionMP;
+				}
+				else
+				{
+					// Si es el ultimo segmento de la lista
+					// Se calcula como el fin de la memoria (ultima posicion de memoria) (BaseMemoria + TamañoTotalMEeoria)
+					inicioProximoSegmento = g_BaseMemoria + g_TamanioMemoria;
+				}
+
+				espacioEntreSegmentos = inicioProximoSegmento - finSegmentoActual;
+
+				if (espacioEntreSegmentos > tamanioRequeridoSegmento)
+				{
+					retorno = finSegmentoActual + 1;
+					ubicado = 1;
+				}
+			}
+
+			index++;
+		}
+
+		// Realizo la busqueda de un lugar para el segmento
+		list_iterate(g_ListaSegmentos, (void*) _list_elements);
+	}
+
+	return retorno;
+}
+
+int ObtenerCantidadSegmentos()
+{
+	bool _true(void *seg)
+	{
+		return 1;
+	}
+
+	return list_count_satisfying(g_ListaSegmentos, _true);
+}
+
+int obtenerTotalMemoriaEnUso()
+{
+	int index = 0;
+	int total = 0;
+
+	void _list_elements(t_segmento *seg)
+	{
+		total = total + seg->Tamanio;
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	return total;
+}
+
+int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer)
+{
+	// Primero verificamos que el programa pueda acceder a ese lugar de memoria
+	int ok = VerificarAccesoMemoria(idPrograma, base, desplazamiento, cantidadBytes);
+	char* baseSegmento;
+
+	if (ok)
+	{
+		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, idPrograma);
+		*(baseSegmento + desplazamiento) = *buffer;
+	}
+
+	return ok;
+}
+
+char * ObtenerUbicacionMPEnBaseAUbicacionVirtual(int idPrograma, int base)
+{
+	char* retorno = NULL;
+	t_segmento* aux = NULL;
+	int index = 0;
+
+	void _list_elements(t_segmento *seg)
+	{
+		if ((seg->IdPrograma == idPrograma) & (seg->Inicio == base))
+			aux = seg;
+
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	if (aux != NULL )
+		retorno = aux->UbicacionMP;
+
+	return retorno;
+}
+
+// Retorta 1 si se puede accedeer a esa posicion de memoria, 0 si no y deja el mensaje de error en la variable global.
+int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes)
+{
+	int accesoOk = 0;
+	t_segmento* aux = NULL;
+	int index = 0;
+
+	void _list_elements(t_segmento *seg)
+	{
+		if ((seg->IdPrograma == idPrograma) & (seg->Inicio == base))
+			aux = seg;
+
+		index++;
+	}
+
+	list_iterate(g_ListaSegmentos, (void*) _list_elements);
+
+	if (aux == NULL )
+	{
+		sprintf(g_MensajeError, "SEGMENTATION FAULT. El programa (%d) no tiene asignado un segmento con base %d", idPrograma, base);
+	}
+	else
+	{
+		int posicionSolicitada = base + desplazamiento + cantidadBytes;
+		int posicionMaximaDelSegmento = aux->Inicio + aux->Tamanio;
+		if (posicionSolicitada > posicionMaximaDelSegmento)
+			sprintf(g_MensajeError, "SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", posicionSolicitada, base, posicionMaximaDelSegmento);
+		else
+			accesoOk = 1;
+	}
+
+	return accesoOk;
 }
 
 #endif
@@ -578,31 +1100,31 @@ int AtiendeCliente(void * arg)
 {
 	int socket = (int) arg;
 
-	//Es el ID del programa con el que está trabajando actualmente el HILO.
-	//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
-	//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
+//Es el ID del programa con el que está trabajando actualmente el HILO.
+//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
+//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
 	int id_Programa = 0;
 
 	int tipo_Conexion = 0;
 
-	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
 	int tipo_mensaje = 0;
 
-	// Dentro del buffer se guarda el mensaje recibido por el cliente.
+// Dentro del buffer se guarda el mensaje recibido por el cliente.
 	char buffer[BUFFERSIZE];
 
-	// Cantidad de bytes recibidos.
+// Cantidad de bytes recibidos.
 	int bytesRecibidos;
 
-	// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
+// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
 	int desconexionCliente = 0;
 
-	// Código de salida por defecto
+// Código de salida por defecto
 	int code = 0;
 
-	while ((!desconexionCliente) & Ejecutando)
+	while ((!desconexionCliente) & g_Ejecutando)
 	{
-		//Recibimos los datos del cliente
+//Recibimos los datos del cliente
 		bytesRecibidos = RecibirDatos(socket, buffer);
 
 		if (bytesRecibidos > 0)
@@ -773,6 +1295,11 @@ int TraducirSiNo(char caracter)
 			return 0;
 			break;
 	}
+}
+
+int numeroAleatorio(int desde, int hasta)
+{
+	return rand() % (hasta - desde + 1) + hasta;
 }
 
 #endif
