@@ -12,6 +12,22 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
+
+/* Definición del pcb */
+typedef struct PCBs
+{
+   int  id;
+   int  segmentoCodigo;
+   int  segmentoStack;
+   int  cursorStack;
+   int  indiceCodigo;
+   int  indiceEtiquetas;
+   int  programCounter;
+   int  sizeContextoActual;
+   int  sizeIndiceEtiquetas;
+} PCB;
+
+
 //Obtener datos de conexión
 int ObtenerPuertoUMV();
 int ObtenerPuertoKERNEL();

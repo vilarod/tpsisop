@@ -78,15 +78,14 @@ int Enviar (int sRemoto, char * buffer)
 
 int Recibir (int sRemoto, char * buffer)
 {
-	int cantBytes;
-	cantBytes = recv(sRemoto,buffer,strlen(buffer),0);
-	if (cantBytes == -1)
-		perror("Surgió un error al recibir los datos!");
-	if (cantBytes == 0)
-		perror("El proceso remoto se desconecto!");
-	return cantBytes;
+        int numbytes;
 
+        numbytes=recv(sRemoto, buffer, 99, 0);
+        buffer[numbytes] = '\0';
+
+        return numbytes;
 }
+
 
 //Cerrar conexión
 
@@ -112,10 +111,17 @@ int ObtenerPuertoKERNEL()
 }
 
 
-int RecibirProceso()
+int RecibirProceso(PCB prog,int quantum,int sRemoto)
 {
+  char estructura[200];
+  int r=Recibir (sRemoto,estructura);
+  if (r > 0)
+  {
+      //deserializar(estructura,prog,quantum);
+  }
 	//aca voy a intentar recibir un PCB y su Q
-	return 0; //devuelve 0 si no tengo, 1 si tengo
+
+  return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
 }
 
 
@@ -197,9 +203,11 @@ int main(void)
 {
 	int socketConexion=0;
 	int CONECTADO_UMV=0;
-	int tengoProg=0; //esto lo uso para controlar si tengo un prog que ejecutar
+	int CONECTADO_KERNEL=0;
+	//int tengoProg=0; //esto lo uso para controlar si tengo un prog que ejecutar
 	struct sockaddr_in dest_UMV;
-	char* sentencia=""; //esto no se de que tipo va a ser, por ahora char*
+	struct sockaddr_in dest_KERNEL;
+	//char* sentencia=""; //esto no se de que tipo va a ser, por ahora char*
 
 	//Llegué y quiero leer los datos de conexión
 	//donde esta el kernel?donde esta la umv?
@@ -207,41 +215,51 @@ int main(void)
 	UMV_PUERTO = ObtenerPuertoUMV();
 	KERNEL_PUERTO = ObtenerPuertoKERNEL();
 
+
 	socketConexion=crearSocket(socketConexion);
 	dest_UMV=prepararDestino(dest_UMV,UMV_PUERTO,MI_IP);
-
+	dest_KERNEL=prepararDestino(dest_KERNEL,KERNEL_PUERTO,MI_IP);
 
 	//Ahora que se donde estan, me quiero conectar con los dos
 	//tendré que tener los descriptores de socket por fuera?CREO QUE SI..
 	ConexionConSocket(&CONECTADO_UMV,socketConexion,dest_UMV);
+        ConexionConSocket(&CONECTADO_KERNEL,socketConexion,dest_KERNEL);
 
-	while (CONECTADO_UMV==1) //mientras estoy conectado...
-	{
+        //Mensaje que recibo
+	char mensaje[100];
 
-	    printf("estoy en el while de conectado_umv!!");
+	//Control programa
+	int tengoProg=0;
+	PCB programa;
+	int quantum;
 
-	         char* mensaje="";
+	while (CONECTADO_KERNEL==1)
+	  {
 
-	      int c=Enviar(socketConexion,"124");
-	      printf("%d",c);
-	      int r=Recibir(socketConexion,mensaje);
-	              printf("%s",mensaje);
-	              printf("%d",r);
+	    //Mientras estoy conectado al Kernel y no tengo programa que
+	    //ejecutar...solo tengo que esperar a recibir uno
 
-
-	      c=Enviar(socketConexion,"322");
-	         printf("%d",c);
-	          r=Recibir(socketConexion,mensaje);
-	          printf("%s",mensaje);
-	          printf("%d",r);
-	      char* chh="";
-	       scanf("%c",chh);
+	    while (tengoProg==0) //me fijo si tengo un prog que ejecutar
+	      {
+	          tengoProg= RecibirProceso(programa,quantum,dest_KERNEL);
+	      }
 
 
-		while (tengoProg==0) //me fijo si tengo un prog que ejecutar
-		{
-			tengoProg= RecibirProceso();
-		}
+
+	        while (CONECTADO_UMV==1) //mientras estoy conectado...
+
+
+	          {
+	            Enviar(socketConexion,"302");
+	            Recibir(socketConexion,mensaje);
+	            printf("%s",mensaje);
+
+	          }
+
+	          /*
+
+
+
 
 		//una vez que tengo el programa, mientras el quantum sea mayor
 		//a cero tengo que ejecutar las sentencias
@@ -268,9 +286,11 @@ int main(void)
 	//me voy a desconectar, asi que... antes le tengo que
 	//avisar al kernel asi me saca de sus recursos
 
-	AvisarDescAKernel();
+	AvisarDescAKernel(); */
 
-	//Cerrar (conexion); //cierro el socket
+	  }
+
+	Cerrar (socketConexion); //cierro el socket
 
  return EXIT_SUCCESS;
 
