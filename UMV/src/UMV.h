@@ -44,6 +44,9 @@ void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int des
 char * ObtenerUbicacionMPEnBaseAUbicacionVirtual(int idPrograma, int base);
 int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes);
 int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer);
+int cantidadCaracteres(char* buffer);
+void ImprimirResuladoDeLeerMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo);
+int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer);
 //Comandos mensajes
 int ObtenerComandoMSJ(char buffer[]);
 void ComandoGetBytes(char *buffer, int idProg);

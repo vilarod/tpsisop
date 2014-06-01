@@ -7,6 +7,11 @@
  Description : Hello World in C, Ansi-style
  Testing	 : Para probarlo es tan simple como ejecutar en el terminator la linea "$ telnet localhost 7000" y empezar a dialogar con el UMV.
  A tener en cuenta: organizar codigo : ctrl+Mayúscula+f
+ PARA HACER
+ - Compactar
+ - Varios dump
+ - Interfaz con cliente en solicitudes
+ - retardo
  ============================================================================
  */
 
@@ -108,7 +113,7 @@ t_list * g_ListaSegmentos;
 sem_t s_AccesoAListadoSegmentos;
 
 //Mensaje de error global.
-char* g_MensajeError;
+char g_MensajeError[200];
 
 #endif
 
@@ -297,7 +302,30 @@ void ConsolaComandoHelp()
 
 void ConsolaComandoLeerMemoria()
 {
+	int ok = 0;
 
+	int idPrograma;
+	int base;
+	int desplazamiento;
+	char* buffer;
+	char grabarArchivo[2];
+	int longitudBuffer;
+
+	printf("\n--> Ingrese ID de programa:   ");
+	scanf("%d", &idPrograma);
+	printf("\n--> Ingrese la base del segmento:   ");
+	scanf("%d", &base);
+	printf("\n--> Ingrese el desplazamiento:   ");
+	scanf("%d", &desplazamiento);
+	printf("\n--> Ingrese la cantidad de bytes que desea leer:   ");
+	scanf("%d", &longitudBuffer);
+	printf("\n--> ¿Grabar en archivo? (S/N):   ");
+	scanf("%s", grabarArchivo);
+
+	buffer = malloc(longitudBuffer * sizeof(char));
+	ok = LeerMemoria(idPrograma, base, desplazamiento, longitudBuffer, buffer);
+	ImprimirResuladoDeLeerMemoria(ok, idPrograma, base, desplazamiento, longitudBuffer, buffer, TraducirSiNo(grabarArchivo[0]));
+	free(buffer);
 }
 
 void ConsolaComandoEscribirMemoria()
@@ -307,8 +335,9 @@ void ConsolaComandoEscribirMemoria()
 	int idPrograma;
 	int base;
 	int desplazamiento;
-	char* buffer = NULL;
+	char buffer[200];
 	char grabarArchivo[2];
+	int longitudBuffer;
 
 	printf("\n--> Ingrese ID de programa:   ");
 	scanf("%d", &idPrograma);
@@ -321,9 +350,11 @@ void ConsolaComandoEscribirMemoria()
 	printf("\n--> ¿Grabar en archivo? (S/N):   ");
 	scanf("%s", grabarArchivo);
 
-	ok = EscribirMemoria(idPrograma, base, desplazamiento, strlen(buffer), buffer);
+	longitudBuffer = strlen(buffer);
 
-	ImprimirResuladoDeEscribirMemoria(ok, idPrograma, base, desplazamiento, strlen(buffer), buffer, TraducirSiNo(grabarArchivo[0]));
+	ok = EscribirMemoria(idPrograma, base, desplazamiento, longitudBuffer, buffer);
+
+	ImprimirResuladoDeEscribirMemoria(ok, idPrograma, base, desplazamiento, longitudBuffer, buffer, TraducirSiNo(grabarArchivo[0]));
 }
 
 void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo)
@@ -331,6 +362,18 @@ void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int des
 	if (ok)
 	{
 		printf("Se escribió en la memoria correctamente");
+	}
+	else
+	{
+		printf("Ocurrio un error al intentar escribir la memoria./n Error: %s", g_MensajeError);
+	}
+}
+
+void ImprimirResuladoDeLeerMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo)
+{
+	if (ok)
+	{
+		printf("Bytes Leidos: %s", buffer);
 	}
 	else
 	{
@@ -685,12 +728,14 @@ void InstanciarTablaSegmentos()
 
 void reservarMemoriaPrincipal()
 {
-// Obtenemos el tamaño de la memoria del config
+	// Obtenemos el tamaño de la memoria del config
 	g_TamanioMemoria = ObtenerTamanioMemoriaConfig();
-// Reservamos la memoria
+	// Reservamos la memoria
 	g_BaseMemoria = (char*) malloc(g_TamanioMemoria);
+	// Rellenamos con ceros.
+	memset(g_BaseMemoria, '0', g_TamanioMemoria);
 
-// si no podemos salimos y cerramos el programa.
+	// si no podemos salimos y cerramos el programa.
 	if (g_BaseMemoria == NULL )
 	{
 		ErrorFatal("No se pudo reservar la memoria.");
@@ -1026,12 +1071,29 @@ int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBy
 {
 	// Primero verificamos que el programa pueda acceder a ese lugar de memoria
 	int ok = VerificarAccesoMemoria(idPrograma, base, desplazamiento, cantidadBytes);
-	char* baseSegmento;
 
 	if (ok)
 	{
-		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, idPrograma);
-		*(baseSegmento + desplazamiento) = *buffer;
+		// Si se puede acceder escribo la memoria
+		char* baseSegmento;
+		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
+		memcpy((baseSegmento + desplazamiento), buffer, cantidadBytes);
+	}
+
+	return ok;
+}
+
+int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer)
+{
+	// Primero verificamos que el programa pueda acceder a ese lugar de memoria
+	int ok = VerificarAccesoMemoria(idPrograma, base, desplazamiento, cantidadBytes);
+
+	if (ok)
+	{
+		// Si se puede acceder escribo la memoria
+		char* baseSegmento;
+		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
+		memcpy(buffer, (baseSegmento + desplazamiento), cantidadBytes);
 	}
 
 	return ok;
@@ -1085,7 +1147,7 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 		int posicionSolicitada = base + desplazamiento + cantidadBytes;
 		int posicionMaximaDelSegmento = aux->Inicio + aux->Tamanio;
 		if (posicionSolicitada > posicionMaximaDelSegmento)
-			sprintf(g_MensajeError, "SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", posicionSolicitada, base, posicionMaximaDelSegmento);
+			sprintf(g_MensajeError, "SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", idPrograma, posicionSolicitada, posicionMaximaDelSegmento);
 		else
 			accesoOk = 1;
 	}
@@ -1300,6 +1362,13 @@ int TraducirSiNo(char caracter)
 int numeroAleatorio(int desde, int hasta)
 {
 	return rand() % (hasta - desde + 1) + hasta;
+}
+
+int cantidadCaracteres(char* buffer)
+{
+	char* bufferAux = NULL;
+	sprintf(bufferAux, "%s/0", buffer);
+	return strlen(bufferAux);
 }
 
 #endif
