@@ -31,31 +31,22 @@
 #define MI_PUERTO 0 //Que elija cualquier puerto que no esté en uso
 #define MI_IP INADDR_ANY //Que use la IP de la maquina en donde ejecuta
 
-//Puerto destino de UMV, de momento lo pongo como variable global
-//Lo tomo por archivo configuracion
-int UMV_PUERTO;
-int KERNEL_PUERTO;
 
 
-//guardo pcb y q
-//struct PCB PCB_prog; //estructura del pcb
-int quantum;
+//hasta ver que hago con las primitivas..las uso globales:
+int socketUMV=0;
+int socketKERNEL=0;
 
 
 
 void ConexionConSocket(int *Conec,int socketConec,struct sockaddr_in destino)
 {
-
-
-   *Conec=1;
    //Controlo si puedo conectarme
    if ((connect(socketConec,(struct sockaddr*)&destino,sizeof(struct sockaddr)))==-1)
-       perror("No me puedo conectar UMV!");
+       perror("No me puedo conectar con servidor!");
+   else  *Conec=1;
 
-   puts("Entre a conexionConSocket!");
-
-
-	}
+}
 
 //Para enviar datos
 
@@ -66,10 +57,6 @@ int Enviar (int sRemoto, char * buffer)
 	cantBytes= send(sRemoto,buffer,strlen(buffer),0);
 	if (cantBytes ==-1)
 		perror("No lo puedo enviar todo junto!");
-
-	puts("Entre a ENVIAR!");
-	printf("%d",cantBytes);
-
 	return cantBytes;
 
 }
@@ -125,12 +112,60 @@ int RecibirProceso(PCB prog,int quantum,int sRemoto)
 }
 
 
-/*
-char* PedirSentencia(puntero indiceCodigo)
+
+int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia)
 {
-	//aca hare algo para enviarle el pedido a la umv y recibir lo solicitado
+  //aca hare algo para enviarle el pedido a la umv y recibir lo solicitado
+
+  char pedido []= "1"; //lo inicializo en 1=getbyte
+  char aux[20];
+
+  //esto hay que modificarlo cuando corrija el pcb
+  sprintf(aux,"%d",indiceCodigo);
+
+  /* sprintf(aux,"%d",indiceCodigo.desplInicio);
+   * serCadena(pedido,aux);
+   * aux="";
+   * sprintf(aux,"%d",indiceCodigo.desplfin);
+   * serCadena(pedido,aux);
+   *
+   */
+
+  strcat(pedido,aux);
+  Enviar(sRemoto,pedido);
+  int r=(Recibir(sRemoto,sentencia) > 0);
+  return r;//devuelve 0 si no tengo, -1 si fue error, >0 si recibi
+
 }
-*/
+
+//serializar en cadena, a un mensaje le agrega algo mas y tamaño de algo mas
+void serCadena(char * msj, char* agr)
+{
+    char* taux="";
+    sprintf(taux,"%d",strlen(agr));
+    strcat(msj,taux);
+    strcat(msj,agr);
+}
+
+
+//primitivas al kernel
+
+t_valor_variable  obtener_valor(t_nombre_compartida variable)
+{
+  t_valor_variable valor;
+  char* pedido= "1"; //o el numero que sea que interprete el kernel
+  char* recibo="";
+  strcat(pedido,variable);
+  Enviar(socketKERNEL,pedido);
+  Recibir(socketKERNEL,recibo);
+  valor=atoi(recibo);
+  return valor;
+}
+
+t_valor_variable  grabar_valor(t_nombre_compartida variable)
+{
+ return 1;
+}
 
 void procesoTerminoQuantum()
 {
@@ -177,6 +212,8 @@ void AvisarDescAKernel()
 	//aviso al kernel que me voy :(
 }
 
+
+
 int crearSocket(int socketConec)
 {
 
@@ -201,13 +238,12 @@ return destino;
 int main(void)
 
 {
-	int socketConexion=0;
+        int UMV_PUERTO;
+        int KERNEL_PUERTO;
 	int CONECTADO_UMV=0;
 	int CONECTADO_KERNEL=0;
-	//int tengoProg=0; //esto lo uso para controlar si tengo un prog que ejecutar
 	struct sockaddr_in dest_UMV;
 	struct sockaddr_in dest_KERNEL;
-	//char* sentencia=""; //esto no se de que tipo va a ser, por ahora char*
 
 	//Llegué y quiero leer los datos de conexión
 	//donde esta el kernel?donde esta la umv?
@@ -215,120 +251,87 @@ int main(void)
 	UMV_PUERTO = ObtenerPuertoUMV();
 	KERNEL_PUERTO = ObtenerPuertoKERNEL();
 
-
-	socketConexion=crearSocket(socketConexion);
+	socketUMV=crearSocket(socketUMV);
+	socketKERNEL=crearSocket(socketKERNEL);
 	dest_UMV=prepararDestino(dest_UMV,UMV_PUERTO,MI_IP);
 	dest_KERNEL=prepararDestino(dest_KERNEL,KERNEL_PUERTO,MI_IP);
 
 	//Ahora que se donde estan, me quiero conectar con los dos
-	//tendré que tener los descriptores de socket por fuera?CREO QUE SI..
-	ConexionConSocket(&CONECTADO_UMV,socketConexion,dest_UMV);
-        ConexionConSocket(&CONECTADO_KERNEL,socketConexion,dest_KERNEL);
-
-        //Mensaje que recibo
-	char mensaje[100];
+	ConexionConSocket(&CONECTADO_UMV,socketUMV,dest_UMV);
+        ConexionConSocket(&CONECTADO_KERNEL,socketKERNEL,dest_KERNEL);
 
 	//Control programa
 	int tengoProg=0;
 	PCB programa;
 	int quantum;
+	char* sentencia="";
 
-	while (CONECTADO_KERNEL==1)
+	//voy a trabajar mientras este conectado tanto con kernel como umv
+	while ((CONECTADO_KERNEL==1) && (CONECTADO_UMV==1))
 	  {
-
 	    //Mientras estoy conectado al Kernel y no tengo programa que
 	    //ejecutar...solo tengo que esperar a recibir uno
 
-	    while (tengoProg==0) //me fijo si tengo un prog que ejecutar
+	    while (tengoProg < 1) //me fijo si tengo un prog que ejecutar
 	      {
-	          tengoProg= RecibirProceso(programa,quantum,dest_KERNEL);
+	          tengoProg= RecibirProceso(programa,quantum,socketKERNEL);
 	      }
+	    //Si salio del ciclo anterior es que ya tengo un programa
 
-
-
-	        while (CONECTADO_UMV==1) //mientras estoy conectado...
-
-
-	          {
-	            Enviar(socketConexion,"302");
-	            Recibir(socketConexion,mensaje);
-	            printf("%s",mensaje);
-
-	          }
-
-	          /*
-
-
-
-
-		//una vez que tengo el programa, mientras el quantum sea mayor
-		//a cero tengo que ejecutar las sentencias
-		while (quantum > 0)
-		{
-			//PCB_prog.PC ++; //incremento el program counter
-			//sentencia= PedirSentencia(PCB_prog.indiceCodigo); //le pido a la umv la sentencia a ejecutar
-			parsearYejecutar(sentencia);
-			quantum --; //decremento el Q
-		}
+	            while (quantum > 0) //mientras tengo quantum
+	              {
+	                programa.programCounter ++;//Incremento el PC
+			PedirSentencia(programa.indiceCodigo,socketUMV,sentencia); //le pido a la umv la sentencia a ejecutar
+			parsearYejecutar(sentencia); //ejecuto sentencia
+			quantum --; //decremento el quantum
+	              }
 
 		//una vez que el proceso termino el quantum
-		//quiero salvar el contexto
+		//quiero salvar el contexto y limpiar estructuras auxiliares
 		salvarContextoProg();
+		limpiarEstructuras();
 		procesoTerminoQuantum(); //ahora le aviso al kernel que el proceso
 								//ha finalizado
 		//el enunciado dice que cuando finalizo la ejecucion de un programa
 		//tengo que destruir las estructuras correspondientes
-		limpiarEstructuras();
 		//cuando termino la ejecución de ese
 		CONECTADO_UMV=seguirConectado();
-	}
 
 	//me voy a desconectar, asi que... antes le tengo que
 	//avisar al kernel asi me saca de sus recursos
 
-	AvisarDescAKernel(); */
+	//AvisarDescAKernel();
 
 	  }
 
-	Cerrar (socketConexion); //cierro el socket
+	Cerrar (socketKERNEL); //cierro el socket
+	Cerrar (socketUMV);
 
  return EXIT_SUCCESS;
 
 	}
 
 
-
-
-
 // Primitivas
 //esto es solamente un bosquejo para ir armandolas
 
 
-void AnSISOP_asignar(t_puntero direccion_variable, t_valor_variable valor)
+void asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
 	//direccion_variable=valor;
 }
 
-t_valor_variable AnSISOP_obtenerValorCompartida(t_nombre_compartida variable)
+t_valor_variable obtenerValorCompartida(t_nombre_compartida variable)
 {
-	t_valor_variable valor;
-	valor=1; //inicializo de prueba
-
-	//Acá tengo que obtener el valor de la variable mediante la sys call al kernel
-	// obtener_valor(variable);
-
-	return valor; //devuelve el valor de la variable
+	return obtener_valor(variable); //devuelve el valor de la variable
 }
 
-t_valor_variable AnSISOP_asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
+t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
 {
-	t_valor_variable valor_asig;
-		valor_asig=1; //inicializo de prueba
 
-	//Acá también uso sys call a kernel
-	// grabar_valor(variable,valor);
+	//como hago para identificar variable - valor? tengo que crear una estructura
 
-	return valor_asig; //devuelve el valor asignado
+	return grabar_valor(variable); //devuelve el valor asignado
 }
 
 t_puntero_instruccion AnSISOP_llamarSinRetorno(t_nombre_etiqueta etiqueta)
