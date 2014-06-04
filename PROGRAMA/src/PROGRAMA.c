@@ -139,21 +139,12 @@ char* ObtenerIpKernel()
 
 void conectarAKERNEL(){
 		Traza("Intentando conectar a umv.");
-		socket = ConexionConSocket(KERNEL_PUERTO, KERNEL_IP);
-		if (hacerhandshakeUMV(socket) == 0) {
+		socket = ConexionConSocket(7000, ObtenerIpKernel());//el puerto es de la umv para probar
+		if (hacerhandshakeKERNEL(socket) == 0) {
 			ErrorFatal("No se pudo conectar al kernel");
 		}
 }
-
-int hacerhandshakeKERNEL() {
-	char *respuestahandshake = string_new();
-	char *mensaje = "31";
-
-	EnviarDatos(socket, mensaje);
-	RecibirDatos(socket, respuestahandshake);
-	return analisarRespuestaUMV(respuestahandshake);
-
-}
+	
 int analizarRespuestaKERNEL(char *mensaje) {
 	if (mensaje[0] == 0) {
 		Error("eL KERNEL nos devolvio un error: %s", mensaje);
@@ -161,141 +152,9 @@ int analizarRespuestaKERNEL(char *mensaje) {
 	} else
 		return 1;
 }
-int ConexionConSocket(int puerto, char* IP) {
-	int socket;
-    //Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
-	struct hostent *he, *gethostbyname();
-	struct sockaddr_in their_addr;
-	he = gethostbyname(IP);
 
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		ErrorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
-				IP);
-		exit(1);
-	}
-
-	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
-	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red
-	bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-	memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
-
-	if (connect(sockfd, (struct sockaddr *) &their_addr,
-			sizeof(struct sockaddr)) == -1) {
-		ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
-		exit(1);
-	}
-
-	return sockfd;
-}
-int RecibirDatos(int socket, void *buffer) {
-	int bytecount;
-    // memset se usa para llenar el buffer con 0s
-	memset(buffer, 0, BUFFERSIZE);
-
-    //Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
-	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-		Error(
-				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
-				socket);
-
-	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-	return bytecount;
-}
-int EnviarDatos(int socket, void *buffer) {
-	int bytecount;
-
-	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
-		Error("No puedo enviar información a al clientes. Socket: %d", socket);
-
-	Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-	return bytecount;
-}
-void error(int code, char *err) {
-	char *msg = (char*) malloc(strlen(err) + 14);
-	sprintf(msg, "Error %d: %s\n", code, err);
-	fprintf(stderr, "%s", msg);
-	exit(1);
-}
 void txt_close_file(FILE* file) {
 
    	fclose(file);
 }
 
-void ConexionConSocket()
-{
-	int sockfd;
-	//Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
-	struct hostent *he, *gethostbyname();
-	struct sockaddr_in their_addr;
-	he=gethostbyname("10.5.2.192");
-
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-	perror("socket");
-	exit(1);
-	}
-	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
-	//their_addr.sin_port = htons(PORT); // short, Ordenación de bytes de la red
-	bcopy (he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length);
-//	their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-	memset(&(their_addr.sin_zero),'\0', 8); // poner a cero el resto de laestructura
-
-	if (connect(sockfd, (struct sockaddr *)&their_addr,
-	sizeof(struct sockaddr)) == -1) {
-	perror("connect");
-	exit(1);
-		}
-	//conexion que funciona envia y recibe, envia comando por teclado y lo recibe.
-	//int numbytes;
-	char mensaje[100];
-
-	/*Enviar(sockfd,"hola");
-	mensaje[Recibir(sockfd,mensaje)] = '\0';
-	printf("Recibi: %s \n",mensaje);
-
-	Enviar(sockfd,"como estas");
-	numbytes=recv(sockfd, mensaje, 99, 0);
-	mensaje[numbytes] = '\0';
-	printf("Recibi: %s \n",mensaje);
-	*/
-	//el while de prueba para conectarse
-	while(1){
-	char comando[20];
-	fgets(comando,20,stdin);
-	//Enviar(sockfd,comando);
-	//Recibir(sockfd,mensaje);
-	printf("Recibi: %s \n",mensaje);
-	}
-     //Cerrar(sockfd);
-}
-
-
-int Enviar (int sRemoto, char *buffer)
-{
-	int cantBytes;
-	cantBytes= send(sRemoto,buffer,strlen(buffer),0);
-	if (cantBytes ==-1)
-		perror("No lo puedo enviar todo junto!");
-
-	puts("Entre a ENVIAR!");
-	//printf("%d",cantBytes);
-
-	return cantBytes;
-
-}
-
-int Recibir (int socks, char * buffer)
-{
-	int numbytes;
-
-	numbytes=recv(socks, buffer, 99, 0);
-	buffer[numbytes] = '\0';
-
-	return numbytes;
-}
-
-void Cerrar (int sRemoto)
-{
-	//close(sRemoto);
-}
