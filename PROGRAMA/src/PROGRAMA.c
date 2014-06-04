@@ -25,7 +25,7 @@
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/PROGRAMA/src/config.cfg"
 
-//Tipo de cliente conectado
+//Tipo de servidor conectado
 #define  TIPO_KERNEL       1
 
 
@@ -38,18 +38,10 @@
 #define PUERTO_KERNEL "7001"
 #define PACKAGESIZE 10240
 #define MAXLONG 1024
-#define N 1000
-//FILE* txt_open_for_append(char* );
-void txt_close_file(FILE* file);
 
 
-
-int main(int argc, char* argv[]) {
-    //int i;
-	//size_t len;
-    //size_t bytesRead;
-    //char* contents;
-    //FILE* f;
+int main(int argc, char* argv[])
+{
 
 
     int index;    //para parametros
@@ -57,49 +49,73 @@ int main(int argc, char* argv[]) {
     for(index = 0; index < argc; index++)//parametros
      	printf("  Parametro %d: %s\n", index, argv[index]);
 
-        //argv[0] es el path: /home/utnso/tp-2014/1c-garras/PROGRAMA/Debug/PROGRAM/
-        //argv[1] es el nombre del programa
+    //argv[0] es el path: /home/utnso/tp-2014/1c-garras/PROGRAMA/Debug/PROGRAM/
+    //argv[1] es el nombre del programa
 
-    	//*se creo el directorio ansisop en /usr/bin con sudo mkdir ansisop */
-    	//se uso sudo para poder ejecutar comandos que requieren permisos de administrador
-    	/*El symbolic link se hizo por consola:
+    //se creo el directorio ansisop en /usr/bin con sudo mkdir ansisop
+    //se uso sudo para poder ejecutar comandos que requieren permisos de administrador
+    /*El symbolic link se hizo por consola:
       	  sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
 
-    	/*char* path;
-    	char* path1 = "/home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/";
-    	path = strcat(path1, argv[1]);*/
-
-        FILE* file;
-        //char* programa=NULL;
-          char** lineas;
-          int i = 0;
 
 
 
-    	file = fopen(argv[1], "r");//abre el archivo en modo read
-        //programa = (char*)malloc((1024 * sizeof(char))+ 1);
+    FILE* f;
+    //char* programa;
+    char* contents;
+    size_t len;
+    size_t bytesRead;
 
-    	if (file != NULL) {
-    					char* buffer = calloc(1,(1024*sizeof(char) + 1));
-    					fread(buffer, (1024*sizeof(char) + 1), 1, file);
-    					//aca esta el buffer con el archivo ya cargado. falta sacarle la primer linea.
-                        printf(" %s\n", buffer);
-                        printf("longitud del buffer: %d\n", strlen(buffer));
-                        lineas = string_split(buffer, "\n");
+    //programa = (char*)malloc(strlen(argv[1])+1);//aca esta el programa que tengo que enviar al kernel
+    //strcpy(programa,argv[1]);
 
-
-   		}
-    	else
-    		printf("El archivo no existe o esta vacio\n");
-    	for(i= 1; lineas[i]!= '\0'; i++)
-    	{
-    		printf("%s", lineas[i]);
-    	    printf("\\n");
-    	}
-    	printf("\n");
-    	//tengo que concatenar las lineas[i] para tener el char* para el kernel
+    f = fopen(argv[1], "r");//abre el archivo en modo read
+    if (f == NULL) {
+    	fprintf(stderr, "Error opening file: %s", argv[1]);//No existe el archivo
+    	return 1;
+     }
+    fseek(f, 0, SEEK_END);//nos situamos al final del archivo
+    len = ftell(f);//nos da la cantidad de bytes del archivo
+    rewind(f);
 
 
+    contents = (char*) malloc(sizeof(char) * len + 1);//leer lo que contiene
+    contents[len] = '\0'; // solo es necesario para imprimir la salida con printf
+    if (contents == NULL) {
+    	fprintf(stderr, "Failed to allocate memory");//imprime error sino tiene memoria
+    return 2;
+    }
+
+    bytesRead = fread(contents, sizeof(char), len, f);
+
+    txt_close_file(f); //cierra el archivo
+
+
+    printf("File length: %d, bytes read: %d\n", len, bytesRead);//imprime la cantidad de bytes del archivo
+    printf("Contents:%s",contents);
+
+    char **linea;
+    char *separator;
+
+    char* nuevo=(char*)malloc(len*sizeof(char) + 1);//aca guardo el programa como lo recibe el kernel
+    strcpy(nuevo, "");
+    separator = "\n";
+    linea = string_split(contents, separator);//separa el programa ansisop en lineas
+    int i;
+
+    for(i=1; linea[i]!= NULL; i++)//elimino la primer linea del shebang
+    {
+    	//printf("%s",linea[i]);
+
+    	string_append(&nuevo,linea[i]);//concatena todas las lineas del programa
+
+    }
+    printf("\n");
+    printf("%s", nuevo);//verifico que tengo el programa sin la primer linea
+    printf("\n");
+
+    free(contents);
+    free(nuevo);
 
 
         //ConexionConSocket();
