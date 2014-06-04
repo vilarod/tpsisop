@@ -27,7 +27,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
-#define MAXDATASIZE 100
+
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
 
@@ -39,7 +39,7 @@
 #define MSJ_HANDSHAKE             3
 #define MSJ_RECIBO_PROGRAMA       1
 #define MSJ_IMPRIMI_ESTO	      2
-#define MSJ_ADIOS		          4
+
 
 #define HANDSHAKEUMV '31'
 
