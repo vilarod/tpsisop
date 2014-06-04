@@ -1,10 +1,10 @@
 /*
  ============================================================================
  Name        : CPU.c
- Author      : 
+ Author      : Romi
  Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
+ Copyright   :
+ Description :
  ============================================================================
  */
 
@@ -23,14 +23,13 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
+
+
 
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/CPU/src/config.cfg"
-
-//Mi PUERTO e IP
-#define MI_PUERTO 0 //Que elija cualquier puerto que no esté en uso
-#define MI_IP INADDR_ANY //Que use la IP de la maquina en donde ejecuta
-
 
 
 //hasta ver que hago con las primitivas..las uso globales:
@@ -83,13 +82,20 @@ void Cerrar (int sRemoto)
 
 //Para leer desde el archivo de configuracion
 
-int ObtenerPuertoIP(char* que)
+int ObtenerPuerto(char* que)
 {
         t_config* config = config_create(PATH_CONFIG);
 
         return config_get_int_value(config,que);
 }
 
+
+char* ObtenerIP(char* que)
+{
+        t_config* config = config_create(PATH_CONFIG);
+
+        return config_get_string_value(config,que);
+}
 
 int RecibirProceso(PCB prog,int quantum,int sRemoto)
 {
@@ -217,13 +223,18 @@ int crearSocket(int socketConec)
 return socketConec;
 }
 
-struct sockaddr_in prepararDestino(struct sockaddr_in destino,int puerto,int ip)
+struct sockaddr_in prepararDestino(struct sockaddr_in destino,int puerto,char* ip)
 {
+
+
+  struct hostent *he, *gethostbyname();
+          he = gethostbyname(ip);
 
          //Con esto me quiero conectar con UMV o KERNEL
         destino.sin_family=AF_INET;
         destino.sin_port=htons(puerto);
-        destino.sin_addr.s_addr= ip;
+        bcopy(he->h_addr, &(destino.sin_addr.s_addr),he->h_length);
+        memset(&(destino.sin_zero), '\0', 8);
 
 return destino;
 }
@@ -245,10 +256,11 @@ int main(void)
         //Llegué y quiero leer los datos de conexión
         //donde esta el kernel?donde esta la umv?
 
-        int UMV_PUERTO = ObtenerPuertoIP("PUERTO_UMV");
-        int KERNEL_PUERTO = ObtenerPuertoIP("PUERTO_KERNEL");
-        int UMV_IP = ObtenerPuertoIP("IP_UMV");
-        int KERNEL_IP = ObtenerPuertoIP("IP_KERNEL");
+        int UMV_PUERTO = ObtenerPuerto("PUERTO_UMV");
+        int KERNEL_PUERTO = ObtenerPuerto("PUERTO_KERNEL");
+        char* UMV_IP = ObtenerIP("IP_UMV");
+        char* KERNEL_IP = ObtenerIP("IP_KERNEL");
+
 
         socketUMV=crearSocket(socketUMV);
         socketKERNEL=crearSocket(socketKERNEL);
@@ -257,7 +269,8 @@ int main(void)
 
         //Ahora que se donde estan, me quiero conectar con los dos
         ConexionConSocket(&CONECTADO_UMV,socketUMV,dest_UMV);
-         ConexionConSocket(&CONECTADO_KERNEL,socketKERNEL,dest_KERNEL);
+        ConexionConSocket(&CONECTADO_KERNEL,socketKERNEL,dest_KERNEL);
+
 
         //Control programa
         int tengoProg=0;

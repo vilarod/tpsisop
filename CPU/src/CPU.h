@@ -29,7 +29,8 @@ typedef struct PCBs
 
 
 //Obtener datos de conexión
-int ObtenerPuertoIP(char* que);
+int ObtenerPuerto(char* que);
+char* ObtenerIP(char* que);
 
 //Manejo de conexiones
 int Enviar (int sRemoto, char * buffer);
@@ -40,7 +41,7 @@ void AvisarDescAKernel();
 void procesoTerminoQuantum();
 int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
-struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,int ip);
+struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
 
 //Recibir-Enviar datos con el kernel
