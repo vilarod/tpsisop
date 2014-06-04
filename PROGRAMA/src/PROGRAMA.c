@@ -19,25 +19,27 @@
 #include <string.h>
 #include "PROGRAMA.h"
 
-#include <sys/stat.h>
-#include <fcntl.h>
+//#include <sys/stat.h>
+//#include <fcntl.h>
 
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/PROGRAMA/src/config.cfg"
 
 //Tipo de servidor conectado
-#define  TIPO_KERNEL       1
+//#define  TIPO_KERNEL       1
 
 
 //Mensajes aceptados
-
+#define HANDSHAKE '31'
+#define ENVIARPROGRAMA '11'
 
 //Puerto
-#define IP "127.0.0.1"
-#define PORT "6007"
-#define PUERTO_KERNEL "7001"
-#define PACKAGESIZE 10240
+//#define IP "127.0.0.1"
+//#define PORT "6007"
+
 #define MAXLONG 1024
+int ObtenerPuertoKernel();
+char* ObtenerIpKernel();
 
 
 int main(int argc, char* argv[])
@@ -61,13 +63,9 @@ int main(int argc, char* argv[])
 
 
     FILE* f;
-    //char* programa;
     char* contents;
     size_t len;
     size_t bytesRead;
-
-    //programa = (char*)malloc(strlen(argv[1])+1);//aca esta el programa que tengo que enviar al kernel
-    //strcpy(programa,argv[1]);
 
     f = fopen(argv[1], "r");//abre el archivo en modo read
     if (f == NULL) {
@@ -96,7 +94,6 @@ int main(int argc, char* argv[])
 
     char **linea;
     char *separator;
-
     char* nuevo=(char*)malloc(len*sizeof(char) + 1);//aca guardo el programa como lo recibe el kernel
     strcpy(nuevo, "");
     separator = "\n";
@@ -124,14 +121,103 @@ int main(int argc, char* argv[])
 }
 
 
-int ObtenerTamanioMemoriaConfig()
+int ObtenerPuertoKernel()
 {
 	t_config* config = config_create(PATH_CONFIG);
 
-	return config_get_int_value(config, "TAMANIO_MEMORIA");
+	return config_get_int_value(config, "PUERTO_KERNEL");
 
 }
 
+char* ObtenerIpKernel()
+{
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "IP_KERNEL");
+
+}
+
+void conectarAKERNEL(){
+		Traza("Intentando conectar a umv.");
+		socket = ConexionConSocket(KERNEL_PUERTO, KERNEL_IP);
+		if (hacerhandshakeUMV(socket) == 0) {
+			ErrorFatal("No se pudo conectar al kernel");
+		}
+}
+
+int hacerhandshakeKERNEL() {
+	char *respuestahandshake = string_new();
+	char *mensaje = "31";
+
+	EnviarDatos(socket, mensaje);
+	RecibirDatos(socket, respuestahandshake);
+	return analisarRespuestaUMV(respuestahandshake);
+
+}
+int analizarRespuestaKERNEL(char *mensaje) {
+	if (mensaje[0] == 0) {
+		Error("eL KERNEL nos devolvio un error: %s", mensaje);
+		return 0;
+	} else
+		return 1;
+}
+int ConexionConSocket(int puerto, char* IP) {
+	int socket;
+    //Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
+	struct hostent *he, *gethostbyname();
+	struct sockaddr_in their_addr;
+	he = gethostbyname(IP);
+
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		ErrorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
+				IP);
+		exit(1);
+	}
+
+	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
+	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red
+	bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+	memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
+
+	if (connect(sockfd, (struct sockaddr *) &their_addr,
+			sizeof(struct sockaddr)) == -1) {
+		ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
+		exit(1);
+	}
+
+	return sockfd;
+}
+int RecibirDatos(int socket, void *buffer) {
+	int bytecount;
+    // memset se usa para llenar el buffer con 0s
+	memset(buffer, 0, BUFFERSIZE);
+
+    //Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
+		Error(
+				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+				socket);
+
+	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+
+	return bytecount;
+}
+int EnviarDatos(int socket, void *buffer) {
+	int bytecount;
+
+	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
+		Error("No puedo enviar información a al clientes. Socket: %d", socket);
+
+	Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+
+	return bytecount;
+}
+void error(int code, char *err) {
+	char *msg = (char*) malloc(strlen(err) + 14);
+	sprintf(msg, "Error %d: %s\n", code, err);
+	fprintf(stderr, "%s", msg);
+	exit(1);
+}
 void txt_close_file(FILE* file) {
 
    	fclose(file);
