@@ -2,9 +2,9 @@
 //Sockets
 int ConexionConSocket(int puerto, char* IP );
 int EnviarDatos(int sRemoto, void *buffer);
-int RecibirDatos(int sRemoto, void *buffer);
+int RecibirDatos(int sRemoto, char *buffer);
 void Cerrar (int sRemoto);
-int hacerhandshakeUMV();
+int hacerhandshakeUMV(int sockfd);
 void conectarAUMV();
 int analisarRespuestaUMV(char *mensaje);
 void CerrarSocket(int socket);
