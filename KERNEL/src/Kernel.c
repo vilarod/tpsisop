@@ -44,7 +44,7 @@
 #define HANDSHAKEUMV '31'
 
 /** Longitud del buffer  */
-#define BUFFERSIZE 512
+#define BUFFERSIZE 1024
 
 /* Definición del pcb */
 typedef struct PCBs {
@@ -61,8 +61,8 @@ typedef struct PCBs {
 
 int Ejecutando = 1;
 int ImprimirTrazaPorConsola = 1;
+
 int Puerto;
-int sockfd;
 int UMV_PUERTO;
 char *UMV_IP;
 
@@ -72,10 +72,10 @@ int main(int argv, char** argc) {
 	//PCB * NUEVO, LISTO;
 
 	//Obtener puertos e ip de la umv
-	Puerto = ObtenerPuertoConfig();
+
 	UMV_PUERTO = ObtenerPuertoUMV();
 	UMV_IP = ObtenerIPUMV();
-
+	Puerto = ObtenerPuertoConfig();
 	//Crear Listas de estados
 	//NUEVO = PCB * list_create();
 	//LISTO = PCB * list_create();
@@ -96,7 +96,7 @@ int main(int argv, char** argc) {
 void *PLP(void *arg) {
 
 	conectarAUMV();
-	crearSocketEscucha();
+	//crearSocketEscucha();
 	// * Crear segmento 1° cod mensaje (5)
 	// * Parametros a pasar 2° cantidad de dijitos del id programa
 	// *  3° id programa
@@ -195,14 +195,15 @@ int ObtenerPuertoConfig() {
 
 void conectarAUMV() {
 	Traza("Intentando conectar a umv.");
-	sockfd = ConexionConSocket(UMV_PUERTO, UMV_IP);
+
+	int sockfd = ConexionConSocket(UMV_PUERTO, UMV_IP);
 	if (hacerhandshakeUMV(sockfd) == 0) {
 		ErrorFatal("No se pudo conectar a la umv.");
 	}
 }
 
-int hacerhandshakeUMV() {
-	char *respuestahandshake = string_new();
+int hacerhandshakeUMV(int sockfd) {
+	char respuestahandshake[BUFFERSIZE];
 	char *mensaje = "31";
 
 	EnviarDatos(sockfd, mensaje);
@@ -246,16 +247,14 @@ int ConexionConSocket(int puerto, char* IP) {
 	return sockfd;
 }
 
-int RecibirDatos(int socket, void *buffer) {
+int RecibirDatos(int socket, char *buffer) {
 	int bytecount;
 // memset se usa para llenar el buffer con 0s
 	memset(buffer, 0, BUFFERSIZE);
 
 //Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-		Error(
-				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
-				socket);
+		Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",socket);
 
 	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
 
