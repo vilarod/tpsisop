@@ -27,11 +27,20 @@ typedef struct PCBs
    int  sizeIndiceEtiquetas;
 } PCB;
 
+//deserializar
+
+
+
+
+PCB desearilizar_PCB (char* estructura, int pos);
+
+//serializar
+
+char* serializar_PCB (PCB prog);
 
 //Obtener datos de conexión
-int ObtenerPuertoUMV();
-int ObtenerPuertoKERNEL();
-char* ObtenerIPUMV();
+int ObtenerPuerto(char* que);
+char* ObtenerIP(char* que);
 
 //Manejo de conexiones
 int Enviar (int sRemoto, char * buffer);
@@ -42,7 +51,7 @@ void AvisarDescAKernel();
 void procesoTerminoQuantum();
 int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
-struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,int ip);
+struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
 
 //Recibir-Enviar datos con el kernel
@@ -54,27 +63,28 @@ int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia); //para recib
 void parsearYejecutar (char* instr);
 void salvarContextoProg();
 void limpiarEstructuras();
-
+void RecuperarContextoActual(PCB prog);
 
 //Primitivas
 
-void AnSISOP_asignar(t_puntero dir, t_valor_variable val);
-t_valor_variable AnSISOP_obtenerValorCompartida(t_nombre_compartida var);
-t_valor_variable AnSISOP_asignarValorCompartida(t_nombre_compartida var, t_valor_variable val);
-t_puntero_instruccion AnSISOP_llamarSinRetorno(t_nombre_etiqueta etiq);
-t_puntero_instruccion AnSISOP_llamarConRetorno(t_nombre_etiqueta etiq,
-					  t_puntero donde_ret);
-t_puntero_instruccion AnSISOP_finalizar(void);
-t_puntero_instruccion AnSISOP_retornar (t_valor_variable ret);
-int AnSISOP_imprimir (t_valor_variable valor_mostrar);
-t_valor_variable AnSISOP_dereferenciar(t_puntero dir_var);
-t_puntero_instruccion AnSISOP_irAlLabel(t_nombre_etiqueta etiq);
-t_puntero AnSISOP_obtenerPosicionVariable(t_nombre_variable id_var);
-t_puntero AnSISOP_definirVariable(t_nombre_variable id_var);
-int AnSISOP_imprimirTexto(char* texto);
-int AnSISOP_entradaSalida(t_nombre_dispositivo disp, int tiempo);
-int AnSISOP_wait(t_nombre_semaforo id_sem);
-int AnSISOP_signal(t_nombre_semaforo id_sem);
+int a_wait(t_nombre_semaforo identificador_semaforo);
+int a_signal(t_nombre_semaforo identificador_semaforo);
+void asignar(t_puntero dir, t_valor_variable val);
+t_valor_variable obtenerValorCompartida(t_nombre_compartida var);  //listo
+t_valor_variable asignarValorCompartida(t_nombre_compartida var, t_valor_variable val);
+t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiq);
+t_puntero_instruccion llamarConRetorno(t_nombre_etiqueta etiq,
+                                          t_puntero donde_ret);
+t_puntero_instruccion finalizar(void);
+t_puntero_instruccion retornar (t_valor_variable ret);
+int imprimir (t_valor_variable valor_mostrar);
+t_valor_variable dereferenciar(t_puntero dir_var);
+t_puntero_instruccion irAlLabel(t_nombre_etiqueta etiq);
+t_puntero obtenerPosicionVariable(t_nombre_variable id_var);
+t_puntero definirVariable(t_nombre_variable id_var);
+int imprimirTexto(char* texto);
+int entradaSalida(t_nombre_dispositivo disp, int tiempo);
+
 
 
 
