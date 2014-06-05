@@ -40,8 +40,8 @@ void ErrorFatal(const char* mensaje, ...);
 
 // METODOS SOCKETS //
 void HiloOrquestadorDeConexiones();
-int RecibirDatos(int socket, void *buffer);
-int EnviarDatos(int socket, void *buffer);
+char* RecibirDatos(int socket, char *buffer, int* bytesRecibidos);
+int EnviarDatos(int socket, char *buffer);
 void CerrarSocket(int socket);
 
 // METODOS CONFIGURACION //
@@ -71,14 +71,14 @@ int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes,
 // METODOS ATENDER CLIENTE //
 int AtiendeCliente(void * arg);
 int ObtenerComandoMSJ(char buffer[]);
-void ComandoGetBytes(char *buffer, int idProg, int tipocliente);
-void ComandoSetBytes(char *buffer, int idProg, int tipocliente);
-void ComandoHandShake(char *buffer, int *tipoCliente);
-void ComandoCambioProceso(char *buffer, int *idProg);
-void ComandoCrearSegmento(char *buffer, int idProg);
-void ComandoDestruirSegmento(char *buffer, int idProg);
-void RespuestaClienteOk(char *buffer);
-void RespuestaClienteError(char *buffer, char *msj);
+char* ComandoGetBytes(char *buffer, int idProg, int tipocliente);
+char* ComandoSetBytes(char *buffer, int idProg, int tipocliente);
+char* ComandoHandShake(char *buffer, int *tipoCliente);
+char* ComandoCambioProceso(char *buffer, int *idProg);
+char* ComandoCrearSegmento(char *buffer, int idProg);
+char* ComandoDestruirSegmento(char *buffer, int idProg);
+char* RespuestaClienteOk(char *buffer);
+char* RespuestaClienteError(char *buffer, char *msj);
 
 // OTROS METODOS //
 int chartToInt(char x);
@@ -88,7 +88,9 @@ int TraducirSiNo(char caracter);
 int numeroAleatorio(int desde, int hasta);
 int cantidadCaracteres(char* buffer);
 int EsTipoClienteValido(int tipoCliente);
-
+int cantidadDigitos(int num);
+int subCadenaAInt(char* text, int start, int length);
+int posicionDeBufferAInt(char* buffer, int posicion);
 
 
 
