@@ -27,6 +27,16 @@ typedef struct PCBs
    int  sizeIndiceEtiquetas;
 } PCB;
 
+//deserializar
+
+
+
+
+PCB desearilizar_PCB (char* estructura, int pos);
+
+//serializar
+
+char* serializar_PCB (PCB prog);
 
 //Obtener datos de conexión
 int ObtenerPuerto(char* que);

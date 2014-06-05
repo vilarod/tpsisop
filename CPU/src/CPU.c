@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/config.h>
+#include <commons/string.h>
 #include "CPU.h"
 #include <parser/parser.h>
 #include <parser/metadata_program.h>
@@ -97,15 +98,94 @@ char* ObtenerIP(char* que)
         return config_get_string_value(config,que);
 }
 
+//serializar pcb
+
+char* serializar_PCB (PCB prog)
+{
+char* cadena="";
+char* aux="";
+
+
+aux=string_itoa(prog.id);
+strcat(cadena,aux);
+strcat(cadena,"-");
+
+return cadena;
+}
+
+PCB desearilizar_PCB (char* estructura, int pos)
+{
+
+PCB est_prog;
+char valor[]="";
+int aux;
+int i;
+int indice;
+
+
+string_get_string_as_array(estructura);
+
+
+        for(aux=1;aux==9;aux++)
+        {
+                indice=0;
+                for (i=pos;estructura[i]=='-';i++)
+                {
+                        valor[indice]=estructura[i];
+                        indice ++;
+                }
+                pos=i + 1; //que la posicion sea la proxima a donde encontró el guión
+                        switch(aux)
+                        {
+                                case 1:
+                                                est_prog.id= atoi(valor);
+                                break;
+                                case 2:
+                                                est_prog.segmentoCodigo=atoi(valor);
+                                break;
+                                case 3:
+                                                est_prog.segmentoStack=atoi(valor);
+                                break;
+                                case 4:
+                                                est_prog.cursorStack=atoi(valor);
+                                break;
+                                case 5:
+                                                est_prog.indiceCodigo=atoi(valor);
+                                break;
+                                case 6:
+                                                est_prog.indiceEtiquetas=atoi(valor);
+                                break;
+                                case 7:
+                                                est_prog.programCounter=atoi(valor);
+                                break;
+                                case 8:
+                                                est_prog.sizeContextoActual=atoi(valor);
+                                break;
+                                case 9:
+                                                est_prog.sizeIndiceEtiquetas=atoi(valor);
+                                break;
+
+                        }
+        }
+
+return est_prog;
+}
+
+
+
+
 int RecibirProceso(PCB prog,int quantum,int sRemoto)
 {
-  char estructura[200];
-  int r=Recibir (sRemoto,estructura);
+  char* estructura="";
+  int r=Recibir(sRemoto,estructura);
   if (r > 0)
   {
-      //deserializar(estructura,prog,quantum);
-  }
-        //aca voy a intentar recibir un PCB y su Q
+        if (string_starts_with(estructura,"1")) // ponele que dice que me esta enviando datos..
+        {
+                quantum=atoi(estructura);
+  prog=desearilizar_PCB(estructura,2);
+      } else puts("No recibi datos validos");
+  }else perror("No recibi datos validos");
 
   return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
 }
@@ -116,7 +196,7 @@ int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia)
 {
   //aca hare algo para enviarle el pedido a la umv y recibir lo solicitado
 
-  char pedido []= "1"; //lo inicializo en 1=getbyte
+  char* pedido= "1"; //lo inicializo en 1=getbyte
   char aux[20];
 
   //esto hay que modificarlo cuando corrija el pcb
@@ -129,8 +209,7 @@ int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia)
    * serCadena(pedido,aux);
    *
    */
-
-  strcat(pedido,aux);
+  string_append(&pedido,aux);
   Enviar(sRemoto,pedido);
   int r=(Recibir(sRemoto,sentencia) > 0);
   return r;//devuelve 0 si no tengo, -1 si fue error, >0 si recibi
@@ -141,9 +220,9 @@ int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia)
 void serCadena(char * msj, char* agr)
 {
     char* taux="";
-    sprintf(taux,"%d",strlen(agr));
-    strcat(msj,taux);
-    strcat(msj,agr);
+    taux=string_itoa(strlen(agr));
+    string_append(&msj,taux);
+    string_append(&msj,agr);
 }
 
 
@@ -277,6 +356,17 @@ int main(void)
         PCB programa;
         int quantum;
         char* sentencia="";
+
+        PCB prueba;
+        prueba.id=0;
+        char* eje="1,-,2,-,33,-,4,-,5,-,6,-,7,-,8,-,999,-";
+
+        prueba=desearilizar_PCB(eje,0);
+
+
+        printf("%d",prueba.id);
+
+        printf("%c",eje[3]);
 
         //voy a trabajar mientras este conectado tanto con kernel como umv
         while ((CONECTADO_KERNEL==1) && (CONECTADO_UMV==1))
