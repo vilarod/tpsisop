@@ -45,8 +45,7 @@ int EnviarDatos(int socket, char *buffer);
 void CerrarSocket(int socket);
 
 // METODOS CONFIGURACION //
-int ObtenerTamanioMemoriaConfig();
-int ObtenerPuertoConfig();
+void LevantarConfig();
 
 // METODOS MANEJO MEMORIA //
 void InstanciarTablaSegmentos();

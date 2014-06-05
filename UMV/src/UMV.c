@@ -9,7 +9,6 @@
  A tener en cuenta: organizar codigo : ctrl+Mayúscula+f
  PARA HACER
  - Varios dump
- - Bajar a archivo
  - permitir definir lugar del archivo y nombre
  ============================================================================
  */
@@ -116,7 +115,7 @@ t_list * g_ListaSegmentos;
 sem_t s_AccesoAListadoSegmentos;
 
 //Mensaje de error global.
-char* g_MensajeError = "/0";
+char* g_MensajeError;
 
 // Retardo (en milisegundos) para contestar una solicitud a un cliente
 int g_Retardo = 0;
@@ -163,17 +162,18 @@ int main(int argv, char** argc)
 	// Definimos los hilos principales
 	pthread_t hOrquestadorConexiones, hConsola;
 
+	// Levantamos el archivo de configuracion.
+	LevantarConfig();
+
 	// Intentamos reservar la memoria principal
 	reservarMemoriaPrincipal();
-
-	// Obtenemos el puerto de la configuración
-	g_Puerto = ObtenerPuertoConfig();
 
 	// Creamos las estructuras necesarias para manejar la UMV
 	InstanciarTablaSegmentos();
 
 	// Instanciamos el archivo donde se grabará lo solicitado por consola
 	g_ArchivoConsola = fopen(NOMBRE_ARCHIVO_CONSOLA, "wt");
+	g_MensajeError = malloc(1 * sizeof(char));
 
 	// Arrancamos los hilos
 	pthread_create(&hOrquestadorConexiones, NULL, (void*) HiloOrquestadorDeConexiones, NULL );
@@ -186,6 +186,7 @@ int main(int argv, char** argc)
 	// Liberamos recursos
 	free(g_BaseMemoria);
 	list_clean_and_destroy_elements(g_ListaSegmentos, (void*) segmento_destroy);
+	free(g_MensajeError);
 
 	// Cerramos el archivo.
 	fclose(g_ArchivoConsola);
@@ -799,9 +800,12 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
 		cantidadBytesAcumulados = strlen(buffer);
 		tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
 
-		buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
+		if (tamanioNuevoBuffer > 0)
+		{
+			buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
 
-		sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcion
+			sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
+		}
 
 		//Verificamos si terminó el mensaje
 		if (cantidadBytesRecibidos < BUFFERSIZE)
@@ -838,20 +842,17 @@ void CerrarSocket(int socket)
 #endif
 
 #if 1 // METODOS CONFIGURACION //
-int ObtenerTamanioMemoriaConfig()
+void LevantarConfig()
 {
 	t_config* config = config_create(PATH_CONFIG);
-	int tamanio = config_get_int_value(config, "TAMANIO_MEMORIA");
-	free(config);
-	return tamanio;
-}
 
-int ObtenerPuertoConfig()
-{
-	t_config* config = config_create(PATH_CONFIG);
-	int puerto = config_get_int_value(config, "PUERTO");
+	// Obtenemos tamaño de la memoria (cantidad de bytes del 'gran malloc')
+	g_TamanioMemoria = config_get_int_value(config, "TAMANIO_MEMORIA");
+
+	// Obtenemos el puerto del config
+	g_Puerto = config_get_int_value(config, "PUERTO");
+
 	free(config);
-	return puerto;
 }
 
 #endif
@@ -866,8 +867,6 @@ void InstanciarTablaSegmentos()
 
 void reservarMemoriaPrincipal()
 {
-// Obtenemos el tamaño de la memoria del config
-	g_TamanioMemoria = ObtenerTamanioMemoriaConfig();
 // Reservamos la memoria
 	g_BaseMemoria = (char*) malloc(g_TamanioMemoria);
 // Rellenamos con ceros.
@@ -1555,10 +1554,10 @@ char* ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 	cantidadDigitosBase = posicionDeBufferAInt(buffer, 1);
 	base = subCadenaAInt(buffer, 2, cantidadDigitosBase);
 
-	cantidadDigitosDesplazamiento = posicionDeBufferAInt(buffer,2 + cantidadDigitosBase);
+	cantidadDigitosDesplazamiento = posicionDeBufferAInt(buffer, 2 + cantidadDigitosBase);
 	desplazamiento = subCadenaAInt(buffer, 2 + cantidadDigitosBase + 1, cantidadDigitosDesplazamiento);
 
-	cantidadDigitoslongitudBuffer = posicionDeBufferAInt(buffer,2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento);
+	cantidadDigitoslongitudBuffer = posicionDeBufferAInt(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento);
 	longitudBuffer = subCadenaAInt(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1, cantidadDigitoslongitudBuffer);
 
 	char* mensaje = string_substring(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1 + cantidadDigitoslongitudBuffer, longitudBuffer);
@@ -1720,10 +1719,13 @@ char* RespuestaClienteError(char *buffer, char *msj)
 #if 1 // OTROS METODOS //
 int chartToInt(char x)
 {
-	char str[1];
-	str[0] = x;
-	int a = atoi(str);
-	return a;
+	int numero = 0;
+	char* aux = malloc(1 * sizeof(char));
+	sprintf(aux, "%c", x);
+	numero = strtol(aux, (char **) NULL, 10);
+
+	free(aux);
+	return numero;
 }
 
 char* NombreDeAlgoritmo(char idAlgorit)
