@@ -41,27 +41,11 @@
 //#define PORT "6007"
 
 #define MAXLONG 1024
-int ObtenerPuertoKernel();
-char* ObtenerIpKernel();
-int ImprimirTrazaPorConsola = 1; //si es cero no imprime la traza
-void Traza(const char* mensaje, ...);
-void Error(const char* mensaje, ...);
-void ErrorFatal(char mensaje[], ...);
-void CerrarSocket(int socket);
-int EnviarDatos(int socket, void *buffer);
-int RecibirDatos(int socket, char *buffer);
-int ConexionConSocket(int puerto, char* IP);
-int analizarRespuestaKERNEL(char *mensaje);
-int hacerhandshakeKERNEL(int sockfd);
-char* ObtenerIpKernel();
-void conectarAKERNEL();
-int soquete;
-
 
 
 
 int main(int argc, char* argv[]) {
-
+/*
 	int index;    //para parametros
 
 	for (index = 0; index < argc; index++)    //parametros
@@ -72,9 +56,9 @@ int main(int argc, char* argv[]) {
 
 	//se creo el directorio ansisop en /usr/bin con sudo mkdir ansisop
 	//se uso sudo para poder ejecutar comandos que requieren permisos de administrador
-	/*El symbolic link se hizo por consola:
-	 sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
-
+	//El symbolic link se hizo por consola:
+	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
+/*
 	FILE* f;
 	char* contents;
 	size_t len;
@@ -123,21 +107,21 @@ int main(int argc, char* argv[]) {
 	printf("\n");
 
 	free(contents);
-	free(nuevo);
+	free(nuevo);*/
 
 	conectarAKERNEL();
 
 	return 0;
 }
 
-int ObtenerPuertoKernel() {
+int ObtenerPuertoKERNEL() {
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_int_value(config, "PUERTO_KERNEL");
 
 }
 
-char* ObtenerIpKernel() {
+char* ObtenerIpKERNEL() {
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_string_value(config, "IP_KERNEL");
@@ -146,17 +130,18 @@ char* ObtenerIpKernel() {
 
 void conectarAKERNEL() {
 	Traza("Intentando conectar a umv.");
-	soquete = ConexionConSocket(7000, "10.5.5.111"); //el puerto es de la umv para probar
-	if (hacerhandshakeKERNEL(soquete) == 0) {//donde esta la ip va obtenerIpKernel()
+	soquete = ConexionConSocket(5000,"127.0.0.1" ); //el puerto 5000 y el ip 127.0.01 son para probar
+	if (hacerhandshakeKERNEL(soquete) == 0) {//donde esta el puerto y la ip va: ObtenerPuertoKERNEL()y ObtenerIpKERNEL()
 		ErrorFatal("No se pudo conectar al kernel");
 	}
 }
 int hacerhandshakeKERNEL(int sockfd) {
 	char respuestahandshake[BUFFERSIZE];
 	char *mensaje = "31";
-
+    char *programa = "texto de prueba \n";//en el texto de prueba tiene que ir el programa
 	EnviarDatos(sockfd, mensaje);
 	RecibirDatos(sockfd, respuestahandshake);
+	EnviarDatos(sockfd, programa);
 	return analizarRespuestaKERNEL(respuestahandshake);
 
 }
