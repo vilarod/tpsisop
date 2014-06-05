@@ -34,6 +34,9 @@ typedef struct PCBs
 
 PCB desearilizar_PCB (char* estructura, int pos);
 
+int posicionDeCadAInt(char* buffer, int posicion);
+int chartToInt(char x);
+
 //serializar
 
 char* serializar_PCB (PCB prog);
