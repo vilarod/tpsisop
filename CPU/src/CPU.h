@@ -62,7 +62,7 @@ char* PedirSentencia(int indiceCodigo, int segCodigo, int progCounter, int sRemo
 void parsearYejecutar (char* instr);
 void salvarContextoProg();
 void limpiarEstructuras();
-void RecuperarContextoActual(PCB prog);
+void RecuperarContextoActual(PCB prog, t_dictionary dicc);
 
 //Primitivas
 

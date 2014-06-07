@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <commons/collections/dictionary.h>
 #include "CPU.h"
 #include <parser/parser.h>
 #include <parser/metadata_program.h>
@@ -439,9 +440,30 @@ prepararDestino(struct sockaddr_in destino, int puerto, char* ip)
 }
 
 void
-RecuperarContextoActual(PCB prog)
+RecuperarContextoActual(PCB prog, t_dictionary dicc)
 {
   //RECUPERAR ALGO
+  //en sizeContextoActual tengo la cant de variables que debo leer
+  //si es 0 -> programa nuevo
+  //si es >0 -> cant de variables a leer desde seg stack en umv
+
+  int i;
+char* variable;
+void* dato;
+
+  if (prog.sizeContextoActual > 0) //tengo variables a recuperar
+    {
+      for (i=0; i < prog.sizeContextoActual; i ++)
+        {
+         variable="";
+         dato=0;
+         dictionary_put(&dicc,variable,dato);
+
+        }
+
+
+    }
+
 }
 
 int
@@ -477,6 +499,8 @@ main(void)
   char* sentencia;
   sentencia = malloc(1 * sizeof(char));
 
+  t_dictionary dicc; //= dictionary_create();
+
   //solo pruebas
   /*
   sentencia= PedirSentencia(687, 200,5, 2);
@@ -511,17 +535,22 @@ main(void)
         }
       //Si salio del ciclo anterior es que ya tengo un programa
 
-      //tengo que recuperar el contexto actual del programa que recibi
-      RecuperarContextoActual(programa);
 
       while (quantum > 0) //mientras tengo quantum
         {
+
+          //tengo que recuperar el contexto actual del programa que recibi
+          RecuperarContextoActual(programa,dicc);
+
           programa.programCounter++; //Incremento el PC
           sentencia=PedirSentencia(programa.indiceCodigo,
                                     programa.segmentoCodigo,
                                     programa.programCounter,socketUMV); //le pido a la umv la sentencia a ejecutar
           parsearYejecutar(sentencia); //ejecuto sentencia
           quantum--; //decremento el quantum
+
+          // aca me conviene poner un control, si ya terminó de ejecutar y uso menos
+          //quantum que el previsto -> quantum=0 para que salga
         }
 
       //una vez que el proceso termino el quantum
