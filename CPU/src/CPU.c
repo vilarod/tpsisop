@@ -105,11 +105,9 @@ char*
 serializar_PCB(PCB prog)
 {
   char* cadena = "";
-  char* aux = "";
 
-  aux = string_itoa(prog.id);
-  strcat(cadena, aux);
-  strcat(cadena, "-");
+  string_append(&cadena, string_itoa(prog.id));
+  string_append(&cadena, "-");
 
   return cadena;
 }
@@ -143,12 +141,11 @@ desearilizar_PCB(char* estructura, int pos)
 {
 
   PCB est_prog;
-  int aux;
-  int i,h=0;
+  int aux = 0;
+  int i, h = 0;
   int indice = 0;
   char* sub = "";
   int inicio = 0;
-
 
   est_prog.id = 0;
   est_prog.segmentoCodigo = 0;
@@ -160,55 +157,58 @@ desearilizar_PCB(char* estructura, int pos)
   est_prog.sizeContextoActual = 0;
   est_prog.sizeIndiceEtiquetas = 0;
 
-  for (aux=1; aux < 10; aux ++)
+  indice = pos;
+
+  for (aux = 1; aux < 11; aux++)
     {
 
       for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++)
         {
 
           sub = string_substring(estructura, inicio, 1);
-          inicio ++;
+          inicio++;
           h++;
         }
-
-      indice = pos + inicio;
 
       switch (aux)
         {
       case 1:
-        est_prog.id = atoi(string_substring(estructura, pos, h));
+        est_prog.id = atoi(string_substring(estructura, indice, i));
 
         break;
       case 2:
-        est_prog.segmentoCodigo = atoi(string_substring(estructura, indice, h));
+        est_prog.segmentoCodigo = atoi(string_substring(estructura, indice, i));
         break;
       case 3:
-        est_prog.segmentoStack = atoi(string_substring(estructura, indice, h));
+        est_prog.segmentoStack = atoi(string_substring(estructura, indice, i));
         break;
       case 4:
-        est_prog.cursorStack = atoi(string_substring(estructura, indice, h));
+        est_prog.cursorStack = atoi(string_substring(estructura, indice, i));
         break;
       case 5:
-        est_prog.indiceCodigo = atoi(string_substring(estructura, indice, h));
+        est_prog.indiceCodigo = atoi(string_substring(estructura, indice, i));
         break;
       case 6:
-        est_prog.indiceEtiquetas = atoi(string_substring(estructura, indice, h));
+        est_prog.indiceEtiquetas = atoi(
+            string_substring(estructura, indice, i));
         break;
       case 7:
-        est_prog.programCounter = atoi(string_substring(estructura, indice, h));
+        est_prog.programCounter = atoi(string_substring(estructura, indice, i));
         break;
       case 8:
-        est_prog.sizeContextoActual = atoi(string_substring(estructura, indice, h));
+        est_prog.sizeContextoActual = atoi(
+            string_substring(estructura, indice, i));
         break;
       case 9:
-        est_prog.sizeIndiceEtiquetas = atoi(string_substring(estructura, indice, h));
+        est_prog.sizeIndiceEtiquetas = atoi(
+            string_substring(estructura, indice, i));
         break;
 
         }
-      //inicio++;
+
       sub = "";
-      //indice = 0;
-      h=0;
+      indice = pos + inicio;
+      h = 0;
     }
 
   return est_prog;
@@ -409,9 +409,9 @@ main(void)
   char* sentencia = "";
 
   PCB prueba;
-  char* eje = "166532-23-33-4-57-6722-7-8-999-";
+  char* eje = "1143-242-33-44-55-6609-77-88-9900-";
 
-  prueba = desearilizar_PCB(eje,0);
+  prueba = desearilizar_PCB(eje, 0);
 
   printf("/n %d", prueba.id);
   printf("/n %d", prueba.segmentoCodigo);
