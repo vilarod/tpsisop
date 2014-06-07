@@ -275,6 +275,7 @@ char* PedirSentencia(int indiceCodigo, int segCodigo, int progCounter, int sRemo
 
   char* instruccion;
   instruccion = malloc(1 * sizeof(char));
+
   mensaje = malloc(1 * sizeof(char));
 
   string_append(&instruccion, pedido);
@@ -328,13 +329,25 @@ obtener_valor(t_nombre_compartida variable)
 {
   t_valor_variable valor;
   char* pedido = "1"; //o el numero que sea que interprete el kernel
-  char recibo[10];
-  strcat(pedido, variable);
+  char* recibo;
+
+  pedido = malloc(1 * sizeof(char));
+  recibo = malloc(1 * sizeof(char));
+
+  string_append(&pedido, variable);
   Enviar(socketKERNEL, pedido);
   Recibir(socketKERNEL, recibo);
-  valor = atoi(recibo);
+
+  if (string_starts_with(recibo,"1")) //si comienza con 1 -> recibi un mensj valido
+    {
+      valor= atoi(string_substring(recibo,1,(strlen(recibo)-1)));
+    } else {
+      valor=0; //aca en verdad tendria que devolver un valor por default a convenir
+    }
+
   return valor;
 }
+
 
 t_valor_variable
 grabar_valor(t_nombre_compartida variable)
@@ -343,9 +356,17 @@ grabar_valor(t_nombre_compartida variable)
 }
 
 void
-procesoTerminoQuantum()
+procesoTerminoQuantum(PCB prog)
 {
-  //le aviso al kernel que el proceso termino el Q
+
+  char* aviso;
+  aviso = malloc(1 * sizeof(char));
+
+  aviso="2"; // el numero que el kernel interprete como fin programa
+
+  string_append(&aviso, serializar_PCB(prog));
+  Enviar(socketKERNEL,aviso);
+
 }
 
 void
@@ -381,6 +402,12 @@ AvisarDescAKernel()
 
 {
   //aviso al kernel que me voy :(
+  char* aviso="3";
+  aviso = malloc(1 * sizeof(char));
+
+  string_append(&aviso, "CHAU"); //como interpreta el kernel que me voy?
+  Enviar(socketKERNEL,aviso);
+
 }
 
 int
@@ -450,6 +477,9 @@ main(void)
   char* sentencia;
   sentencia = malloc(1 * sizeof(char));
 
+  //solo pruebas
+  /*
+  sentencia= PedirSentencia(687, 200,5, 2);
   PCB prueba;
   char* eje = "1143-242-33-44-55-6609-77-88-9900-";
 
@@ -467,7 +497,7 @@ main(void)
 
   printf("cadena %s", serializar_PCB(prueba));
 
-  analizadorLinea("a = b + 3", &funciones_p, &funciones_k);
+  analizadorLinea("a = b + 3", &funciones_p, &funciones_k);*/
 
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while ((CONECTADO_KERNEL == 1) && (CONECTADO_UMV == 1))
@@ -498,19 +528,18 @@ main(void)
       //quiero salvar el contexto y limpiar estructuras auxiliares
       salvarContextoProg();
       limpiarEstructuras();
-      procesoTerminoQuantum(); //ahora le aviso al kernel que el proceso
+      procesoTerminoQuantum(programa); //ahora le aviso al kernel que el proceso
                                //ha finalizado
       //el enunciado dice que cuando finalizo la ejecucion de un programa
       //tengo que destruir las estructuras correspondientes
       //cuando termino la ejecución de ese
       CONECTADO_UMV = seguirConectado();
-
-      //me voy a desconectar, asi que... antes le tengo que
+      CONECTADO_KERNEL=CONECTADO_UMV;
+    }
+  //me voy a desconectar, asi que... antes le tengo que
       //avisar al kernel asi me saca de sus recursos
 
-      //AvisarDescAKernel();
-
-    }
+  AvisarDescAKernel();
 
   Cerrar(socketKERNEL); //cierro el socket
   Cerrar(socketUMV);

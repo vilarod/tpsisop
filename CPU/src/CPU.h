@@ -47,7 +47,7 @@ void ConexionConSocket(int *Conec,int socketConec,struct sockaddr_in dest);
 void Cerrar(int sRemoto);
 int seguirConectado();
 void AvisarDescAKernel();
-void procesoTerminoQuantum();
+void procesoTerminoQuantum(PCB prog);
 int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
 struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
