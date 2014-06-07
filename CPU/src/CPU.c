@@ -101,21 +101,33 @@ ObtenerIP(char* que)
 
 //serializar pcb
 
-char*
-serializar_PCB(PCB prog)
+
+
+char* serializar_PCB(PCB prog)
 {
 
   char*  cadena;
   cadena = malloc(1 * sizeof(char));
 
-  //aca tengo que mandar esto a una minifuncion y agregar el resto de los campos
-  //del pcb de mandera ordenada!!!
   string_append(&cadena, string_itoa(prog.id));
   string_append(&cadena, "-");
   string_append(&cadena, string_itoa(prog.segmentoCodigo));
   string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.segmentoStack));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.cursorStack));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.indiceCodigo));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.indiceEtiquetas));
+  string_append(&cadena, "-");
   string_append(&cadena, string_itoa(prog.programCounter));
   string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.sizeContextoActual));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.sizeIndiceEtiquetas));
+  string_append(&cadena, "-");
+
   return cadena;
 }
 
