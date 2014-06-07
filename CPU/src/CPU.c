@@ -34,33 +34,25 @@
 int socketUMV = 0;
 int socketKERNEL = 0;
 
-
 //Llamado a las funciones primitivas
 
 AnSISOP_funciones funciones_p =
-  {
-  .AnSISOP_definirVariable = prim_definirVariable,
-  .AnSISOP_obtenerPosicionVariable = prim_obtenerPosicionVariable,
-  .AnSISOP_dereferenciar = prim_dereferenciar,
-  .AnSISOP_asignar = prim_asignar,
-  .AnSISOP_obtenerValorCompartida = prim_obtenerValorCompartida,
-  .AnSISOP_asignarValorCompartida = prim_asignarValorCompartida,
-  .AnSISOP_irAlLabel = prim_irAlLabel,
-  .AnSISOP_llamarSinRetorno = prim_llamarSinRetorno,
-  .AnSISOP_llamarConRetorno = prim_llamarConRetorno,
-  .AnSISOP_finalizar = prim_finalizar,
-  .AnSISOP_retornar = prim_retornar,
-  .AnSISOP_imprimir = prim_imprimir,
-  .AnSISOP_imprimirTexto = prim_imprimirTexto,
-  .AnSISOP_entradaSalida = prim_entradaSalida,
-  };
+  { .AnSISOP_definirVariable = prim_definirVariable,
+      .AnSISOP_obtenerPosicionVariable = prim_obtenerPosicionVariable,
+      .AnSISOP_dereferenciar = prim_dereferenciar,
+      .AnSISOP_asignar = prim_asignar,
+      .AnSISOP_obtenerValorCompartida = prim_obtenerValorCompartida,
+      .AnSISOP_asignarValorCompartida =
+          prim_asignarValorCompartida,
+      .AnSISOP_irAlLabel = prim_irAlLabel,
+      .AnSISOP_llamarSinRetorno = prim_llamarSinRetorno,
+      .AnSISOP_llamarConRetorno = prim_llamarConRetorno, .AnSISOP_finalizar =
+          prim_finalizar, .AnSISOP_retornar = prim_retornar, .AnSISOP_imprimir =
+          prim_imprimir, .AnSISOP_imprimirTexto = prim_imprimirTexto,
+      .AnSISOP_entradaSalida = prim_entradaSalida, };
 
 AnSISOP_kernel funciones_k =
-  {
-  .AnSISOP_signal = prim_signal,
-  .AnSISOP_wait = prim_wait,
-  };
-
+  { .AnSISOP_signal = prim_signal, .AnSISOP_wait = prim_wait, };
 
 void
 ConexionConSocket(int * Conec, int socketConec, struct sockaddr_in destino)
@@ -158,17 +150,35 @@ serializar_PCB(PCB prog)
   return cadena;
 }
 
+void deserializarDesplLong(char * msj,int despl, int longi)
+{
+
+  int tamanio1=0;
+  int tamanio2=0;
+
+  if (string_starts_with(msj,"1")) //si el mensaje es valido -> busca despl y longi
+      {
+      tamanio1= atoi(string_substring(msj,1,1));
+      despl=atoi(string_substring(msj,2, tamanio1));
+      tamanio2= atoi(string_substring(msj,tamanio1 + 2,1));
+      longi=atoi(string_substring(msj,tamanio1 + 3, tamanio2));
+      }
+}
+
 PCB
 desearilizar_PCB(char* estructura, int pos)
 {
+
+  char* sub;
+  sub = malloc(1 * sizeof(char));
 
   PCB est_prog;
   int aux = 0;
   int i, h = 0;
   int indice = 0;
-  char* sub = "";
   int inicio = 0;
 
+  sub = "";
   est_prog.id = 0;
   est_prog.segmentoCodigo = 0;
   est_prog.segmentoStack = 0;
@@ -211,19 +221,16 @@ desearilizar_PCB(char* estructura, int pos)
         est_prog.indiceCodigo = atoi(string_substring(estructura, indice, i));
         break;
       case 6:
-        est_prog.indiceEtiquetas = atoi(
-            string_substring(estructura, indice, i));
+        est_prog.indiceEtiquetas = atoi(string_substring(estructura, indice, i));
         break;
       case 7:
         est_prog.programCounter = atoi(string_substring(estructura, indice, i));
         break;
       case 8:
-        est_prog.sizeContextoActual = atoi(
-            string_substring(estructura, indice, i));
+        est_prog.sizeContextoActual = atoi(string_substring(estructura, indice, i));
         break;
       case 9:
-        est_prog.sizeIndiceEtiquetas = atoi(
-            string_substring(estructura, indice, i));
+        est_prog.sizeIndiceEtiquetas = atoi(string_substring(estructura, indice, i));
         break;
 
         }
@@ -245,7 +252,7 @@ RecibirProceso(PCB prog, int quantum, int sRemoto)
     {
       if (string_starts_with(estructura, "1")) // ponele que dice que me esta enviando datos..
         {
-          quantum = atoi(estructura);
+          quantum = atoi(string_substring(estructura,1,1));
           prog = desearilizar_PCB(estructura, 2);
         }
       else
@@ -257,39 +264,61 @@ RecibirProceso(PCB prog, int quantum, int sRemoto)
   return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
 }
 
-int
-PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia)
+char* PedirSentencia(int indiceCodigo, int segCodigo, int progCounter, int sRemoto)
 {
   //aca hare algo para enviarle el pedido a la umv y recibir lo solicitado
 
   char* pedido = "1"; //lo inicializo en 1=getbyte
-  char aux[20];
+  char* mensaje;
+  int despl=0;
+  int longi=0;
 
-  //esto hay que modificarlo cuando corrija el pcb
-  sprintf(aux, "%d", indiceCodigo);
+  char* instruccion;
+  instruccion = malloc(1 * sizeof(char));
+  mensaje = malloc(1 * sizeof(char));
 
-  /* sprintf(aux,"%d",indiceCodigo.desplInicio);
-   * serCadena(pedido,aux);
-   * aux="";
-   * sprintf(aux,"%d",indiceCodigo.desplfin);
-   * serCadena(pedido,aux);
-   *
-   */
-  string_append(&pedido, aux);
-  Enviar(sRemoto, pedido);
-  int r = (Recibir(sRemoto, sentencia) > 0);
-  return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
+  string_append(&instruccion, pedido);
+  serCadena(&instruccion,string_itoa(indiceCodigo)); //base
+  serCadena(&instruccion, string_itoa(progCounter*8)); //desplazamiento
+  serCadena(&instruccion, string_itoa(8)); //longitud
+
+  Enviar(sRemoto, instruccion); //envio el pedido a la umv
+  Recibir(sRemoto, mensaje);
+
+  deserializarDesplLong(mensaje,despl,longi); //tengo que saber que me mando
+
+  if ((despl !=0) && (longi !=0)) //si son igual 0->no recibi nada :S
+    {
+  instruccion="";
+  mensaje="";
+
+  string_append(&instruccion, pedido);
+  serCadena(&instruccion,string_itoa(segCodigo));
+  serCadena(&instruccion,string_itoa(despl));
+  serCadena(&instruccion,string_itoa(longi));
+
+
+  Enviar(sRemoto, instruccion); //envio el pedido a la umv
+  Recibir(sRemoto, mensaje);
+    } else {mensaje="0"; // si no recibi nada -> el mensaje no comienza con 1
+}
+
+
+  if (string_starts_with(mensaje,"1")) //si comienza con 1 -> recibi un mensj valido
+    {
+      return string_substring(mensaje,1,(strlen(mensaje)-1));
+    } else {
+      return "ERROR"; //sino, no sirve lo que recibi...tengo que ver lib errores!!!!
+    }
 
 }
 
 //serializar en cadena, a un mensaje le agrega algo mas y tamaño de algo mas
 void
-serCadena(char * msj, char* agr)
+serCadena(char ** msj, char* agr)
 {
-  char* taux = "";
-  taux = string_itoa(strlen(agr));
-  string_append(&msj, taux);
-  string_append(&msj, agr);
+  string_append(msj, string_itoa(strlen(agr)));
+  string_append(msj, agr);
 }
 
 //primitivas al kernel
@@ -322,7 +351,7 @@ procesoTerminoQuantum()
 void
 parsearYejecutar(char* instr)
 {
-  analizadorLinea(instr,&funciones_p,&funciones_k);
+  analizadorLinea(instr, &funciones_p, &funciones_k);
 
 }
 
@@ -438,10 +467,7 @@ main(void)
 
   printf("cadena %s", serializar_PCB(prueba));
 
-
-
-  analizadorLinea("a = b + 3",&funciones_p,&funciones_k);
-
+  analizadorLinea("a = b + 3", &funciones_p, &funciones_k);
 
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while ((CONECTADO_KERNEL == 1) && (CONECTADO_UMV == 1))
@@ -461,7 +487,9 @@ main(void)
       while (quantum > 0) //mientras tengo quantum
         {
           programa.programCounter++; //Incremento el PC
-          PedirSentencia(programa.indiceCodigo, socketUMV, sentencia); //le pido a la umv la sentencia a ejecutar
+          sentencia=PedirSentencia(programa.indiceCodigo,
+                                    programa.segmentoCodigo,
+                                    programa.programCounter,socketUMV); //le pido a la umv la sentencia a ejecutar
           parsearYejecutar(sentencia); //ejecuto sentencia
           quantum--; //decremento el quantum
         }
@@ -490,7 +518,6 @@ main(void)
   return EXIT_SUCCESS;
 
 }
-
 
 // Primitivas
 
@@ -568,14 +595,13 @@ void
 prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
   /*t_puntero_instruccion primer_instr;
-  char* ptr_etiquetas = "";
-  t_size tam_etiquetas = 0;
+   char* ptr_etiquetas = "";
+   t_size tam_etiquetas = 0;
 
-  primer_instr = metadata_buscar_etiqueta(etiqueta, ptr_etiquetas,
-      tam_etiquetas);*/
+   primer_instr = metadata_buscar_etiqueta(etiqueta, ptr_etiquetas,
+   tam_etiquetas);*/
 
   //busco la primer instruccion ejecutable
-
 }
 
 t_puntero
@@ -584,7 +610,6 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   t_puntero posicion;
   posicion = 1; //inicializo de prueba
   //busco la posicion de la variable
-
 
   printf("hola!!!!!");
   return posicion; //devuelvo la posicion
@@ -605,41 +630,41 @@ void
 prim_imprimirTexto(char* texto)
 {
   /*int cant_caracteres;
-  cant_caracteres = 1; //inicializo de prueba
+   cant_caracteres = 1; //inicializo de prueba
 
-  //acá me conecto con el kernel y le paso el mensaje
-*/
+   //acá me conecto con el kernel y le paso el mensaje
+   */
 }
 
 void
 prim_entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 {
- /* int tiempo2;
-  tiempo2 = 1; //inicializo de prueba
+  /* int tiempo2;
+   tiempo2 = 1; //inicializo de prueba
 
-  //acá pido por sys call a kernel
-  // entrada_salida(dispositivo,tiempo);
-*/
+   //acá pido por sys call a kernel
+   // entrada_salida(dispositivo,tiempo);
+   */
 }
 
 void
 prim_wait(t_nombre_semaforo identificador_semaforo)
 {
   /*int bloquea;
-  bloquea = 0;        //incializo de prueba
+   bloquea = 0;        //incializo de prueba
 
-  //sys call con kernel
-  // wait(identificador_semaforo);
-*/
+   //sys call con kernel
+   // wait(identificador_semaforo);
+   */
 }
 
 void
 prim_signal(t_nombre_semaforo identificador_semaforo)
 {
   /*int desbloquea;
-  desbloquea = 1; //inicializo de prueba
+   desbloquea = 1; //inicializo de prueba
 
-  //sys call con kernel
-  // signal(identificador_semaforo);
-*/
+   //sys call con kernel
+   // signal(identificador_semaforo);
+   */
 }

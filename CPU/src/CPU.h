@@ -30,11 +30,12 @@ typedef struct PCBs
 //deserializar
 
 PCB desearilizar_PCB (char* estructura, int pos);
-
+void deserializarDesplLong(char * msj,int despl, int longi);
 
 //serializar
 
 char* serializar_PCB (PCB prog);
+void serCadena(char ** msj, char* agr);
 
 //Obtener datos de conexión
 int ObtenerPuerto(char* que);
@@ -54,7 +55,7 @@ struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
 //Recibir-Enviar datos con el kernel
 int RecibirProceso(PCB prog,int quantum,int sRemoto); //para recibir el pcb y el q
-int PedirSentencia(int indiceCodigo, int sRemoto, char* sentencia); //para recibir la instruccion
+char* PedirSentencia(int indiceCodigo, int segCodigo, int progCounter, int sRemoto); //para recibir la instruccion
 
 
 //Ejecutar
