@@ -104,11 +104,18 @@ ObtenerIP(char* que)
 char*
 serializar_PCB(PCB prog)
 {
-  char* cadena = "";
 
+  char*  cadena;
+  cadena = malloc(1 * sizeof(char));
+
+  //aca tengo que mandar esto a una minifuncion y agregar el resto de los campos
+  //del pcb de mandera ordenada!!!
   string_append(&cadena, string_itoa(prog.id));
   string_append(&cadena, "-");
-
+  string_append(&cadena, string_itoa(prog.segmentoCodigo));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.programCounter));
+  string_append(&cadena, "-");
   return cadena;
 }
 
@@ -406,7 +413,9 @@ main(void)
   int tengoProg = 0;
   PCB programa;
   int quantum;
-  char* sentencia = "";
+  char* sentencia;
+  sentencia = malloc(1 * sizeof(char));
+
 
   PCB prueba;
   char* eje = "1143-242-33-44-55-6609-77-88-9900-";
@@ -422,6 +431,16 @@ main(void)
   printf("/n %d", prueba.programCounter);
   printf("/n %d", prueba.sizeContextoActual);
   printf("/n %d", prueba.sizeIndiceEtiquetas);
+
+
+
+  printf("cadena %s",serializar_PCB(prueba));
+
+  /*string_append(&sentencia, string_itoa(prueba.id));
+  string_append(&sentencia, ".");
+  printf("cadena %s",sentencia);*/
+
+
 
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while ((CONECTADO_KERNEL == 1) && (CONECTADO_UMV == 1))
