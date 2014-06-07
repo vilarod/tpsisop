@@ -29,13 +29,8 @@ typedef struct PCBs
 
 //deserializar
 
-
-
-
 PCB desearilizar_PCB (char* estructura, int pos);
 
-int posicionDeCadAInt(char* buffer, int posicion);
-int chartToInt(char x);
 
 //serializar
 
@@ -70,23 +65,28 @@ void RecuperarContextoActual(PCB prog);
 
 //Primitivas
 
-int a_wait(t_nombre_semaforo identificador_semaforo);
-int a_signal(t_nombre_semaforo identificador_semaforo);
-void asignar(t_puntero dir, t_valor_variable val);
-t_valor_variable obtenerValorCompartida(t_nombre_compartida var);  //listo
-t_valor_variable asignarValorCompartida(t_nombre_compartida var, t_valor_variable val);
-t_puntero_instruccion llamarSinRetorno(t_nombre_etiqueta etiq);
-t_puntero_instruccion llamarConRetorno(t_nombre_etiqueta etiq,
+void prim_wait(t_nombre_semaforo identificador_semaforo);
+void prim_signal(t_nombre_semaforo identificador_semaforo);
+void prim_asignar(t_puntero dir, t_valor_variable val);
+t_valor_variable prim_obtenerValorCompartida(t_nombre_compartida var);  //listo
+t_valor_variable prim_asignarValorCompartida(t_nombre_compartida var, t_valor_variable val);
+void prim_llamarSinRetorno(t_nombre_etiqueta etiq);
+void prim_llamarConRetorno(t_nombre_etiqueta etiq,
                                           t_puntero donde_ret);
-t_puntero_instruccion finalizar(void);
-t_puntero_instruccion retornar (t_valor_variable ret);
-int imprimir (t_valor_variable valor_mostrar);
-t_valor_variable dereferenciar(t_puntero dir_var);
-t_puntero_instruccion irAlLabel(t_nombre_etiqueta etiq);
-t_puntero obtenerPosicionVariable(t_nombre_variable id_var);
-t_puntero definirVariable(t_nombre_variable id_var);
-int imprimirTexto(char* texto);
-int entradaSalida(t_nombre_dispositivo disp, int tiempo);
+void prim_finalizar(void);
+void prim_retornar (t_valor_variable ret);
+void prim_imprimir (t_valor_variable valor_mostrar);
+t_valor_variable prim_dereferenciar(t_puntero dir_var);
+void prim_irAlLabel(t_nombre_etiqueta etiq);
+t_puntero prim_obtenerPosicionVariable(t_nombre_variable id_var);
+t_puntero prim_definirVariable(t_nombre_variable id_var);
+void prim_imprimirTexto(char* texto);
+void prim_entradaSalida(t_nombre_dispositivo disp, int tiempo);
+
+
+
+
+
 
 
 

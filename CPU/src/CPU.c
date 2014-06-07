@@ -34,6 +34,34 @@
 int socketUMV = 0;
 int socketKERNEL = 0;
 
+
+//Llamado a las funciones primitivas
+
+AnSISOP_funciones funciones_p =
+  {
+  .AnSISOP_definirVariable = prim_definirVariable,
+  .AnSISOP_obtenerPosicionVariable = prim_obtenerPosicionVariable,
+  .AnSISOP_dereferenciar = prim_dereferenciar,
+  .AnSISOP_asignar = prim_asignar,
+  .AnSISOP_obtenerValorCompartida = prim_obtenerValorCompartida,
+  .AnSISOP_asignarValorCompartida = prim_asignarValorCompartida,
+  .AnSISOP_irAlLabel = prim_irAlLabel,
+  .AnSISOP_llamarSinRetorno = prim_llamarSinRetorno,
+  .AnSISOP_llamarConRetorno = prim_llamarConRetorno,
+  .AnSISOP_finalizar = prim_finalizar,
+  .AnSISOP_retornar = prim_retornar,
+  .AnSISOP_imprimir = prim_imprimir,
+  .AnSISOP_imprimirTexto = prim_imprimirTexto,
+  .AnSISOP_entradaSalida = prim_entradaSalida,
+  };
+
+AnSISOP_kernel funciones_k =
+  {
+  .AnSISOP_signal = prim_signal,
+  .AnSISOP_wait = prim_wait,
+  };
+
+
 void
 ConexionConSocket(int * Conec, int socketConec, struct sockaddr_in destino)
 {
@@ -101,12 +129,11 @@ ObtenerIP(char* que)
 
 //serializar pcb
 
-
-
-char* serializar_PCB(PCB prog)
+char*
+serializar_PCB(PCB prog)
 {
 
-  char*  cadena;
+  char* cadena;
   cadena = malloc(1 * sizeof(char));
 
   string_append(&cadena, string_itoa(prog.id));
@@ -129,30 +156,6 @@ char* serializar_PCB(PCB prog)
   string_append(&cadena, "-");
 
   return cadena;
-}
-
-int
-posicionDeCadAInt(char* buffer, int posicion)
-{
-  int logitudBuffer = 0;
-  logitudBuffer = strlen(buffer);
-
-  if (logitudBuffer <= posicion)
-    return 0;
-  else
-    return chartToInt(buffer[posicion]);
-}
-
-int
-chartToInt(char x)
-{
-  int numero = 0;
-  char* aux = malloc(1 * sizeof(char));
-  sprintf(aux, "%c", x);
-  numero = strtol(aux, (char **) NULL, 10);
-
-  free(aux);
-  return numero;
 }
 
 PCB
@@ -319,17 +322,7 @@ procesoTerminoQuantum()
 void
 parsearYejecutar(char* instr)
 {
-
-  AnSISOP_funciones * funciones = 0; //primitivas...pero, que onda??
-  //por lo que vi, tendria que empaquetar todas las primitivas en un tipo
-  //ya que el parser hace  funciones.AnSISOP_lafuncionquesea
-
-  AnSISOP_kernel * f_kernel = 0; //esto es wait y signal
-
-  //aca hay que invocar al parser y ejecutar las primitivas que
-  //estan mas abajito
-
-  analizadorLinea(instr, funciones, f_kernel);
+  analizadorLinea(instr,&funciones_p,&funciones_k);
 
 }
 
@@ -428,7 +421,6 @@ main(void)
   char* sentencia;
   sentencia = malloc(1 * sizeof(char));
 
-
   PCB prueba;
   char* eje = "1143-242-33-44-55-6609-77-88-9900-";
 
@@ -444,14 +436,11 @@ main(void)
   printf("/n %d", prueba.sizeContextoActual);
   printf("/n %d", prueba.sizeIndiceEtiquetas);
 
+  printf("cadena %s", serializar_PCB(prueba));
 
 
-  printf("cadena %s",serializar_PCB(prueba));
 
-  /*string_append(&sentencia, string_itoa(prueba.id));
-  string_append(&sentencia, ".");
-  printf("cadena %s",sentencia);*/
-
+  analizadorLinea("a = b + 3",&funciones_p,&funciones_k);
 
 
   //voy a trabajar mientras este conectado tanto con kernel como umv
@@ -502,23 +491,24 @@ main(void)
 
 }
 
+
 // Primitivas
-//esto es solamente un bosquejo para ir armandolas
 
 void
-asignar(t_puntero direccion_variable, t_valor_variable valor)
+prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
   //direccion_variable=valor;
 }
 
 t_valor_variable
-obtenerValorCompartida(t_nombre_compartida variable)
+prim_obtenerValorCompartida(t_nombre_compartida variable)
 {
   return obtener_valor(variable); //devuelve el valor de la variable
 }
 
 t_valor_variable
-asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
+prim_asignarValorCompartida(t_nombre_compartida variable,
+    t_valor_variable valor)
 {
 
   //como hago para identificar variable - valor? tengo que crear una estructura
@@ -526,61 +516,45 @@ asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor)
   return grabar_valor(variable); //devuelve el valor asignado
 }
 
-t_puntero_instruccion
-llamarSinRetorno(t_nombre_etiqueta etiqueta)
+void
+prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 {
-  t_puntero_instruccion instr;
-  instr = 1; //inicializo de prueba
 
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
 
-  return instr;
 }
 
-t_puntero_instruccion
-llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
+void
+prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 {
-  t_puntero_instruccion instr;
-  instr = 1; //inicializo de prueba
 
   //preservar el contexto actual para retornar al mismo
 
-  return instr;
 }
 
-t_puntero_instruccion
-finalizar(void)
+void
+prim_finalizar(void)
 {
-  t_puntero_instruccion instr;
-  instr = 1; //inicializo de prueba
   //recuperar pc y contexto apilados en stack.Si finalizo, devolver -1
 
-  return instr;
 }
 
-t_puntero_instruccion
-retornar(t_valor_variable retorno)
-{
-  t_puntero_instruccion instr;
-  instr = 1; //inicializo de prueba
-  //acá tengo que volver a retorno
+void
+prim_retornar(t_valor_variable retorno)
+{  //acá tengo que volver a retorno
 
-  return instr;
 }
 
-int
-imprimir(t_valor_variable valor_mostrar)
+void
+prim_imprimir(t_valor_variable valor_mostrar)
 {
-  int cant_caracteres;
-  cant_caracteres = 1; //inicializo de prueba
 
   //acá me conecto con el kernel y le paso el mensaje
 
-  return cant_caracteres;
 }
 
 t_valor_variable
-dereferenciar(t_puntero direccion_variable)
+prim_dereferenciar(t_puntero direccion_variable)
 {
   t_valor_variable valor;
   valor = 1; //inicializo de prueba
@@ -590,33 +564,34 @@ dereferenciar(t_puntero direccion_variable)
   return valor; //devuelve el valor encontrado
 }
 
-t_puntero_instruccion
-irAlLabel(t_nombre_etiqueta etiqueta)
+void
+prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
-  t_puntero_instruccion primer_instr;
+  /*t_puntero_instruccion primer_instr;
   char* ptr_etiquetas = "";
   t_size tam_etiquetas = 0;
 
   primer_instr = metadata_buscar_etiqueta(etiqueta, ptr_etiquetas,
-      tam_etiquetas);
+      tam_etiquetas);*/
 
   //busco la primer instruccion ejecutable
 
-  return primer_instr; //devuelve la instruccion encontrada
 }
 
 t_puntero
-obtenerPosicionVariable(t_nombre_variable identificador_variable)
+prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
 {
   t_puntero posicion;
   posicion = 1; //inicializo de prueba
   //busco la posicion de la variable
 
+
+  printf("hola!!!!!");
   return posicion; //devuelvo la posicion
 }
 
 t_puntero
-definirVariable(t_nombre_variable identificador_variable)
+prim_definirVariable(t_nombre_variable identificador_variable)
 {
   t_puntero pos_var_stack;
   pos_var_stack = 1; //inicializo de prueba
@@ -626,49 +601,45 @@ definirVariable(t_nombre_variable identificador_variable)
   return pos_var_stack; //devuelvo la pos en el stack
 }
 
-int
-imprimirTexto(char* texto)
+void
+prim_imprimirTexto(char* texto)
 {
-  int cant_caracteres;
+  /*int cant_caracteres;
   cant_caracteres = 1; //inicializo de prueba
 
   //acá me conecto con el kernel y le paso el mensaje
-
-  return cant_caracteres;
+*/
 }
 
-int
-entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
+void
+prim_entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 {
-  int tiempo2;
+ /* int tiempo2;
   tiempo2 = 1; //inicializo de prueba
 
   //acá pido por sys call a kernel
   // entrada_salida(dispositivo,tiempo);
-
-  return tiempo2;
+*/
 }
 
-int
-a_wait(t_nombre_semaforo identificador_semaforo)
+void
+prim_wait(t_nombre_semaforo identificador_semaforo)
 {
-  int bloquea;
+  /*int bloquea;
   bloquea = 0;        //incializo de prueba
 
   //sys call con kernel
   // wait(identificador_semaforo);
-
-  return bloquea;
+*/
 }
 
-int
-a_signal(t_nombre_semaforo identificador_semaforo)
+void
+prim_signal(t_nombre_semaforo identificador_semaforo)
 {
-  int desbloquea;
+  /*int desbloquea;
   desbloquea = 1; //inicializo de prueba
 
   //sys call con kernel
   // signal(identificador_semaforo);
-
-  return desbloquea;
+*/
 }
