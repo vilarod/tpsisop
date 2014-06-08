@@ -21,8 +21,8 @@ int EnviarDatos(int socket, void *buffer);
 int RecibirDatos(int socket, char *buffer);
 int ConexionConSocket(int puerto, char* IP);
 int analizarRespuestaKERNEL(char *mensaje);
-int hacerhandshakeKERNEL(int sockfd);
-void conectarAKERNEL();
+int hacerhandshakeKERNEL(int sockfd, char *prueba);//agrego como parametro prueba que el programa
+void conectarAKERNEL(char *programa);//agrego como parametro prueba que es el programa
 int soquete;
 
 

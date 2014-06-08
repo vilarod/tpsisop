@@ -31,8 +31,8 @@
 //#define  TIPO_KERNEL       1
 
 //Mensajes aceptados
-#define HANDSHAKE '31'
-#define ENVIARPROGRAMA '11'
+#define HANDSHAKE "31"//'31'
+#define ENVIARPROGRAMA "11"//'11'
 //Tamaño buffer
 #define BUFFERSIZE 1024
 
@@ -42,10 +42,8 @@
 
 #define MAXLONG 1024
 
-
-
 int main(int argc, char* argv[]) {
-/*
+
 	int index;    //para parametros
 
 	for (index = 0; index < argc; index++)    //parametros
@@ -58,7 +56,7 @@ int main(int argc, char* argv[]) {
 	//se uso sudo para poder ejecutar comandos que requieren permisos de administrador
 	//El symbolic link se hizo por consola:
 	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
-/*
+
 	FILE* f;
 	char* contents;
 	size_t len;
@@ -82,35 +80,37 @@ int main(int argc, char* argv[]) {
 
 	bytesRead = fread(contents, sizeof(char), len, f);
 
-	txt_close_file(f); //cierra el archivo
+	//txt_close_file(f); //cierra el archivo
 
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
 	printf("Contents:%s", contents);
 
 	char **linea;
 	char *separator;
-	char* nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa como lo recibe el kernel
+	char *nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa como lo recibe el kernel
 	strcpy(nuevo, "");
 	separator = "\n";
 	linea = string_split(contents, separator); //separa el programa ansisop en lineas
 	int i;
 
-	for (i = 1; linea[i] != NULL ; i++) //elimino la primer linea del shebang
+	for (i = 1; linea[i] != NULL ; i++) //elimino la primer linea del hashbang
 			{
 		//printf("%s",linea[i]);
 
 		string_append(&nuevo, linea[i]); //concatena todas las lineas del programa
 
 	}
+
 	printf("\n");
 	printf("%s", nuevo); //verifico que tengo el programa sin la primer linea
 	printf("\n");
 
+    char *programa = (char*)malloc(len*sizeof(char));
+    programa = strdup(nuevo);
+    conectarAKERNEL(programa);//agrego como parametro programa
+	//txt_close_file(f);
 	free(contents);
-	free(nuevo);*/
-
-	conectarAKERNEL();
-
+	free(nuevo);
 	return 0;
 }
 
@@ -128,20 +128,23 @@ char* ObtenerIpKERNEL() {
 
 }
 
-void conectarAKERNEL() {
-	Traza("Intentando conectar a umv.");
-	soquete = ConexionConSocket(5000,"127.0.0.1" ); //el puerto 5000 y el ip 127.0.01 son para probar
-	if (hacerhandshakeKERNEL(soquete) == 0) {//donde esta el puerto y la ip va: ObtenerPuertoKERNEL()y ObtenerIpKERNEL()
+void conectarAKERNEL(char *archivo) { //tengo que agregar programa para poder enviarlo
+	Traza("Intentando conectar a kernel");
+	int soquete = ConexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para probar
+	if (hacerhandshakeKERNEL(soquete, archivo) == 0) { //donde esta el puerto y la ip va: ObtenerPuertoKERNEL()y ObtenerIpKERNEL()
 		ErrorFatal("No se pudo conectar al kernel");
 	}
 }
-int hacerhandshakeKERNEL(int sockfd) {
+int hacerhandshakeKERNEL(int sockfd, char *prueba) {
 	char respuestahandshake[BUFFERSIZE];
-	char *mensaje = "31";
-    char *programa = "texto de prueba \n";//en el texto de prueba tiene que ir el programa
-	EnviarDatos(sockfd, mensaje);
+	//char *mensaje = "31";
+	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a mensaje
 	RecibirDatos(sockfd, respuestahandshake);
-	EnviarDatos(sockfd, programa);
+
+	EnviarDatos(sockfd, ENVIARPROGRAMA);
+	RecibirDatos(sockfd, respuestahandshake); //linea agregada para ver si el kernel acepta el programa
+	//char *programa = "texto de prueba \n"; //en el texto de prueba tiene que ir el programa
+	EnviarDatos(sockfd, prueba); //envio el texto de prueba
 	return analizarRespuestaKERNEL(respuestahandshake);
 
 }
@@ -153,7 +156,7 @@ int analizarRespuestaKERNEL(char *mensaje) {
 	} else
 		return 1;
 }
-int ConexionConSocket(int puerto, char* IP) {//crea el socket y me retorna el int
+int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el int
 	int sockfd;
 	//Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
 	struct hostent *he, *gethostbyname();
@@ -263,9 +266,3 @@ void Traza(const char* mensaje, ...) {
 
 	}
 }
-
-void txt_close_file(FILE* file) {
-
-	fclose(file);
-}
-
