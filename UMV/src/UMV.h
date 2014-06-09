@@ -18,6 +18,7 @@ void ConsolaComandoDumpEstructuras();
 void ConsolaComandoDumpMemoriaPrincipal();
 void ConsolaComandoDumpContenidoMemoriaPrincipal();
 void ConsolaComandoGrabaSiempreArchivo();
+void ConsolaComandoActivarTraza();
 
 // METODOS QUE IMPRIMEN //
 void ImprimirResuladoDeLeerMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo);
@@ -31,6 +32,9 @@ void ImprimirResuladoDeDestruirSegmento(int idPrograma, int ok, int imprimirArch
 void ImprimirResuladoDeEscribirMemoria(int ok, int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer, int imprimirArchivo);
 void ImprimirListadoSegmentos(int imprimirArchivo);
 void Imprimir(int ImprimirArchivo, const char* mensaje, ...);
+void ImprimirMemoriaSegmentosDePrograma(int imprimirArchivo, int idPrograma);
+void ImprimirMemoriaSegmentosDeProgramaTSeg(int imprimirArchivo, t_segmento *seg);
+void ImprimirMemoriaSegmentos(int imprimirArchivo);
 
 // METODOS MANEJO DE ERRORES //
 void Error(const char* mensaje, ...);
