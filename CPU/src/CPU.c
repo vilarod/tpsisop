@@ -36,6 +36,10 @@ int socketUMV = 0;
 int socketKERNEL = 0;
 
 
+t_dictionary dicVariables;
+t_dictionary dicEtiquetas;
+
+
 
 //Llamado a las funciones primitivas
 
@@ -529,8 +533,6 @@ main(void)
   char* sentencia;
   sentencia = malloc(1 * sizeof(char));
 
-  t_dictionary dicVariables;
-  t_dictionary dicEtiquetas;
 
 
   //solo pruebas
@@ -699,11 +701,13 @@ prim_irAlLabel(t_nombre_etiqueta etiqueta)
 t_puntero
 prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
 {
-  t_puntero posicion;
-  posicion = 1; //inicializo de prueba
+  t_puntero posicion=0;
   //busco la posicion de la variable
+  //las variables y las posiciones respecto al stack estan en el dicVariables
 
-  printf("hola!!!!!");
+  /*posicion=dictionary_get(&dicVariables,&identificador_variable);
+  if (posicion==0) { posicion=-1;}*/
+
   return posicion; //devuelvo la posicion
 }
 
