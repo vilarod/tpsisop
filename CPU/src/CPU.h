@@ -63,6 +63,10 @@ void parsearYejecutar (char* instr);
 void salvarContextoProg();
 void limpiarEstructuras();
 void RecuperarContextoActual(PCB prog, t_dictionary dicc);
+void RecuperarDicEtiquetas(int indice, int tamanio, t_dictionary dicc);
+
+
+void grabar_valor(t_nombre_compartida variable,t_valor_variable valor);
 
 //Primitivas
 

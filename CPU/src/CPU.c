@@ -35,6 +35,8 @@
 int socketUMV = 0;
 int socketKERNEL = 0;
 
+
+
 //Llamado a las funciones primitivas
 
 AnSISOP_funciones funciones_p =
@@ -335,8 +337,10 @@ obtener_valor(t_nombre_compartida variable)
   pedido = malloc(1 * sizeof(char));
   recibo = malloc(1 * sizeof(char));
 
+  //el mensaje que le mando es PedidoVariable
   string_append(&pedido, variable);
   Enviar(socketKERNEL, pedido);
+  //recibo EstadoValor
   Recibir(socketKERNEL, recibo);
 
   if (string_starts_with(recibo,"1")) //si comienza con 1 -> recibi un mensj valido
@@ -350,10 +354,17 @@ obtener_valor(t_nombre_compartida variable)
 }
 
 
-t_valor_variable
-grabar_valor(t_nombre_compartida variable)
+void
+grabar_valor(t_nombre_compartida variable,t_valor_variable valor)
 {
-  return 1;
+  char* pedido = "1";
+  pedido = malloc(1 * sizeof(char));
+
+  //el mensaje que le mando es  PedidoVariableValor
+  string_append(&pedido, variable);
+  string_append(&pedido, string_itoa(valor));
+  Enviar(socketKERNEL, pedido);
+
 }
 
 void
@@ -439,6 +450,22 @@ prepararDestino(struct sockaddr_in destino, int puerto, char* ip)
   return destino;
 }
 
+
+void
+RecuperarDicEtiquetas(int indice, int tamanio, t_dictionary dicc)
+{
+
+ /* int i;
+  int inicio;
+  char* funcion;
+
+  for (i=1; i< (tamanio + 1);i ++)
+    {
+      //aca tengo que ver como obtener la funcion y el inicio
+      //dictionary_put(dicc,funcion,inicio);
+    }*/
+
+}
 void
 RecuperarContextoActual(PCB prog, t_dictionary dicc)
 {
@@ -453,10 +480,12 @@ void* dato;
 
   if (prog.sizeContextoActual > 0) //tengo variables a recuperar
     {
+      //voy de 0 a cantidad de variables en contexto actual
       for (i=0; i < prog.sizeContextoActual; i ++)
         {
          variable="";
          dato=0;
+         //aca tengo que ver como obtener la variable y el dato
          dictionary_put(&dicc,variable,dato);
 
         }
@@ -484,6 +513,7 @@ main(void)
 
   socketUMV = crearSocket(socketUMV);
   socketKERNEL = crearSocket(socketKERNEL);
+
   struct sockaddr_in dest_UMV = prepararDestino(dest_UMV, UMV_PUERTO, UMV_IP);
   struct sockaddr_in dest_KERNEL = prepararDestino(dest_KERNEL, KERNEL_PUERTO,
       KERNEL_IP);
@@ -499,7 +529,9 @@ main(void)
   char* sentencia;
   sentencia = malloc(1 * sizeof(char));
 
-  t_dictionary dicc; //= dictionary_create();
+  t_dictionary dicVariables;
+  t_dictionary dicEtiquetas;
+
 
   //solo pruebas
   /*
@@ -536,11 +568,15 @@ main(void)
       //Si salio del ciclo anterior es que ya tengo un programa
 
 
+      RecuperarDicEtiquetas(programa.indiceEtiquetas,
+                            programa.sizeIndiceEtiquetas, dicEtiquetas);
+      RecuperarContextoActual(programa,dicVariables);
+
       while (quantum > 0) //mientras tengo quantum
         {
 
           //tengo que recuperar el contexto actual del programa que recibi
-          RecuperarContextoActual(programa,dicc);
+
 
           programa.programCounter++; //Incremento el PC
           sentencia=PedirSentencia(programa.indiceCodigo,
@@ -582,7 +618,7 @@ main(void)
 void
 prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
-  //direccion_variable=valor;
+
 }
 
 t_valor_variable
@@ -595,10 +631,8 @@ t_valor_variable
 prim_asignarValorCompartida(t_nombre_compartida variable,
     t_valor_variable valor)
 {
-
-  //como hago para identificar variable - valor? tengo que crear una estructura
-
-  return grabar_valor(variable); //devuelve el valor asignado
+  grabar_valor(variable,valor);
+  return valor; //devuelve el valor asignado
 }
 
 void
@@ -676,10 +710,15 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
 t_puntero
 prim_definirVariable(t_nombre_variable identificador_variable)
 {
-  t_puntero pos_var_stack;
-  pos_var_stack = 1; //inicializo de prueba
+  t_puntero pos_var_stack=0;
   // reserva espacio para la variable,
-  //la registra en el stack y en el diccionario de variables
+  //la registra en el stack
+
+  //la registro en el dicc de variables
+
+  //dictionary_put(dicVariables,identificador_variable,pos_var_stack);
+  //aumentarContextoAct();  acá de algún modo tengo que modificar el tmñ del contexto actual de ejecucion
+
 
   return pos_var_stack; //devuelvo la pos en el stack
 }
@@ -708,21 +747,39 @@ prim_entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 void
 prim_wait(t_nombre_semaforo identificador_semaforo)
 {
-  /*int bloquea;
-   bloquea = 0;        //incializo de prueba
+  //sys call con kernel
+  // wait(identificador_semaforo);
+  int senial=0;
+  char* msj="";
+  char* pedido = "5"; //lo que identifique como wait
+  pedido = malloc(1 * sizeof(char));
 
-   //sys call con kernel
-   // wait(identificador_semaforo);
-   */
+    //el mensaje que le mando es  PedidoSemaforo
+    string_append(&pedido, identificador_semaforo);
+    Enviar(socketKERNEL,pedido);
+
+    //aca algo tengo que hacer si lo toma o no...
+    //pienso quizas..que el kernel me responda y salir del ciclo
+    //sólo si consegui el semaforo
+
+    while (senial==0) //solo va a salir del ciclo cuando senial=1 ->me dio el semaforo
+      {
+        Recibir(socketKERNEL,msj);
+        senial=atoi(string_substring(msj,1,1)); //donde este la señal
+      }
 }
 
 void
 prim_signal(t_nombre_semaforo identificador_semaforo)
 {
-  /*int desbloquea;
-   desbloquea = 1; //inicializo de prueba
-
    //sys call con kernel
    // signal(identificador_semaforo);
-   */
+
+  char* pedido = "6"; //lo que identifique como wait
+  pedido = malloc(1 * sizeof(char));
+
+    //el mensaje que le mando es  PedidoSemaforo
+    string_append(&pedido, identificador_semaforo);
+    Enviar(socketKERNEL,pedido);
+    //aca no me importa que haga el kernel, el se va a fijar si desbloquea a alguien
 }
