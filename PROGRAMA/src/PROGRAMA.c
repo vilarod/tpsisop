@@ -80,8 +80,6 @@ int main(int argc, char* argv[]) {
 
 	bytesRead = fread(contents, sizeof(char), len, f);
 
-	//txt_close_file(f); //cierra el archivo
-
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
 	printf("Contents:%s", contents);
 
@@ -108,7 +106,7 @@ int main(int argc, char* argv[]) {
     char *programa = (char*)malloc(len*sizeof(char));
     programa = strdup(nuevo);
     conectarAKERNEL(programa);//agrego como parametro programa
-	//txt_close_file(f);
+	txt_close_file(f);
 	free(contents);
 	free(nuevo);
 	return 0;
@@ -138,13 +136,13 @@ void conectarAKERNEL(char *archivo) { //tengo que agregar programa para poder en
 int hacerhandshakeKERNEL(int sockfd, char *prueba) {
 	char respuestahandshake[BUFFERSIZE];
 	//char *mensaje = "31";
-	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a mensaje
+	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a mensaje "31"
 	RecibirDatos(sockfd, respuestahandshake);
 
-	EnviarDatos(sockfd, ENVIARPROGRAMA);
+	EnviarDatos(sockfd, ENVIARPROGRAMA);//ENVIARPROGRAMA reemplaza a "11"
 	RecibirDatos(sockfd, respuestahandshake); //linea agregada para ver si el kernel acepta el programa
 	//char *programa = "texto de prueba \n"; //en el texto de prueba tiene que ir el programa
-	EnviarDatos(sockfd, prueba); //envio el texto de prueba
+	EnviarDatos(sockfd, prueba); //envio el programa
 	return analizarRespuestaKERNEL(respuestahandshake);
 
 }
@@ -169,8 +167,8 @@ int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el i
 		exit(1);
 	}
 
-	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
-	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red
+	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina //tipo de conexion
+	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red//tipo de servicio puerto
 	bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
 	memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
 
@@ -220,10 +218,11 @@ void Cerrar(int sRemoto) {
 
 	close(sRemoto);
 }
+/*
 void CerrarSocket(int socket) {
 	close(socket);
 	Traza("Se cerró el socket (%d).", socket);
-}
+}*/
 void ErrorFatal(char mensaje[], ...) {
 	char* nuevo;
 	va_list arguments;
