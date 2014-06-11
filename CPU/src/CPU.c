@@ -39,6 +39,8 @@ int socketKERNEL = 0;
 t_dictionary dicVariables;
 t_dictionary dicEtiquetas;
 
+PCB programa;
+
 
 
 //Llamado a las funciones primitivas
@@ -335,7 +337,7 @@ t_valor_variable
 obtener_valor(t_nombre_compartida variable)
 {
   t_valor_variable valor;
-  char* pedido = "1"; //o el numero que sea que interprete el kernel
+  char* pedido = "5"; //kernel sabe que 5 es obtener valor compartida
   char* recibo;
 
   pedido = malloc(1 * sizeof(char));
@@ -361,7 +363,7 @@ obtener_valor(t_nombre_compartida variable)
 void
 grabar_valor(t_nombre_compartida variable,t_valor_variable valor)
 {
-  char* pedido = "1";
+  char* pedido = "6"; // kernel sabe que 6 es grabar valor compartida
   pedido = malloc(1 * sizeof(char));
 
   //el mensaje que le mando es  PedidoVariableValor
@@ -378,8 +380,7 @@ procesoTerminoQuantum(PCB prog)
   char* aviso;
   aviso = malloc(1 * sizeof(char));
 
-  aviso="2"; // el numero que el kernel interprete como fin programa
-
+  aviso="4"; //  kernel sabe que 4 es fin de quantum
   string_append(&aviso, serializar_PCB(prog));
   Enviar(socketKERNEL,aviso);
 
@@ -528,7 +529,6 @@ main(void)
 
   //Control programa
   int tengoProg = 0;
-  PCB programa;
   int quantum;
   char* sentencia;
   sentencia = malloc(1 * sizeof(char));
@@ -643,6 +643,31 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
 
+ t_puntero aux;
+ char* mensaje=2;
+ mensaje= malloc(1 * sizeof(char));
+ //a aux le asigno la direccion base del contexto actual +
+ //(1 byte id_varible + 4bytes valor)*tamaño contexto
+ aux=programa.cursorStack + 5*(programa.sizeContextoActual);
+ getUMV(&mensaje, &aux,0,5,string_itoa(programa.cursorStack));
+ Enviar(socketUMV,mensaje);
+ mensaje="2";
+ getUMV(&mensaje,(&aux + 5),0,5,string_itoa(programa.programCounter));
+ Enviar(socketUMV,mensaje);
+ programa.cursorStack= aux + 10; //mi contexto va a comenzar donde finalizó el otro
+ programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
+ dictionary_clean_and_destroy_elements(dicVariables);//limpio el dic de variables
+
+}
+
+void getUMV(char** mensaje,int ptro, int dsp, int tam, char* valor)
+{
+
+   serCadena(mensaje,string_itoa(ptro)); //concateno con la direccion a donde apunta aux
+   serCadena(mensaje,string_itoa(dsp));//no tengo desplazamiento
+   serCadena(mensaje,string_itoa(tam));//uso un tamaño de 5 bytes
+   serCadena(mensaje,valor); //que guarde la direccion del cursor de stack actual
+
 }
 
 void
@@ -651,12 +676,35 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 
   //preservar el contexto actual para retornar al mismo
 
+
+  t_puntero aux;
+  char* mensaje="2";
+  mensaje= malloc(1 * sizeof(char));
+  //a aux le asigno la direccion base del contexto actual +
+  //(1 byte id_varible + 4bytes valor)*tamaño contexto
+  aux=programa.cursorStack + 5*(programa.sizeContextoActual);
+  getUMV(&mensaje, &aux,0,5,string_itoa(programa.cursorStack));
+  Enviar(socketUMV,mensaje);
+  mensaje="2";
+  getUMV(&mensaje,(&aux + 5),0,5,string_itoa(programa.programCounter));
+  Enviar(socketUMV,mensaje);
+  mensaje="2";
+  getUMV(&mensaje,(&aux + 10),0,5,string_itoa(donde_retornar));
+  Enviar(socketUMV,mensaje);
+  programa.cursorStack= aux + 15; //mi contexto va a comenzar donde finalizó el otro
+  programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
+  dictionary_clean_and_destroy_elements(dicVariables);//limpio el dic de variables
+
 }
 
 void
 prim_finalizar(void)
 {
-  //recuperar pc y contexto apilados en stack.Si finalizo, devolver -1
+  //recuperar pc y contexto apilados en stack
+
+  t_puntero aux;
+  aux=prog.cursorStack;
+
 
 }
 

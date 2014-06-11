@@ -36,6 +36,7 @@ void deserializarDesplLong(char * msj,int despl, int longi);
 
 char* serializar_PCB (PCB prog);
 void serCadena(char ** msj, char* agr);
+void getUMV(char** mensaje,int ptro, int dsp, int tam, char* valor);
 
 //Obtener datos de conexión
 int ObtenerPuerto(char* que);
