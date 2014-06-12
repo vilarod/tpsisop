@@ -615,11 +615,42 @@ main(void)
 
 }
 
+
+
+char* getUMV(int base, int dsp, int tam)
+{
+
+char* instruccion;
+instruccion = malloc(1 * sizeof(char));
+serCadena(&instruccion,string_itoa(base)); //base
+serCadena(&instruccion, string_itoa(dsp)); //desplazamiento
+serCadena(&instruccion, string_itoa(tam)); //longitud
+
+}
+
+
+void setUMV(char** mensaje,int ptro, int dsp, int tam, char* valor)
+{
+
+   serCadena(mensaje,string_itoa(ptro)); //concateno con la direccion a donde apunta aux
+   serCadena(mensaje,string_itoa(dsp));//no tengo desplazamiento
+   serCadena(mensaje,string_itoa(tam));//uso un tamaño de 5 bytes
+   serCadena(mensaje,valor); //que guarde la direccion del cursor de stack actual
+
+}
+
 // Primitivas
 
 void
 prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
+
+int aux;
+char* pedido="2";
+pedido= malloc(1 * sizeof(char));
+setUMV(&pedido, direccion_varible + 1,0,4,string_itoa(valor));
+Enviar(socketUMV, pedido);
+//aca tengo que leer algo de la umv...eso lo veo despues
 
 }
 
@@ -643,30 +674,20 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
 
- t_puntero aux;
- char* mensaje=2;
+ int aux;
+ char* mensaje="2";
  mensaje= malloc(1 * sizeof(char));
  //a aux le asigno la direccion base del contexto actual +
  //(1 byte id_varible + 4bytes valor)*tamaño contexto
  aux=programa.cursorStack + 5*(programa.sizeContextoActual);
- getUMV(&mensaje, &aux,0,5,string_itoa(programa.cursorStack));
+ setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
  Enviar(socketUMV,mensaje);
  mensaje="2";
- getUMV(&mensaje,(&aux + 5),0,5,string_itoa(programa.programCounter));
+ setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
  Enviar(socketUMV,mensaje);
  programa.cursorStack= aux + 10; //mi contexto va a comenzar donde finalizó el otro
  programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
  dictionary_clean_and_destroy_elements(dicVariables);//limpio el dic de variables
-
-}
-
-void getUMV(char** mensaje,int ptro, int dsp, int tam, char* valor)
-{
-
-   serCadena(mensaje,string_itoa(ptro)); //concateno con la direccion a donde apunta aux
-   serCadena(mensaje,string_itoa(dsp));//no tengo desplazamiento
-   serCadena(mensaje,string_itoa(tam));//uso un tamaño de 5 bytes
-   serCadena(mensaje,valor); //que guarde la direccion del cursor de stack actual
 
 }
 
@@ -677,19 +698,19 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   //preservar el contexto actual para retornar al mismo
 
 
-  t_puntero aux;
+  int aux;
   char* mensaje="2";
   mensaje= malloc(1 * sizeof(char));
   //a aux le asigno la direccion base del contexto actual +
   //(1 byte id_varible + 4bytes valor)*tamaño contexto
   aux=programa.cursorStack + 5*(programa.sizeContextoActual);
-  getUMV(&mensaje, &aux,0,5,string_itoa(programa.cursorStack));
+  setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
   Enviar(socketUMV,mensaje);
   mensaje="2";
-  getUMV(&mensaje,(&aux + 5),0,5,string_itoa(programa.programCounter));
+  setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
   Enviar(socketUMV,mensaje);
   mensaje="2";
-  getUMV(&mensaje,(&aux + 10),0,5,string_itoa(donde_retornar));
+  setUMV(&mensaje,(aux + 10),0,5,string_itoa(donde_retornar));
   Enviar(socketUMV,mensaje);
   programa.cursorStack= aux + 15; //mi contexto va a comenzar donde finalizó el otro
   programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
@@ -702,8 +723,15 @@ prim_finalizar(void)
 {
   //recuperar pc y contexto apilados en stack
 
-  t_puntero aux;
-  aux=prog.cursorStack;
+ aux=prog.cursorStack;
+limpiarEstructuras();
+prog.programCounter=atoi(getUMV(aux-5, 0,5));
+prog.cursorStack=atoi(getUMV(aux-10, 0,5));
+prog.sizeContextoActual=(aux-prog.cursorStack)/5;
+if (prog.sizeContextoActual > 0)
+{ armarDicVariables(prog.cursorStack,prog.sizeContextoActual);
+} else { printf("se termino!!!"); }
+
 
 
 }
@@ -726,9 +754,19 @@ t_valor_variable
 prim_dereferenciar(t_puntero direccion_variable)
 {
   t_valor_variable valor;
-  valor = 1; //inicializo de prueba
-
-  //tiene que leer el valor que se guarda en esa posición
+ char* mensaje= malloc(1 * sizeof(char));
+ char* respuesta= malloc(1 * sizeof(char));
+ 
+  mensaje=getUMV(direccion_varible + 1, 0 , 4);
+  Enviar(socketUMV, mensaje);
+  Recibir(socketUMV,respuesta);
+  
+ if (string_starts_with(respuesta,"1")) //si comienza con 1 -> recibi un mensj valido
+    {
+      valor= atoi(string_substring(respuesta,1,(strlen(respuesta)-1)));
+    } else {
+      valor=0; //aca en verdad tendria que devolver un valor por default a convenir-o mensaje de error
+    }
 
   return valor; //devuelve el valor encontrado
 }
@@ -744,6 +782,10 @@ prim_irAlLabel(t_nombre_etiqueta etiqueta)
    tam_etiquetas);*/
 
   //busco la primer instruccion ejecutable
+  
+  
+ // aca busco la etiqueta en el diccionario de etiquetas, lo que esta comentado arriba es para 
+ //llenar el dic
 }
 
 t_puntero
