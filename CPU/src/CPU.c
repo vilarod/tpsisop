@@ -505,6 +505,8 @@ main(void)
 
 {
 
+
+
   int CONECTADO_UMV = 0;
   int CONECTADO_KERNEL = 0;
 
@@ -532,6 +534,7 @@ main(void)
   int quantum;
   char* sentencia;
   sentencia = malloc(1 * sizeof(char));
+
 
 
 
@@ -643,20 +646,20 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
 
- t_puntero aux;
- char* mensaje=2;
+ int aux;
+ char* mensaje="2";
  mensaje= malloc(1 * sizeof(char));
  //a aux le asigno la direccion base del contexto actual +
  //(1 byte id_varible + 4bytes valor)*tamaño contexto
  aux=programa.cursorStack + 5*(programa.sizeContextoActual);
- getUMV(&mensaje, &aux,0,5,string_itoa(programa.cursorStack));
+ getUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
  Enviar(socketUMV,mensaje);
  mensaje="2";
- getUMV(&mensaje,(&aux + 5),0,5,string_itoa(programa.programCounter));
+ getUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
  Enviar(socketUMV,mensaje);
  programa.cursorStack= aux + 10; //mi contexto va a comenzar donde finalizó el otro
  programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
- dictionary_clean_and_destroy_elements(dicVariables);//limpio el dic de variables
+ dictionary_clean(&dicVariables);//limpio el dic de variables
 
 }
 
@@ -677,23 +680,24 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   //preservar el contexto actual para retornar al mismo
 
 
-  t_puntero aux;
+  int aux;
   char* mensaje="2";
   mensaje= malloc(1 * sizeof(char));
   //a aux le asigno la direccion base del contexto actual +
   //(1 byte id_varible + 4bytes valor)*tamaño contexto
   aux=programa.cursorStack + 5*(programa.sizeContextoActual);
-  getUMV(&mensaje, &aux,0,5,string_itoa(programa.cursorStack));
+  getUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
   Enviar(socketUMV,mensaje);
   mensaje="2";
-  getUMV(&mensaje,(&aux + 5),0,5,string_itoa(programa.programCounter));
+  getUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
   Enviar(socketUMV,mensaje);
   mensaje="2";
-  getUMV(&mensaje,(&aux + 10),0,5,string_itoa(donde_retornar));
+  getUMV(&mensaje,(aux + 10),0,5,string_itoa(donde_retornar));
   Enviar(socketUMV,mensaje);
   programa.cursorStack= aux + 15; //mi contexto va a comenzar donde finalizó el otro
   programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
-  dictionary_clean_and_destroy_elements(dicVariables);//limpio el dic de variables
+  dictionary_clean(&dicVariables);//limpio el dic de variables
+
 
 }
 
@@ -701,10 +705,10 @@ void
 prim_finalizar(void)
 {
   //recuperar pc y contexto apilados en stack
-
+/*
   t_puntero aux;
   aux=prog.cursorStack;
-
+*/
 
 }
 
