@@ -16,12 +16,12 @@ int ImprimirTrazaPorConsola = 1; //si es cero no imprime la traza
 void Traza(const char* mensaje, ...);
 void Error(const char* mensaje, ...);
 void ErrorFatal(char mensaje[], ...);
-void CerrarSocket(int socket);
+//void CerrarSocket(int socket);
 int EnviarDatos(int socket, void *buffer);
 int RecibirDatos(int socket, char *buffer);
 int ConexionConSocket(int puerto, char* IP);
 int analizarRespuestaKERNEL(char *mensaje);
-int hacerhandshakeKERNEL(int sockfd, char *prueba);//agrego como parametro prueba que el programa
+int hacerhandshakeKERNEL(int sockfd, char *prueba);//agrego como parametro prueba que es el programa
 void conectarAKERNEL(char *programa);//agrego como parametro prueba que es el programa
 int soquete;
 

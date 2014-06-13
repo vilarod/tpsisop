@@ -21,18 +21,18 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <arpa/inet.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-
+#include <sys/time.h>
+#include <fcntl.h>
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/PROGRAMA/src/config.cfg"
 
-//Tipo de servidor conectado
-//#define  TIPO_KERNEL       1
+//Tipo de servidor conectado: KERNEL
 
 //Mensajes aceptados
-#define HANDSHAKE "31"//'31'
-#define ENVIARPROGRAMA "11"//'11'
+#define HANDSHAKE "31"
+#define ENVIARPROGRAMA "11"
+#define CONFIRMACION "33"
+
 //Tamaño buffer
 #define BUFFERSIZE 1024
 
@@ -40,7 +40,9 @@
 //#define IP "127.0.0.1"
 //#define PORT "6007"
 
-#define MAXLONG 1024
+int EnviarConfirmacionDeRecepcionDeDatos();
+int AnalizarSiEsFinDeEjecucion(char *respuestahandshake);
+
 
 int main(int argc, char* argv[]) {
 
@@ -72,7 +74,7 @@ int main(int argc, char* argv[]) {
 	rewind(f);
 
 	contents = (char*) malloc(sizeof(char) * len + 1);    //leer lo que contiene
-	contents[len] = '\0'; // solo es necesario para imprimir la salida con printf
+	contents[len] = '\0'; // para indicar que termina el texto
 	if (contents == NULL ) {
 		fprintf(stderr, "Failed to allocate memory"); //imprime error sino tiene memoria
 		return 2;
@@ -81,11 +83,11 @@ int main(int argc, char* argv[]) {
 	bytesRead = fread(contents, sizeof(char), len, f);
 
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
-	printf("Contents:%s", contents);
-
+	printf("Contents:\n %s", contents); //imprime el programa tal como esta en el script
+	txt_close_file(f);
 	char **linea;
 	char *separator;
-	char *nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa como lo recibe el kernel
+	char *nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
 	strcpy(nuevo, "");
 	separator = "\n";
 	linea = string_split(contents, separator); //separa el programa ansisop en lineas
@@ -103,10 +105,15 @@ int main(int argc, char* argv[]) {
 	printf("%s", nuevo); //verifico que tengo el programa sin la primer linea
 	printf("\n");
 
-    char *programa = (char*)malloc(len*sizeof(char));
-    programa = strdup(nuevo);
-    conectarAKERNEL(programa);//agrego como parametro programa
-	txt_close_file(f);
+	char *programa = (char*) malloc(len * sizeof(char));
+	programa = strdup(nuevo);
+	int largo;
+	largo = strlen(programa);
+	printf("el tamanio del programa es: %d\n", largo);
+
+	//string_append(&programa, "\0");//si tengo que agregar el "\0" agrego esta linea y sumo 2 en el malloc
+	conectarAKERNEL(programa); //agrego como parametro programa
+
 	free(contents);
 	free(nuevo);
 	return 0;
@@ -139,129 +146,163 @@ int hacerhandshakeKERNEL(int sockfd, char *prueba) {
 	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a mensaje "31"
 	RecibirDatos(sockfd, respuestahandshake);
 
-	EnviarDatos(sockfd, ENVIARPROGRAMA);//ENVIARPROGRAMA reemplaza a "11"
+	EnviarDatos(sockfd, ENVIARPROGRAMA); //ENVIARPROGRAMA reemplaza a "11"
 	RecibirDatos(sockfd, respuestahandshake); //linea agregada para ver si el kernel acepta el programa
-	//char *programa = "texto de prueba \n"; //en el texto de prueba tiene que ir el programa
+
 	EnviarDatos(sockfd, prueba); //envio el programa
+
+	int finDeEjecucion=0;
+	while(!finDeEjecucion)
+	{
+		RecibirDatos(sockfd,respuestahandshake);
+		EnviarConfirmacionDeRecepcionDeDatos();
+
+	finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
+
+	if (!finDeEjecucion)
+	    printf("%s\n", respuestahandshake);
+	}
+
+	printf("Fin de ejecucion");
+
 	return analizarRespuestaKERNEL(respuestahandshake);
 
 }
 
-int analizarRespuestaKERNEL(char *mensaje) {
-	if (mensaje[0] == 0) {
-		Error("eL KERNEL nos devolvio un error: %s", mensaje);
-		return 0;
-	} else
-		return 1;
+int EnviarConfirmacionDeRecepcionDeDatos(sockfd)
+{
+
+	EnviarDatos(sockfd, CONFIRMACION);
+	return 0;
 }
-int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el int
-	int sockfd;
-	//Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
-	struct hostent *he, *gethostbyname();
-	struct sockaddr_in their_addr;
-	he = gethostbyname(IP);
-
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		ErrorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
-				IP);
-		exit(1);
-	}
-
-	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina //tipo de conexion
-	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red//tipo de servicio puerto
-	bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-	memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
-
-	if (connect(sockfd, (struct sockaddr *) &their_addr,
-			sizeof(struct sockaddr)) == -1) {
-		ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
-		exit(1);
-	}
-
-	return sockfd;
+int AnalizarSiEsFinDeEjecucion(char *respuestahandshake)
+{
+char *fin = "22";
+ if(respuestahandshake == fin)
+	 return 0;
+ else
+	 return 1;
 }
 
-int RecibirDatos(int socket, char *buffer) {
-	int bytecount;
+	int analizarRespuestaKERNEL(char *mensaje) {
+		if (mensaje[0] == 0) {
+			Error("eL KERNEL nos devolvio un error: %s", mensaje);
+			return 0;
+		} else
+			return 1;
+	}
+	int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el int
+		int sockfd;
+		//Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
+		struct hostent *he, *gethostbyname();
+		struct sockaddr_in their_addr;
+		he = gethostbyname(IP);
+
+		if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+			ErrorFatal("Error al querer crear el socket. puerto %d, ip %s",
+					puerto, IP);
+			exit(1);
+		}
+		//ordenacion de bytes de la red es htons = "h" de ordenacion de la maquina [Host Byte Order], "to" (a), "n" de "network" y "s" de "short"
+		their_addr.sin_family = AF_INET; //tipo de conexion
+		their_addr.sin_port = htons(puerto); //tipo de servicio puerto
+		bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+		memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
+
+		if (connect(sockfd, (struct sockaddr *) &their_addr,
+				sizeof(struct sockaddr)) == -1) {
+			ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto,
+					IP);
+			exit(1);
+		}
+
+		return sockfd;
+	}
+
+	int RecibirDatos(int socket, char *buffer) {
+		int bytecount;
 // memset se usa para llenar el buffer con 0s
-	memset(buffer, 0, BUFFERSIZE);
+		memset(buffer, 0, BUFFERSIZE);
 
 //Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
-	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-		Error(
-				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
-				socket);
+		if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
+			Error(
+					"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+					socket);
 
-	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+		Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
 
-	return bytecount;
-}
+		return bytecount;
+	}
 
-int EnviarDatos(int socket, void *buffer) {
-	int bytecount;
+	int EnviarDatos(int socket, void *buffer) {
+		int bytecount;
 
-	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
-		Error("No puedo enviar información a al clientes. Socket: %d", socket);
+		if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
+			Error("No puedo enviar información al kernel. Socket: %d", socket);
 
-	Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+		Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
 
-	return bytecount;
-}
+		return bytecount;
+	}
 
-void error(int code, char *err) {
-	char *msg = (char*) malloc(strlen(err) + 14);
-	sprintf(msg, "Error %d: %s\n", code, err);
-	fprintf(stderr, "%s", msg);
-	exit(1);
-}
-void Cerrar(int sRemoto) {
 
-	close(sRemoto);
-}
-/*
-void CerrarSocket(int socket) {
-	close(socket);
-	Traza("Se cerró el socket (%d).", socket);
-}*/
-void ErrorFatal(char mensaje[], ...) {
-	char* nuevo;
-	va_list arguments;
-	va_start(arguments, mensaje);
-	nuevo = string_from_vformat(mensaje, arguments);
+	void error(int code, char *err) {
+		char *msg = (char*) malloc(strlen(err) + 14);
+		sprintf(msg, "Error %d: %s\n", code, err);
+		fprintf(stderr, "%s", msg);
+		exit(1);
+	}
 
-	fprintf(stderr, "\nERROR FATAL: %s\n", nuevo);
+	void Cerrar(int sRemoto) {
 
-	va_end(arguments);
+		close(sRemoto);
+	}
 
-	char fin;
+	void CerrarSocket(int socket) {
+		close(socket);
+		Traza("Se cerró el socket (%d).", socket);
+	}
 
-	printf(
-			"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
-	scanf("%c", &fin);
-
-	exit(EXIT_FAILURE);
-}
-void Error(const char* mensaje, ...) {
-	char* nuevo;
-	va_list arguments;
-	va_start(arguments, mensaje);
-	nuevo = string_from_vformat(mensaje, arguments);
-
-	fprintf(stderr, "\nERROR: %s\n", nuevo);
-
-	va_end(arguments);
-
-}
-void Traza(const char* mensaje, ...) {
-	if (ImprimirTrazaPorConsola) {
+	void ErrorFatal(char mensaje[], ...) {
 		char* nuevo;
 		va_list arguments;
 		va_start(arguments, mensaje);
 		nuevo = string_from_vformat(mensaje, arguments);
 
-		printf("TRAZA--> %s \n", nuevo);
+		fprintf(stderr, "\nERROR FATAL: %s\n", nuevo);
+
+		va_end(arguments);
+
+		char fin;
+
+		printf(
+				"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
+		scanf("%c", &fin);
+
+		exit(EXIT_FAILURE);
+	}
+	void Error(const char* mensaje, ...) {
+		char* nuevo;
+		va_list arguments;
+		va_start(arguments, mensaje);
+		nuevo = string_from_vformat(mensaje, arguments);
+
+		fprintf(stderr, "\nERROR: %s\n", nuevo);
 
 		va_end(arguments);
 
 	}
-}
+	void Traza(const char* mensaje, ...) {
+		if (ImprimirTrazaPorConsola) {
+			char* nuevo;
+			va_list arguments;
+			va_start(arguments, mensaje);
+			nuevo = string_from_vformat(mensaje, arguments);
+
+			printf("TRAZA--> %s \n", nuevo);
+
+			va_end(arguments);
+
+		}
+	}
