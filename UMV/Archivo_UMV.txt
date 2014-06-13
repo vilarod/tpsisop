@@ -1,88 +1,138 @@
 
 Se creó el siguiente segmento en la memoria: 
 |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|          1|          1|       1322|         10|             152061320|
+|          1|          1|       1144|        100|              69290624|
 
 Se creó el siguiente segmento en la memoria: 
 |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|         20|          1|       1151|        200|             152061330|
+|          2|          1|       1311|        200|              69290724|
 
 Se creó el siguiente segmento en la memoria: 
 |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|          3|          1|       1926|        100|             152061530|
+|          1|          2|       3211|        100|              69290924|
 
 Se creó el siguiente segmento en la memoria: 
 |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|          1|          2|       3245|        100|             152061630|
-BASE MEMORIA: 152061320
-|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|          1|          1|       1322|         10|             152061320|
+|          3|          1|       1124|         40|              69291024|
 
- CONTENIDO DE MEMORIA 
--         0-   00000000    
--         8-   00
+Se creó el siguiente segmento en la memoria: 
 |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|         20|          1|       1151|        200|             152061330|
-
- CONTENIDO DE MEMORIA 
--         0-   00000000
--         8-   00000000
--        16-   00000000
--        24-   00000000
--        32-   00000000
--        40-   00000000
--        48-   00000000
--        56-   00000000
--        64-   00000000
--        72-   00000000
--        80-   00000000
--        88-   00000000
--        96-   00000000
--       104-   00000000
--       112-   00000000
--       120-   00000000
--       128-   00000000
--       136-   00000000
--       144-   00000000
--       152-   00000000
--       160-   00000000
--       168-   00000000
--       176-   00000000
--       184-   00000000
--       192-   00000000
+|          1|          3|       4476|         10|              69291064|
+BASE MEMORIA: 69290624
 |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|          3|          1|       1926|        100|             152061530|
-
- CONTENIDO DE MEMORIA 
--         0-   00000000
--         8-   00000000
--        16-   00000000
--        24-   00000000
--        32-   00000000
--        40-   00000000
--        48-   00000000
--        56-   00000000
--        64-   00000000
--        72-   00000000
--        80-   00000000
--        88-   00000000
--        96-   0000%
-|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|          1|          2|       3245|        100|             152061630|
-
- CONTENIDO DE MEMORIA 
--         0-   00000000
--         8-   00000000
--        16-   00000000
--        24-   00000000
--        32-   00000000
--        40-   00000000
--        48-   00000000
--        56-   00000000
--        64-   00000000
--        72-   00000000
--        80-   00000000
--        88-   00000000
--        96-   0000%
+|          1|          1|       1144|        100|              69290624|
+|          2|          1|       1311|        200|              69290724|
+|          1|          2|       3211|        100|              69290924|
+|          3|          1|       1124|         40|              69291024|
+|          1|          3|       4476|         10|              69291064|
 MEMORIA TOTAL (Bytes): 1024
-MEMORIA USADA (Bytes): 410
+MEMORIA USADA (Bytes): 450
+BASE MEMORIA: 69290624
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          1|          1|       1144|        100|              69290624|
+
+ CONTENIDO DE MEMORIA 
+-         0-   00000000
+-         8-   00000000
+-        16-   00000000
+-        24-   00000000
+-        32-   00000000
+-        40-   00000000
+-        48-   00000000
+-        56-   00000000
+-        64-   00000000
+-        72-   00000000
+-        80-   00000000
+-        88-   00000000
+-        96-   0000
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          1|          2|       3211|        100|              69290924|
+
+ CONTENIDO DE MEMORIA 
+-         0-   00000000
+-         8-   00000000
+-        16-   00000000
+-        24-   00000000
+-        32-   00000000
+-        40-   00000000
+-        48-   00000000
+-        56-   00000000
+-        64-   00000000
+-        72-   00000000
+-        80-   00000000
+-        88-   00000000
+-        96-   0000
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          1|          3|       4476|         10|              69291064|
+
+ CONTENIDO DE MEMORIA 
+-         0-   00000000
+-         8-   00
+TOTAL Memoria usada por programa (Bytes): 210BASE MEMORIA: 69290624
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          1|          1|       1144|        100|              69290624|
+
+ CONTENIDO DE MEMORIA 
+-         0-   HOLAHOLA
+-         8-   PE000000
+-        16-   00000000
+-        24-   00000000
+-        32-   00000000
+-        40-   00000000
+-        48-   00000000
+-        56-   00000000
+-        64-   00000000
+-        72-   00000000
+-        80-   00000000
+-        88-   00000000
+-        96-   0000
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          1|          2|       3211|        100|              69290924|
+
+ CONTENIDO DE MEMORIA 
+-         0-   00000000
+-         8-   00000000
+-        16-   00000000
+-        24-   00000000
+-        32-   00000000
+-        40-   00000000
+-        48-   00000000
+-        56-   00000000
+-        64-   00000000
+-        72-   00000000
+-        80-   00000000
+-        88-   00000000
+-        96-   0000
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          1|          3|       4476|         10|              69291064|
+
+ CONTENIDO DE MEMORIA 
+-         0-   00000000
+-         8-   00
+TOTAL Memoria usada por programa (Bytes): 210BASE MEMORIA: 69290624
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          7|          1|       1541|         99|              69291217|
+
+ CONTENIDO DE MEMORIA 
+-         0-   00000000
+-         8-   00000000
+-        16-   VAMOSVAM
+-        24-   OSlospi0
+-        32-   00000000
+-        40-   00000000
+-        48-   00000000
+-        56-   00000000
+-        64-   00000000
+-        72-   00000000
+-        80-   00000000
+-        88-   00000000
+-        96-   000
+TOTAL Memoria usada por programa (Bytes): 99BASE MEMORIA: 69290624
+|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+|          2|          1|       1311|        200|              69290724|
+|          3|          1|       1124|         40|              69291024|
+|          9|          1|       1313|         44|              69291074|
+|          8|          1|       1287|         99|              69291118|
+|          7|          1|       1541|         99|              69291217|
+MEMORIA TOTAL (Bytes): 1024
+MEMORIA USADA (Bytes): 482

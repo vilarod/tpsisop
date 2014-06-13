@@ -1805,7 +1805,7 @@ char* ComandoDestruirSegmento(char *buffer, int tipoCliente)
 
 		if (ok)
 		{
-			RespuestaClienteOk(buffer);
+			buffer = RespuestaClienteOk(buffer);
 		}
 		else
 		{
@@ -1815,7 +1815,7 @@ char* ComandoDestruirSegmento(char *buffer, int tipoCliente)
 	}
 	else
 	{
-		SetearErrorGlobal("ERROR CREAR SEGMENTO. El tipo de cliente que puede solicitar esta operacion solo puede ser KERNEL (1), usted es del tipo (%d) ", tipoCliente);
+		SetearErrorGlobal("ERROR DESTRUIR SEGMENTO. El tipo de cliente que puede solicitar esta operacion solo puede ser KERNEL (1), usted es del tipo (%d) ", tipoCliente);
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
 
