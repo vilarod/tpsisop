@@ -33,10 +33,11 @@ PCB desearilizar_PCB (char* estructura, int pos);
 void deserializarDesplLong(char * msj,int despl, int longi);
 
 //serializar
-
+char* getUMV(int base, int dsp, int tam);
 char* serializar_PCB (PCB prog);
 void serCadena(char ** msj, char* agr);
-void getUMV(char** mensaje,int ptro, int dsp, int tam, char* valor);
+void setUMV(char** mensaje,int ptro, int dsp, int tam, char* valor);
+
 
 //Obtener datos de conexión
 int ObtenerPuerto(char* que);

@@ -629,6 +629,7 @@ serCadena(&instruccion,string_itoa(base)); //base
 serCadena(&instruccion, string_itoa(dsp)); //desplazamiento
 serCadena(&instruccion, string_itoa(tam)); //longitud
 
+return instruccion;
 }
 
 
@@ -648,10 +649,9 @@ void
 prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
 
-int aux;
 char* pedido="2";
 pedido= malloc(1 * sizeof(char));
-setUMV(&pedido, direccion_varible + 1,0,4,string_itoa(valor));
+setUMV(&pedido, direccion_variable + 1,0,4,string_itoa(valor));
 Enviar(socketUMV, pedido);
 //aca tengo que leer algo de la umv...eso lo veo despues
 
@@ -683,17 +683,14 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
  //a aux le asigno la direccion base del contexto actual +
  //(1 byte id_varible + 4bytes valor)*tamaño contexto
  aux=programa.cursorStack + 5*(programa.sizeContextoActual);
-<<<<<<< HEAD
- getUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
- Enviar(socketUMV,mensaje);
- mensaje="2";
- getUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
-=======
  setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
  Enviar(socketUMV,mensaje);
  mensaje="2";
  setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
->>>>>>> 794cf9e23882dc8df0fd718390e028ee011d611e
+ setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
+ Enviar(socketUMV,mensaje);
+ mensaje="2";
+ setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
  Enviar(socketUMV,mensaje);
  programa.cursorStack= aux + 10; //mi contexto va a comenzar donde finalizó el otro
  programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
@@ -714,15 +711,6 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   //a aux le asigno la direccion base del contexto actual +
   //(1 byte id_varible + 4bytes valor)*tamaño contexto
   aux=programa.cursorStack + 5*(programa.sizeContextoActual);
-<<<<<<< HEAD
-  getUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
-  Enviar(socketUMV,mensaje);
-  mensaje="2";
-  getUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
-  Enviar(socketUMV,mensaje);
-  mensaje="2";
-  getUMV(&mensaje,(aux + 10),0,5,string_itoa(donde_retornar));
-=======
   setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
   Enviar(socketUMV,mensaje);
   mensaje="2";
@@ -730,7 +718,13 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   Enviar(socketUMV,mensaje);
   mensaje="2";
   setUMV(&mensaje,(aux + 10),0,5,string_itoa(donde_retornar));
->>>>>>> 794cf9e23882dc8df0fd718390e028ee011d611e
+  setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
+  Enviar(socketUMV,mensaje);
+  mensaje="2";
+  setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
+  Enviar(socketUMV,mensaje);
+  mensaje="2";
+  setUMV(&mensaje,(aux + 10),0,5,string_itoa(donde_retornar));
   Enviar(socketUMV,mensaje);
   programa.cursorStack= aux + 15; //mi contexto va a comenzar donde finalizó el otro
   programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
@@ -743,24 +737,24 @@ void
 prim_finalizar(void)
 {
   //recuperar pc y contexto apilados en stack
-<<<<<<< HEAD
+
 /*
   t_puntero aux;
   aux=prog.cursorStack;
 */
-=======
 
- aux=prog.cursorStack;
+int aux;
+ aux=programa.cursorStack;
 limpiarEstructuras();
-prog.programCounter=atoi(getUMV(aux-5, 0,5));
-prog.cursorStack=atoi(getUMV(aux-10, 0,5));
-prog.sizeContextoActual=(aux-prog.cursorStack)/5;
-if (prog.sizeContextoActual > 0)
-{ armarDicVariables(prog.cursorStack,prog.sizeContextoActual);
+programa.programCounter=atoi(getUMV(aux-5, 0,5));
+programa.cursorStack=atoi(getUMV(aux-10, 0,5));
+programa.sizeContextoActual=(aux-programa.cursorStack)/5;
+if (programa.sizeContextoActual > 0)
+{ //armarDicVariables(programa.cursorStack,prog.sizeContextoActual);
 } else { printf("se termino!!!"); }
 
 
->>>>>>> 794cf9e23882dc8df0fd718390e028ee011d611e
+
 
 }
 
@@ -785,7 +779,7 @@ prim_dereferenciar(t_puntero direccion_variable)
  char* mensaje= malloc(1 * sizeof(char));
  char* respuesta= malloc(1 * sizeof(char));
  
-  mensaje=getUMV(direccion_varible + 1, 0 , 4);
+  mensaje=getUMV(direccion_variable + 1, 0 , 4);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV,respuesta);
   
