@@ -44,9 +44,25 @@ int AtiendeClienteCPU(void * arg);
 int posicionDeBufferAInt(char* buffer, int posicion);
 char* RespuestaClienteOk(char *buffer);
 
+//Semaforo Contador
+typedef struct{
+	int n;
+	pthread_mutex_t semdata;
+	pthread_mutex_t sem_mutex;
+} psem_t;
+
+void semdestroy(psem_t *ps);
+void semsig(psem_t *ps);
+void semwait(psem_t *ps);
+void seminit(psem_t *ps, int n);
+
+psem_t readyCont,CPUCont,finalizarCont, imprimirCont;
+
 //Globales
 int ImprimirTrazaPorConsola = 1;
 int Puerto;
 int PuertoPCP;
 int UMV_PUERTO;
 char *UMV_IP;
+
+

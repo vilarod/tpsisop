@@ -628,3 +628,46 @@ char* RespuestaClienteOk(char *buffer)
 }
 
 
+void seminit(psem_t *ps, int n) {
+	pthread_mutex_init(&ps->semdata, NULL );
+
+	pthread_mutex_init(&ps->sem_mutex, NULL );
+
+	/* para inicializar el semaforo binario a 0 */
+
+	pthread_mutex_lock(&ps->sem_mutex);
+
+	ps->n = n;
+}
+
+void semwait(psem_t *ps) {
+
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n--;
+	if (ps->n < 0) {
+		pthread_mutex_unlock(&ps->semdata);
+
+		pthread_mutex_lock(&ps->sem_mutex);
+	}
+
+	else
+		pthread_mutex_unlock(&ps->semdata);
+
+}
+
+void semsig(psem_t *ps) {
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n++;
+	if (ps->n < 1)
+		pthread_mutex_unlock(&ps->sem_mutex);
+
+	pthread_mutex_unlock(&ps->semdata);
+}
+
+void semdestroy(psem_t *ps) {
+	pthread_mutex_destroy(&ps->semdata);
+	pthread_mutex_destroy(&ps->sem_mutex);
+}
+
