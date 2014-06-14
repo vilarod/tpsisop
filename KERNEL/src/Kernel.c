@@ -5,7 +5,7 @@
  Version     : 1.0
  Copyright   : Garras - UTN FRBA 2014
  Description : Ansi-style
- Testing	 : Para probarlo es tan simple como ejecutar en el terminator la linea "$ telnet localhost 7000" y empezar a dialogar con el UMV.
+ Testing	 : Para probarlo es tan simple como ejecutar en el terminator
  ============================================================================
  */
 
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <commons/string.h>
 #include <commons/temporal.h>
+#include <commons/collections/list.h>
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
@@ -39,7 +40,6 @@
 #define MSJ_HANDSHAKE             3
 #define MSJ_RECIBO_PROGRAMA       1
 #define MSJ_IMPRIMI_ESTO	      2
-
 
 #define HANDSHAKEUMV '31'
 
@@ -59,33 +59,33 @@ typedef struct PCBs {
 	int sizeIndiceEtiquetas;
 } PCB;
 
-int Ejecutando = 1;
-int ImprimirTrazaPorConsola = 1;
+typedef struct CPUs {
+	int id;
+	int programa;
+	int libre;
+} CPU;
 
-int Puerto;
-int UMV_PUERTO;
-char *UMV_IP;
-
+CPU CPU1;
+PCB PCB1;
+t_list *listCPU;
+int socketumv;
 int main(int argv, char** argc) {
 
-	printf("Creando Hilos PLP y PCP.\n");
-	//PCB * NUEVO, LISTO;
-
 	//Obtener puertos e ip de la umv
-
 	UMV_PUERTO = ObtenerPuertoUMV();
 	UMV_IP = ObtenerIPUMV();
 	Puerto = ObtenerPuertoConfig();
+	PuertoPCP = ObtenerPuertoPCPConfig();
+
 	//Crear Listas de estados
+	//PCB * NUEVO, LISTO;
 	//NUEVO = PCB * list_create();
 	//LISTO = PCB * list_create();
-	//Creacion de los hilos principales
-	pthread_t plp, pcp;
-	pthread_create(&plp, NULL, PLP, NULL );
-	pthread_create(&pcp, NULL, PCP, NULL );
 
+	//Creacion del hilo plp
+	pthread_t plp;
+	pthread_create(&plp, NULL, PLP, NULL );
 	pthread_join(plp, NULL );
-	pthread_join(pcp, NULL );
 
 	printf("Finalizado\n");
 
@@ -95,14 +95,25 @@ int main(int argv, char** argc) {
 /* Hilo de PLP (lo que ejecuta) */
 void *PLP(void *arg) {
 
+	//Me conecto a la UMV
 	conectarAUMV();
-	//crearSocketEscucha();
-	// * Crear segmento 1° cod mensaje (5)
-	// * Parametros a pasar 2° cantidad de dijitos del id programa
-	// *  3° id programa
-	// *  4° cantidad dijitos tamaño
-	// *  5° tamaño
-	// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
+
+	//Creo el hilo de pcp
+	pthread_t pcp, escuchaFinEImprimir;
+	pthread_create(&pcp, NULL, PCP, NULL );
+	pthread_join(pcp, NULL );
+
+	crearEscucha();
+
+	pthread_create(&escuchaFinEImprimir, NULL, IMPRIMIRYFIN, NULL );
+	pthread_join(escuchaFinEImprimir, NULL );
+
+	return NULL ;
+}
+
+void *IMPRIMIRYFIN(void *arg) {
+
+	//los waits y while 1 para las cola de fin y de imprimir algo
 
 	return NULL ;
 }
@@ -112,10 +123,28 @@ void *PCP(void *arg) {
 
 	/// MAGIA DE DANI ///
 
+	listCPU = list_create();
+	//crear hilo de escucha CPU
+	pthread_t plpCPU, plpReady, plpBloqueado;
+	pthread_create(&plpCPU, NULL, HiloOrquestadorDeCPU, NULL );
+
+
+	//crear hilo de ready
+	pthread_create(&plpReady, NULL, moverEjecutar, NULL );
+
+
+	//crear hilo de bloqueado
+	pthread_create(&plpBloqueado, NULL, moverReady, NULL );
+
+	pthread_join(plpCPU, NULL );
+	pthread_join(plpReady, NULL );
+	pthread_join(plpBloqueado, NULL );
+
 	return NULL ;
 }
 
-int crearSocketEscucha() {
+void *HiloOrquestadorDeCPU()
+{
 	int socket_host;
 	struct sockaddr_in client_addr;
 	struct sockaddr_in my_addr;
@@ -124,55 +153,87 @@ int crearSocketEscucha() {
 
 	socket_host = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_host == -1)
-		ErrorFatal(
-				"No se pudo inicializar el socket que escucha a los clientes");
+		ErrorFatal("No se pudo inicializar el socket que escucha a los clientes");
 
-	if (setsockopt(socket_host, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
-			== -1) {
+	if (setsockopt(socket_host, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+	{
 		ErrorFatal("Error al hacer el 'setsockopt'");
 	}
 
 	my_addr.sin_family = AF_INET;
-	my_addr.sin_port = htons(Puerto);
+	my_addr.sin_port = htons(PuertoPCP);
 	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
-	memset(&(my_addr.sin_zero), '\0', 8);
+	memset(&(my_addr.sin_zero), '\0', 8* sizeof(char));
 
 	if (bind(socket_host, (struct sockaddr*) &my_addr, sizeof(my_addr)) == -1)
 		ErrorFatal("Error al hacer el Bind. El puerto está en uso");
 
 	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
-		ErrorFatal(
-				"Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
+		ErrorFatal("Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
 
-	Traza(
-			"El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d",
-			socket_host, Puerto);
+	Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, PuertoPCP);
 
-	return socket_host;
-
-	while (Ejecutando) {
+	while (1)
+	{
 		int socket_client;
 
 		size_addr = sizeof(struct sockaddr_in);
 
-		if ((socket_client = accept(socket_host,
-				(struct sockaddr *) &client_addr, &size_addr)) != -1) {
-			Traza(
-					"Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d",
-					inet_ntoa(client_addr.sin_addr), client_addr.sin_port,
-					socket_client);
+		if ((socket_client = accept(socket_host, (struct sockaddr *) &client_addr, &size_addr)) != -1)
+		{
+			Traza("Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d", inet_ntoa(client_addr.sin_addr), client_addr.sin_port, socket_client);
 
 			// Aca hay que crear un nuevo hilo, que será el encargado de atender al cliente
 			pthread_t hNuevoCliente;
-			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeCliente,
-					(void *) socket_client);
-		} else {
+			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeClienteCPU, (void *) socket_client);
+		}
+		else
+		{
 			Error("ERROR AL ACEPTAR LA CONEXIÓN DE UN CLIENTE");
 		}
 	}
 
 	CerrarSocket(socket_host);
-	return 1;
+}
+
+
+void *escuharCPU(void *arg) {
+
+	//Abrir socket de escuchar CPU
+
+	return NULL ;
+}
+
+void *moverEjecutar(void *arg) {
+
+	//buscar CPU libre y mandar PCB
+
+	return NULL ;
+}
+
+void *moverReady(void *arg) {
+
+	//mandar a ready los bloqueados
+
+	return NULL ;
+}
+
+void crearEscucha() {
+	//while(1);
+	//Crear select
+
+	int AtiendeCliente(int sockete); //Handshake y recibir programa
+
+	return;
+}
+int pedirMemoriaUMV(int socketumv) {
+	char respuestaMemoria[BUFFERSIZE];
+	char *mensaje = "5";
+	//ENVIAR TODOS LOS CREAR SEGMENTOS
+	EnviarDatos(socketumv, mensaje);
+	RecibirDatos(socketumv, respuestaMemoria);
+
+	return analisarRespuestaUMV(respuestaMemoria);
 }
 
 int ObtenerPuertoUMV() {
@@ -193,11 +254,17 @@ int ObtenerPuertoConfig() {
 	return config_get_int_value(config, "PUERTO");
 }
 
+int ObtenerPuertoPCPConfig() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTOPCP");
+}
+
 void conectarAUMV() {
 	Traza("Intentando conectar a umv.");
 
-	int sockfd = ConexionConSocket(UMV_PUERTO, UMV_IP);
-	if (hacerhandshakeUMV(sockfd) == 0) {
+	socketumv = ConexionConSocket(UMV_PUERTO, UMV_IP);
+	if (hacerhandshakeUMV(socketumv) == 0) {
 		ErrorFatal("No se pudo conectar a la umv.");
 	}
 }
@@ -254,7 +321,9 @@ int RecibirDatos(int socket, char *buffer) {
 
 //Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-		Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",socket);
+		Error(
+				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+				socket);
 
 	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
 
@@ -328,32 +397,49 @@ void Traza(const char* mensaje, ...) {
 
 	}
 }
-int ObtenerComandoMSJ(char buffer[])
-{
+int ObtenerComandoMSJ(char buffer[]) {
 //Hay que obtener el comando dado el buffer.
 //El comando está dado por el primer caracter, que tiene que ser un número.
 	return chartToInt(buffer[0]);
 }
-void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente)
-{
+void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente) {
 	(*idProg) = chartToInt(buffer[1]);
 	(*tipoCliente) = chartToInt(buffer[2]);
 
 	memset(buffer, 0, BUFFERSIZE);
-	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ", *idProg, *tipoCliente);
+	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ",
+			*idProg, *tipoCliente);
 }
-int chartToInt(char x)
-{
+int chartToInt(char x) {
 	char str[1];
 	str[0] = x;
 	int a = atoi(str);
 	return a;
 }
 
-int AtiendeCliente(void * arg) {
-	int socket = (int) arg;
+void ComandoRecibirPrograma(char *buffer, int *idProg, int *tipoCliente) {
+	(*idProg) = chartToInt(buffer[1]);
+	(*tipoCliente) = chartToInt(buffer[2]);
 
-	//Es el ID del programa con el que está trabajando actualmente el HILO.
+	memset(buffer, 0, BUFFERSIZE);
+
+	//Recibir programa
+	//CrearPCB();
+	if (pedirMemoriaUMV(socketumv)) {
+		//Responder programa too ok
+	} else {
+		//responder programa too mal
+		// * Crear segmento 1° cod mensaje (5)
+		// * Parametros a pasar 2° cantidad de dijitos del id programa
+		// *  3° id programa
+		// *  4° cantidad dijitos tamaño
+		// *  5° tamaño
+		// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
+	}
+}
+
+int AtiendeCliente(int sockete) {
+
 	//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
 	//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
 	int id_Programa = 0;
@@ -369,32 +455,84 @@ int AtiendeCliente(void * arg) {
 	// Cantidad de bytes recibidos.
 	int bytesRecibidos;
 
-	// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
-	int desconexionCliente = 0;
-
 	// Código de salida por defecto
 	int code = 0;
 
-	while ((!desconexionCliente) & Ejecutando) {
-		//Recibimos los datos del cliente
-		bytesRecibidos = RecibirDatos(socket, buffer);
+	bytesRecibidos = RecibirDatos(sockete, buffer);
 
-		if (bytesRecibidos > 0) {
+	if (bytesRecibidos > 0) {
+		//Analisamos que peticion nos está haciendo (obtenemos el comando)
+		tipo_mensaje = ObtenerComandoMSJ(buffer);
+
+		//Evaluamos los comandos
+		switch (tipo_mensaje) {
+		case MSJ_HANDSHAKE:
+			ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
+			EnviarDatos(sockete, "1");
+			break;
+		case MSJ_RECIBO_PROGRAMA:
+			ComandoRecibirPrograma(buffer, &id_Programa, &tipo_Conexion);
+			EnviarDatos(sockete, "1");
+		}
+	}
+	return code;
+}
+
+int AtiendeClienteCPU(void * arg)
+{
+	int socket = (int) arg;
+
+//Es el ID del programa con el que está trabajando actualmente el HILO.
+//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
+//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
+//	int id_CPU = 0;
+	int tipo_Cliente = 0;
+
+// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+	int tipo_mensaje = 0;
+
+// Dentro del buffer se guarda el mensaje recibido por el cliente.
+	char* buffer;
+	buffer = malloc(1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+
+// Cantidad de bytes recibidos.
+	int bytesRecibidos;
+
+// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
+	int desconexionCliente = 0;
+
+// Código de salida por defecto
+	int code = 0;
+
+	while ((!desconexionCliente))
+	{
+		buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+
+		//Recibimos los datos del cliente
+		buffer = RecibirDatos2(socket, buffer, &bytesRecibidos);
+
+		if (bytesRecibidos > 0)
+		{
 			//Analisamos que peticion nos está haciendo (obtenemos el comando)
 			tipo_mensaje = ObtenerComandoMSJ(buffer);
 
 			//Evaluamos los comandos
-			switch (tipo_mensaje) {
-			case MSJ_HANDSHAKE:
-				ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
-				break;
+			switch (tipo_mensaje)
+			{
 
-				// Enviamos datos al cliente.
-				// NMR: aca luego habra que agregar un retardo segun pide el TP int pthread_detach(pthread_self());
-				EnviarDatos(socket, buffer);
+				case MSJ_HANDSHAKE:
+					buffer = ComandoHandShake2(buffer, &tipo_Cliente);
+					//crear nueva CPU
+					break;
+				default:
+					//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
+					break;
 			}
+
+			// Enviamos datos al cliente.
 			EnviarDatos(socket, buffer);
-		} else
+		}
+		else
 			desconexionCliente = 1;
 
 	}
@@ -402,5 +540,134 @@ int AtiendeCliente(void * arg) {
 	CerrarSocket(socket);
 
 	return code;
+}
+
+char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos)
+{
+	*bytesRecibidos = 0;
+	int tamanioNuevoBuffer = 0;
+	int mensajeCompleto = 0;
+	int cantidadBytesRecibidos = 0;
+	int cantidadBytesAcumulados = 0;
+
+	// memset se usa para llenar el buffer con 0s
+	char bufferAux[BUFFERSIZE];
+
+	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
+	memset(buffer, 0, 1* sizeof(char));
+
+	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
+	{
+		memset(bufferAux, 0, BUFFERSIZE* sizeof(char)); //-> llenamos el bufferAux con barras ceros.
+
+		//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+		if ((*bytesRecibidos = *bytesRecibidos + recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
+			Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
+
+		cantidadBytesRecibidos = strlen(bufferAux);
+		cantidadBytesAcumulados = strlen(buffer);
+		tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
+
+		if (tamanioNuevoBuffer > 0)
+		{
+			buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
+
+			sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
+		}
+
+		//Verificamos si terminó el mensaje
+		if (cantidadBytesRecibidos < BUFFERSIZE)
+			mensajeCompleto = 1;
+	}
+
+	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+
+	return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+}
+
+char* ComandoHandShake2(char *buffer, int *tipoCliente)
+{
+// Formato del mensaje: CD
+// C = codigo de mensaje ( = 3)
+
+	int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
+
+	if (tipoDeCliente == TIPO_CPU)
+	{
+		*tipoCliente = tipoDeCliente;
+		buffer = RespuestaClienteOk(buffer);
+	}
+	else
+	{
+		*tipoCliente = 0;
+		//SetearErrorGlobal("HANDSHAKE ERROR. Tipo de cliente invalido (%d). KERNEL o '2' = CPU.", posicionDeBufferAInt(buffer, 1));
+		//buffer = RespuestaClienteError(buffer, g_MensajeError);
+	}
+
+	return buffer;
+}
+
+int posicionDeBufferAInt(char* buffer, int posicion)
+{
+	int logitudBuffer = 0;
+	logitudBuffer = strlen(buffer);
+
+	if (logitudBuffer <= posicion)
+		return 0;
+	else
+		return chartToInt(buffer[posicion]);
+}
+
+char* RespuestaClienteOk(char *buffer)
+{
+	int tamanio = sizeof(char) * 2;
+	buffer = realloc(buffer, tamanio* sizeof(char));
+	memset(buffer, 0, tamanio* sizeof(char));
+	sprintf(buffer, "%s", "1");
+	return buffer;
+}
+
+
+void seminit(psem_t *ps, int n) {
+	pthread_mutex_init(&ps->semdata, NULL );
+
+	pthread_mutex_init(&ps->sem_mutex, NULL );
+
+	/* para inicializar el semaforo binario a 0 */
+
+	pthread_mutex_lock(&ps->sem_mutex);
+
+	ps->n = n;
+}
+
+void semwait(psem_t *ps) {
+
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n--;
+	if (ps->n < 0) {
+		pthread_mutex_unlock(&ps->semdata);
+
+		pthread_mutex_lock(&ps->sem_mutex);
+	}
+
+	else
+		pthread_mutex_unlock(&ps->semdata);
+
+}
+
+void semsig(psem_t *ps) {
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n++;
+	if (ps->n < 1)
+		pthread_mutex_unlock(&ps->sem_mutex);
+
+	pthread_mutex_unlock(&ps->semdata);
+}
+
+void semdestroy(psem_t *ps) {
+	pthread_mutex_destroy(&ps->semdata);
+	pthread_mutex_destroy(&ps->sem_mutex);
 }
 

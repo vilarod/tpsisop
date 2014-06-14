@@ -21,18 +21,23 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <arpa/inet.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-
+#include <sys/time.h>
+#include <fcntl.h>
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/PROGRAMA/src/config.cfg"
 
-//Tipo de servidor conectado
-//#define  TIPO_KERNEL       1
+//Tipo de servidor conectado: KERNEL
+
+//Mensajes 	enviados
+#define HANDSHAKE "31"
+#define ENVIARPROGRAMA "11"
+#define CONFIRMACION "33"
 
 //Mensajes aceptados
-#define HANDSHAKE "31"//'31'
-#define ENVIARPROGRAMA "11"//'11'
+#define MSJ_HANDSHAKE             3
+#define MSJ_RECIBO_PROGRAMA       1
+#define MSJ_IMPRIMI_ESTO	      2
+
 //Tamaño buffer
 #define BUFFERSIZE 1024
 
@@ -40,7 +45,7 @@
 //#define IP "127.0.0.1"
 //#define PORT "6007"
 
-#define MAXLONG 1024
+
 
 int main(int argc, char* argv[]) {
 
@@ -57,7 +62,7 @@ int main(int argc, char* argv[]) {
 	//El symbolic link se hizo por consola:
 	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
 
-	FILE* f;
+	FILE* f; //archivo que voy a leer
 	char* contents;
 	size_t len;
 	size_t bytesRead;
@@ -71,44 +76,49 @@ int main(int argc, char* argv[]) {
 	len = ftell(f);    //nos da la cantidad de bytes del archivo
 	rewind(f);
 
-	contents = (char*) malloc(sizeof(char) * len + 1);    //leer lo que contiene
-	contents[len] = '\0'; // solo es necesario para imprimir la salida con printf
+	contents = (char*) malloc(sizeof(char) * len + 1);    //para guardar lo que lee
+	contents[len] = '\0'; // para indicar que termina el texto
 	if (contents == NULL ) {
 		fprintf(stderr, "Failed to allocate memory"); //imprime error sino tiene memoria
 		return 2;
 	}
 
-	bytesRead = fread(contents, sizeof(char), len, f);
+	bytesRead = fread(contents, sizeof(char), len, f); //bytes leidos
 
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
-	printf("Contents:%s", contents);
+	printf("Contents:\n %s", contents); //imprime el programa tal como esta en el script
+	txt_close_file(f);//cierro el archivo
 
 	char **linea;
 	char *separator;
-	char *nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa como lo recibe el kernel
+	char *nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
 	strcpy(nuevo, "");
 	separator = "\n";
+
 	linea = string_split(contents, separator); //separa el programa ansisop en lineas
+
 	int i;
 
 	for (i = 1; linea[i] != NULL ; i++) //elimino la primer linea del hashbang
-			{
-		//printf("%s",linea[i]);
+			string_append(&nuevo, linea[i]); //concatena todas las lineas del programa
 
-		string_append(&nuevo, linea[i]); //concatena todas las lineas del programa
-
-	}
 
 	printf("\n");
 	printf("%s", nuevo); //verifico que tengo el programa sin la primer linea
 	printf("\n");
 
-    char *programa = (char*)malloc(len*sizeof(char));
-    programa = strdup(nuevo);
-    conectarAKERNEL(programa);//agrego como parametro programa
-	txt_close_file(f);
+	char *programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
+	programa = strdup(nuevo);
+	int largo;
+	largo = strlen(programa);
+	printf("el tamanio del programa es: %d\n", largo);
+	//string_append(&programa, "\0");//si tengo que agregar el "\0" agrego esta linea y sumo 2 en el malloc
+
+	conectarAKERNEL(programa);
+
 	free(contents);
 	free(nuevo);
+	free(programa);
 	return 0;
 }
 
@@ -133,18 +143,45 @@ void conectarAKERNEL(char *archivo) { //tengo que agregar programa para poder en
 		ErrorFatal("No se pudo conectar al kernel");
 	}
 }
-int hacerhandshakeKERNEL(int sockfd, char *prueba) {
+int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	char respuestahandshake[BUFFERSIZE];
-	//char *mensaje = "31";
-	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a mensaje "31"
+
+	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
 	RecibirDatos(sockfd, respuestahandshake);
 
-	EnviarDatos(sockfd, ENVIARPROGRAMA);//ENVIARPROGRAMA reemplaza a "11"
-	RecibirDatos(sockfd, respuestahandshake); //linea agregada para ver si el kernel acepta el programa
-	//char *programa = "texto de prueba \n"; //en el texto de prueba tiene que ir el programa
-	EnviarDatos(sockfd, prueba); //envio el programa
-	return analizarRespuestaKERNEL(respuestahandshake);
+	EnviarDatos(sockfd, ENVIARPROGRAMA); //ENVIARPROGRAMA reemplaza a "11"
+	RecibirDatos(sockfd, respuestahandshake);
 
+	EnviarDatos(sockfd, programa); //envio el programa
+
+	int finDeEjecucion = 0;
+	while (!finDeEjecucion) {
+		RecibirDatos(sockfd, respuestahandshake);
+		EnviarConfirmacionDeRecepcionDeDatos();
+
+		finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
+
+		if (!finDeEjecucion)
+			txt_write_in_stdout(respuestahandshake);
+
+	}
+	txt_write_in_stdout("Fin de ejecuacion");
+
+	return analizarRespuestaKERNEL(respuestahandshake);
+}
+
+int EnviarConfirmacionDeRecepcionDeDatos( sockfd) {
+
+	EnviarDatos(sockfd, CONFIRMACION);
+	return 0;
+}
+
+int AnalizarSiEsFinDeEjecucion(char *respuestahandshake) {
+	char *fin = "22";
+	if (respuestahandshake == fin)
+		return 0;
+	else
+		return 1;
 }
 
 int analizarRespuestaKERNEL(char *mensaje) {
@@ -166,9 +203,9 @@ int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el i
 				IP);
 		exit(1);
 	}
-
-	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina //tipo de conexion
-	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red//tipo de servicio puerto
+	//ordenacion de bytes de la red es htons = "h" de ordenacion de la maquina [Host Byte Order], "to" (a), "n" de "network" y "s" de "short"
+	their_addr.sin_family = AF_INET; //tipo de conexion
+	their_addr.sin_port = htons(puerto); //tipo de servicio puerto
 	bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
 	memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
 
@@ -201,7 +238,7 @@ int EnviarDatos(int socket, void *buffer) {
 	int bytecount;
 
 	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
-		Error("No puedo enviar información a al clientes. Socket: %d", socket);
+		Error("No puedo enviar información al kernel. Socket: %d", socket);
 
 	Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
 
@@ -214,15 +251,17 @@ void error(int code, char *err) {
 	fprintf(stderr, "%s", msg);
 	exit(1);
 }
+
 void Cerrar(int sRemoto) {
 
 	close(sRemoto);
 }
-/*
+
 void CerrarSocket(int socket) {
 	close(socket);
 	Traza("Se cerró el socket (%d).", socket);
-}*/
+}
+
 void ErrorFatal(char mensaje[], ...) {
 	char* nuevo;
 	va_list arguments;
