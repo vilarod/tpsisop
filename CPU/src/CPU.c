@@ -30,18 +30,23 @@
 
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/CPU/src/config.cfg"
+#define HandU 3
+#define HandK 1
+#define tCPUU 2
+#define tCPUK 1
 
-//hasta ver que hago con las primitivas..las uso globales:
 int socketUMV = 0;
 int socketKERNEL = 0;
 
+int CONECTADO_UMV = 0;
+int CONECTADO_KERNEL = 0;
 
 t_dictionary dicVariables;
 t_dictionary dicEtiquetas;
 
 PCB programa;
-
-
+int quantum=0;
+int io=0;
 
 //Llamado a las funciones primitivas
 
@@ -63,16 +68,16 @@ AnSISOP_funciones funciones_p =
 AnSISOP_kernel funciones_k =
   { .AnSISOP_signal = prim_signal, .AnSISOP_wait = prim_wait, };
 
+
 void
-ConexionConSocket(int * Conec, int socketConec, struct sockaddr_in destino)
+ConexionConSocket(int Conec, int socketConec, struct sockaddr_in destino)
 {
   //Controlo si puedo conectarme
   if ((connect(socketConec, (struct sockaddr*) &destino,
       sizeof(struct sockaddr))) == -1)
     perror("No me puedo conectar con servidor!");
   else
-    *Conec = 1;
-
+    Conec = 1;
 }
 
 //Para enviar datos
@@ -273,50 +278,31 @@ RecibirProceso(PCB prog, int quantum, int sRemoto)
   return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
 }
 
-char* PedirSentencia(int indiceCodigo, int segCodigo, int progCounter, int sRemoto)
+char* PedirSentencia()
 {
   //aca hare algo para enviarle el pedido a la umv y recibir lo solicitado
-
-  char* pedido = "1"; //lo inicializo en 1=getbyte
-  char* mensaje;
   int despl=0;
   int longi=0;
 
   char* instruccion;
   instruccion = malloc(1 * sizeof(char));
 
-  mensaje = malloc(1 * sizeof(char));
+  instruccion=getUMV(programa.indiceCodigo,programa.programCounter*8,8);
 
-  string_append(&instruccion, pedido);
-  serCadena(&instruccion,string_itoa(indiceCodigo)); //base
-  serCadena(&instruccion, string_itoa(progCounter*8)); //desplazamiento
-  serCadena(&instruccion, string_itoa(8)); //longitud
-
-  Enviar(sRemoto, instruccion); //envio el pedido a la umv
-  Recibir(sRemoto, mensaje);
-
-  deserializarDesplLong(mensaje,despl,longi); //tengo que saber que me mando
+  deserializarDesplLong(instruccion,despl,longi); //tengo que saber que me mando
 
   if ((despl !=0) && (longi !=0)) //si son igual 0->no recibi nada :S
     {
   instruccion="";
-  mensaje="";
+  instruccion=getUMV(programa.segmentoCodigo,despl,longi);
 
-  string_append(&instruccion, pedido);
-  serCadena(&instruccion,string_itoa(segCodigo));
-  serCadena(&instruccion,string_itoa(despl));
-  serCadena(&instruccion,string_itoa(longi));
-
-
-  Enviar(sRemoto, instruccion); //envio el pedido a la umv
-  Recibir(sRemoto, mensaje);
-    } else {mensaje="0"; // si no recibi nada -> el mensaje no comienza con 1
+    } else {instruccion="0"; // si no recibi nada -> el mensaje no comienza con 1
 }
 
 
-  if (string_starts_with(mensaje,"1")) //si comienza con 1 -> recibi un mensj valido
+  if (string_starts_with(instruccion,"1")) //si comienza con 1 -> recibi un mensj valido
     {
-      return string_substring(mensaje,1,(strlen(mensaje)-1));
+      return string_substring(instruccion,1,(strlen(instruccion)-1));
     } else {
       return "ERROR"; //sino, no sirve lo que recibi...tengo que ver lib errores!!!!
     }
@@ -374,14 +360,14 @@ grabar_valor(t_nombre_compartida variable,t_valor_variable valor)
 }
 
 void
-procesoTerminoQuantum(PCB prog)
+procesoTerminoQuantum()
 {
 
   char* aviso;
   aviso = malloc(1 * sizeof(char));
 
   aviso="4"; //  kernel sabe que 4 es fin de quantum
-  string_append(&aviso, serializar_PCB(prog));
+  string_append(&aviso, serializar_PCB(programa));
   Enviar(socketKERNEL,aviso);
 
 }
@@ -457,41 +443,45 @@ prepararDestino(struct sockaddr_in destino, int puerto, char* ip)
 
 
 void
-RecuperarDicEtiquetas(int indice, int tamanio, t_dictionary dicc)
+RecuperarDicEtiquetas()
 {
+/*
+  t_puntero_instruccion primer_instr;
+   char* ptr_etiquetas = "";
+   t_size tam_etiquetas = 0;
 
- /* int i;
-  int inicio;
-  char* funcion;
-
-  for (i=1; i< (tamanio + 1);i ++)
-    {
-      //aca tengo que ver como obtener la funcion y el inicio
-      //dictionary_put(dicc,funcion,inicio);
-    }*/
+   primer_instr = metadata_buscar_etiqueta(etiqueta, ptr_etiquetas,
+   tam_etiquetas);*/
 
 }
 void
-RecuperarContextoActual(PCB prog, t_dictionary dicc)
+RecuperarDicVariables()
 {
   //RECUPERAR ALGO
   //en sizeContextoActual tengo la cant de variables que debo leer
   //si es 0 -> programa nuevo
   //si es >0 -> cant de variables a leer desde seg stack en umv
 
-  int i;
+int i;
+int aux;
 char* variable;
-void* dato;
+int dato;
+char* recibo;
 
-  if (prog.sizeContextoActual > 0) //tengo variables a recuperar
+aux=programa.sizeContextoActual;
+
+  if (aux > 0) //tengo variables a recuperar
     {
       //voy de 0 a cantidad de variables en contexto actual
-      for (i=0; i < prog.sizeContextoActual; i ++)
+      for (i=0; i < aux; i ++)
         {
-         variable="";
-         dato=0;
-         //aca tengo que ver como obtener la variable y el dato
-         dictionary_put(&dicc,variable,dato);
+         recibo=getUMV(aux,0,1);
+         if (string_starts_with(recibo,"1"))
+          variable= string_substring(recibo,1, strlen(recibo) -1);
+         else printf("ERROR");
+         dato=aux + 1;
+         dictionary_put(&dicVariables,variable,&dato);
+         aux=aux + 5;
 
         }
 
@@ -500,19 +490,37 @@ void* dato;
 
 }
 
+int saludar(int sld,int tipo, int sRemoto)
+{
+  int aux=0;
+  char* recibo;
+  recibo=malloc(1 * sizeof(char));
+  char* msj;
+  msj=malloc(1 * sizeof(char));
+
+  string_append(&msj, string_itoa(sld));
+  string_append(&msj, string_itoa(tipo));
+  Enviar(sRemoto,msj);
+  Recibir(sRemoto,recibo);
+
+  if (string_starts_with(recibo,"1"))
+    {
+      aux= 1;
+    } else {
+      aux=0; }
+
+  return aux;
+}
+
+
 int
 main(void)
 
 {
-
-
-
-  int CONECTADO_UMV = 0;
-  int CONECTADO_KERNEL = 0;
-
   //Llegué y quiero leer los datos de conexión
   //donde esta el kernel?donde esta la umv?
-
+int aux_conec_umv=0;
+int aux_conec_ker=0;
   int UMV_PUERTO = ObtenerPuerto("PUERTO_UMV");
   int KERNEL_PUERTO = ObtenerPuerto("PUERTO_KERNEL");
   char* UMV_IP = ObtenerIP("IP_UMV");
@@ -526,39 +534,21 @@ main(void)
       KERNEL_IP);
 
   //Ahora que se donde estan, me quiero conectar con los dos
-  ConexionConSocket(&CONECTADO_UMV, socketUMV, dest_UMV);
-  ConexionConSocket(&CONECTADO_KERNEL, socketKERNEL, dest_KERNEL);
+  ConexionConSocket(aux_conec_umv, socketUMV, dest_UMV);
+  ConexionConSocket(aux_conec_ker, socketKERNEL, dest_KERNEL);
 
   //Control programa
   int tengoProg = 0;
-  int quantum;
-  char* sentencia;
-  sentencia = malloc(1 * sizeof(char));
 
+  char* sentencia = malloc(1 * sizeof(char));
 
+  if (aux_conec_umv == saludar(HandU,tCPUU,socketUMV))
+    CONECTADO_UMV= 1;
+  else CONECTADO_UMV= 0;
 
-
-  //solo pruebas
-  /*
-  sentencia= PedirSentencia(687, 200,5, 2);
-  PCB prueba;
-  char* eje = "1143-242-33-44-55-6609-77-88-9900-";
-
-  prueba = desearilizar_PCB(eje, 0);
-
-  printf("/n %d", prueba.id);
-  printf("/n %d", prueba.segmentoCodigo);
-  printf("/n %d", prueba.segmentoStack);
-  printf("/n %d", prueba.cursorStack);
-  printf("/n %d", prueba.indiceCodigo);
-  printf("/n %d", prueba.indiceEtiquetas);
-  printf("/n %d", prueba.programCounter);
-  printf("/n %d", prueba.sizeContextoActual);
-  printf("/n %d", prueba.sizeIndiceEtiquetas);
-
-  printf("cadena %s", serializar_PCB(prueba));
-
-  analizadorLinea("a = b + 3", &funciones_p, &funciones_k);*/
+  if (aux_conec_ker == saludar(HandK,tCPUK,socketKERNEL))
+  CONECTADO_KERNEL=1 ;
+  else CONECTADO_KERNEL=0 ;
 
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while ((CONECTADO_KERNEL == 1) && (CONECTADO_UMV == 1))
@@ -572,37 +562,24 @@ main(void)
         }
       //Si salio del ciclo anterior es que ya tengo un programa
 
-
-      RecuperarDicEtiquetas(programa.indiceEtiquetas,
-                            programa.sizeIndiceEtiquetas, dicEtiquetas);
-      RecuperarContextoActual(programa,dicVariables);
+      RecuperarDicEtiquetas();
+      RecuperarDicVariables();
 
       while (quantum > 0) //mientras tengo quantum
         {
-
-          //tengo que recuperar el contexto actual del programa que recibi
-
-
           programa.programCounter++; //Incremento el PC
-          sentencia=PedirSentencia(programa.indiceCodigo,
-                                    programa.segmentoCodigo,
-                                    programa.programCounter,socketUMV); //le pido a la umv la sentencia a ejecutar
+          sentencia=PedirSentencia(); //le pido a la umv la sentencia a ejecutar
           parsearYejecutar(sentencia); //ejecuto sentencia
-          quantum--; //decremento el quantum
-
-          // aca me conviene poner un control, si ya terminó de ejecutar y uso menos
-          //quantum que el previsto -> quantum=0 para que salga
+          quantum--;
         }
 
       //una vez que el proceso termino el quantum
       //quiero salvar el contexto y limpiar estructuras auxiliares
       salvarContextoProg();
       limpiarEstructuras();
-      procesoTerminoQuantum(programa); //ahora le aviso al kernel que el proceso
+      procesoTerminoQuantum(); //ahora le aviso al kernel que el proceso
                                //ha finalizado
-      //el enunciado dice que cuando finalizo la ejecucion de un programa
-      //tengo que destruir las estructuras correspondientes
-      //cuando termino la ejecución de ese
+
       CONECTADO_UMV = seguirConectado();
       CONECTADO_KERNEL=CONECTADO_UMV;
     }
@@ -610,8 +587,8 @@ main(void)
       //avisar al kernel asi me saca de sus recursos
 
   AvisarDescAKernel();
-
-  Cerrar(socketKERNEL); //cierro el socket
+ // destruirEstructuras();
+  Cerrar(socketKERNEL);
   Cerrar(socketUMV);
 
   return EXIT_SUCCESS;
@@ -623,37 +600,49 @@ main(void)
 char* getUMV(int base, int dsp, int tam)
 {
 
-char* instruccion;
-instruccion = malloc(1 * sizeof(char));
+char* instruccion= malloc(1*sizeof(char));
+char* recibo= malloc(1*sizeof(char));
+
 serCadena(&instruccion,string_itoa(base)); //base
 serCadena(&instruccion, string_itoa(dsp)); //desplazamiento
 serCadena(&instruccion, string_itoa(tam)); //longitud
+Enviar(socketUMV,instruccion);
+Recibir(socketUMV,recibo);
 
-return instruccion;
+return recibo;
 }
 
 
-void setUMV(char** mensaje,int ptro, int dsp, int tam, char* valor)
+int setUMV(int ptro, int dsp, int tam, char* valor)
 {
+  int resultado=0;
+ char* mensaje="2";
+ mensaje= malloc(1 * sizeof(char));
+ char* recibo= malloc(1*sizeof(char));
 
-   serCadena(mensaje,string_itoa(ptro)); //concateno con la direccion a donde apunta aux
-   serCadena(mensaje,string_itoa(dsp));//no tengo desplazamiento
-   serCadena(mensaje,string_itoa(tam));//uso un tamaño de 5 bytes
-   serCadena(mensaje,valor); //que guarde la direccion del cursor de stack actual
+   serCadena(&mensaje,string_itoa(ptro)); //concateno con la direccion a donde apunta aux
+   serCadena(&mensaje,string_itoa(dsp));//no tengo desplazamiento
+   serCadena(&mensaje,string_itoa(tam));//uso un tamaño de 5 bytes
+   serCadena(&mensaje,valor); //que guarde la direccion del cursor de stack actual
+   Enviar(socketUMV,mensaje);
+   Recibir(socketUMV,recibo);
 
+   if (string_starts_with(recibo,"1"))
+     resultado= 1;
+
+  return resultado;
 }
+
 
 // Primitivas
 
 void
 prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
-
-char* pedido="2";
-pedido= malloc(1 * sizeof(char));
-setUMV(&pedido, direccion_variable + 1,0,4,string_itoa(valor));
-Enviar(socketUMV, pedido);
-//aca tengo que leer algo de la umv...eso lo veo despues
+int validar;
+validar=setUMV(direccion_variable,1,4,string_itoa(valor));
+if (validar==0)
+ printf("ERROR");
 
 }
 
@@ -677,23 +666,8 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
 
- int aux;
- char* mensaje="2";
- mensaje= malloc(1 * sizeof(char));
- //a aux le asigno la direccion base del contexto actual +
- //(1 byte id_varible + 4bytes valor)*tamaño contexto
- aux=programa.cursorStack + 5*(programa.sizeContextoActual);
- setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
- Enviar(socketUMV,mensaje);
- mensaje="2";
- setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
- setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
- Enviar(socketUMV,mensaje);
- mensaje="2";
- setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
- Enviar(socketUMV,mensaje);
- programa.cursorStack= aux + 10; //mi contexto va a comenzar donde finalizó el otro
- programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
+
+
  dictionary_clean(&dicVariables);//limpio el dic de variables
 
 }
@@ -705,29 +679,6 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   //preservar el contexto actual para retornar al mismo
 
 
-  int aux;
-  char* mensaje="2";
-  mensaje= malloc(1 * sizeof(char));
-  //a aux le asigno la direccion base del contexto actual +
-  //(1 byte id_varible + 4bytes valor)*tamaño contexto
-  aux=programa.cursorStack + 5*(programa.sizeContextoActual);
-  setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
-  Enviar(socketUMV,mensaje);
-  mensaje="2";
-  setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
-  Enviar(socketUMV,mensaje);
-  mensaje="2";
-  setUMV(&mensaje,(aux + 10),0,5,string_itoa(donde_retornar));
-  setUMV(&mensaje, aux,0,5,string_itoa(programa.cursorStack));
-  Enviar(socketUMV,mensaje);
-  mensaje="2";
-  setUMV(&mensaje,(aux + 5),0,5,string_itoa(programa.programCounter));
-  Enviar(socketUMV,mensaje);
-  mensaje="2";
-  setUMV(&mensaje,(aux + 10),0,5,string_itoa(donde_retornar));
-  Enviar(socketUMV,mensaje);
-  programa.cursorStack= aux + 15; //mi contexto va a comenzar donde finalizó el otro
-  programa.sizeContextoActual=0; // el tamaño del contexto actual va a ser 0
   dictionary_clean(&dicVariables);//limpio el dic de variables
 
 
@@ -738,22 +689,14 @@ prim_finalizar(void)
 {
   //recuperar pc y contexto apilados en stack
 
-/*
-  t_puntero aux;
-  aux=prog.cursorStack;
-*/
-
-int aux;
- aux=programa.cursorStack;
+int aux=programa.cursorStack;
 limpiarEstructuras();
 programa.programCounter=atoi(getUMV(aux-5, 0,5));
 programa.cursorStack=atoi(getUMV(aux-10, 0,5));
 programa.sizeContextoActual=(aux-programa.cursorStack)/5;
 if (programa.sizeContextoActual > 0)
-{ //armarDicVariables(programa.cursorStack,prog.sizeContextoActual);
-} else { printf("se termino!!!"); }
-
-
+RecuperarDicVariables();
+ else printf("se termino!!!");
 
 
 }
@@ -775,39 +718,28 @@ prim_imprimir(t_valor_variable valor_mostrar)
 t_valor_variable
 prim_dereferenciar(t_puntero direccion_variable)
 {
-  t_valor_variable valor;
+  t_valor_variable valor=0;
  char* mensaje= malloc(1 * sizeof(char));
- char* respuesta= malloc(1 * sizeof(char));
  
-  mensaje=getUMV(direccion_variable + 1, 0 , 4);
-  Enviar(socketUMV, mensaje);
-  Recibir(socketUMV,respuesta);
-  
- if (string_starts_with(respuesta,"1")) //si comienza con 1 -> recibi un mensj valido
-    {
-      valor= atoi(string_substring(respuesta,1,(strlen(respuesta)-1)));
-    } else {
-      valor=0; //aca en verdad tendria que devolver un valor por default a convenir-o mensaje de error
-    }
+  mensaje=getUMV((direccion_variable + 1), 0 , 4);
+  if (string_starts_with(mensaje,"1"))//si comienza con 1 -> recibi un mensj valido
+  valor= atoi(string_substring(mensaje,1,(strlen(mensaje)-1)));
+  else
+    printf("ERROR");; //aca en verdad tendria que devolver un valor por default a convenir-o mensaje de error
 
-  return valor; //devuelve el valor encontrado
+  
+  return valor;
 }
 
 void
 prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
-  /*t_puntero_instruccion primer_instr;
-   char* ptr_etiquetas = "";
-   t_size tam_etiquetas = 0;
+  //int posicion;
 
-   primer_instr = metadata_buscar_etiqueta(etiqueta, ptr_etiquetas,
-   tam_etiquetas);*/
+  //posicion=dictionary_get(&dicEtiquetas,etiqueta);
+  //aca tengo que asignarle la posicion al cursorstack?
 
-  //busco la primer instruccion ejecutable
   
-  
- // aca busco la etiqueta en el diccionario de etiquetas, lo que esta comentado arriba es para 
- //llenar el dic
 }
 
 t_puntero
@@ -817,8 +749,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   //busco la posicion de la variable
   //las variables y las posiciones respecto al stack estan en el dicVariables
 
-  /*posicion=dictionary_get(&dicVariables,&identificador_variable);
-  if (posicion==0) { posicion=-1;}*/
+  //posicion=dictionary_get(&dicVariables,identificador_variable);
 
   return posicion; //devuelvo la posicion
 }
@@ -843,21 +774,20 @@ void
 prim_imprimirTexto(char* texto)
 {
   /*int cant_caracteres;
-   cant_caracteres = 1; //inicializo de prueba
-
-   //acá me conecto con el kernel y le paso el mensaje
+   aca le envio mensaje al kernel
    */
 }
 
 void
 prim_entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 {
-  /* int tiempo2;
-   tiempo2 = 1; //inicializo de prueba
-
-   //acá pido por sys call a kernel
-   // entrada_salida(dispositivo,tiempo);
+  /*
+   *
+   * aca le mando el mensaje al kernel
+   *
    */
+  quantum=0; //para que salga del ciclo
+  io=1; //señal de que paso por entrada y salida...ya le envio el pcb al kernel
 }
 
 void
