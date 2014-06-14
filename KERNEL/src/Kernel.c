@@ -77,6 +77,12 @@ int main(int argv, char** argc) {
 	Puerto = ObtenerPuertoConfig();
 	PuertoPCP = ObtenerPuertoPCPConfig();
 
+	//Inicializo semaforo
+	seminit( &readyCont, 0);
+	seminit( &CPUCont, 0);
+	seminit( &finalizarCont, 0);
+	seminit( &imprimirCont, 0);
+
 	//Crear Listas de estados
 	//PCB * NUEVO, LISTO;
 	//NUEVO = PCB * list_create();
