@@ -33,6 +33,11 @@
 #define ENVIARPROGRAMA "11"
 #define CONFIRMACION "33"
 
+//Mensajes aceptados
+#define MSJ_HANDSHAKE             3
+#define MSJ_RECIBO_PROGRAMA       1
+#define MSJ_IMPRIMI_ESTO	      2
+
 //Tamaño buffer
 #define BUFFERSIZE 1024
 
