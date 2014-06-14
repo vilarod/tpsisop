@@ -14,6 +14,7 @@ void CerrarSocket(int socket);
 char *ObtenerIPUMV();
 int ObtenerPuertoConfig();
 int ObtenerPuertoUMV();
+int ObtenerPuertoPCPConfig();
 
 
 
@@ -46,5 +47,6 @@ char* RespuestaClienteOk(char *buffer);
 //Globales
 int ImprimirTrazaPorConsola = 1;
 int Puerto;
+int PuertoPCP;
 int UMV_PUERTO;
 char *UMV_IP;

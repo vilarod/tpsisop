@@ -75,6 +75,7 @@ int main(int argv, char** argc) {
 	UMV_PUERTO = ObtenerPuertoUMV();
 	UMV_IP = ObtenerIPUMV();
 	Puerto = ObtenerPuertoConfig();
+	PuertoPCP = ObtenerPuertoPCPConfig();
 
 	//Crear Listas de estados
 	//PCB * NUEVO, LISTO;
@@ -160,7 +161,7 @@ void *HiloOrquestadorDeCPU()
 	}
 
 	my_addr.sin_family = AF_INET;
-	my_addr.sin_port = htons(Puerto);
+	my_addr.sin_port = htons(PuertoPCP);
 	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
 	memset(&(my_addr.sin_zero), '\0', 8* sizeof(char));
 
@@ -170,7 +171,7 @@ void *HiloOrquestadorDeCPU()
 	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
 		ErrorFatal("Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
 
-	Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, Puerto);
+	Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, PuertoPCP);
 
 	while (1)
 	{
@@ -251,6 +252,12 @@ int ObtenerPuertoConfig() {
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_int_value(config, "PUERTO");
+}
+
+int ObtenerPuertoPCPConfig() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTOPCP");
 }
 
 void conectarAUMV() {
