@@ -36,8 +36,8 @@ void deserializarDesplLong(char * msj,int despl, int longi);
 char* getUMV(int base, int dsp, int tam);
 char* serializar_PCB (PCB prog);
 void serCadena(char ** msj, char* agr);
-void setUMV(char** mensaje,int ptro, int dsp, int tam, char* valor);
-
+int setUMV(int ptro, int dsp, int tam, char* valor);
+int saludar(int sld,int tipo, int sRemoto); //el handshake
 
 //Obtener datos de conexión
 int ObtenerPuerto(char* que);
@@ -45,11 +45,11 @@ char* ObtenerIP(char* que);
 
 //Manejo de conexiones
 int Enviar (int sRemoto, char * buffer);
-void ConexionConSocket(int *Conec,int socketConec,struct sockaddr_in dest);
+void ConexionConSocket(int Conec,int socketConec,struct sockaddr_in dest);
 void Cerrar(int sRemoto);
 int seguirConectado();
 void AvisarDescAKernel();
-void procesoTerminoQuantum(PCB prog);
+void procesoTerminoQuantum();
 int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
 struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
@@ -57,15 +57,15 @@ struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
 //Recibir-Enviar datos con el kernel
 int RecibirProceso(PCB prog,int quantum,int sRemoto); //para recibir el pcb y el q
-char* PedirSentencia(int indiceCodigo, int segCodigo, int progCounter, int sRemoto); //para recibir la instruccion
+char* PedirSentencia(); //para recibir la instruccion
 
 
 //Ejecutar
 void parsearYejecutar (char* instr);
 void salvarContextoProg();
 void limpiarEstructuras();
-void RecuperarContextoActual(PCB prog, t_dictionary dicc);
-void RecuperarDicEtiquetas(int indice, int tamanio, t_dictionary dicc);
+void RecuperarDicVariables();
+void RecuperarDicEtiquetas();
 
 
 void grabar_valor(t_nombre_compartida variable,t_valor_variable valor);
