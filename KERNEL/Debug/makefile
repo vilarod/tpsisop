@@ -26,7 +26,7 @@ endif
 all: KERNEL
 
 dependents:
-	-cd /home/utnso/tp-2014-1c-garras/Commons/Debug && $(MAKE) clean all
+	-cd /home/utnso/tp-2014-1c-garras/Commons/Debug && $(MAKE) all
 
 # Tool invocations
 KERNEL: $(OBJS) $(USER_OBJS) /home/utnso/tp-2014-1c-garras/Commons/Debug/libcommons.so

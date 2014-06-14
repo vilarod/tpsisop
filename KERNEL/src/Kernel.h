@@ -15,8 +15,9 @@ char *ObtenerIPUMV();
 int ObtenerPuertoConfig();
 int ObtenerPuertoUMV();
 int ObtenerPuertoPCPConfig();
-
-
+int ObtenerQuamtum();
+int ObtenerRetardo();
+int ObtenerMulti();
 
 //Hilos
 void *PLP(void *arg);
@@ -43,6 +44,7 @@ int pedirMemoriaUMV(int socketumv);
 int AtiendeClienteCPU(void * arg);
 int posicionDeBufferAInt(char* buffer, int posicion);
 char* RespuestaClienteOk(char *buffer);
+void agregarNuevaCPU(int socket);
 
 //Semaforo Contador
 typedef struct{
@@ -58,11 +60,40 @@ void seminit(psem_t *ps, int n);
 
 psem_t readyCont,CPUCont,finalizarCont, imprimirCont;
 
+//Lista de CPU
+typedef struct _t_CPU {
+	int idCPU;
+	int idPrograma;
+	int libre;
+} t_CPU;
+
+static t_CPU *cpu_create(int idCPU)
+{
+	t_CPU *new = malloc(sizeof(t_CPU));
+	new->idPrograma = 0;
+	new->idCPU = idCPU;
+	new->libre = 0;
+	return new;
+}
+
+static void cpu_destroy(t_CPU *self)
+{
+	free(self);
+}
+
+
+t_CPU l_CPU;
+bool encontrarInt(int actual, int expected);
+t_CPU*  encontrarCPULibre();
+
 //Globales
 int ImprimirTrazaPorConsola = 1;
 int Puerto;
 int PuertoPCP;
 int UMV_PUERTO;
+int Quamtum;
+int Retardo;
+int Multi;
 char *UMV_IP;
-
+t_list *listCPU;
 

@@ -59,15 +59,8 @@ typedef struct PCBs {
 	int sizeIndiceEtiquetas;
 } PCB;
 
-typedef struct CPUs {
-	int id;
-	int programa;
-	int libre;
-} CPU;
-
-CPU CPU1;
 PCB PCB1;
-t_list *listCPU;
+
 int socketumv;
 int main(int argv, char** argc) {
 
@@ -77,11 +70,16 @@ int main(int argv, char** argc) {
 	Puerto = ObtenerPuertoConfig();
 	PuertoPCP = ObtenerPuertoPCPConfig();
 
+	//Obtener datos del Kernell
+	Quamtum = ObtenerQuamtum();
+	Retardo = ObtenerRetardo();
+	Multi = ObtenerMulti();
+
 	//Inicializo semaforo
-	seminit( &readyCont, 0);
-	seminit( &CPUCont, 0);
-	seminit( &finalizarCont, 0);
-	seminit( &imprimirCont, 0);
+	seminit(&readyCont, 0);
+	seminit(&CPUCont, 0);
+	seminit(&finalizarCont, 0);
+	seminit(&imprimirCont, 0);
 
 	//Crear Listas de estados
 	//PCB * NUEVO, LISTO;
@@ -92,6 +90,9 @@ int main(int argv, char** argc) {
 	pthread_t plp;
 	pthread_create(&plp, NULL, PLP, NULL );
 	pthread_join(plp, NULL );
+
+	//liberamos recursos
+	list_clean_and_destroy_elements(listCPU, (void*) cpu_destroy);
 
 	printf("Finalizado\n");
 
@@ -134,10 +135,8 @@ void *PCP(void *arg) {
 	pthread_t plpCPU, plpReady, plpBloqueado;
 	pthread_create(&plpCPU, NULL, HiloOrquestadorDeCPU, NULL );
 
-
 	//crear hilo de ready
 	pthread_create(&plpReady, NULL, moverEjecutar, NULL );
-
 
 	//crear hilo de bloqueado
 	pthread_create(&plpBloqueado, NULL, moverReady, NULL );
@@ -149,8 +148,7 @@ void *PCP(void *arg) {
 	return NULL ;
 }
 
-void *HiloOrquestadorDeCPU()
-{
+void *HiloOrquestadorDeCPU() {
 	int socket_host;
 	struct sockaddr_in client_addr;
 	struct sockaddr_in my_addr;
@@ -159,49 +157,53 @@ void *HiloOrquestadorDeCPU()
 
 	socket_host = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_host == -1)
-		ErrorFatal("No se pudo inicializar el socket que escucha a los clientes");
+		ErrorFatal(
+				"No se pudo inicializar el socket que escucha a los clientes");
 
-	if (setsockopt(socket_host, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-	{
+	if (setsockopt(socket_host, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
+			== -1) {
 		ErrorFatal("Error al hacer el 'setsockopt'");
 	}
 
 	my_addr.sin_family = AF_INET;
 	my_addr.sin_port = htons(PuertoPCP);
 	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
-	memset(&(my_addr.sin_zero), '\0', 8* sizeof(char));
+	memset(&(my_addr.sin_zero), '\0', 8 * sizeof(char));
 
 	if (bind(socket_host, (struct sockaddr*) &my_addr, sizeof(my_addr)) == -1)
 		ErrorFatal("Error al hacer el Bind. El puerto está en uso");
 
 	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
-		ErrorFatal("Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
+		ErrorFatal(
+				"Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
 
-	Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, PuertoPCP);
+	Traza(
+			"El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d",
+			socket_host, PuertoPCP);
 
-	while (1)
-	{
+	while (1) {
 		int socket_client;
 
 		size_addr = sizeof(struct sockaddr_in);
 
-		if ((socket_client = accept(socket_host, (struct sockaddr *) &client_addr, &size_addr)) != -1)
-		{
-			Traza("Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d", inet_ntoa(client_addr.sin_addr), client_addr.sin_port, socket_client);
+		if ((socket_client = accept(socket_host,
+				(struct sockaddr *) &client_addr, &size_addr)) != -1) {
+			Traza(
+					"Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d",
+					inet_ntoa(client_addr.sin_addr), client_addr.sin_port,
+					socket_client);
 
 			// Aca hay que crear un nuevo hilo, que será el encargado de atender al cliente
 			pthread_t hNuevoCliente;
-			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeClienteCPU, (void *) socket_client);
-		}
-		else
-		{
+			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeClienteCPU,
+					(void *) socket_client);
+		} else {
 			Error("ERROR AL ACEPTAR LA CONEXIÓN DE UN CLIENTE");
 		}
 	}
 
 	CerrarSocket(socket_host);
 }
-
 
 void *escuharCPU(void *arg) {
 
@@ -264,6 +266,24 @@ int ObtenerPuertoPCPConfig() {
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_int_value(config, "PUERTOPCP");
+}
+
+int ObtenerQuamtum() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "QUAMTUM");
+}
+
+int ObtenerRetardo() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "RETARDO");
+}
+
+int ObtenerMulti() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "MULTIPROGRAMACION");
 }
 
 void conectarAUMV() {
@@ -484,13 +504,9 @@ int AtiendeCliente(int sockete) {
 	return code;
 }
 
-int AtiendeClienteCPU(void * arg)
-{
+int AtiendeClienteCPU(void * arg) {
 	int socket = (int) arg;
 
-//Es el ID del programa con el que está trabajando actualmente el HILO.
-//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
-//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
 //	int id_CPU = 0;
 	int tipo_Cliente = 0;
 
@@ -510,35 +526,34 @@ int AtiendeClienteCPU(void * arg)
 // Código de salida por defecto
 	int code = 0;
 
-	while ((!desconexionCliente))
-	{
+	while ((!desconexionCliente)) {
 		buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
 
 		//Recibimos los datos del cliente
 		buffer = RecibirDatos2(socket, buffer, &bytesRecibidos);
 
-		if (bytesRecibidos > 0)
-		{
+		if (bytesRecibidos > 0) {
 			//Analisamos que peticion nos está haciendo (obtenemos el comando)
 			tipo_mensaje = ObtenerComandoMSJ(buffer);
 
 			//Evaluamos los comandos
-			switch (tipo_mensaje)
-			{
+			switch (tipo_mensaje) {
 
-				case MSJ_HANDSHAKE:
-					buffer = ComandoHandShake2(buffer, &tipo_Cliente);
-					//crear nueva CPU
-					break;
-				default:
-					//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
-					break;
+			case MSJ_HANDSHAKE:
+				buffer = ComandoHandShake2(buffer, &tipo_Cliente);
+				//crear nueva CPU
+				if (tipo_Cliente == TIPO_CPU) {
+					agregarNuevaCPU(socket);
+				}
+				break;
+			default:
+				//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
+				break;
 			}
 
 			// Enviamos datos al cliente.
 			EnviarDatos(socket, buffer);
-		}
-		else
+		} else
 			desconexionCliente = 1;
 
 	}
@@ -548,8 +563,7 @@ int AtiendeClienteCPU(void * arg)
 	return code;
 }
 
-char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos)
-{
+char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 	*bytesRecibidos = 0;
 	int tamanioNuevoBuffer = 0;
 	int mensajeCompleto = 0;
@@ -560,22 +574,24 @@ char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos)
 	char bufferAux[BUFFERSIZE];
 
 	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-	memset(buffer, 0, 1* sizeof(char));
+	memset(buffer, 0, 1 * sizeof(char));
 
 	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
 	{
-		memset(bufferAux, 0, BUFFERSIZE* sizeof(char)); //-> llenamos el bufferAux con barras ceros.
+		memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
 
 		//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
-		if ((*bytesRecibidos = *bytesRecibidos + recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
-			Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
+		if ((*bytesRecibidos = *bytesRecibidos
+				+ recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
+			Error(
+					"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+					socket);
 
 		cantidadBytesRecibidos = strlen(bufferAux);
 		cantidadBytesAcumulados = strlen(buffer);
 		tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
 
-		if (tamanioNuevoBuffer > 0)
-		{
+		if (tamanioNuevoBuffer > 0) {
 			buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
 
 			sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
@@ -591,20 +607,16 @@ char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos)
 	return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
 }
 
-char* ComandoHandShake2(char *buffer, int *tipoCliente)
-{
+char* ComandoHandShake2(char *buffer, int *tipoCliente) {
 // Formato del mensaje: CD
 // C = codigo de mensaje ( = 3)
 
 	int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
 
-	if (tipoDeCliente == TIPO_CPU)
-	{
+	if (tipoDeCliente == TIPO_CPU) {
 		*tipoCliente = tipoDeCliente;
 		buffer = RespuestaClienteOk(buffer);
-	}
-	else
-	{
+	} else {
 		*tipoCliente = 0;
 		//SetearErrorGlobal("HANDSHAKE ERROR. Tipo de cliente invalido (%d). KERNEL o '2' = CPU.", posicionDeBufferAInt(buffer, 1));
 		//buffer = RespuestaClienteError(buffer, g_MensajeError);
@@ -613,8 +625,7 @@ char* ComandoHandShake2(char *buffer, int *tipoCliente)
 	return buffer;
 }
 
-int posicionDeBufferAInt(char* buffer, int posicion)
-{
+int posicionDeBufferAInt(char* buffer, int posicion) {
 	int logitudBuffer = 0;
 	logitudBuffer = strlen(buffer);
 
@@ -624,15 +635,13 @@ int posicionDeBufferAInt(char* buffer, int posicion)
 		return chartToInt(buffer[posicion]);
 }
 
-char* RespuestaClienteOk(char *buffer)
-{
+char* RespuestaClienteOk(char *buffer) {
 	int tamanio = sizeof(char) * 2;
-	buffer = realloc(buffer, tamanio* sizeof(char));
-	memset(buffer, 0, tamanio* sizeof(char));
+	buffer = realloc(buffer, tamanio * sizeof(char));
+	memset(buffer, 0, tamanio * sizeof(char));
 	sprintf(buffer, "%s", "1");
 	return buffer;
 }
-
 
 void seminit(psem_t *ps, int n) {
 	pthread_mutex_init(&ps->semdata, NULL );
@@ -677,3 +686,18 @@ void semdestroy(psem_t *ps) {
 	pthread_mutex_destroy(&ps->sem_mutex);
 }
 
+void agregarNuevaCPU(int socket) {
+	list_add(listCPU, cpu_create(socket));
+}
+
+bool encontrarInt(int actual, int expected) {
+	return actual == expected;
+}
+
+t_CPU* encontrarCPULibre() {
+	int _is_CPU(t_CPU *p) {
+		return encontrarInt(p->libre, 0);
+	}
+	t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
+	return aux;
+}
