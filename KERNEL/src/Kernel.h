@@ -49,14 +49,25 @@ typedef struct PCBs {
 
 PCB PCB1;
 
-void crearEscucha();
-int AtiendeCliente(int sockete);
-int ObtenerComandoMSJ(char buffer[]);
+//deserealizar
+PCB desearilizar_PCB(char* estructura, int pos);
+
+//serializar
+char* serializar_PCB (PCB prog);
+void iniciarPCB(PCB prog);
+
+//Comando de mensajes
+void comandoLiberar(int socket);
 char ObtenerComandoCPU(char buffer[]);
+int ObtenerComandoMSJ(char buffer[]);
 void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
 char* ComandoHandShake2(char *buffer, int *tipoCliente);
-int chartToInt(char x);
 void ComandoRecibirPrograma(char *buffer, int id);
+
+
+void crearEscucha();
+int AtiendeCliente(int sockete);
+int chartToInt(char x);
 //int pedirMemoriaUMV(int socketumv, PCB programa);
 int pedirMemoriaUMV(int socketumv);
 int posicionDeBufferAInt(char* buffer, int posicion);
@@ -105,6 +116,7 @@ static void cpu_destroy(t_CPU *self)
 t_CPU l_CPU;
 bool encontrarInt(int actual, int expected);
 t_CPU*  encontrarCPULibre();
+t_CPU* encontrarCPU(int idcpu);
 
 //Globales
 int ImprimirTrazaPorConsola = 1;
