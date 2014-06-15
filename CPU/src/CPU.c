@@ -32,9 +32,9 @@
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/CPU/src/config.cfg"
 #define HandU 3
-#define HandK 1
+#define HandK 3
 #define tCPUU 2
-#define tCPUK 1
+#define tCPUK 2
 
 #define BUFFERSIZE 1024
 int socketUMV = 0;
