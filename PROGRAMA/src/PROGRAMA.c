@@ -34,9 +34,8 @@
 #define CONFIRMACION "33"
 
 //Mensajes aceptados
-#define MSJ_HANDSHAKE             3
-#define MSJ_RECIBO_PROGRAMA       1
-#define MSJ_IMPRIMI_ESTO	      2
+//MSJ_IMPRIMI_ESTO comienza con 2
+//MSJ_FIN_DE_EJECUCION 4
 
 //Tamaño buffer
 #define BUFFERSIZE 1024
@@ -44,7 +43,7 @@
 //Puerto
 //#define IP "127.0.0.1"
 //#define PORT "6007"
-
+int ImprimirRespuesta(char *texto);
 
 
 int main(int argc, char* argv[]) {
@@ -63,7 +62,7 @@ int main(int argc, char* argv[]) {
 	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
 
 	FILE* f; //archivo que voy a leer
-	char* contents;
+	char* contents=NULL;
 	size_t len;
 	size_t bytesRead;
 
@@ -90,8 +89,9 @@ int main(int argc, char* argv[]) {
 	txt_close_file(f);//cierro el archivo
 
 	char **linea;
-	char *separator;
-	char *nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
+	char *separator = NULL;
+	char *nuevo = NULL;
+	nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
 	strcpy(nuevo, "");
 	separator = "\n";
 
@@ -107,7 +107,8 @@ int main(int argc, char* argv[]) {
 	printf("%s", nuevo); //verifico que tengo el programa sin la primer linea
 	printf("\n");
 
-	char *programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
+	char *programa = NULL;
+	programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
 	programa = strdup(nuevo);
 	int largo;
 	largo = strlen(programa);
@@ -119,6 +120,9 @@ int main(int argc, char* argv[]) {
 	free(contents);
 	free(nuevo);
 	free(programa);
+	contents = NULL;
+	nuevo = NULL;
+	programa = NULL;
 	return 0;
 }
 
@@ -148,44 +152,65 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
 	RecibirDatos(sockfd, respuestahandshake);
-
-	EnviarDatos(sockfd, ENVIARPROGRAMA); //ENVIARPROGRAMA reemplaza a "11"
-	RecibirDatos(sockfd, respuestahandshake);
+	if(respuestahandshake[0] == '0')
+	{
+		printf("Error del KERNEL");
+		exit(1);
+	}
+    AnalizarRespuestaKERNEL(respuestahandshake);
 
 	EnviarDatos(sockfd, programa); //envio el programa
+	RecibirDatos(sockfd, respuestahandshake);
+	if(respuestahandshake[0] == '0')
+	{
+			printf("Error del KERNEL");
+			exit(1);
+	}
 
-	int finDeEjecucion = 0;
-	while (!finDeEjecucion) {
+	int finDeEjecucion;
+	finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
+	while (finDeEjecucion!=0) {
 		RecibirDatos(sockfd, respuestahandshake);
-		EnviarConfirmacionDeRecepcionDeDatos();
 
 		finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
 
-		if (!finDeEjecucion)
-			txt_write_in_stdout(respuestahandshake);
+		if (finDeEjecucion != 0)
+		{
+			AnalizarRespuestaKERNEL(respuestahandshake);
+			ImprimirRespuesta(respuestahandshake);
+		    EnviarConfirmacionDeRecepcionDeDatos(sockfd);
+		}
 
 	}
-	txt_write_in_stdout("Fin de ejecuacion");
+	txt_write_in_stdout("Fin de ejecucion");
 
-	return analizarRespuestaKERNEL(respuestahandshake);
+	return AnalizarRespuestaKERNEL(respuestahandshake);
+}
+int ImprimirRespuesta(char *mensaje)
+{
+
+	if(mensaje[0] == '2')
+		printf("%s", (mensaje + 1));
+
+	return 0;
 }
 
-int EnviarConfirmacionDeRecepcionDeDatos( sockfd) {
+int EnviarConfirmacionDeRecepcionDeDatos(sockfd) {
 
 	EnviarDatos(sockfd, CONFIRMACION);
 	return 0;
 }
 
 int AnalizarSiEsFinDeEjecucion(char *respuestahandshake) {
-	char *fin = "22";
-	if (respuestahandshake == fin)
+
+	if (respuestahandshake[0] == '4')
 		return 0;
 	else
 		return 1;
 }
 
-int analizarRespuestaKERNEL(char *mensaje) {
-	if (mensaje[0] == 0) {
+int AnalizarRespuestaKERNEL(char *mensaje) {
+	if (mensaje[0] == '0') {
 		Error("eL KERNEL nos devolvio un error: %s", mensaje);
 		return 0;
 	} else
@@ -223,15 +248,14 @@ int RecibirDatos(int socket, char *buffer) {
 // memset se usa para llenar el buffer con 0s
 	memset(buffer, 0, BUFFERSIZE);
 
-//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+//Nos ponemos a la escucha de las peticiones que nos envie el kernel //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
 		Error(
-				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
 
 	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-	return bytecount;
+    return bytecount;
 }
 
 int EnviarDatos(int socket, void *buffer) {
