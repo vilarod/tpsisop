@@ -70,10 +70,12 @@ int main(int argv, char** argc) {
 	Multi = ObtenerMulti();
 
 	//Inicializo semaforo
+	seminit(&newCont, 0);
 	seminit(&readyCont, 0);
 	seminit(&CPUCont, 0);
 	seminit(&finalizarCont, 0);
 	seminit(&imprimirCont, 0);
+	seminit(&multiCont, Multi);
 
 	//Crear Listas de estados
 	//PCB * NUEVO, LISTO;
@@ -126,8 +128,11 @@ void *PCP(void *arg) {
 
 	listCPU = list_create();
 	//crear hilo de escucha CPU
-	pthread_t plpCPU, plpReady, plpBloqueado;
+	pthread_t plpCPU, plpNew,plpReady, plpBloqueado;
 	pthread_create(&plpCPU, NULL, HiloOrquestadorDeCPU, NULL );
+
+	//crear hilo de new
+	pthread_create(&plpNew, NULL, moverReadyDeNew, NULL );
 
 	//crear hilo de ready
 	pthread_create(&plpReady, NULL, moverEjecutar, NULL );
@@ -216,6 +221,23 @@ void *moverEjecutar(void *arg) {
 void *moverReady(void *arg) {
 
 	//mandar a ready los bloqueados
+
+	return NULL ;
+}
+
+void *moverReadyDeNew(void *arg) {
+	t_list *aux;
+	//mandar a ready de new
+	while(1){
+		semwait(&multiCont);
+		semwait(&newCont);
+		if (list_size(listaNew) >0 ){
+			aux=list_take_and_remove(listaNew, 1);
+			list_add_all(listaReady, aux);
+			semsig(&readyCont);
+		}
+
+	}
 
 	return NULL ;
 }

@@ -26,6 +26,7 @@ void *IMPRIMIRYFIN(void *arg);
 void *HiloOrquestadorDeCPU();
 void *moverEjecutar(void *arg);
 void *moverReady(void *arg);
+void *moverReadyDeNew(void *arg);
 
 //Manejo de errores
 void error(int code, char *err);
@@ -75,26 +76,28 @@ void semsig(psem_t *ps);
 void semwait(psem_t *ps);
 void seminit(psem_t *ps, int n);
 
-psem_t readyCont,CPUCont,finalizarCont, imprimirCont;
+psem_t newCont,readyCont,CPUCont,finalizarCont, imprimirCont;
+psem_t multiCont; //limita la multiprogramacion
 
 //Lista de CPU
 typedef struct _t_CPU {
 	int idCPU;
-	int idPrograma;
+	PCB* idPCB;
 	int libre;
 } t_CPU;
 
 static t_CPU *cpu_create(int idCPU)
 {
 	t_CPU *new = malloc(sizeof(t_CPU));
-	new->idPrograma = 0;
+	PCB *nuevo = malloc(sizeof(PCB));
+	new->idPCB = nuevo;
 	new->idCPU = idCPU;
 	new->libre = 0;
 	return new;
 }
 
 static void cpu_destroy(t_CPU *self)
-{
+{	free(self->idPCB);
 	free(self);
 }
 
@@ -112,5 +115,5 @@ int Quamtum;
 int Retardo;
 int Multi;
 char *UMV_IP;
-t_list *listCPU;
+t_list *listCPU, *listaNew, *listaReady, *listaBloqueados;
 
