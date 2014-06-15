@@ -27,6 +27,12 @@ typedef struct PCBs
    int  sizeIndiceEtiquetas;
 } PCB;
 
+
+
+void iniciarPCB(PCB prog);
+void destruirEstructuras();
+void CambioProcesoActivo();
+
 //deserializar
 
 PCB desearilizar_PCB (char* estructura, int pos);
@@ -49,14 +55,14 @@ void ConexionConSocket(int Conec,int socketConec,struct sockaddr_in dest);
 void Cerrar(int sRemoto);
 int seguirConectado();
 void AvisarDescAKernel();
-void procesoTerminoQuantum();
+void procesoTerminoQuantum(int que, char* donde, int cuanto);
 int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
 struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
 
 //Recibir-Enviar datos con el kernel
-int RecibirProceso(PCB prog,int quantum,int sRemoto); //para recibir el pcb y el q
+int RecibirProceso(); //para recibir el pcb, el retardo y el quantum
 char* PedirSentencia(); //para recibir la instruccion
 
 
@@ -66,7 +72,7 @@ void salvarContextoProg();
 void limpiarEstructuras();
 void RecuperarDicVariables();
 void RecuperarDicEtiquetas();
-
+void esperarTiempoRetardo();
 
 void grabar_valor(t_nombre_compartida variable,t_valor_variable valor);
 
