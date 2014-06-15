@@ -51,16 +51,17 @@ PCB PCB1;
 void crearEscucha();
 int AtiendeCliente(int sockete);
 int ObtenerComandoMSJ(char buffer[]);
+char ObtenerComandoCPU(char buffer[]);
 void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
 char* ComandoHandShake2(char *buffer, int *tipoCliente);
 int chartToInt(char x);
 void ComandoRecibirPrograma(char *buffer, int id);
 //int pedirMemoriaUMV(int socketumv, PCB programa);
 int pedirMemoriaUMV(int socketumv);
-int AtiendeClienteCPU(void * arg);
 int posicionDeBufferAInt(char* buffer, int posicion);
 char* RespuestaClienteOk(char *buffer);
 void agregarNuevaCPU(int socket);
+//int AtiendeClienteCPU(void * arg);
 
 //Semaforo Contador
 typedef struct{

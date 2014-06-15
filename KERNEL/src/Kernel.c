@@ -37,9 +37,17 @@
 #define TIPO_PROGRAMA     1
 
 //Mensajes aceptados
-#define MSJ_HANDSHAKE             3
-#define MSJ_RECIBO_PROGRAMA       1
-#define MSJ_IMPRIMI_ESTO	      2
+#define MSJ_RECIBO_PROGRAMA       	1
+#define MSJ_IMPRIMI_ESTO	      	2
+#define MSJ_HANDSHAKE             	3
+#define MSJ_CPU_FINAlQUAMTUM		4
+#define MSJ_CPU_OBTENERVALORGLOBAL	5
+#define MSJ_CPU_GRABARVALORGLOBAL	6
+#define MSJ_CPU_ABANDONA			7
+#define MSJ_CPU_WAIT				8
+#define MSJ_CPU_SIGNAL				9
+#define MSJ_CPU_FINAlIZAR			'F'
+#define MSJ_CPU_LIBERAR				'L'
 
 #define HANDSHAKEUMV '31'
 
@@ -595,64 +603,64 @@ int AtiendeCliente(int sockete) {
 	return code;
 }
 
-int AtiendeClienteCPU(void * arg) {
-	int socket = (int) arg;
-
-//	int id_CPU = 0;
-	int tipo_Cliente = 0;
-
-// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-	int tipo_mensaje = 0;
-
-// Dentro del buffer se guarda el mensaje recibido por el cliente.
-	char* buffer;
-	buffer = malloc(1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-
-// Cantidad de bytes recibidos.
-	int bytesRecibidos;
-
-// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
-	int desconexionCliente = 0;
-
-// Código de salida por defecto
-	int code = 0;
-
-	while ((!desconexionCliente)) {
-		buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-
-		//Recibimos los datos del cliente
-		buffer = RecibirDatos2(socket, buffer, &bytesRecibidos);
-
-		if (bytesRecibidos > 0) {
-			//Analisamos que peticion nos está haciendo (obtenemos el comando)
-			tipo_mensaje = ObtenerComandoMSJ(buffer);
-
-			//Evaluamos los comandos
-			switch (tipo_mensaje) {
-
-			case MSJ_HANDSHAKE:
-				buffer = ComandoHandShake2(buffer, &tipo_Cliente);
-				//crear nueva CPU
-				if (tipo_Cliente == TIPO_CPU) {
-					agregarNuevaCPU(socket);
-				}
-				break;
-			default:
-				//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
-				break;
-			}
-
-			// Enviamos datos al cliente.
-			EnviarDatos(socket, buffer);
-		} else
-			desconexionCliente = 1;
-
-	}
-
-	CerrarSocket(socket);
-
-	return code;
-}
+//int AtiendeClienteCPU(void * arg) {
+//	int socket = (int) arg;
+//
+////	int id_CPU = 0;
+//	int tipo_Cliente = 0;
+//
+//// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+//	int tipo_mensaje = 0;
+//
+//// Dentro del buffer se guarda el mensaje recibido por el cliente.
+//	char* buffer;
+//	buffer = malloc(1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+//
+//// Cantidad de bytes recibidos.
+//	int bytesRecibidos;
+//
+//// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
+//	int desconexionCliente = 0;
+//
+//// Código de salida por defecto
+//	int code = 0;
+//
+//	while ((!desconexionCliente)) {
+//		buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+//
+//		//Recibimos los datos del cliente
+//		buffer = RecibirDatos2(socket, buffer, &bytesRecibidos);
+//
+//		if (bytesRecibidos > 0) {
+//			//Analisamos que peticion nos está haciendo (obtenemos el comando)
+//			tipo_mensaje = ObtenerComandoMSJ(buffer);
+//
+//			//Evaluamos los comandos
+//			switch (tipo_mensaje) {
+//
+//			case MSJ_HANDSHAKE:
+//				buffer = ComandoHandShake2(buffer, &tipo_Cliente);
+//				//crear nueva CPU
+//				if (tipo_Cliente == TIPO_CPU) {
+//					agregarNuevaCPU(socket);
+//				}
+//				break;
+//			default:
+//				//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
+//				break;
+//			}
+//
+//			// Enviamos datos al cliente.
+//			EnviarDatos(socket, buffer);
+//		} else
+//			desconexionCliente = 1;
+//
+//	}
+//
+//	CerrarSocket(socket);
+//
+//	return code;
+//}
 
 char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 	*bytesRecibidos = 0;
@@ -696,6 +704,12 @@ char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
 
 	return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+}
+
+char ObtenerComandoCPU(char buffer[]) {
+//Hay que obtener el comando dado el buffer.
+//El comando está dado por el primer caracter, que tiene que ser un número.
+	return buffer[0];
 }
 
 char* ComandoHandShake2(char *buffer, int *tipoCliente) {
@@ -801,7 +815,7 @@ void *HiloOrquestadorDeCPU() {
 	int tipo_Cliente = 0;
 
 	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-	int tipo_mensaje = 0;
+	char tipo_mensaje = '0';
 
 //int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 //	struct sockaddr_in myaddr;     // dirección del servidor
@@ -901,11 +915,12 @@ void *HiloOrquestadorDeCPU() {
 						close(i); // bye!
 						FD_CLR(i, &master); // eliminar del conjunto maestro
 					} else {
-						tipo_mensaje = ObtenerComandoMSJ(buffer);
+						tipo_mensaje = ObtenerComandoCPU(buffer);
 
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
-
+						case MSJ_IMPRIMI_ESTO:
+							break;
 						case MSJ_HANDSHAKE:
 							buffer = ComandoHandShake2(buffer, &tipo_Cliente);
 							//crear nueva CPU
@@ -913,6 +928,24 @@ void *HiloOrquestadorDeCPU() {
 								agregarNuevaCPU(i);
 							}
 							EnviarDatos(i, buffer);
+							break;
+
+						case MSJ_CPU_FINAlQUAMTUM:
+							break;
+						case MSJ_CPU_OBTENERVALORGLOBAL:
+							break;
+						case MSJ_CPU_GRABARVALORGLOBAL:
+							break;
+						case MSJ_CPU_ABANDONA:
+							break;
+						case MSJ_CPU_WAIT:
+							break;
+						case MSJ_CPU_SIGNAL:
+							break;
+						case MSJ_CPU_FINAlIZAR:
+							break;
+						case MSJ_CPU_LIBERAR:
+							//CPU pasa a libre
 							break;
 						default:
 							//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
@@ -929,5 +962,4 @@ void *HiloOrquestadorDeCPU() {
 
 	return 0;
 }
-
 
