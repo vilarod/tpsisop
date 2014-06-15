@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-
+#include <commons/collections/dictionary.h>
 
 /* Definición del pcb */
 typedef struct PCBs

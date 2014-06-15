@@ -9,6 +9,7 @@
  */
 
 #include <stdio.h>
+#include<string.h>
 #include <stdlib.h>
 #include <commons/config.h>
 #include <commons/string.h>
@@ -35,14 +36,17 @@
 #define tCPUU 2
 #define tCPUK 1
 
+#define BUFFERSIZE 1024
 int socketUMV = 0;
 int socketKERNEL = 0;
 
 int CONECTADO_UMV = 0;
 int CONECTADO_KERNEL = 0;
 
-t_dictionary dicVariables;
-t_dictionary dicEtiquetas;
+
+t_dictionary* dicVariables;
+t_dictionary* dicEtiquetas;
+
 
 PCB programa;
 int quantum=0;
@@ -100,9 +104,13 @@ int
 Recibir(int sRemoto, char * buffer)
 {
   int numbytes;
-
-  numbytes = recv(sRemoto, buffer, 99, 0);
-  buffer[numbytes] = '\0';
+  char bufferAux[BUFFERSIZE];
+  buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
+  memset(buffer, 0, 1* sizeof(char));
+  memset(bufferAux, 0, BUFFERSIZE* sizeof(char));
+  numbytes = recv(sRemoto, bufferAux, BUFFERSIZE, 0);
+  buffer = realloc(buffer, numbytes * sizeof(char));
+  sprintf(buffer, "%s%s", (char*) buffer, bufferAux);
   return numbytes;
 }
 
@@ -135,8 +143,7 @@ ObtenerIP(char* que)
 char*
 serializar_PCB(PCB prog)
 {
-  char* cadena;
-  cadena = malloc(1 * sizeof(char));
+  char* cadena=string_new();
 
   string_append(&cadena, string_itoa(prog.id));
   string_append(&cadena, "-");
@@ -192,8 +199,7 @@ PCB
 desearilizar_PCB(char* estructura, int pos)
 {
 
-  char* sub="";
-  sub = malloc(1 * sizeof(char));
+  char* sub=string_new();;
 
   PCB est_prog;
   int aux;
@@ -243,15 +249,14 @@ desearilizar_PCB(char* estructura, int pos)
       sub = "";
       indice = pos + inicio;
     }
-  free(sub);
   return est_prog;
 }
 
 int
 RecibirProceso()
 {
-  char* estructura = "";
-  char* sub= malloc(1 * sizeof(char));
+  char* estructura = string_new();
+  char* sub= string_new();
   int i,aux;
   int indice = 1;
   int inicio = 0;
@@ -282,7 +287,6 @@ RecibirProceso()
           sub = "";
           indice=inicio;
         }
-       free(sub);
         }
       else
         puts("No recibi datos validos");
@@ -388,16 +392,16 @@ void
 limpiarEstructuras()
 {
   //limpio dicVariables y dicEtiquetas
-  dictionary_clean(&dicVariables);
-  dictionary_clean(&dicEtiquetas);
+  dictionary_clean(dicVariables);
+  dictionary_clean(dicEtiquetas);
 }
 
 void
 destruirEstructuras()
 {
   //destruyo dicVariables y dicEtiquetas
-  dictionary_destroy(&dicVariables);
-  dictionary_destroy(&dicEtiquetas);
+  dictionary_destroy(dicVariables);
+  dictionary_destroy(dicEtiquetas);
 }
 
 int
@@ -459,7 +463,7 @@ RecuperarDicVariables()
   //si es >0 -> cant de variables a leer desde seg stack en umv
 int i,aux;
 char* variable=malloc(1 * sizeof(char));
-int dato=0;
+int* dato=0;
 char* recibo;
 
 aux=programa.sizeContextoActual;
@@ -472,8 +476,8 @@ aux=programa.sizeContextoActual;
          if (string_starts_with(recibo,"1"))
            {
           variable= string_substring(recibo,1, strlen(recibo) -1);
-          dato=aux + 1;
-          dictionary_put(&dicVariables,variable,&dato);
+          *dato=aux + 1;
+          dictionary_put(dicVariables,variable,dato);
           aux=aux + 5;
            }
          else printf("ERROR");
@@ -485,17 +489,17 @@ free(variable);
 int saludar(int sld,int tipo, int sRemoto)
 {
   int aux=0;
-  char* recibo="";
-  char* msj=malloc(1 * sizeof(char));
+  char* recibo=string_new();
+  char* msj=string_new();
+  msj=string_itoa(sld);
 
-  string_append(&msj, string_itoa(sld));
   string_append(&msj, string_itoa(tipo));
   Enviar(sRemoto,msj);
-  //free(msj);
   Recibir(sRemoto,recibo);
   if (string_starts_with(recibo,"1"))
     aux= 1;
     else aux=0;
+  printf("saludo");
   return aux;
 }
 
@@ -583,6 +587,9 @@ main(void)
     CONECTADO_KERNEL=1 ;
   else CONECTADO_KERNEL=0 ;
 
+  dicVariables=dictionary_create();
+  dicEtiquetas=dictionary_create();
+
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while ((CONECTADO_KERNEL == 1) && (CONECTADO_UMV == 1))
     {
@@ -657,7 +664,7 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
 
- dictionary_clean(&dicVariables);//limpio el dic de variables
+ dictionary_clean(dicVariables);//limpio el dic de variables
 
 }
 
@@ -667,7 +674,7 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 
   //preservar el contexto actual para retornar al mismo
 
-  dictionary_clean(&dicVariables);//limpio el dic de variables
+  dictionary_clean(dicVariables);//limpio el dic de variables
 }
 
 void
@@ -742,7 +749,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   t_puntero posicion=0;
   //busco la posicion de la variable
   //las variables y las posiciones respecto al stack estan en el dicVariables
-//  posicion=dictionary_get(&dicVariables,identificador_variable);
+ //posicion=dictionary_get(&dicVariables,identificador_variable);
   return posicion; //devuelvo la posicion
 }
 
