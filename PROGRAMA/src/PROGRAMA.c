@@ -34,9 +34,8 @@
 #define CONFIRMACION "33"
 
 //Mensajes aceptados
-#define MSJ_HANDSHAKE             3
-#define MSJ_RECIBO_PROGRAMA       1
-#define MSJ_IMPRIMI_ESTO	      2
+//MSJ_IMPRIMI_ESTO comienza con 2
+//MSJ_FIN_DE_EJECUCION 4
 
 //Tamaño buffer
 #define BUFFERSIZE 1024
@@ -44,7 +43,7 @@
 //Puerto
 //#define IP "127.0.0.1"
 //#define PORT "6007"
-
+int imprimirRespuesta(char *texto);
 
 
 int main(int argc, char* argv[]) {
@@ -148,11 +147,11 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
 	RecibirDatos(sockfd, respuestahandshake);
-
-	EnviarDatos(sockfd, ENVIARPROGRAMA); //ENVIARPROGRAMA reemplaza a "11"
-	RecibirDatos(sockfd, respuestahandshake);
+    analizarRespuestaKERNEL(respuestahandshake);
 
 	EnviarDatos(sockfd, programa); //envio el programa
+	RecibirDatos(sockfd, respuestahandshake);
+	analizarRespuestaKERNEL(respuestahandshake);
 
 	int finDeEjecucion = 0;
 	while (!finDeEjecucion) {
@@ -162,12 +161,21 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 		finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
 
 		if (!finDeEjecucion)
-			txt_write_in_stdout(respuestahandshake);
+			imprimirRespuesta(respuestahandshake);
+
 
 	}
-	txt_write_in_stdout("Fin de ejecuacion");
+	txt_write_in_stdout("Fin de ejecucion");
 
 	return analizarRespuestaKERNEL(respuestahandshake);
+}
+int imprimirRespuesta(char *mensaje)
+{
+	char *primer;
+	primer = "2";
+	if(string_starts_with(mensaje, primer))
+		printf("%s", (mensaje));//tengo que corregir me tiene que imprimir a partir del segundo caracter
+	return 0;
 }
 
 int EnviarConfirmacionDeRecepcionDeDatos( sockfd) {
@@ -177,7 +185,7 @@ int EnviarConfirmacionDeRecepcionDeDatos( sockfd) {
 }
 
 int AnalizarSiEsFinDeEjecucion(char *respuestahandshake) {
-	char *fin = "22";
+	char *fin = "4";
 	if (respuestahandshake == fin)
 		return 0;
 	else
@@ -187,6 +195,7 @@ int AnalizarSiEsFinDeEjecucion(char *respuestahandshake) {
 int analizarRespuestaKERNEL(char *mensaje) {
 	if (mensaje[0] == 0) {
 		Error("eL KERNEL nos devolvio un error: %s", mensaje);
+		exit(1);
 		return 0;
 	} else
 		return 1;
@@ -223,15 +232,14 @@ int RecibirDatos(int socket, char *buffer) {
 // memset se usa para llenar el buffer con 0s
 	memset(buffer, 0, BUFFERSIZE);
 
-//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+//Nos ponemos a la escucha de las peticiones que nos envie el kernel //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
 		Error(
-				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
-
+        exit(1);
 	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-	return bytecount;
+    return bytecount;
 }
 
 int EnviarDatos(int socket, void *buffer) {
