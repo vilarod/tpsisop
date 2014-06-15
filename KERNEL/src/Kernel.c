@@ -822,11 +822,27 @@ bool encontrarInt(int actual, int expected) {
 }
 
 t_CPU* encontrarCPULibre() {
-	int _is_CPU(t_CPU *p) {
+	int _is_CPU_Libre(t_CPU *p) {
 		return encontrarInt(p->libre, 0);
 	}
-	t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
+	if (list_any_satisfy(listCPU, (void*)_is_CPU_Libre)){
+			t_CPU * aux = list_find(listCPU, (void*) _is_CPU_Libre);
 	return aux;
+	}
+	return NULL;
+
+}
+
+t_CPU* encontrarCPU(int idcpu) {
+	int _is_CPU(t_CPU *p) {
+		return encontrarInt(p->idCPU, idcpu);
+	}
+	if (list_any_satisfy(listCPU, (void*)_is_CPU)){
+			t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
+	return aux;
+	}
+	return NULL;
+
 }
 
 void *HiloOrquestadorDeCPU() {
@@ -968,6 +984,7 @@ void *HiloOrquestadorDeCPU() {
 							break;
 						case MSJ_CPU_LIBERAR:
 							//CPU pasa a libre
+							comandoLiberar(i);
 							break;
 						default:
 							//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
@@ -983,5 +1000,117 @@ void *HiloOrquestadorDeCPU() {
 	}
 
 	return 0;
+}
+
+
+PCB desearilizar_PCB(char* estructura, int pos) {
+
+	char* sub = "";
+	sub = malloc(1 * sizeof(char));
+
+	PCB est_prog;
+	int aux;
+	int i;
+	int indice = pos;
+	int inicio = 0;
+
+	iniciarPCB(est_prog);
+
+	for (aux = 1; aux < 11; aux++) {
+		for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
+			sub = string_substring(estructura, inicio, 1);
+			inicio++;
+		}
+		switch (aux) {
+		case 1:
+			est_prog.id = atoi(string_substring(estructura, indice, i));
+			break;
+		case 2:
+			est_prog.segmentoCodigo = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 3:
+			est_prog.segmentoStack = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 4:
+			est_prog.cursorStack = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 5:
+			est_prog.indiceCodigo = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 6:
+			est_prog.indiceEtiquetas = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 7:
+			est_prog.programCounter = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 8:
+			est_prog.sizeContextoActual = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 9:
+			est_prog.sizeIndiceEtiquetas = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		}
+		sub = "";
+		indice = pos + inicio;
+	}
+	free(sub);
+	return est_prog;
+}
+
+
+char*
+serializar_PCB(PCB prog)
+{
+  char* cadena;
+  cadena = malloc(1 * sizeof(char));
+
+  string_append(&cadena, string_itoa(prog.id));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.segmentoCodigo));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.segmentoStack));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.cursorStack));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.indiceCodigo));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.indiceEtiquetas));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.programCounter));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.sizeContextoActual));
+  string_append(&cadena, "-");
+  string_append(&cadena, string_itoa(prog.sizeIndiceEtiquetas));
+  string_append(&cadena, "-");
+  return cadena;
+
+}
+
+void iniciarPCB(PCB prog)
+{
+  prog.id = 0;
+  prog.segmentoCodigo = 0;
+  prog.segmentoStack = 0;
+  prog.cursorStack = 0;
+  prog.indiceCodigo = 0;
+  prog.indiceEtiquetas = 0;
+  prog.programCounter = 0;
+  prog.sizeContextoActual = 0;
+  prog.sizeIndiceEtiquetas = 0;
+}
+
+void comandoLiberar(int socket){
+	t_CPU* aux =encontrarCPU(socket);
+	if (aux != NULL){
+		aux->libre=0;
+	}
 }
 
