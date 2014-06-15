@@ -33,6 +33,21 @@ void ErrorFatal(char mensaje[], ...);
 void Error(const char* mensaje, ...);
 void Traza(const char* mensaje, ...);
 
+/* Definición del pcb */
+typedef struct PCBs {
+	int id;
+	int segmentoCodigo;
+	int segmentoStack;
+	int cursorStack;
+	int indiceCodigo;
+	int indiceEtiquetas;
+	int programCounter;
+	int sizeContextoActual;
+	int sizeIndiceEtiquetas;
+} PCB;
+
+PCB PCB1;
+
 void crearEscucha();
 int AtiendeCliente(int sockete);
 int ObtenerComandoMSJ(char buffer[]);
@@ -40,7 +55,8 @@ void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
 char* ComandoHandShake2(char *buffer, int *tipoCliente);
 int chartToInt(char x);
 void ComandoRecibirPrograma(char *buffer, int id);
-int pedirMemoriaUMV(int socketumv, PCB programa);
+//int pedirMemoriaUMV(int socketumv, PCB programa);
+int pedirMemoriaUMV(int socketumv);
 int AtiendeClienteCPU(void * arg);
 int posicionDeBufferAInt(char* buffer, int posicion);
 char* RespuestaClienteOk(char *buffer);

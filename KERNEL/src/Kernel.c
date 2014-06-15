@@ -45,21 +45,7 @@
 
 /** Longitud del buffer  */
 #define BUFFERSIZE 1024
-
-/* Definición del pcb */
-typedef struct PCBs {
-	int id;
-	int segmentoCodigo;
-	int segmentoStack;
-	int cursorStack;
-	int indiceCodigo;
-	int indiceEtiquetas;
-	int programCounter;
-	int sizeContextoActual;
-	int sizeIndiceEtiquetas;
-} PCB;
-
-PCB PCB1;
+#define DIRECCION INADDR_ANY
 
 int socketumv;
 int main(int argv, char** argc) {
@@ -148,62 +134,62 @@ void *PCP(void *arg) {
 	return NULL ;
 }
 
-void *HiloOrquestadorDeCPU() {
-	int socket_host;
-	struct sockaddr_in client_addr;
-	struct sockaddr_in my_addr;
-	int yes = 1;
-	socklen_t size_addr = 0;
-
-	socket_host = socket(AF_INET, SOCK_STREAM, 0);
-	if (socket_host == -1)
-		ErrorFatal(
-				"No se pudo inicializar el socket que escucha a los clientes");
-
-	if (setsockopt(socket_host, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
-			== -1) {
-		ErrorFatal("Error al hacer el 'setsockopt'");
-	}
-
-	my_addr.sin_family = AF_INET;
-	my_addr.sin_port = htons(PuertoPCP);
-	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
-	memset(&(my_addr.sin_zero), '\0', 8 * sizeof(char));
-
-	if (bind(socket_host, (struct sockaddr*) &my_addr, sizeof(my_addr)) == -1)
-		ErrorFatal("Error al hacer el Bind. El puerto está en uso");
-
-	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
-		ErrorFatal(
-				"Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
-
-	Traza(
-			"El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d",
-			socket_host, PuertoPCP);
-
-	while (1) {
-		int socket_client;
-
-		size_addr = sizeof(struct sockaddr_in);
-
-		if ((socket_client = accept(socket_host,
-				(struct sockaddr *) &client_addr, &size_addr)) != -1) {
-			Traza(
-					"Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d",
-					inet_ntoa(client_addr.sin_addr), client_addr.sin_port,
-					socket_client);
-
-			// Aca hay que crear un nuevo hilo, que será el encargado de atender al cliente
-			pthread_t hNuevoCliente;
-			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeClienteCPU,
-					(void *) socket_client);
-		} else {
-			Error("ERROR AL ACEPTAR LA CONEXIÓN DE UN CLIENTE");
-		}
-	}
-
-	CerrarSocket(socket_host);
-}
+//void *HiloOrquestadorDeCPU() {
+//	int socket_host;
+//	struct sockaddr_in client_addr;
+//	struct sockaddr_in my_addr;
+//	int yes = 1;
+//	socklen_t size_addr = 0;
+//
+//	socket_host = socket(AF_INET, SOCK_STREAM, 0);
+//	if (socket_host == -1)
+//		ErrorFatal(
+//				"No se pudo inicializar el socket que escucha a los clientes");
+//
+//	if (setsockopt(socket_host, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
+//			== -1) {
+//		ErrorFatal("Error al hacer el 'setsockopt'");
+//	}
+//
+//	my_addr.sin_family = AF_INET;
+//	my_addr.sin_port = htons(PuertoPCP);
+//	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
+//	memset(&(my_addr.sin_zero), '\0', 8 * sizeof(char));
+//
+//	if (bind(socket_host, (struct sockaddr*) &my_addr, sizeof(my_addr)) == -1)
+//		ErrorFatal("Error al hacer el Bind. El puerto está en uso");
+//
+//	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
+//		ErrorFatal(
+//				"Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
+//
+//	Traza(
+//			"El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d",
+//			socket_host, PuertoPCP);
+//
+//	while (1) {
+//		int socket_client;
+//
+//		size_addr = sizeof(struct sockaddr_in);
+//
+//		if ((socket_client = accept(socket_host,
+//				(struct sockaddr *) &client_addr, &size_addr)) != -1) {
+//			Traza(
+//					"Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d",
+//					inet_ntoa(client_addr.sin_addr), client_addr.sin_port,
+//					socket_client);
+//
+//			// Aca hay que crear un nuevo hilo, que será el encargado de atender al cliente
+//			pthread_t hNuevoCliente;
+//			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeClienteCPU,
+//					(void *) socket_client);
+//		} else {
+//			Error("ERROR AL ACEPTAR LA CONEXIÓN DE UN CLIENTE");
+//		}
+//	}
+//
+//	CerrarSocket(socket_host);
+//}
 
 void *escuharCPU(void *arg) {
 
@@ -227,109 +213,110 @@ void *moverReady(void *arg) {
 }
 
 void crearEscucha() {
-	fd_set master;   // conjunto maestro de descriptores de fichero
-	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
-	struct sockaddr_in myaddr;     // dirección del servidor
-	struct sockaddr_in remoteaddr; // dirección del cliente
-	int fdmax;        // número máximo de descriptores de fichero
-	int listener;     // descriptor de socket a la escucha
-	int newfd;        // descriptor de socket de nueva conexión aceptada
-	char buf[BUFFERSIZE];    // buffer para datos del cliente
-	int nbytes;
-	int yes = 1;        // para setsockopt() SO_REUSEADDR, más abajo
-	int addrlen;
-	int i, j;
-	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
-	FD_ZERO(&read_fds);
-	// obtener socket a la escucha
-	if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		perror("error al crear socket");
-		exit(1);
-	}
-	// obviar el mensaje "address already in use" (la dirección ya se está usando)
-	if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
-			== -1) {
-		perror("setsockopt, la direccion ya se esta usando");
-		exit(1);
-	}
-	// enlazar
-	myaddr.sin_family = AF_INET;
-	myaddr.sin_addr.s_addr = INADDR_ANY;
-	myaddr.sin_port = htons(Puerto);
-	memset(&(myaddr.sin_zero), '\0', 8);
-	if (bind(listener, (struct sockaddr *) &myaddr, sizeof(myaddr)) == -1) {
-		perror("error en el bind");
-		exit(1);
-	}
-	// escuchar
-	if (listen(listener, 10) == -1) {
-		perror("error en el listen");
-		exit(1);
-	}
-	// añadir listener al conjunto maestro
-	FD_SET(listener, &master);
-	// seguir la pista del descriptor de fichero mayor
-	fdmax = listener; // por ahora es éste
-	// bucle principal
-	for (;;) {
-		read_fds = master; // cópialo
-		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
-			perror("select");
-			exit(1);
-		}
-		// explorar conexiones existentes en busca de datos que leer
-		for (i = 0; i <= fdmax; i++) {
-			if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
-				if (i == listener) {
-					// gestionar nuevas conexiones
-					addrlen = sizeof(remoteaddr);
-					if ((newfd = accept(listener,
-							(struct sockaddr *) &remoteaddr, &addrlen)) == -1) {
-						perror("accept");
-					} else {
-						FD_SET(newfd, &master); // añadir al conjunto maestro
-						if (newfd > fdmax) {    // actualizar el máximo
-							fdmax = newfd;
-						}
-						printf("selectserver: new connection from %s on "
-								"socket %d\n", inet_ntoa(remoteaddr.sin_addr),
-								newfd);
-					}
-				} else {
-					// gestionar datos de un cliente
-					if ((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
-						// error o conexión cerrada por el cliente
-						if (nbytes == 0) {
-							// conexión cerrada
-							printf("selectserver: socket %d hung up\n", i);
-						} else {
-							perror("recv");
-						}
-						close(i); // bye!
-						FD_CLR(i, &master); // eliminar del conjunto maestro
-					} else {
-						// tenemos datos de algún cliente
-						for (j = 0; j <= fdmax; j++) {
-							// ¡enviar a todoos el mundo!
-							if (FD_ISSET(j, &master)) {
-								// excepto al listener y a nosotros mismos
-								if (j != listener && j != i) {
-									if (send(j, buf, nbytes, 0) == -1) {
-										perror("send");
-									}
-								}
-							}
-						}
-					}
-				} // Esto es ¡TAN FEO! demasiado feo
-			}
-		}
-	}
-
-	int AtiendeCliente(int sockete); //Handshake y recibir programa
+//	fd_set master;   // conjunto maestro de descriptores de fichero
+//	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
+//	struct sockaddr_in myaddr;     // dirección del servidor
+//	struct sockaddr_in remoteaddr; // dirección del cliente
+//	int fdmax;        // número máximo de descriptores de fichero
+//	int listener;     // descriptor de socket a la escucha
+//	int newfd;        // descriptor de socket de nueva conexión aceptada
+//	char buf[BUFFERSIZE];    // buffer para datos del cliente
+//	int nbytes;
+//	int yes = 1;        // para setsockopt() SO_REUSEADDR, más abajo
+//	int addrlen;
+//	int i, j;
+//	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
+//	FD_ZERO(&read_fds);
+//	// obtener socket a la escucha
+//	if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+//		perror("error al crear socket");
+//		exit(1);
+//	}
+//	// obviar el mensaje "address already in use" (la dirección ya se está usando)
+//	if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
+//			== -1) {
+//		perror("setsockopt, la direccion ya se esta usando");
+//		exit(1);
+//	}
+//	// enlazar
+//	myaddr.sin_family = AF_INET;
+//	myaddr.sin_addr.s_addr = INADDR_ANY;
+//	myaddr.sin_port = htons(Puerto);
+//	memset(&(myaddr.sin_zero), '\0', 8);
+//	if (bind(listener, (struct sockaddr *) &myaddr, sizeof(myaddr)) == -1) {
+//		perror("error en el bind");
+//		exit(1);
+//	}
+//	// escuchar
+//	if (listen(listener, 10) == -1) {
+//		perror("error en el listen");
+//		exit(1);
+//	}
+//	// añadir listener al conjunto maestro
+//	FD_SET(listener, &master);
+//	// seguir la pista del descriptor de fichero mayor
+//	fdmax = listener; // por ahora es éste
+//	// bucle principal
+//	for (;;) {
+//		read_fds = master; // cópialo
+//		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
+//			perror("select");
+//			exit(1);
+//		}
+//		// explorar conexiones existentes en busca de datos que leer
+//		for (i = 0; i <= fdmax; i++) {
+//			if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
+//				if (i == listener) {
+//					// gestionar nuevas conexiones
+//					addrlen = sizeof(remoteaddr);
+//					if ((newfd = accept(listener,
+//							(struct sockaddr *) &remoteaddr, &addrlen)) == -1) {
+//						perror("accept");
+//					} else {
+//						FD_SET(newfd, &master); // añadir al conjunto maestro
+//						if (newfd > fdmax) {    // actualizar el máximo
+//							fdmax = newfd;
+//						}
+//						printf("selectserver: new connection from %s on "
+//								"socket %d\n", inet_ntoa(remoteaddr.sin_addr),
+//								newfd);
+//					}
+//				} else {
+//					// gestionar datos de un cliente
+//					if ((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
+//						// error o conexión cerrada por el cliente
+//						if (nbytes == 0) {
+//							// conexión cerrada
+//							printf("selectserver: socket %d hung up\n", i);
+//						} else {
+//							perror("recv");
+//						}
+//						close(i); // bye!
+//						FD_CLR(i, &master); // eliminar del conjunto maestro
+//					} else {
+//						// tenemos datos de algún cliente
+//						for (j = 0; j <= fdmax; j++) {
+//							// ¡enviar a todoos el mundo!
+//							if (FD_ISSET(j, &master)) {
+//								// excepto al listener y a nosotros mismos
+//								if (j != listener && j != i) {
+//									if (send(j, buf, nbytes, 0) == -1) {
+//										perror("send");
+//									}
+//								}
+//							}
+//						}
+//					}
+//				} // Esto es ¡TAN FEO! demasiado feo
+//			}
+//		}
+//	}
+//
+//	int AtiendeCliente(int sockete); //Handshake y recibir programa
 
 	return;
 }
+
 int pedirMemoriaUMV(int socketumv) {
 	char respuestaMemoria[BUFFERSIZE];
 	char *mensaje = "5";
@@ -539,32 +526,33 @@ int chartToInt(char x) {
 	return a;
 }
 
-void ComandoRecibirPrograma(char *buffer, int *idProg, int *tipoCliente) {
-	memset(buffer, 0, BUFFERSIZE);
-	PCB programa;
-	programa.id = id;
-	programa.programCounter= 0; // o 1
-	programa.segmentoCodigo;
-	programa.segmentoStack;
-	programa.cursorStack;
-	//int indiceCodigo;
-	//int indiceEtiquetas;
-	//int programCounter;
-	//int sizeContextoActual;
-	//int sizeIndiceEtiquetas;
-
-
-	if (pedirMemoriaUMV(socketumv,programa)) {
-		//Responder programa too ok
-	} else {
-		//responder programa too mal
-		// * Crear segmento 1° cod mensaje (5)
-		// * Parametros a pasar 2° cantidad de dijitos del id programa
-		// *  3° id programa
-		// *  4° cantidad dijitos tamaño
-		// *  5° tamaño
-		// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
-	}
+void ComandoRecibirPrograma(char *buffer, int idProg) {
+//void ComandoRecibirPrograma(char *buffer, int *idProg, int *tipoCliente) {
+//	memset(buffer, 0, BUFFERSIZE);
+//	PCB programa;
+//	programa.id = id;
+//	programa.programCounter= 0; // o 1
+//	programa.segmentoCodigo;
+//	programa.segmentoStack;
+//	programa.cursorStack;
+//	//int indiceCodigo;
+//	//int indiceEtiquetas;
+//	//int programCounter;
+//	//int sizeContextoActual;
+//	//int sizeIndiceEtiquetas;
+//
+//
+//	if (pedirMemoriaUMV(socketumv,programa)) {
+//		//Responder programa too ok
+//	} else {
+//		//responder programa too mal
+//		// * Crear segmento 1° cod mensaje (5)
+//		// * Parametros a pasar 2° cantidad de dijitos del id programa
+//		// *  3° id programa
+//		// *  4° cantidad dijitos tamaño
+//		// *  5° tamaño
+//		// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
+//	}
 }
 
 int AtiendeCliente(int sockete) {
@@ -804,3 +792,142 @@ t_CPU* encontrarCPULibre() {
 	t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
 	return aux;
 }
+
+void *HiloOrquestadorDeCPU() {
+	int nbytesRecibidos;
+	char* buffer;
+
+	//	int id_CPU = 0;
+	int tipo_Cliente = 0;
+
+	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+	int tipo_mensaje = 0;
+
+//int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
+//	struct sockaddr_in myaddr;     // dirección del servidor
+
+	fd_set master;   // conjunto maestro de descriptores de fichero
+	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
+	int fdmax;        // número máximo de descriptores de fichero
+	int socketEscucha;     // descriptor de socket a la escucha
+	int socketNuevaConexion;  // descriptor de socket de nueva conexión aceptada
+	int i;
+	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
+	FD_ZERO(&read_fds);
+
+	struct sockaddr_in socketInfo;
+//	char buffer[BUFF_SIZE];
+	int optval = 1;
+
+	// Crear un socket:
+	// AF_INET: Socket de internet IPv4
+	// SOCK_STREAM: Orientado a la conexion, TCP
+	// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
+	if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		//return 1;
+	}
+
+	// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
+	setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
+			sizeof(optval));
+
+	socketInfo.sin_family = AF_INET;
+	socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
+	socketInfo.sin_port = htons(PuertoPCP);
+
+// Vincular el socket con una direccion de red almacenada en 'socketInfo'.
+	if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
+			!= 0) {
+
+		perror("Error al bindear socket escucha");
+		//return EXIT_FAILURE;
+	}
+
+// Escuchar nuevas conexiones entrantes.
+	if (listen(socketEscucha, 10) != 0) {
+
+		perror("Error al poner a escuchar socket");
+		//return EXIT_FAILURE;
+	}
+
+	printf("Escuchando conexiones entrantes.\n");
+	// añadir listener al conjunto maestro
+	FD_SET(socketEscucha, &master);
+	// seguir la pista del descriptor de fichero mayor
+	fdmax = socketEscucha; // por ahora es éste
+
+	for (;;) {
+		read_fds = master; // cópialo
+		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
+			perror("select");
+			exit(1);
+		}
+		// explorar conexiones existentes en busca de datos que leer
+		for (i = 0; i <= fdmax; i++) {
+			if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
+				if (i == socketEscucha) {
+					// gestionar nuevas conexiones
+					// addrlen = sizeof(remoteaddr);
+					if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
+							== -1) {
+						perror("accept");
+					} else {
+						FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
+						if (socketNuevaConexion > fdmax) { // actualizar el máximo
+							fdmax = socketNuevaConexion;
+						}
+
+						printf("selectserver: una nueva conneccion socket %d\n",
+								socketNuevaConexion);
+					}
+				} else {
+
+					// gestionar datos de un cliente
+					// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
+
+					buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+
+					//Recibimos los datos del cliente
+					buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
+					if (nbytesRecibidos <= 0) {
+						// error o conexión cerrada por el cliente
+						if (nbytesRecibidos == 0) {
+							// conexión cerrada
+							printf("selectserver: socket %d hung up\n", i);
+						} else {
+							perror("recv");
+						}
+						close(i); // bye!
+						FD_CLR(i, &master); // eliminar del conjunto maestro
+					} else {
+						tipo_mensaje = ObtenerComandoMSJ(buffer);
+
+						//Evaluamos los comandos
+						switch (tipo_mensaje) {
+
+						case MSJ_HANDSHAKE:
+							buffer = ComandoHandShake2(buffer, &tipo_Cliente);
+							//crear nueva CPU
+							if (tipo_Cliente == TIPO_CPU) {
+								agregarNuevaCPU(i);
+							}
+							EnviarDatos(i, buffer);
+							break;
+						default:
+							//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
+							break;
+
+						}
+
+						buffer[0] = '\0';
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
