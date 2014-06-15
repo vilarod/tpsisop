@@ -20,7 +20,7 @@ void ErrorFatal(char mensaje[], ...);
 int EnviarDatos(int socket, void *buffer);
 int RecibirDatos(int socket, char *buffer);
 int ConexionConSocket(int puerto, char* IP);
-int analizarRespuestaKERNEL(char *mensaje);
+int AnalizarRespuestaKERNEL(char *mensaje);
 int hacerhandshakeKERNEL(int sockfd, char *programa);
 void conectarAKERNEL(char *programa);
 int EnviarConfirmacionDeRecepcionDeDatos();

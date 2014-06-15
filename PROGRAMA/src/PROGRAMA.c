@@ -43,7 +43,7 @@
 //Puerto
 //#define IP "127.0.0.1"
 //#define PORT "6007"
-int imprimirRespuesta(char *texto);
+int ImprimirRespuesta(char *texto);
 
 
 int main(int argc, char* argv[]) {
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
 
 	FILE* f; //archivo que voy a leer
-	char* contents;
+	char* contents=NULL;
 	size_t len;
 	size_t bytesRead;
 
@@ -89,8 +89,9 @@ int main(int argc, char* argv[]) {
 	txt_close_file(f);//cierro el archivo
 
 	char **linea;
-	char *separator;
-	char *nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
+	char *separator = NULL;
+	char *nuevo = NULL;
+	nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
 	strcpy(nuevo, "");
 	separator = "\n";
 
@@ -106,7 +107,8 @@ int main(int argc, char* argv[]) {
 	printf("%s", nuevo); //verifico que tengo el programa sin la primer linea
 	printf("\n");
 
-	char *programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
+	char *programa = NULL;
+	programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
 	programa = strdup(nuevo);
 	int largo;
 	largo = strlen(programa);
@@ -118,6 +120,9 @@ int main(int argc, char* argv[]) {
 	free(contents);
 	free(nuevo);
 	free(programa);
+	contents = NULL;
+	nuevo = NULL;
+	programa = NULL;
 	return 0;
 }
 
@@ -147,55 +152,66 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
 	RecibirDatos(sockfd, respuestahandshake);
-    analizarRespuestaKERNEL(respuestahandshake);
+	if(respuestahandshake[0] == '0')
+	{
+		printf("Error del KERNEL");
+		exit(1);
+	}
+    AnalizarRespuestaKERNEL(respuestahandshake);
 
 	EnviarDatos(sockfd, programa); //envio el programa
 	RecibirDatos(sockfd, respuestahandshake);
-	analizarRespuestaKERNEL(respuestahandshake);
+	if(respuestahandshake[0] == '0')
+	{
+			printf("Error del KERNEL");
+			exit(1);
+	}
 
-	int finDeEjecucion = 0;
-	while (!finDeEjecucion) {
+	int finDeEjecucion;
+	finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
+	while (finDeEjecucion!=0) {
 		RecibirDatos(sockfd, respuestahandshake);
-		EnviarConfirmacionDeRecepcionDeDatos();
 
 		finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
 
-		if (!finDeEjecucion)
-			imprimirRespuesta(respuestahandshake);
-
+		if (finDeEjecucion != 0)
+		{
+			AnalizarRespuestaKERNEL(respuestahandshake);
+			ImprimirRespuesta(respuestahandshake);
+		    EnviarConfirmacionDeRecepcionDeDatos(sockfd);
+		}
 
 	}
 	txt_write_in_stdout("Fin de ejecucion");
 
-	return analizarRespuestaKERNEL(respuestahandshake);
+	return AnalizarRespuestaKERNEL(respuestahandshake);
 }
-int imprimirRespuesta(char *mensaje)
+int ImprimirRespuesta(char *mensaje)
 {
-	char *primer;
-	primer = "2";
-	if(string_starts_with(mensaje, primer))
-		printf("%s", (mensaje));//tengo que corregir me tiene que imprimir a partir del segundo caracter
+
+	if(mensaje[0] == '2')
+		printf("%s", (mensaje + 1));
+
 	return 0;
 }
 
-int EnviarConfirmacionDeRecepcionDeDatos( sockfd) {
+int EnviarConfirmacionDeRecepcionDeDatos(sockfd) {
 
 	EnviarDatos(sockfd, CONFIRMACION);
 	return 0;
 }
 
 int AnalizarSiEsFinDeEjecucion(char *respuestahandshake) {
-	char *fin = "4";
-	if (respuestahandshake == fin)
+
+	if (respuestahandshake[0] == '4')
 		return 0;
 	else
 		return 1;
 }
 
-int analizarRespuestaKERNEL(char *mensaje) {
-	if (mensaje[0] == 0) {
+int AnalizarRespuestaKERNEL(char *mensaje) {
+	if (mensaje[0] == '0') {
 		Error("eL KERNEL nos devolvio un error: %s", mensaje);
-		exit(1);
 		return 0;
 	} else
 		return 1;
@@ -237,7 +253,7 @@ int RecibirDatos(int socket, char *buffer) {
 		Error(
 				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
-        exit(1);
+
 	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
     return bytecount;
 }
