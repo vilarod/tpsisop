@@ -189,9 +189,8 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 }
 int imprimirRespuesta(char *mensaje)
 {
-
-	if(mensaje[0] == '2')
-		printf("%s", (mensaje + 1));
+	if (string_starts_with(mensaje,"2"))
+		printf("%s", string_substring(mensaje,1,(strlen(mensaje)-1)));
 
 	return 0;
 }
