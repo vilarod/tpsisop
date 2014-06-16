@@ -25,6 +25,6 @@ int hacerhandshakeKERNEL(int sockfd, char *programa);
 void conectarAKERNEL(char *programa);
 int enviarConfirmacionDeRecepcionDeDatos();
 int analizarSiEsFinDeEjecucion(char *respuesta);
-
+int imprimirRespuesta(char *texto);
 
 #endif /* PROGRAMA_H_ */
