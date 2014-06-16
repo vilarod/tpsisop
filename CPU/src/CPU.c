@@ -32,9 +32,12 @@
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/CPU/src/config.cfg"
 #define HandU 3
-#define HandK 1
+#define HandK 3
 #define tCPUU 2
-#define tCPUK 1
+#define tCPUK 2
+
+  int aux_conec_umv=0;
+  int aux_conec_ker=0;
 
 #define BUFFERSIZE 1024
 int socketUMV = 0;
@@ -76,13 +79,14 @@ AnSISOP_kernel funciones_k =
 
 
 void
-ConexionConSocket(int Conec, int socketConec, struct sockaddr_in destino)
+ConexionConSocket(int* Conec, int socketConec, struct sockaddr_in destino)
 {
+  printf("entre a conexion con sockets!");
   if ((connect(socketConec, (struct sockaddr*) &destino,
       sizeof(struct sockaddr))) == -1) //Controlo si puedo conectarme
     perror("No me puedo conectar con servidor!");
   else
-    Conec = 1;
+    *Conec = 1;
 }
 
 //Para enviar datos
@@ -103,15 +107,21 @@ Enviar(int sRemoto, char * buffer)
 int
 Recibir(int sRemoto, char * buffer)
 {
-  int numbytes;
-  char bufferAux[BUFFERSIZE];
-  buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-  memset(buffer, 0, 1* sizeof(char));
-  memset(bufferAux, 0, BUFFERSIZE* sizeof(char));
-  numbytes = recv(sRemoto, bufferAux, BUFFERSIZE, 0);
-  buffer = realloc(buffer, numbytes * sizeof(char));
-  sprintf(buffer, "%s%s", (char*) buffer, bufferAux);
-  return numbytes;
+  int bytecount;
+// memset se usa para llenar el buffer con 0s
+  memset(buffer, 0, BUFFERSIZE);
+
+//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+  if ((bytecount = recv(sRemoto, buffer, BUFFERSIZE, 0)) == -1)
+         /* Error(
+                          "Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+                          socket);
+
+  Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);*/
+    printf("wiii");
+
+  return bytecount;
+
 }
 
 //Cerrar conexión
@@ -125,17 +135,31 @@ Cerrar(int sRemoto)
 //Para leer desde el archivo de configuracion
 
 int
-ObtenerPuerto(char* que)
+ObtenerPuertoKernel()
 {
   t_config* config = config_create(PATH_CONFIG);
-  return config_get_int_value(config, que);
+  return config_get_int_value(config,"PUERTO_KERNEL");
 }
 
 char*
-ObtenerIP(char* que)
+ObtenerIPKernel()
 {
   t_config* config = config_create(PATH_CONFIG);
-  return config_get_string_value(config, que);
+  return config_get_string_value(config,"IP_KERNEL");
+}
+
+int
+ObtenerPuertoUmv()
+{
+  t_config* config = config_create(PATH_CONFIG);
+  return config_get_int_value(config,"PUERTO_UMV");
+}
+
+char*
+ObtenerIPUmv()
+{
+  t_config* config = config_create(PATH_CONFIG);
+  return config_get_string_value(config,"IP_UMV");
 }
 
 //serializar pcb
@@ -255,7 +279,8 @@ desearilizar_PCB(char* estructura, int pos)
 int
 RecibirProceso()
 {
-  char* estructura = string_new();
+  char* estructura=malloc(BUFFERSIZE * sizeof(char));
+
   char* sub= string_new();
   int i,aux;
   int indice = 1;
@@ -290,9 +315,11 @@ RecibirProceso()
         }
       else
         puts("No recibi datos validos");
+      r=1;
     }
   else
     perror("No recibi datos validos");
+free(estructura);
   return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
 }
 
@@ -488,18 +515,14 @@ free(variable);
 
 int saludar(int sld,int tipo, int sRemoto)
 {
-  int aux=0;
-  char* recibo=string_new();
-  char* msj=string_new();
-  msj=string_itoa(sld);
+  char respuesta[BUFFERSIZE];
+    char *mensaje = "32";
+    int aux=0;
+    Enviar(sRemoto, mensaje);
+    Recibir(sRemoto, respuesta);
+    if (string_starts_with(respuesta,"1"))
+      aux= 1;
 
-  string_append(&msj, string_itoa(tipo));
-  Enviar(sRemoto,msj);
-  Recibir(sRemoto,recibo);
-  if (string_starts_with(recibo,"1"))
-    aux= 1;
-    else aux=0;
-  printf("saludo");
   return aux;
 }
 
@@ -551,41 +574,49 @@ void CambioProcesoActivo()
  //aviso a la mem que voy a ejecutar tal programa
 }
 
+int chartToInt(char x) {
+        char str[1];
+        str[0] = x;
+        int a = atoi(str);
+        return a;
+}
+
 int
 main(void)
 
 {
   //Llegué y quiero leer los datos de conexión
   //donde esta el kernel?donde esta la umv?
-  int aux_conec_umv=0;
-  int aux_conec_ker=0;
-  int UMV_PUERTO = ObtenerPuerto("PUERTO_UMV");
-  int KERNEL_PUERTO = ObtenerPuerto("PUERTO_KERNEL");
-  char* UMV_IP = ObtenerIP("IP_UMV");
-  char* KERNEL_IP = ObtenerIP("IP_KERNEL");
+
+  int UMV_PUERTO = ObtenerPuertoUmv();
+  int KERNEL_PUERTO = ObtenerPuertoKernel();
+  char* UMV_IP = ObtenerIPUmv();
+  char* KERNEL_IP = ObtenerIPKernel();
 
   socketUMV = crearSocket(socketUMV);
   socketKERNEL = crearSocket(socketKERNEL);
-
+printf("baaaa");
   struct sockaddr_in dest_UMV = prepararDestino(dest_UMV, UMV_PUERTO, UMV_IP);
   struct sockaddr_in dest_KERNEL = prepararDestino(dest_KERNEL, KERNEL_PUERTO,
       KERNEL_IP);
 
+  printf("estoy por conectar con socket");
   //Ahora que se donde estan, me quiero conectar con los dos
-  ConexionConSocket(aux_conec_umv, socketUMV, dest_UMV);
-  ConexionConSocket(aux_conec_ker, socketKERNEL, dest_KERNEL);
+  ConexionConSocket(&aux_conec_umv,socketUMV, dest_UMV);
+  ConexionConSocket(&aux_conec_ker, socketKERNEL, dest_KERNEL);
+printf("ya pase los sockets");
 
   //Control programa
   int tengoProg = 0;
   char* sentencia="";
 
   if (aux_conec_umv == saludar(HandU,tCPUU,socketUMV))
-    CONECTADO_UMV= 1;
-  else CONECTADO_UMV= 0;
-
+    {CONECTADO_UMV= 1;
+    printf("umv contesto");}
   if (aux_conec_ker == saludar(HandK,tCPUK,socketKERNEL))
-    CONECTADO_KERNEL=1 ;
-  else CONECTADO_KERNEL=0 ;
+    {CONECTADO_KERNEL=1 ;
+    printf("kernel contesto");
+    }
 
   dicVariables=dictionary_create();
   dicEtiquetas=dictionary_create();
@@ -593,11 +624,14 @@ main(void)
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while ((CONECTADO_KERNEL == 1) && (CONECTADO_UMV == 1))
     {
+      printf("ciclo conectado");
       //Mientras estoy conectado al Kernel y no tengo programa que
       //ejecutar...solo tengo que esperar a recibir uno
-      while (tengoProg < 1) //me fijo si tengo un prog que ejecutar
+      while (tengoProg ==0) //me fijo si tengo un prog que ejecutar
         {
+          printf("ciclo pedir proceso");
           tengoProg = RecibirProceso();
+
         }
       //Si salio del ciclo anterior es que ya tengo un programa
       RecuperarDicEtiquetas();

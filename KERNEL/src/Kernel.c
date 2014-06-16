@@ -40,12 +40,14 @@
 #define MSJ_RECIBO_PROGRAMA       	1
 #define MSJ_IMPRIMI_ESTO	      	2
 #define MSJ_HANDSHAKE             	3
-#define MSJ_CPU_FINAlQUAMTUM		4
-#define MSJ_CPU_OBTENERVALORGLOBAL	5
-#define MSJ_CPU_GRABARVALORGLOBAL	6
-#define MSJ_CPU_ABANDONA			7
-#define MSJ_CPU_WAIT				8
-#define MSJ_CPU_SIGNAL				9
+#define MSJ_CPU_IMPRIMI	      		'2'
+#define MSJ_CPU_HANDSHAKE           '3'
+#define MSJ_CPU_FINAlQUAMTUM		'4'
+#define MSJ_CPU_OBTENERVALORGLOBAL	'5'
+#define MSJ_CPU_GRABARVALORGLOBAL	'6'
+#define MSJ_CPU_ABANDONA			'7'
+#define MSJ_CPU_WAIT				'8'
+#define MSJ_CPU_SIGNAL				'9'
 #define MSJ_CPU_FINAlIZAR			'F'
 #define MSJ_CPU_LIBERAR				'L'
 
@@ -957,9 +959,9 @@ void *HiloOrquestadorDeCPU() {
 
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
-						case MSJ_IMPRIMI_ESTO:
+						case MSJ_CPU_IMPRIMI:
 							break;
-						case MSJ_HANDSHAKE:
+						case MSJ_CPU_HANDSHAKE:
 							buffer = ComandoHandShake2(buffer, &tipo_Cliente);
 							//crear nueva CPU
 							if (tipo_Cliente == TIPO_CPU) {

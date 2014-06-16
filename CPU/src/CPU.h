@@ -43,15 +43,19 @@ char* getUMV(int base, int dsp, int tam);
 char* serializar_PCB (PCB prog);
 void serCadena(char ** msj, char* agr);
 int setUMV(int ptro, int dsp, int tam, char* valor);
-int saludar(int sld,int tipo, int sRemoto); //el handshake
+//int saludar(int sld,int tipo, int sRemoto); //el handshake
 
 //Obtener datos de conexión
-int ObtenerPuerto(char* que);
-char* ObtenerIP(char* que);
+int ObtenerPuertoKernel();
+char* ObtenerIPKernel();
+int ObtenerPuertoUmv();
+char* ObtenerIPUmv();
+
+int chartToInt(char x);
 
 //Manejo de conexiones
 int Enviar (int sRemoto, char * buffer);
-void ConexionConSocket(int Conec,int socketConec,struct sockaddr_in dest);
+void ConexionConSocket(int* Conec,int socketConec,struct sockaddr_in dest);
 void Cerrar(int sRemoto);
 int seguirConectado();
 void AvisarDescAKernel();
