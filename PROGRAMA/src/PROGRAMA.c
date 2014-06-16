@@ -14,6 +14,7 @@
 #include<commons/txt.h>
 #include<commons/string.h>
 #include<commons/log.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
@@ -24,6 +25,23 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <pthread.h>
+#include <error.h>
+#include <commons/process.h>
+#include <commons/temporal.h>
+
+static void log_in_disk(char* temp_file) {
+    t_log* logger = log_create(temp_file, "TEST",true, LOG_LEVEL_INFO);
+
+    log_trace(logger, "LOG A NIVEL %s", "TRACE");
+    log_debug(logger, "LOG A NIVEL %s", "DEBUG");
+    log_info(logger, "LOG A NIVEL %s", "INFO");
+    log_warning(logger, "LOG A NIVEL %s", "WARNING");
+    log_error(logger, "LOG A NIVEL %s", "ERROR");
+
+    log_destroy(logger);
+}
+
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/PROGRAMA/src/config.cfg"
 
@@ -44,10 +62,33 @@
 //Puerto
 //#define IP "127.0.0.1"
 //#define PORT "6007"
-int imprimirRespuesta(char *texto);
-
+t_log* logger ;
 
 int main(int argc, char* argv[]) {
+//log hasta antes de int index
+	char* temp_file = tmpnam(NULL);
+
+	logger = log_create(temp_file, "PROGRAMA",ImprimirTrazaPorConsola, LOG_LEVEL_TRACE);
+
+
+	log_trace(logger, "LOG A NIVEL %s", "TRACE");
+    log_debug(logger, "LOG A NIVEL %s", "DEBUG");
+    log_info(logger, "LOG A NIVEL %s", "INFO");
+    log_warning(logger, "LOG A NIVEL %s", "WARNING");
+    log_error(logger, "LOG A NIVEL %s", "ERROR");
+
+    pthread_t th1, th2;
+
+	if (temp_file != NULL) {
+		pthread_create(&th1, NULL, (void*) log_in_disk, temp_file);
+	    pthread_create(&th2, NULL, (void*) log_in_disk, temp_file);
+
+	    pthread_join(th1, NULL);
+	    pthread_join(th2, NULL);
+	    printf("\nRevisar el archivo de log que se creo en: %s\n", temp_file);
+	    } else {
+	        printf("No se pudo generar el archivo de log\n");
+	    }
 
 	int index;    //para parametros
 
@@ -63,7 +104,7 @@ int main(int argc, char* argv[]) {
 	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
 
 	FILE* file; //archivo que voy a leer
-	char* contents=NULL;
+	char* contents = NULL;
 	size_t len;
 	size_t bytesRead;
 
@@ -76,7 +117,7 @@ int main(int argc, char* argv[]) {
 	len = ftell(file);    //nos da la cantidad de bytes del archivo
 	rewind(file);
 
-	contents = (char*) malloc(sizeof(char) * len + 1);    //para guardar lo que lee
+	contents = (char*) malloc(sizeof(char) * len + 1); //para guardar lo que lee
 	contents[len] = '\0'; // para indicar que termina el texto
 	if (contents == NULL ) {
 		fprintf(stderr, "Failed to allocate memory"); //imprime error sino tiene memoria
@@ -87,7 +128,7 @@ int main(int argc, char* argv[]) {
 
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
 	printf("Contents:\n %s", contents); //imprime el programa tal como esta en el script
-	txt_close_file(file);//cierro el archivo
+	txt_close_file(file); //cierro el archivo
 
 	char **linea;
 	char *separator = NULL;
@@ -101,8 +142,7 @@ int main(int argc, char* argv[]) {
 	int i;
 
 	for (i = 1; linea[i] != NULL ; i++) //elimino la primer linea del hashbang
-			string_append(&nuevo, linea[i]); //concatena todas las lineas del programa
-
+		string_append(&nuevo, linea[i]); //concatena todas las lineas del programa
 
 	printf("\n");
 	printf("%s", nuevo); //verifico que tengo el programa sin la primer linea
@@ -124,6 +164,7 @@ int main(int argc, char* argv[]) {
 	contents = NULL;
 	nuevo = NULL;
 	programa = NULL;
+	return(EXIT_SUCCESS);
 	return 0;
 }
 
@@ -153,33 +194,30 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
 	recibirDatos(sockfd, respuestahandshake);
-	if(respuestahandshake[0] == '0')
-	{
+	if (respuestahandshake[0] == '0') {
 		printf("Error del KERNEL");
 		exit(1);
 	}
-    analizarRespuestaKERNEL(respuestahandshake);
+	analizarRespuestaKERNEL(respuestahandshake);
 
 	enviarDatos(sockfd, programa); //envio el programa
 	recibirDatos(sockfd, respuestahandshake);
-	if(respuestahandshake[0] == '0')
-	{
-			printf("Error del KERNEL");
-			exit(1);
+	if (respuestahandshake[0] == '0') {
+		printf("Error del KERNEL");
+		exit(1);
 	}
 
 	int finDeEjecucion;
 	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestahandshake);
-	while (finDeEjecucion!=0) {
+	while (finDeEjecucion != 0) {
 		recibirDatos(sockfd, respuestahandshake);
 
 		finDeEjecucion = analizarSiEsFinDeEjecucion(respuestahandshake);
 
-		if (finDeEjecucion != 0)
-		{
+		if (finDeEjecucion != 0) {
 			analizarRespuestaKERNEL(respuestahandshake);
 			imprimirRespuesta(respuestahandshake);
-		    enviarConfirmacionDeRecepcionDeDatos(sockfd);
+			enviarConfirmacionDeRecepcionDeDatos(sockfd);
 		}
 
 	}
@@ -187,15 +225,14 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	return analizarRespuestaKERNEL(respuestahandshake);
 }
-int imprimirRespuesta(char *mensaje)
-{
-	if (string_starts_with(mensaje,"2"))
-		printf("%s", string_substring(mensaje,1,(strlen(mensaje)-1)));
+int imprimirRespuesta(char *mensaje) {
+	if (string_starts_with(mensaje, "2"))
+		printf("%s", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
 
 	return 0;
 }
 
-int enviarConfirmacionDeRecepcionDeDatos(sockfd) {
+int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 
 	enviarDatos(sockfd, CONFIRMACION);
 	return 0;
@@ -255,7 +292,7 @@ int recibirDatos(int socket, char *buffer) {
 				socket);
 
 	traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-    return bytecount;
+	return bytecount;
 }
 
 int enviarDatos(int socket, void *buffer) {
@@ -268,14 +305,14 @@ int enviarDatos(int socket, void *buffer) {
 
 	return bytecount;
 }
-
+/*
 void error(int code, char *err) {
 	char *msg = (char*) malloc(strlen(err) + 14);
 	sprintf(msg, "Error %d: %s\n", code, err);
 	fprintf(stderr, "%s", msg);
 	exit(1);
 }
-
+*/
 void cerrar(int sRemoto) {
 
 	close(sRemoto);
@@ -322,9 +359,12 @@ void traza(const char* mensaje, ...) {
 		va_start(arguments, mensaje);
 		nuevo = string_from_vformat(mensaje, arguments);
 
-		printf("TRAZA--> %s \n", nuevo);
+		//printf("TRAZA--> %s \n", nuevo);
+		 log_trace(logger, "%s", nuevo);
 
 		va_end(arguments);
 
 	}
+
+
 }
