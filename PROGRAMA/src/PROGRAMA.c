@@ -13,6 +13,7 @@
 #include <commons/config.h>
 #include<commons/txt.h>
 #include<commons/string.h>
+#include<commons/log.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
@@ -43,7 +44,7 @@
 //Puerto
 //#define IP "127.0.0.1"
 //#define PORT "6007"
-int ImprimirRespuesta(char *texto);
+int imprimirRespuesta(char *texto);
 
 
 int main(int argc, char* argv[]) {
@@ -61,19 +62,19 @@ int main(int argc, char* argv[]) {
 	//El symbolic link se hizo por consola:
 	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop*/
 
-	FILE* f; //archivo que voy a leer
+	FILE* file; //archivo que voy a leer
 	char* contents=NULL;
 	size_t len;
 	size_t bytesRead;
 
-	f = fopen(argv[1], "r");    //abre el archivo en modo read
-	if (f == NULL ) {
+	file = fopen(argv[1], "r");    //abre el archivo en modo read
+	if (file == NULL ) {
 		fprintf(stderr, "Error opening file: %s", argv[1]); //No existe el archivo
 		return 1;
 	}
-	fseek(f, 0, SEEK_END);    //nos situamos al final del archivo
-	len = ftell(f);    //nos da la cantidad de bytes del archivo
-	rewind(f);
+	fseek(file, 0, SEEK_END);    //nos situamos al final del archivo
+	len = ftell(file);    //nos da la cantidad de bytes del archivo
+	rewind(file);
 
 	contents = (char*) malloc(sizeof(char) * len + 1);    //para guardar lo que lee
 	contents[len] = '\0'; // para indicar que termina el texto
@@ -82,11 +83,11 @@ int main(int argc, char* argv[]) {
 		return 2;
 	}
 
-	bytesRead = fread(contents, sizeof(char), len, f); //bytes leidos
+	bytesRead = fread(contents, sizeof(char), len, file); //bytes leidos
 
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
 	printf("Contents:\n %s", contents); //imprime el programa tal como esta en el script
-	txt_close_file(f);//cierro el archivo
+	txt_close_file(file);//cierro el archivo
 
 	char **linea;
 	char *separator = NULL;
@@ -177,7 +178,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 		if (finDeEjecucion != 0)
 		{
 			AnalizarRespuestaKERNEL(respuestahandshake);
-			ImprimirRespuesta(respuestahandshake);
+			imprimirRespuesta(respuestahandshake);
 		    EnviarConfirmacionDeRecepcionDeDatos(sockfd);
 		}
 
@@ -186,7 +187,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	return AnalizarRespuestaKERNEL(respuestahandshake);
 }
-int ImprimirRespuesta(char *mensaje)
+int imprimirRespuesta(char *mensaje)
 {
 
 	if(mensaje[0] == '2')

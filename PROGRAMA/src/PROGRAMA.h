@@ -13,18 +13,18 @@ int ObtenerPuertoKERNEL();
 char* ObtenerIpKERNEL();
 //conexion con el kernel
 int ImprimirTrazaPorConsola = 1; //si es cero no imprime la traza
-void Traza(const char* mensaje, ...);
+void traza(const char* mensaje, ...);
 void Error(const char* mensaje, ...);
-void ErrorFatal(char mensaje[], ...);
+void errorFatal(char mensaje[], ...);
 //void CerrarSocket(int socket);
-int EnviarDatos(int socket, void *buffer);
-int RecibirDatos(int socket, char *buffer);
-int ConexionConSocket(int puerto, char* IP);
-int AnalizarRespuestaKERNEL(char *mensaje);
+int enviarDatos(int socket, void *buffer);
+int recibirDatos(int socket, char *buffer);
+int conexionConSocket(int puerto, char* IP);
+int analizarRespuestaKERNEL(char *mensaje);
 int hacerhandshakeKERNEL(int sockfd, char *programa);
 void conectarAKERNEL(char *programa);
-int EnviarConfirmacionDeRecepcionDeDatos();
-int AnalizarSiEsFinDeEjecucion(char *respuesta);
+int enviarConfirmacionDeRecepcionDeDatos();
+int analizarSiEsFinDeEjecucion(char *respuesta);
 
 
 #endif /* PROGRAMA_H_ */
