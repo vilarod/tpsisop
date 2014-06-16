@@ -53,7 +53,7 @@ PCB PCB1;
 PCB* desearilizar_PCB(char* estructura, int* pos);
 
 //serializar
-char* serializar_PCB (PCB prog);
+char* serializar_PCB (PCB* prog);
 void iniciarPCB(PCB* prog);
 
 //Comando de mensajes
