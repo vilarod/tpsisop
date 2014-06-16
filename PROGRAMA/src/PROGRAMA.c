@@ -127,14 +127,14 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-int ObtenerPuertoKERNEL() {
+int obtenerPuertoKERNEL() {
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_int_value(config, "PUERTO_KERNEL");
 
 }
 
-char* ObtenerIpKERNEL() {
+char* obtenerIpKERNEL() {
 	t_config* config = config_create(PATH_CONFIG);
 
 	return config_get_string_value(config, "IP_KERNEL");
@@ -142,26 +142,26 @@ char* ObtenerIpKERNEL() {
 }
 
 void conectarAKERNEL(char *archivo) { //tengo que agregar programa para poder enviarlo
-	Traza("Intentando conectar a kernel");
-	int soquete = ConexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para probar
+	traza("Intentando conectar a kernel");
+	int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para probar
 	if (hacerhandshakeKERNEL(soquete, archivo) == 0) { //donde esta el puerto y la ip va: ObtenerPuertoKERNEL()y ObtenerIpKERNEL()
-		ErrorFatal("No se pudo conectar al kernel");
+		errorFatal("No se pudo conectar al kernel");
 	}
 }
 int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	char respuestahandshake[BUFFERSIZE];
 
-	EnviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
-	RecibirDatos(sockfd, respuestahandshake);
+	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
+	recibirDatos(sockfd, respuestahandshake);
 	if(respuestahandshake[0] == '0')
 	{
 		printf("Error del KERNEL");
 		exit(1);
 	}
-    AnalizarRespuestaKERNEL(respuestahandshake);
+    analizarRespuestaKERNEL(respuestahandshake);
 
-	EnviarDatos(sockfd, programa); //envio el programa
-	RecibirDatos(sockfd, respuestahandshake);
+	enviarDatos(sockfd, programa); //envio el programa
+	recibirDatos(sockfd, respuestahandshake);
 	if(respuestahandshake[0] == '0')
 	{
 			printf("Error del KERNEL");
@@ -169,23 +169,23 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	}
 
 	int finDeEjecucion;
-	finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
+	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestahandshake);
 	while (finDeEjecucion!=0) {
-		RecibirDatos(sockfd, respuestahandshake);
+		recibirDatos(sockfd, respuestahandshake);
 
-		finDeEjecucion = AnalizarSiEsFinDeEjecucion(respuestahandshake);
+		finDeEjecucion = analizarSiEsFinDeEjecucion(respuestahandshake);
 
 		if (finDeEjecucion != 0)
 		{
-			AnalizarRespuestaKERNEL(respuestahandshake);
+			analizarRespuestaKERNEL(respuestahandshake);
 			imprimirRespuesta(respuestahandshake);
-		    EnviarConfirmacionDeRecepcionDeDatos(sockfd);
+		    enviarConfirmacionDeRecepcionDeDatos(sockfd);
 		}
 
 	}
 	txt_write_in_stdout("Fin de ejecucion");
 
-	return AnalizarRespuestaKERNEL(respuestahandshake);
+	return analizarRespuestaKERNEL(respuestahandshake);
 }
 int imprimirRespuesta(char *mensaje)
 {
@@ -196,13 +196,13 @@ int imprimirRespuesta(char *mensaje)
 	return 0;
 }
 
-int EnviarConfirmacionDeRecepcionDeDatos(sockfd) {
+int enviarConfirmacionDeRecepcionDeDatos(sockfd) {
 
-	EnviarDatos(sockfd, CONFIRMACION);
+	enviarDatos(sockfd, CONFIRMACION);
 	return 0;
 }
 
-int AnalizarSiEsFinDeEjecucion(char *respuestahandshake) {
+int analizarSiEsFinDeEjecucion(char *respuestahandshake) {
 
 	if (respuestahandshake[0] == '4')
 		return 0;
@@ -210,14 +210,14 @@ int AnalizarSiEsFinDeEjecucion(char *respuestahandshake) {
 		return 1;
 }
 
-int AnalizarRespuestaKERNEL(char *mensaje) {
+int analizarRespuestaKERNEL(char *mensaje) {
 	if (mensaje[0] == '0') {
 		Error("eL KERNEL nos devolvio un error: %s", mensaje);
 		return 0;
 	} else
 		return 1;
 }
-int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el int
+int conexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el int
 	int sockfd;
 	//Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
 	struct hostent *he, *gethostbyname();
@@ -225,7 +225,7 @@ int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el i
 	he = gethostbyname(IP);
 
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		ErrorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
+		errorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
 				IP);
 		exit(1);
 	}
@@ -237,14 +237,14 @@ int ConexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el i
 
 	if (connect(sockfd, (struct sockaddr *) &their_addr,
 			sizeof(struct sockaddr)) == -1) {
-		ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
+		errorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
 		exit(1);
 	}
 
 	return sockfd;
 }
 
-int RecibirDatos(int socket, char *buffer) {
+int recibirDatos(int socket, char *buffer) {
 	int bytecount;
 // memset se usa para llenar el buffer con 0s
 	memset(buffer, 0, BUFFERSIZE);
@@ -255,17 +255,17 @@ int RecibirDatos(int socket, char *buffer) {
 				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
 
-	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
     return bytecount;
 }
 
-int EnviarDatos(int socket, void *buffer) {
+int enviarDatos(int socket, void *buffer) {
 	int bytecount;
 
 	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
 		Error("No puedo enviar información al kernel. Socket: %d", socket);
 
-	Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
 
 	return bytecount;
 }
@@ -277,17 +277,17 @@ void error(int code, char *err) {
 	exit(1);
 }
 
-void Cerrar(int sRemoto) {
+void cerrar(int sRemoto) {
 
 	close(sRemoto);
 }
 
-void CerrarSocket(int socket) {
+void cerrarSocket(int socket) {
 	close(socket);
-	Traza("Se cerró el socket (%d).", socket);
+	traza("Se cerró el socket (%d).", socket);
 }
 
-void ErrorFatal(char mensaje[], ...) {
+void errorFatal(char mensaje[], ...) {
 	char* nuevo;
 	va_list arguments;
 	va_start(arguments, mensaje);
@@ -316,7 +316,7 @@ void Error(const char* mensaje, ...) {
 	va_end(arguments);
 
 }
-void Traza(const char* mensaje, ...) {
+void traza(const char* mensaje, ...) {
 	if (ImprimirTrazaPorConsola) {
 		char* nuevo;
 		va_list arguments;
