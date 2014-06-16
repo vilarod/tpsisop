@@ -50,11 +50,11 @@ typedef struct PCBs {
 PCB PCB1;
 
 //deserealizar
-PCB desearilizar_PCB(char* estructura, int pos);
+PCB* desearilizar_PCB(char* estructura, int* pos);
 
 //serializar
 char* serializar_PCB (PCB prog);
-void iniciarPCB(PCB prog);
+void iniciarPCB(PCB* prog);
 
 //Comando de mensajes
 void comandoLiberar(int socket);
@@ -117,6 +117,7 @@ t_CPU l_CPU;
 bool encontrarInt(int actual, int expected);
 t_CPU*  encontrarCPULibre();
 t_CPU* encontrarCPU(int idcpu);
+void eliminarCpu(int idcpu);
 
 //Globales
 int ImprimirTrazaPorConsola = 1;

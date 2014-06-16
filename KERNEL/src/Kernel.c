@@ -130,7 +130,7 @@ void *PCP(void *arg) {
 
 	listCPU = list_create();
 	//crear hilo de escucha CPU
-	pthread_t plpCPU, plpNew,plpReady, plpBloqueado;
+	pthread_t plpCPU, plpNew, plpReady, plpBloqueado;
 	pthread_create(&plpCPU, NULL, HiloOrquestadorDeCPU, NULL );
 
 	//crear hilo de new
@@ -230,11 +230,11 @@ void *moverReady(void *arg) {
 void *moverReadyDeNew(void *arg) {
 	t_list *aux;
 	//mandar a ready de new
-	while(1){
+	while (1) {
 		semwait(&multiCont);
 		semwait(&newCont);
-		if (list_size(listaNew) >0 ){
-			aux=list_take_and_remove(listaNew, 1);
+		if (list_size(listaNew) > 0) {
+			aux = list_take_and_remove(listaNew, 1);
 			list_add_all(listaReady, aux);
 			semsig(&readyCont);
 		}
@@ -827,11 +827,11 @@ t_CPU* encontrarCPULibre() {
 	int _is_CPU_Libre(t_CPU *p) {
 		return encontrarInt(p->libre, 0);
 	}
-	if (list_any_satisfy(listCPU, (void*)_is_CPU_Libre)){
-			t_CPU * aux = list_find(listCPU, (void*) _is_CPU_Libre);
-	return aux;
+	if (list_any_satisfy(listCPU, (void*) _is_CPU_Libre)) {
+		t_CPU * aux = list_find(listCPU, (void*) _is_CPU_Libre);
+		return aux;
 	}
-	return NULL;
+	return NULL ;
 
 }
 
@@ -839,11 +839,11 @@ t_CPU* encontrarCPU(int idcpu) {
 	int _is_CPU(t_CPU *p) {
 		return encontrarInt(p->idCPU, idcpu);
 	}
-	if (list_any_satisfy(listCPU, (void*)_is_CPU)){
-			t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
-	return aux;
+	if (list_any_satisfy(listCPU, (void*) _is_CPU)) {
+		t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
+		return aux;
 	}
-	return NULL;
+	return NULL ;
 
 }
 
@@ -977,6 +977,10 @@ void *HiloOrquestadorDeCPU() {
 						case MSJ_CPU_GRABARVALORGLOBAL:
 							break;
 						case MSJ_CPU_ABANDONA:
+							//elimina cpu
+							eliminarCpu(i);
+							close(i); // bye!
+							FD_CLR(i, &master); // eliminar del conjunto maestro
 							break;
 						case MSJ_CPU_WAIT:
 							break;
@@ -1004,115 +1008,121 @@ void *HiloOrquestadorDeCPU() {
 	return 0;
 }
 
-
-PCB desearilizar_PCB(char* estructura, int pos) {
-
+PCB* desearilizar_PCB(char* estructura, int* pos) {
+	printf("%s\n", estructura);
 	char* sub = "";
 	sub = malloc(1 * sizeof(char));
-
-	PCB est_prog;
+	PCB* est_prog;
+	est_prog = (struct PCBs *) malloc(sizeof(PCB));
 	int aux;
 	int i;
-	int indice = pos;
-	int inicio = 0;
+	int indice = *pos;
+	int inicio = *pos;
 
 	iniciarPCB(est_prog);
-
-	for (aux = 1; aux < 11; aux++) {
+	for (aux = 1; aux < 10; aux++) {
 		for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
 			sub = string_substring(estructura, inicio, 1);
 			inicio++;
 		}
 		switch (aux) {
 		case 1:
-			est_prog.id = atoi(string_substring(estructura, indice, i));
+			est_prog->id = atoi(string_substring(estructura, indice, i));
 			break;
 		case 2:
-			est_prog.segmentoCodigo = atoi(
+			est_prog->segmentoCodigo = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		case 3:
-			est_prog.segmentoStack = atoi(
+			est_prog->segmentoStack = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		case 4:
-			est_prog.cursorStack = atoi(
+			est_prog->cursorStack = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		case 5:
-			est_prog.indiceCodigo = atoi(
+			est_prog->indiceCodigo = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		case 6:
-			est_prog.indiceEtiquetas = atoi(
+			est_prog->indiceEtiquetas = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		case 7:
-			est_prog.programCounter = atoi(
+			est_prog->programCounter = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		case 8:
-			est_prog.sizeContextoActual = atoi(
+			est_prog->sizeContextoActual = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		case 9:
-			est_prog.sizeIndiceEtiquetas = atoi(
+			est_prog->sizeIndiceEtiquetas = atoi(
 					string_substring(estructura, indice, i));
 			break;
 		}
 		sub = "";
-		indice = pos + inicio;
+		indice = inicio;
 	}
-	free(sub);
+	*pos = inicio;
+	//free(sub);
 	return est_prog;
 }
 
+void iniciarPCB(PCB* prog) {
+	prog->id = 0;
+	prog->segmentoCodigo = 0;
+	prog->segmentoStack = 0;
+	prog->cursorStack = 0;
+	prog->indiceCodigo = 0;
+	prog->indiceEtiquetas = 0;
+	prog->programCounter = 0;
+	prog->sizeContextoActual = 0;
+	prog->sizeIndiceEtiquetas = 0;
+}
 
 char*
-serializar_PCB(PCB prog)
-{
-  char* cadena;
-  cadena = malloc(1 * sizeof(char));
+serializar_PCB(PCB prog) {
+	char* cadena;
+	cadena = malloc(1 * sizeof(char));
 
-  string_append(&cadena, string_itoa(prog.id));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.segmentoCodigo));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.segmentoStack));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.cursorStack));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.indiceCodigo));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.indiceEtiquetas));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.programCounter));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.sizeContextoActual));
-  string_append(&cadena, "-");
-  string_append(&cadena, string_itoa(prog.sizeIndiceEtiquetas));
-  string_append(&cadena, "-");
-  return cadena;
+	string_append(&cadena, string_itoa(prog.id));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.segmentoCodigo));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.segmentoStack));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.cursorStack));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.indiceCodigo));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.indiceEtiquetas));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.programCounter));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.sizeContextoActual));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog.sizeIndiceEtiquetas));
+	string_append(&cadena, "-");
+	return cadena;
 
 }
 
-void iniciarPCB(PCB prog)
-{
-  prog.id = 0;
-  prog.segmentoCodigo = 0;
-  prog.segmentoStack = 0;
-  prog.cursorStack = 0;
-  prog.indiceCodigo = 0;
-  prog.indiceEtiquetas = 0;
-  prog.programCounter = 0;
-  prog.sizeContextoActual = 0;
-  prog.sizeIndiceEtiquetas = 0;
+
+void comandoLiberar(int socket) {
+	t_CPU* aux = encontrarCPU(socket);
+	if (aux != NULL ) {
+		aux->libre = 0;
+	}
 }
 
-void comandoLiberar(int socket){
-	t_CPU* aux =encontrarCPU(socket);
-	if (aux != NULL){
-		aux->libre=0;
+void eliminarCpu(int idcpu) {
+	int _is_CPU_ID(t_CPU *p) {
+		return encontrarInt(p->idCPU, idcpu);
+	}
+	if (list_any_satisfy(listCPU, (void*) _is_CPU_ID)) {
+		list_remove_by_condition(listCPU, (void*) _is_CPU_ID);
 	}
 }
 
