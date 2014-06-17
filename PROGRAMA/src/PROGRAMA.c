@@ -30,17 +30,7 @@
 #include <commons/process.h>
 #include <commons/temporal.h>
 
-static void log_in_disk(char* temp_file) {
-    t_log* logger = log_create(temp_file, "TEST",true, LOG_LEVEL_INFO);
 
-    log_trace(logger, "LOG A NIVEL %s", "TRACE");
-    log_debug(logger, "LOG A NIVEL %s", "DEBUG");
-    log_info(logger, "LOG A NIVEL %s", "INFO");
-    log_warning(logger, "LOG A NIVEL %s", "WARNING");
-    log_error(logger, "LOG A NIVEL %s", "ERROR");
-
-    log_destroy(logger);
-}
 
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/PROGRAMA/src/config.cfg"
@@ -70,26 +60,26 @@ int main(int argc, char* argv[]) {
 
 	logger = log_create(temp_file, "PROGRAMA",ImprimirTrazaPorConsola, LOG_LEVEL_TRACE);
 
-
 	log_trace(logger, "LOG A NIVEL %s", "TRACE");
     log_debug(logger, "LOG A NIVEL %s", "DEBUG");
     log_info(logger, "LOG A NIVEL %s", "INFO");
     log_warning(logger, "LOG A NIVEL %s", "WARNING");
     log_error(logger, "LOG A NIVEL %s", "ERROR");
 
-    pthread_t th1, th2;
-
-	if (temp_file != NULL) {
-		pthread_create(&th1, NULL, (void*) log_in_disk, temp_file);
-	    pthread_create(&th2, NULL, (void*) log_in_disk, temp_file);
-
-	    pthread_join(th1, NULL);
-	    pthread_join(th2, NULL);
-	    printf("\nRevisar el archivo de log que se creo en: %s\n", temp_file);
-	    } else {
-	        printf("No se pudo generar el archivo de log\n");
-	    }
-
+    //
+////    pthread_t th1, th2;
+//
+//	if (temp_file != NULL) {
+//		pthread_create(&th1, NULL, (void*) log_in_disk, temp_file);
+//	    pthread_create(&th2, NULL, (void*) log_in_disk, temp_file);
+//
+//	    pthread_join(th1, NULL);
+//	    pthread_join(th2, NULL);
+//	    printf("\nRevisar el archivo de log que se creo en: %s\n", temp_file);
+//	    } else {
+//	        printf("No se pudo generar el archivo de log\n");
+//	    }
+    //
 	int index;    //para parametros
 
 	for (index = 0; index < argc; index++)    //parametros
@@ -305,14 +295,14 @@ int enviarDatos(int socket, void *buffer) {
 
 	return bytecount;
 }
-/*
-void error(int code, char *err) {
+
+void Error1(int code, char *err) {
 	char *msg = (char*) malloc(strlen(err) + 14);
 	sprintf(msg, "Error %d: %s\n", code, err);
 	fprintf(stderr, "%s", msg);
 	exit(1);
 }
-*/
+
 void cerrar(int sRemoto) {
 
 	close(sRemoto);

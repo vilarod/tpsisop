@@ -26,5 +26,6 @@ void conectarAKERNEL(char *programa);
 int enviarConfirmacionDeRecepcionDeDatos();
 int analizarSiEsFinDeEjecucion(char *respuesta);
 int imprimirRespuesta(char *texto);
+void Error1(int code, char *err);
 
 #endif /* PROGRAMA_H_ */
