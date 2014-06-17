@@ -54,7 +54,7 @@
 #define HANDSHAKEUMV '31'
 
 /** Longitud del buffer  */
-#define BUFFERSIZE 1024
+#define BUFFERSIZE 1024 * 4
 #define DIRECCION INADDR_ANY
 
 int socketumv;
@@ -149,63 +149,6 @@ void *PCP(void *arg) {
 	return NULL ;
 }
 
-//void *HiloOrquestadorDeCPU() {
-//	int socket_host;
-//	struct sockaddr_in client_addr;
-//	struct sockaddr_in my_addr;
-//	int yes = 1;
-//	socklen_t size_addr = 0;
-//
-//	socket_host = socket(AF_INET, SOCK_STREAM, 0);
-//	if (socket_host == -1)
-//		ErrorFatal(
-//				"No se pudo inicializar el socket que escucha a los clientes");
-//
-//	if (setsockopt(socket_host, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
-//			== -1) {
-//		ErrorFatal("Error al hacer el 'setsockopt'");
-//	}
-//
-//	my_addr.sin_family = AF_INET;
-//	my_addr.sin_port = htons(PuertoPCP);
-//	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
-//	memset(&(my_addr.sin_zero), '\0', 8 * sizeof(char));
-//
-//	if (bind(socket_host, (struct sockaddr*) &my_addr, sizeof(my_addr)) == -1)
-//		ErrorFatal("Error al hacer el Bind. El puerto está en uso");
-//
-//	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
-//		ErrorFatal(
-//				"Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
-//
-//	Traza(
-//			"El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d",
-//			socket_host, PuertoPCP);
-//
-//	while (1) {
-//		int socket_client;
-//
-//		size_addr = sizeof(struct sockaddr_in);
-//
-//		if ((socket_client = accept(socket_host,
-//				(struct sockaddr *) &client_addr, &size_addr)) != -1) {
-//			Traza(
-//					"Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d",
-//					inet_ntoa(client_addr.sin_addr), client_addr.sin_port,
-//					socket_client);
-//
-//			// Aca hay que crear un nuevo hilo, que será el encargado de atender al cliente
-//			pthread_t hNuevoCliente;
-//			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeClienteCPU,
-//					(void *) socket_client);
-//		} else {
-//			Error("ERROR AL ACEPTAR LA CONEXIÓN DE UN CLIENTE");
-//		}
-//	}
-//
-//	CerrarSocket(socket_host);
-//}
-
 void *escuharCPU(void *arg) {
 
 	//Abrir socket de escuchar CPU
@@ -223,8 +166,10 @@ void *moverEjecutar(void *arg) {
 	while (1) {
 		semwait(&readyCont);
 		semwait(&CPUCont);
+		pthread_mutex_lock(&mutexReady);
 		buffer = malloc(1 * sizeof(char) + 1);
 		buffer = "1";
+		pthread_mutex_lock(&mutexCPU);
 		auxcpu = encontrarCPULibre();
 		if (auxcpu != NULL ) {
 			if (list_size(listaReady) > 0) {
@@ -244,38 +189,45 @@ void *moverEjecutar(void *arg) {
 				}
 				list_clean(auxList);
 			}
+			pthread_mutex_unlock(&mutexCPU);
+			pthread_mutex_unlock(&mutexReady);
 			free(buffer);
 		}
 		return NULL ;
 	}
 }
 
-	void *moverReady(void *arg) {
+void *moverReady(void *arg) {
 
-		//mandar a ready los bloqueados
+	//mandar a ready los bloqueados
 
-		return NULL ;
-	}
+	return NULL ;
+}
 
-	void *moverReadyDeNew(void *arg) {
-		t_list *aux;
-		//mandar a ready de new
-		while (1) {
-			semwait(&multiCont);
-			semwait(&newCont);
-			if (list_size(listaNew) > 0) {
-				aux = list_take_and_remove(listaNew, 1);
-				list_add_all(listaReady, aux);
-				semsig(&readyCont);
-
-			}
-
+void *moverReadyDeNew(void *arg) {
+	t_list *aux;
+	//mandar a ready de new
+	while (1) {
+		semwait(&multiCont);
+		semwait(&newCont);
+		pthread_mutex_lock(&mutexNew);
+		if (list_size(listaNew) > 0) {
+			aux = list_take_and_remove(listaNew, 1);
+			pthread_mutex_unlock(&mutexNew);
+			pthread_mutex_lock(&mutexReady);
+			list_add_all(listaReady, aux);
+			pthread_mutex_unlock(&mutexReady);
+			semsig(&readyCont);
+		} else {
+			pthread_mutex_unlock(&mutexNew);
 		}
 
-		return NULL ;
 	}
 
-	void crearEscucha() {
+	return NULL ;
+}
+
+void crearEscucha() {
 //	fd_set master;   // conjunto maestro de descriptores de fichero
 //	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
 //	struct sockaddr_in myaddr;     // dirección del servidor
@@ -377,221 +329,219 @@ void *moverEjecutar(void *arg) {
 //
 //	int AtiendeCliente(int sockete); //Handshake y recibir programa
 
-		return;
+	return;
+}
+
+int pedirMemoriaUMV(int socketumv) {
+	char respuestaMemoria[BUFFERSIZE];
+	char *mensaje = "5";
+	//ENVIAR TODOS LOS CREAR SEGMENTOS
+	EnviarDatos(socketumv, mensaje);
+	RecibirDatos(socketumv, respuestaMemoria);
+
+	return analisarRespuestaUMV(respuestaMemoria);
+}
+
+int ObtenerPuertoUMV() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTO_UMV");
+}
+
+char *ObtenerIPUMV() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_string_value(config, "IP_UMV");
+}
+
+int ObtenerPuertoConfig() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTO");
+}
+
+int ObtenerPuertoPCPConfig() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "PUERTOPCP");
+}
+
+int ObtenerQuamtum() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "QUAMTUM");
+}
+
+int ObtenerRetardo() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "RETARDO");
+}
+
+int ObtenerMulti() {
+	t_config* config = config_create(PATH_CONFIG);
+
+	return config_get_int_value(config, "MULTIPROGRAMACION");
+}
+
+void conectarAUMV() {
+	Traza("Intentando conectar a umv.");
+
+	socketumv = ConexionConSocket(UMV_PUERTO, UMV_IP);
+	if (hacerhandshakeUMV(socketumv) == 0) {
+		ErrorFatal("No se pudo conectar a la umv.");
 	}
+}
 
-	int pedirMemoriaUMV(int socketumv) {
-		char respuestaMemoria[BUFFERSIZE];
-		char *mensaje = "5";
-		//ENVIAR TODOS LOS CREAR SEGMENTOS
-		EnviarDatos(socketumv, mensaje);
-		RecibirDatos(socketumv, respuestaMemoria);
+int hacerhandshakeUMV(int sockfd) {
+	char respuestahandshake[BUFFERSIZE];
+	char *mensaje = "31";
 
-		return analisarRespuestaUMV(respuestaMemoria);
-	}
+	EnviarDatos(sockfd, mensaje);
+	RecibirDatos(sockfd, respuestahandshake);
+	return analisarRespuestaUMV(respuestahandshake);
 
-	int ObtenerPuertoUMV() {
-		t_config* config = config_create(PATH_CONFIG);
+}
 
-		return config_get_int_value(config, "PUERTO_UMV");
-	}
+int analisarRespuestaUMV(char *mensaje) {
+	if (mensaje[0] == 0) {
+		Error("La umv nos devolvio un error: %s", mensaje);
+		return 0;
+	} else
+		return 1;
+}
 
-	char *ObtenerIPUMV() {
-		t_config* config = config_create(PATH_CONFIG);
-
-		return config_get_string_value(config, "IP_UMV");
-	}
-
-	int ObtenerPuertoConfig() {
-		t_config* config = config_create(PATH_CONFIG);
-
-		return config_get_int_value(config, "PUERTO");
-	}
-
-	int ObtenerPuertoPCPConfig() {
-		t_config* config = config_create(PATH_CONFIG);
-
-		return config_get_int_value(config, "PUERTOPCP");
-	}
-
-	int ObtenerQuamtum() {
-		t_config* config = config_create(PATH_CONFIG);
-
-		return config_get_int_value(config, "QUAMTUM");
-	}
-
-	int ObtenerRetardo() {
-		t_config* config = config_create(PATH_CONFIG);
-
-		return config_get_int_value(config, "RETARDO");
-	}
-
-	int ObtenerMulti() {
-		t_config* config = config_create(PATH_CONFIG);
-
-		return config_get_int_value(config, "MULTIPROGRAMACION");
-	}
-
-	void conectarAUMV() {
-		Traza("Intentando conectar a umv.");
-
-		socketumv = ConexionConSocket(UMV_PUERTO, UMV_IP);
-		if (hacerhandshakeUMV(socketumv) == 0) {
-			ErrorFatal("No se pudo conectar a la umv.");
-		}
-	}
-
-	int hacerhandshakeUMV(int sockfd) {
-		char respuestahandshake[BUFFERSIZE];
-		char *mensaje = "31";
-
-		EnviarDatos(sockfd, mensaje);
-		RecibirDatos(sockfd, respuestahandshake);
-		return analisarRespuestaUMV(respuestahandshake);
-
-	}
-
-	int analisarRespuestaUMV(char *mensaje) {
-		if (mensaje[0] == 0) {
-			Error("La umv nos devolvio un error: %s", mensaje);
-			return 0;
-		} else
-			return 1;
-	}
-
-	int ConexionConSocket(int puerto, char* IP) {
-		int sockfd;
+int ConexionConSocket(int puerto, char* IP) {
+	int sockfd;
 //Ip de lo que quieres enviar: ifconfig desde terminator , INADDR_ANY para local
-		struct hostent *he, *gethostbyname();
-		struct sockaddr_in their_addr;
-		he = gethostbyname(IP);
+	struct hostent *he, *gethostbyname();
+	struct sockaddr_in their_addr;
+	he = gethostbyname(IP);
 
-		if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-			ErrorFatal("Error al querer crear el socket. puerto %d, ip %s",
-					puerto, IP);
-			exit(1);
-		}
-
-		their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
-		their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red
-		bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-		memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
-
-		if (connect(sockfd, (struct sockaddr *) &their_addr,
-				sizeof(struct sockaddr)) == -1) {
-			ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto,
-					IP);
-			exit(1);
-		}
-
-		return sockfd;
-	}
-
-	int RecibirDatos(int socket, char *buffer) {
-		int bytecount;
-// memset se usa para llenar el buffer con 0s
-		memset(buffer, 0, BUFFERSIZE);
-
-//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
-		if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-			Error(
-					"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
-					socket);
-
-		Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-		return bytecount;
-	}
-
-	int EnviarDatos(int socket, void *buffer) {
-		int bytecount;
-
-		if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
-			Error("No puedo enviar información a al clientes. Socket: %d",
-					socket);
-
-		Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-		return bytecount;
-	}
-
-	void error(int code, char *err) {
-		char *msg = (char*) malloc(strlen(err) + 14);
-		sprintf(msg, "Error %d: %s\n", code, err);
-		fprintf(stderr, "%s", msg);
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		ErrorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
+				IP);
 		exit(1);
 	}
-	void Cerrar(int sRemoto) {
 
-		close(sRemoto);
+	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
+	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red
+	bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+	memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
+
+	if (connect(sockfd, (struct sockaddr *) &their_addr,
+			sizeof(struct sockaddr)) == -1) {
+		ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
+		exit(1);
 	}
-	void CerrarSocket(int socket) {
-		close(socket);
-		Traza("Se cerró el socket (%d).", socket);
-	}
-	void ErrorFatal(char mensaje[], ...) {
+
+	return sockfd;
+}
+
+int RecibirDatos(int socket, char *buffer) {
+	int bytecount;
+// memset se usa para llenar el buffer con 0s
+	memset(buffer, 0, BUFFERSIZE);
+
+//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
+		Error(
+				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+				socket);
+
+	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+
+	return bytecount;
+}
+
+int EnviarDatos(int socket, void *buffer) {
+	int bytecount;
+
+	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
+		Error("No puedo enviar información a al clientes. Socket: %d", socket);
+
+	Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+
+	return bytecount;
+}
+
+void error(int code, char *err) {
+	char *msg = (char*) malloc(strlen(err) + 14);
+	sprintf(msg, "Error %d: %s\n", code, err);
+	fprintf(stderr, "%s", msg);
+	exit(1);
+}
+void Cerrar(int sRemoto) {
+
+	close(sRemoto);
+}
+void CerrarSocket(int socket) {
+	close(socket);
+	Traza("Se cerró el socket (%d).", socket);
+}
+void ErrorFatal(char mensaje[], ...) {
+	char* nuevo;
+	va_list arguments;
+	va_start(arguments, mensaje);
+	nuevo = string_from_vformat(mensaje, arguments);
+
+	fprintf(stderr, "\nERROR FATAL: %s\n", nuevo);
+
+	va_end(arguments);
+
+	char fin;
+
+	printf(
+			"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
+	scanf("%c", &fin);
+
+	exit(EXIT_FAILURE);
+}
+void Error(const char* mensaje, ...) {
+	char* nuevo;
+	va_list arguments;
+	va_start(arguments, mensaje);
+	nuevo = string_from_vformat(mensaje, arguments);
+
+	fprintf(stderr, "\nERROR: %s\n", nuevo);
+
+	va_end(arguments);
+
+}
+void Traza(const char* mensaje, ...) {
+	if (ImprimirTrazaPorConsola) {
 		char* nuevo;
 		va_list arguments;
 		va_start(arguments, mensaje);
 		nuevo = string_from_vformat(mensaje, arguments);
 
-		fprintf(stderr, "\nERROR FATAL: %s\n", nuevo);
-
-		va_end(arguments);
-
-		char fin;
-
-		printf(
-				"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
-		scanf("%c", &fin);
-
-		exit(EXIT_FAILURE);
-	}
-	void Error(const char* mensaje, ...) {
-		char* nuevo;
-		va_list arguments;
-		va_start(arguments, mensaje);
-		nuevo = string_from_vformat(mensaje, arguments);
-
-		fprintf(stderr, "\nERROR: %s\n", nuevo);
+		printf("TRAZA--> %s \n", nuevo);
 
 		va_end(arguments);
 
 	}
-	void Traza(const char* mensaje, ...) {
-		if (ImprimirTrazaPorConsola) {
-			char* nuevo;
-			va_list arguments;
-			va_start(arguments, mensaje);
-			nuevo = string_from_vformat(mensaje, arguments);
-
-			printf("TRAZA--> %s \n", nuevo);
-
-			va_end(arguments);
-
-		}
-	}
-	int ObtenerComandoMSJ(char buffer[]) {
+}
+int ObtenerComandoMSJ(char buffer[]) {
 //Hay que obtener el comando dado el buffer.
 //El comando está dado por el primer caracter, que tiene que ser un número.
-		return chartToInt(buffer[0]);
-	}
-	void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente) {
-		(*idProg) = chartToInt(buffer[1]);
-		(*tipoCliente) = chartToInt(buffer[2]);
+	return chartToInt(buffer[0]);
+}
+void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente) {
+	(*idProg) = chartToInt(buffer[1]);
+	(*tipoCliente) = chartToInt(buffer[2]);
 
-		memset(buffer, 0, BUFFERSIZE);
-		sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ",
-				*idProg, *tipoCliente);
-	}
-	int chartToInt(char x) {
-		char str[1];
-		str[0] = x;
-		int a = atoi(str);
-		return a;
-	}
+	memset(buffer, 0, BUFFERSIZE);
+	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ",
+			*idProg, *tipoCliente);
+}
+int chartToInt(char x) {
+	char str[1];
+	str[0] = x;
+	int a = atoi(str);
+	return a;
+}
 
-	void ComandoRecibirPrograma(char *buffer, int idProg) {
+void ComandoRecibirPrograma(char *buffer, int idProg) {
 //void ComandoRecibirPrograma(char *buffer, int *idProg, int *tipoCliente) {
 //	memset(buffer, 0, BUFFERSIZE);
 //	PCB programa;
@@ -618,47 +568,47 @@ void *moverEjecutar(void *arg) {
 //		// *  5° tamaño
 //		// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
 //	}
-	}
+}
 
-	int AtiendeCliente(int sockete) {
+int AtiendeCliente(int sockete) {
 
-		//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
-		//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
-		int id_Programa = 0;
+	//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
+	//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
+	int id_Programa = 0;
 
-		int tipo_Conexion = 0;
+	int tipo_Conexion = 0;
 
-		// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-		int tipo_mensaje = 0;
+	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+	int tipo_mensaje = 0;
 
-		// Dentro del buffer se guarda el mensaje recibido por el cliente.
-		char buffer[BUFFERSIZE];
+	// Dentro del buffer se guarda el mensaje recibido por el cliente.
+	char buffer[BUFFERSIZE];
 
-		// Cantidad de bytes recibidos.
-		int bytesRecibidos;
+	// Cantidad de bytes recibidos.
+	int bytesRecibidos;
 
-		// Código de salida por defecto
-		int code = 0;
+	// Código de salida por defecto
+	int code = 0;
 
-		bytesRecibidos = RecibirDatos(sockete, buffer);
+	bytesRecibidos = RecibirDatos(sockete, buffer);
 
-		if (bytesRecibidos > 0) {
-			//Analisamos que peticion nos está haciendo (obtenemos el comando)
-			tipo_mensaje = ObtenerComandoMSJ(buffer);
+	if (bytesRecibidos > 0) {
+		//Analisamos que peticion nos está haciendo (obtenemos el comando)
+		tipo_mensaje = ObtenerComandoMSJ(buffer);
 
-			//Evaluamos los comandos
-			switch (tipo_mensaje) {
-			case MSJ_HANDSHAKE:
-				ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
-				EnviarDatos(sockete, "1");
-				break;
-			case MSJ_RECIBO_PROGRAMA:
-				ComandoRecibirPrograma(buffer, sockete);
-				EnviarDatos(sockete, "1");
-			}
+		//Evaluamos los comandos
+		switch (tipo_mensaje) {
+		case MSJ_HANDSHAKE:
+			ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
+			EnviarDatos(sockete, "1");
+			break;
+		case MSJ_RECIBO_PROGRAMA:
+			ComandoRecibirPrograma(buffer, sockete);
+			EnviarDatos(sockete, "1");
 		}
-		return code;
 	}
+	return code;
+}
 
 //int AtiendeClienteCPU(void * arg) {
 //	int socket = (int) arg;
@@ -719,444 +669,480 @@ void *moverEjecutar(void *arg) {
 //	return code;
 //}
 
-	char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
-		*bytesRecibidos = 0;
-		int tamanioNuevoBuffer = 0;
-		int mensajeCompleto = 0;
-		int cantidadBytesRecibidos = 0;
-		int cantidadBytesAcumulados = 0;
+char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
+	*bytesRecibidos = 0;
+	int tamanioNuevoBuffer = 0;
+	int mensajeCompleto = 0;
+	int cantidadBytesRecibidos = 0;
+	int cantidadBytesAcumulados = 0;
 
-		// memset se usa para llenar el buffer con 0s
-		char bufferAux[BUFFERSIZE];
+	// memset se usa para llenar el buffer con 0s
+	char bufferAux[BUFFERSIZE];
 
-		buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-		memset(buffer, 0, 1 * sizeof(char));
+	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
+	memset(buffer, 0, 1 * sizeof(char));
 
-		while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
-		{
-			memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
+	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
+	{
+		memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
 
-			//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
-			if ((*bytesRecibidos = *bytesRecibidos
-					+ recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
-				Error(
-						"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
-						socket);
+		//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+		if ((*bytesRecibidos = *bytesRecibidos
+				+ recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
+			Error(
+					"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+					socket);
 
-			cantidadBytesRecibidos = strlen(bufferAux);
-			cantidadBytesAcumulados = strlen(buffer);
-			tamanioNuevoBuffer = cantidadBytesRecibidos
-					+ cantidadBytesAcumulados;
+		cantidadBytesRecibidos = strlen(bufferAux);
+		cantidadBytesAcumulados = strlen(buffer);
+		tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
 
-			if (tamanioNuevoBuffer > 0) {
-				buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
+		if (tamanioNuevoBuffer > 0) {
+			buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
 
-				sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
-			}
-
-			//Verificamos si terminó el mensaje
-			if (cantidadBytesRecibidos < BUFFERSIZE)
-				mensajeCompleto = 1;
+			sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
 		}
 
-		Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-		return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+		//Verificamos si terminó el mensaje
+		if (cantidadBytesRecibidos < BUFFERSIZE)
+			mensajeCompleto = 1;
 	}
 
-	char ObtenerComandoCPU(char buffer[]) {
+	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+
+	return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+}
+
+char ObtenerComandoCPU(char buffer[]) {
 //Hay que obtener el comando dado el buffer.
 //El comando está dado por el primer caracter, que tiene que ser un número.
-		return buffer[0];
-	}
+	return buffer[0];
+}
 
-	char* ComandoHandShake2(char *buffer, int *tipoCliente) {
+char* ComandoHandShake2(char *buffer, int *tipoCliente) {
 // Formato del mensaje: CD
 // C = codigo de mensaje ( = 3)
 
-		int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
+	int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
 
-		if (tipoDeCliente == TIPO_CPU) {
-			*tipoCliente = tipoDeCliente;
-			buffer = RespuestaClienteOk(buffer);
-		} else {
-			*tipoCliente = 0;
-			//SetearErrorGlobal("HANDSHAKE ERROR. Tipo de cliente invalido (%d). KERNEL o '2' = CPU.", posicionDeBufferAInt(buffer, 1));
-			//buffer = RespuestaClienteError(buffer, g_MensajeError);
-		}
-
-		return buffer;
+	if (tipoDeCliente == TIPO_CPU) {
+		*tipoCliente = tipoDeCliente;
+		buffer = RespuestaClienteOk(buffer);
+	} else {
+		*tipoCliente = 0;
+		//SetearErrorGlobal("HANDSHAKE ERROR. Tipo de cliente invalido (%d). KERNEL o '2' = CPU.", posicionDeBufferAInt(buffer, 1));
+		//buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
 
-	int posicionDeBufferAInt(char* buffer, int posicion) {
-		int logitudBuffer = 0;
-		logitudBuffer = strlen(buffer);
+	return buffer;
+}
 
-		if (logitudBuffer <= posicion)
-			return 0;
-		else
-			return chartToInt(buffer[posicion]);
-	}
+int posicionDeBufferAInt(char* buffer, int posicion) {
+	int logitudBuffer = 0;
+	logitudBuffer = strlen(buffer);
 
-	char* RespuestaClienteOk(char *buffer) {
-		int tamanio = sizeof(char) * 2;
-		buffer = realloc(buffer, tamanio * sizeof(char));
-		memset(buffer, 0, tamanio * sizeof(char));
-		sprintf(buffer, "%s", "1");
-		return buffer;
-	}
+	if (logitudBuffer <= posicion)
+		return 0;
+	else
+		return chartToInt(buffer[posicion]);
+}
 
-	void seminit(psem_t *ps, int n) {
-		pthread_mutex_init(&ps->semdata, NULL );
+char* RespuestaClienteOk(char *buffer) {
+	int tamanio = sizeof(char) * 2;
+	buffer = realloc(buffer, tamanio * sizeof(char));
+	memset(buffer, 0, tamanio * sizeof(char));
+	sprintf(buffer, "%s", "1");
+	return buffer;
+}
 
-		pthread_mutex_init(&ps->sem_mutex, NULL );
+void seminit(psem_t *ps, int n) {
+	pthread_mutex_init(&ps->semdata, NULL );
 
-		/* para inicializar el semaforo binario a 0 */
+	pthread_mutex_init(&ps->sem_mutex, NULL );
+
+	/* para inicializar el semaforo binario a 0 */
+
+	pthread_mutex_lock(&ps->sem_mutex);
+
+	ps->n = n;
+}
+
+void semwait(psem_t *ps) {
+
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n--;
+	if (ps->n < 0) {
+		pthread_mutex_unlock(&ps->semdata);
 
 		pthread_mutex_lock(&ps->sem_mutex);
-
-		ps->n = n;
 	}
 
-	void semwait(psem_t *ps) {
-
-		pthread_mutex_lock(&ps->semdata);
-
-		ps->n--;
-		if (ps->n < 0) {
-			pthread_mutex_unlock(&ps->semdata);
-
-			pthread_mutex_lock(&ps->sem_mutex);
-		}
-
-		else
-			pthread_mutex_unlock(&ps->semdata);
-
-	}
-
-	void semsig(psem_t *ps) {
-		pthread_mutex_lock(&ps->semdata);
-
-		ps->n++;
-		if (ps->n < 1)
-			pthread_mutex_unlock(&ps->sem_mutex);
-
+	else
 		pthread_mutex_unlock(&ps->semdata);
+
+}
+
+void semsig(psem_t *ps) {
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n++;
+	if (ps->n < 1)
+		pthread_mutex_unlock(&ps->sem_mutex);
+
+	pthread_mutex_unlock(&ps->semdata);
+}
+
+void semdestroy(psem_t *ps) {
+	pthread_mutex_destroy(&ps->semdata);
+	pthread_mutex_destroy(&ps->sem_mutex);
+}
+
+void agregarNuevaCPU(int socket) {
+	list_add(listCPU, cpu_create(socket));
+}
+
+bool encontrarInt(int actual, int expected) {
+	return actual == expected;
+}
+
+t_CPU* encontrarCPULibre() {
+	int _is_CPU_Libre(t_CPU *p) {
+		return encontrarInt(p->libre, 0);
 	}
-
-	void semdestroy(psem_t *ps) {
-		pthread_mutex_destroy(&ps->semdata);
-		pthread_mutex_destroy(&ps->sem_mutex);
+	if (list_any_satisfy(listCPU, (void*) _is_CPU_Libre)) {
+		t_CPU * aux = list_find(listCPU, (void*) _is_CPU_Libre);
+		return aux;
 	}
+	return NULL ;
 
-	void agregarNuevaCPU(int socket) {
-		list_add(listCPU, cpu_create(socket));
+}
+
+t_CPU* encontrarCPU(int idcpu) {
+	int _is_CPU(t_CPU *p) {
+		return encontrarInt(p->idCPU, idcpu);
 	}
-
-	bool encontrarInt(int actual, int expected) {
-		return actual == expected;
+	if (list_any_satisfy(listCPU, (void*) _is_CPU)) {
+		t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
+		return aux;
 	}
+	return NULL ;
 
-	t_CPU* encontrarCPULibre() {
-		int _is_CPU_Libre(t_CPU *p) {
-			return encontrarInt(p->libre, 0);
-		}
-		if (list_any_satisfy(listCPU, (void*) _is_CPU_Libre)) {
-			t_CPU * aux = list_find(listCPU, (void*) _is_CPU_Libre);
-			return aux;
-		}
-		return NULL ;
+}
 
-	}
+void *HiloOrquestadorDeCPU() {
+	int nbytesRecibidos;
+	char* buffer;
 
-	t_CPU* encontrarCPU(int idcpu) {
-		int _is_CPU(t_CPU *p) {
-			return encontrarInt(p->idCPU, idcpu);
-		}
-		if (list_any_satisfy(listCPU, (void*) _is_CPU)) {
-			t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
-			return aux;
-		}
-		return NULL ;
+	//	int id_CPU = 0;
+	int tipo_Cliente = 0;
 
-	}
-
-	void *HiloOrquestadorDeCPU() {
-		int nbytesRecibidos;
-		char* buffer;
-
-		//	int id_CPU = 0;
-		int tipo_Cliente = 0;
-
-		// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-		char tipo_mensaje = '0';
+	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+	char tipo_mensaje = '0';
 
 //int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 //	struct sockaddr_in myaddr;     // dirección del servidor
 
-		fd_set master;   // conjunto maestro de descriptores de fichero
-		fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
-		int fdmax;        // número máximo de descriptores de fichero
-		int socketEscucha;     // descriptor de socket a la escucha
-		int socketNuevaConexion; // descriptor de socket de nueva conexión aceptada
-		int i;
-		FD_ZERO(&master);    // borra los conjuntos maestro y temporal
-		FD_ZERO(&read_fds);
+	fd_set master;   // conjunto maestro de descriptores de fichero
+	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
+	int fdmax;        // número máximo de descriptores de fichero
+	int socketEscucha;     // descriptor de socket a la escucha
+	int socketNuevaConexion; // descriptor de socket de nueva conexión aceptada
+	int i;
+	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
+	FD_ZERO(&read_fds);
 
-		struct sockaddr_in socketInfo;
+	struct sockaddr_in socketInfo;
 //	char buffer[BUFF_SIZE];
-		int optval = 1;
+	int optval = 1;
 
-		// Crear un socket:
-		// AF_INET: Socket de internet IPv4
-		// SOCK_STREAM: Orientado a la conexion, TCP
-		// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
-		if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-			perror("socket");
-			//return 1;
-		}
+	// Crear un socket:
+	// AF_INET: Socket de internet IPv4
+	// SOCK_STREAM: Orientado a la conexion, TCP
+	// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
+	if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		//return 1;
+	}
 
-		// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
-		setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
-				sizeof(optval));
+	// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
+	setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
+			sizeof(optval));
 
-		socketInfo.sin_family = AF_INET;
-		socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
-		socketInfo.sin_port = htons(PuertoPCP);
+	socketInfo.sin_family = AF_INET;
+	socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
+	socketInfo.sin_port = htons(PuertoPCP);
 
 // Vincular el socket con una direccion de red almacenada en 'socketInfo'.
-		if (bind(socketEscucha, (struct sockaddr*) &socketInfo,
-				sizeof(socketInfo)) != 0) {
+	if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
+			!= 0) {
 
-			perror("Error al bindear socket escucha");
-			//return EXIT_FAILURE;
-		}
+		perror("Error al bindear socket escucha");
+		//return EXIT_FAILURE;
+	}
 
 // Escuchar nuevas conexiones entrantes.
-		if (listen(socketEscucha, 10) != 0) {
+	if (listen(socketEscucha, 10) != 0) {
 
-			perror("Error al poner a escuchar socket");
-			//return EXIT_FAILURE;
+		perror("Error al poner a escuchar socket");
+		//return EXIT_FAILURE;
+	}
+
+	printf("Escuchando conexiones entrantes.\n");
+	// añadir listener al conjunto maestro
+	FD_SET(socketEscucha, &master);
+	// seguir la pista del descriptor de fichero mayor
+	fdmax = socketEscucha; // por ahora es éste
+
+	for (;;) {
+		read_fds = master; // cópialo
+		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
+			perror("select");
+			exit(1);
 		}
-
-		printf("Escuchando conexiones entrantes.\n");
-		// añadir listener al conjunto maestro
-		FD_SET(socketEscucha, &master);
-		// seguir la pista del descriptor de fichero mayor
-		fdmax = socketEscucha; // por ahora es éste
-
-		for (;;) {
-			read_fds = master; // cópialo
-			if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
-				perror("select");
-				exit(1);
-			}
-			// explorar conexiones existentes en busca de datos que leer
-			for (i = 0; i <= fdmax; i++) {
-				if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
-					if (i == socketEscucha) {
-						// gestionar nuevas conexiones
-						// addrlen = sizeof(remoteaddr);
-						if ((socketNuevaConexion = accept(socketEscucha, NULL,
-								0)) == -1) {
-							perror("accept");
-						} else {
-							FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
-							if (socketNuevaConexion > fdmax) { // actualizar el máximo
-								fdmax = socketNuevaConexion;
-							}
-
-							printf(
-									"selectserver: una nueva conneccion socket %d\n",
-									socketNuevaConexion);
-						}
+		// explorar conexiones existentes en busca de datos que leer
+		for (i = 0; i <= fdmax; i++) {
+			if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
+				if (i == socketEscucha) {
+					// gestionar nuevas conexiones
+					// addrlen = sizeof(remoteaddr);
+					if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
+							== -1) {
+						perror("accept");
 					} else {
+						FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
+						if (socketNuevaConexion > fdmax) { // actualizar el máximo
+							fdmax = socketNuevaConexion;
+						}
 
-						// gestionar datos de un cliente
-						// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
+						printf("selectserver: una nueva conneccion socket %d\n",
+								socketNuevaConexion);
+					}
+				} else {
 
-						buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+					// gestionar datos de un cliente
+					// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
 
-						//Recibimos los datos del cliente
-						buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
-						if (nbytesRecibidos <= 0) {
-							// error o conexión cerrada por el cliente
-							if (nbytesRecibidos == 0) {
-								// conexión cerrada
-								printf("selectserver: socket %d hung up\n", i);
-							} else {
-								perror("recv");
+					buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+
+					//Recibimos los datos del cliente
+					buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
+					if (nbytesRecibidos <= 0) {
+						// error o conexión cerrada por el cliente
+						if (nbytesRecibidos == 0) {
+							// conexión cerrada
+							printf("selectserver: socket %d hung up\n", i);
+						} else {
+							perror("recv");
+						}
+						pthread_mutex_lock(&mutexCPU);
+						eliminarCpu(i);
+						pthread_mutex_lock(&mutexCPU);
+						close(i); // bye!
+						FD_CLR(i, &master); // eliminar del conjunto maestro
+					} else {
+						tipo_mensaje = ObtenerComandoCPU(buffer);
+
+						//Evaluamos los comandos
+						switch (tipo_mensaje) {
+						case MSJ_CPU_IMPRIMI:
+							break;
+						case MSJ_CPU_HANDSHAKE:
+							buffer = ComandoHandShake2(buffer, &tipo_Cliente);
+							//crear nueva CPU
+							if (tipo_Cliente == TIPO_CPU) {
+								pthread_mutex_lock(&mutexCPU);
+								agregarNuevaCPU(i);
+								pthread_mutex_lock(&mutexCPU);
 							}
+							EnviarDatos(i, buffer);
+							break;
+
+						case MSJ_CPU_FINAlQUAMTUM:
+							comandoFinalQuamtum(buffer, i);
+							break;
+						case MSJ_CPU_OBTENERVALORGLOBAL:
+							break;
+						case MSJ_CPU_GRABARVALORGLOBAL:
+							break;
+						case MSJ_CPU_ABANDONA:
+							//elimina cpu
+							pthread_mutex_lock(&mutexCPU);
+							eliminarCpu(i);
+							pthread_mutex_lock(&mutexCPU);
 							close(i); // bye!
 							FD_CLR(i, &master); // eliminar del conjunto maestro
-						} else {
-							tipo_mensaje = ObtenerComandoCPU(buffer);
+							break;
+						case MSJ_CPU_WAIT:
+							break;
+						case MSJ_CPU_SIGNAL:
+							break;
+						case MSJ_CPU_FINAlIZAR:
+							break;
+						case MSJ_CPU_LIBERAR:
+							//CPU pasa a libre
+							comandoLiberar(i);
+							break;
+						default:
+							//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
+							break;
 
-							//Evaluamos los comandos
-							switch (tipo_mensaje) {
-							case MSJ_CPU_IMPRIMI:
-								break;
-							case MSJ_CPU_HANDSHAKE:
-								buffer = ComandoHandShake2(buffer,
-										&tipo_Cliente);
-								//crear nueva CPU
-								if (tipo_Cliente == TIPO_CPU) {
-									agregarNuevaCPU(i);
-								}
-								EnviarDatos(i, buffer);
-								break;
-
-							case MSJ_CPU_FINAlQUAMTUM:
-								break;
-							case MSJ_CPU_OBTENERVALORGLOBAL:
-								break;
-							case MSJ_CPU_GRABARVALORGLOBAL:
-								break;
-							case MSJ_CPU_ABANDONA:
-								//elimina cpu
-								eliminarCpu(i);
-								close(i); // bye!
-								FD_CLR(i, &master); // eliminar del conjunto maestro
-								break;
-							case MSJ_CPU_WAIT:
-								break;
-							case MSJ_CPU_SIGNAL:
-								break;
-							case MSJ_CPU_FINAlIZAR:
-								break;
-							case MSJ_CPU_LIBERAR:
-								//CPU pasa a libre
-								comandoLiberar(i);
-								break;
-							default:
-								//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
-								break;
-
-							}
-
-							buffer[0] = '\0';
 						}
+
+						buffer[0] = '\0';
 					}
 				}
 			}
 		}
-
-		return 0;
 	}
 
-	PCB* desearilizar_PCB(char* estructura, int* pos) {
-		printf("%s\n", estructura);
-		char* sub = "";
-		sub = malloc(1 * sizeof(char));
-		PCB* est_prog;
-		est_prog = (struct PCBs *) malloc(sizeof(PCB));
-		int aux;
-		int i;
-		int indice = *pos;
-		int inicio = *pos;
+	return 0;
+}
 
-		iniciarPCB(est_prog);
-		for (aux = 1; aux < 10; aux++) {
-			for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
-				sub = string_substring(estructura, inicio, 1);
-				inicio++;
-			}
-			switch (aux) {
-			case 1:
-				est_prog->id = atoi(string_substring(estructura, indice, i));
-				break;
-			case 2:
-				est_prog->segmentoCodigo = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 3:
-				est_prog->segmentoStack = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 4:
-				est_prog->cursorStack = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 5:
-				est_prog->indiceCodigo = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 6:
-				est_prog->indiceEtiquetas = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 7:
-				est_prog->programCounter = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 8:
-				est_prog->sizeContextoActual = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 9:
-				est_prog->sizeIndiceEtiquetas = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			}
-			sub = "";
-			indice = inicio;
+PCB* desearilizar_PCB(char* estructura, int* pos) {
+	printf("%s\n", estructura);
+	char* sub = "";
+	sub = malloc(1 * sizeof(char));
+	PCB* est_prog;
+	est_prog = (struct PCBs *) malloc(sizeof(PCB));
+	int aux;
+	int i;
+	int indice = *pos;
+	int inicio = *pos;
+
+	iniciarPCB(est_prog);
+	for (aux = 1; aux < 10; aux++) {
+		for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
+			sub = string_substring(estructura, inicio, 1);
+			inicio++;
 		}
-		*pos = inicio;
-		//free(sub);
-		return est_prog;
-	}
-
-	void iniciarPCB(PCB* prog) {
-		prog->id = 0;
-		prog->segmentoCodigo = 0;
-		prog->segmentoStack = 0;
-		prog->cursorStack = 0;
-		prog->indiceCodigo = 0;
-		prog->indiceEtiquetas = 0;
-		prog->programCounter = 0;
-		prog->sizeContextoActual = 0;
-		prog->sizeIndiceEtiquetas = 0;
-	}
-
-	char* serializar_PCB(PCB* prog) {
-		char* cadena;
-		cadena = malloc(1 * sizeof(char));
-
-		string_append(&cadena, string_itoa(prog->id));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->segmentoCodigo));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->segmentoStack));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->cursorStack));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->indiceCodigo));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->indiceEtiquetas));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->programCounter));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->sizeContextoActual));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->sizeIndiceEtiquetas));
-		string_append(&cadena, "-");
-		return cadena;
-
-	}
-
-	void comandoLiberar(int socket) {
-		t_CPU* aux = encontrarCPU(socket);
-		if (aux != NULL ) {
-			aux->libre = 0;
+		switch (aux) {
+		case 1:
+			est_prog->id = atoi(string_substring(estructura, indice, i));
+			break;
+		case 2:
+			est_prog->segmentoCodigo = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 3:
+			est_prog->segmentoStack = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 4:
+			est_prog->cursorStack = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 5:
+			est_prog->indiceCodigo = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 6:
+			est_prog->indiceEtiquetas = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 7:
+			est_prog->programCounter = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 8:
+			est_prog->sizeContextoActual = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 9:
+			est_prog->sizeIndiceEtiquetas = atoi(
+					string_substring(estructura, indice, i));
+			break;
 		}
+		sub = "";
+		indice = inicio;
 	}
+	*pos = inicio;
+	//free(sub);
+	return est_prog;
+}
 
-	void eliminarCpu(int idcpu) {
-		int _is_CPU_ID(t_CPU *p) {
-			return encontrarInt(p->idCPU, idcpu);
-		}
-		if (list_any_satisfy(listCPU, (void*) _is_CPU_ID)) {
-			list_remove_by_condition(listCPU, (void*) _is_CPU_ID);
-		}
+void iniciarPCB(PCB* prog) {
+	prog->id = 0;
+	prog->segmentoCodigo = 0;
+	prog->segmentoStack = 0;
+	prog->cursorStack = 0;
+	prog->indiceCodigo = 0;
+	prog->indiceEtiquetas = 0;
+	prog->programCounter = 0;
+	prog->sizeContextoActual = 0;
+	prog->sizeIndiceEtiquetas = 0;
+}
+
+char* serializar_PCB(PCB* prog) {
+	char* cadena;
+	cadena = malloc(1 * sizeof(char));
+
+	string_append(&cadena, string_itoa(prog->id));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->segmentoCodigo));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->segmentoStack));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->cursorStack));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->indiceCodigo));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->indiceEtiquetas));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->programCounter));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->sizeContextoActual));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->sizeIndiceEtiquetas));
+	string_append(&cadena, "-");
+	return cadena;
+
+}
+
+void comandoLiberar(int socket) {
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU* aux = encontrarCPU(socket);
+	if (aux != NULL ) {
+		aux->libre = 0;
 	}
+	pthread_mutex_lock(&mutexCPU);
+}
+
+void eliminarCpu(int idcpu) {
+	int _is_CPU_ID(t_CPU *p) {
+		return encontrarInt(p->idCPU, idcpu);
+	}
+	if (list_any_satisfy(listCPU, (void*) _is_CPU_ID)) {
+		list_remove_by_condition(listCPU, (void*) _is_CPU_ID);
+	}
+}
+
+void comandoFinalQuamtum(char *buffer, int socket) {
+	PCB* auxPCB;
+	int pos;
+	auxPCB = desearilizar_PCB(buffer, &pos);
+	switch (buffer[pos]) {
+	case '0': //termino quamtum colocar en ready
+		pthread_mutex_lock(&mutexReady);
+		list_add(listaReady, auxPCB);
+		pthread_mutex_unlock(&mutexReady);
+		semsig(&readyCont);
+		break;
+	case '1':	//Hay que hacer I/O
+		break;
+	case '2':	//Bloqueado por semaforo
+		break;
+	}
+	//Buscar CPU y Borrar Programa
+	t_CPU* aux;
+	PCB* aux1;
+	pthread_mutex_lock(&mutexCPU);
+	aux = encontrarCPU(socket);
+	if (aux != NULL ) {
+		aux1 = aux->idPCB;
+		aux->idPCB = NULL;
+		free(aux1);
+	}
+	pthread_mutex_unlock(&mutexCPU);
+}
 
