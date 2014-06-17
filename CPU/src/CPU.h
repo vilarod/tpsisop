@@ -65,6 +65,11 @@ int crearSocket(int socketConec);
 struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
 
+void ErrorFatal(const char* mensaje, ...);
+void Traza(const char* mensaje, ...);
+void Error(const char* mensaje, ...);
+char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos);
+
 //Recibir-Enviar datos con el kernel
 int RecibirProceso(); //para recibir el pcb, el retardo y el quantum
 char* PedirSentencia(); //para recibir la instruccion

@@ -63,7 +63,7 @@ int ObtenerComandoMSJ(char buffer[]);
 void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
 char* ComandoHandShake2(char *buffer, int *tipoCliente);
 void ComandoRecibirPrograma(char *buffer, int id);
-
+void comandoFinalQuamtum(char *buffer,int socket);
 
 void crearEscucha();
 int AtiendeCliente(int sockete);
@@ -129,4 +129,7 @@ int Retardo;
 int Multi;
 char *UMV_IP;
 t_list *listCPU, *listaNew, *listaReady, *listaBloqueados;
+pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
 

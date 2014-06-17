@@ -8,8 +8,8 @@
  Testing	 : Para probarlo es tan simple como ejecutar en el terminator la linea "$ telnet localhost 7000" y empezar a dialogar con el UMV.
  A tener en cuenta: organizar codigo : ctrl+Mayúscula+f
  PARA HACER
- - Varios dump
- - permitir definir lugar del archivo y nombre
+ - algun dump?
+ - permitir definir lugar del archivo y nombre--
  ============================================================================
  */
 
@@ -29,6 +29,7 @@
 #include <string.h>
 #include <commons/string.h>
 #include <commons/collections/list.h>
+#include <commons/log.h>
 #include <semaphore.h>
 
 #include "UMV.h"
@@ -88,6 +89,7 @@ char CMD_ACTIVAR_TRAZA[6] = { 'T', 'R', 'A', 'Z', 'A', '\0' };
 #define ALGORITMO_FIRST_FIT       'F'
 
 #define NOMBRE_ARCHIVO_CONSOLA     "Archivo_UMV.txt"
+#define NOMBRE_ARCHIVO_LOG 		   "Log_UMV.txt"
 
 #endif
 
@@ -114,7 +116,8 @@ char g_AlgoritmoAsignacion = ALGORITMO_FIRST_FIT;
 t_list * g_ListaSegmentos;
 
 // Semaforo mutex para controlar que nadie quiera acceder a la memoria mientras esta se compacta.
-sem_t s_AccesoAListadoSegmentos;
+// sem_t s_AccesoAListadoSegmentos;
+pthread_rwlock_t s_AccesoAListadoSegmentos = PTHREAD_RWLOCK_INITIALIZER;
 
 //Mensaje de error global.
 char* g_MensajeError;
@@ -127,6 +130,9 @@ FILE * g_ArchivoConsola;
 
 // Bandera que indica si siempre se graba a archivo (ni siquiera consula)
 int g_GrabarSiempreArchivo = 1;
+
+// Logger del commons
+t_log* logger;
 
 #endif
 
@@ -161,6 +167,12 @@ static void segmento_destroy(t_segmento *self)
 
 int main(int argv, char** argc)
 {
+	// Instanciamos el archivo donde se grabará lo solicitado por consola
+	g_ArchivoConsola = fopen(NOMBRE_ARCHIVO_CONSOLA, "wt");
+	g_MensajeError = malloc(1 * sizeof(char));
+	//char* temp_file = tmpnam(NULL);
+	logger = log_create(NOMBRE_ARCHIVO_LOG, "UMV", false, LOG_LEVEL_TRACE);
+
 	// Definimos los hilos principales
 	pthread_t hOrquestadorConexiones, hConsola;
 
@@ -172,10 +184,6 @@ int main(int argv, char** argc)
 
 	// Creamos las estructuras necesarias para manejar la UMV
 	InstanciarTablaSegmentos();
-
-	// Instanciamos el archivo donde se grabará lo solicitado por consola
-	g_ArchivoConsola = fopen(NOMBRE_ARCHIVO_CONSOLA, "wt");
-	g_MensajeError = malloc(1 * sizeof(char));
 
 	// Arrancamos los hilos
 	pthread_create(&hOrquestadorConexiones, NULL, (void*) HiloOrquestadorDeConexiones, NULL );
@@ -652,16 +660,18 @@ void ImprimirMemoriaSegmentosDeProgramaTSeg(int imprimirArchivo, t_segmento *seg
 	ImprimirListadoSegmentosDeProgramaTSeg(imprimirArchivo, seg);
 
 	char * buffer = malloc(seg->Tamanio * sizeof(char));
+	memset(buffer, 0, seg->Tamanio * sizeof(char));
 	memcpy(buffer, seg->UbicacionMP, seg->Tamanio * sizeof(char));
 
 	int id = 0;
 
 	Imprimir(imprimirArchivo, "\n CONTENIDO DE MEMORIA \n", "");
 
-	while(id<seg->Tamanio)
+	while (id < seg->Tamanio)
 	{
-		char* aux = malloc(bytesPorLinea*sizeof(char));
-		memcpy(aux, buffer + id , bytesPorLinea *sizeof(char));
+		char* aux = malloc(bytesPorLinea * sizeof(char));
+		memset(aux, 0, bytesPorLinea * sizeof(char));
+		memcpy(aux, buffer + (id* sizeof(char)), bytesPorLinea * sizeof(char));
 		Imprimir(imprimirArchivo, "-%10d-   %s\n", id, aux);
 		free(aux);
 		id = id + bytesPorLinea;
@@ -767,6 +777,8 @@ void Imprimir(int ImprimirArchivo, const char* mensaje, ...)
 	{
 		fprintf(g_ArchivoConsola, "%s", nuevo);
 		fflush(g_ArchivoConsola);
+
+		log_info(logger, "%s", nuevo);
 	}
 
 	va_end(arguments);
@@ -783,6 +795,7 @@ void Error(const char* mensaje, ...)
 	nuevo = string_from_vformat(mensaje, arguments);
 
 	fprintf(stderr, "\nERROR: %s\n", nuevo);
+	log_error(logger, "%s", nuevo);
 
 	va_end(arguments);
 	free(nuevo);
@@ -790,18 +803,21 @@ void Error(const char* mensaje, ...)
 
 void Traza(const char* mensaje, ...)
 {
+	char* nuevo;
+
+	va_list arguments;
+	va_start(arguments, mensaje);
+	nuevo = string_from_vformat(mensaje, arguments);
+
 	if (g_ImprimirTrazaPorConsola)
 	{
-		char* nuevo;
-		va_list arguments;
-		va_start(arguments, mensaje);
-		nuevo = string_from_vformat(mensaje, arguments);
-
 		printf("TRAZA--> %s \n", nuevo);
-
-		va_end(arguments);
-		free(nuevo);
 	}
+
+	log_trace(logger, "%s", nuevo);
+
+	free(nuevo);
+	va_end(arguments);
 }
 
 void ErrorFatal(const char* mensaje, ...)
@@ -811,6 +827,7 @@ void ErrorFatal(const char* mensaje, ...)
 	va_start(arguments, mensaje);
 	nuevo = string_from_vformat(mensaje, arguments);
 	printf("\nERROR FATAL--> %s \n", nuevo);
+	log_error(logger, "\nERROR FATAL--> %s \n", nuevo);
 	char fin;
 
 	printf("El programa se cerrara. Presione ENTER para finalizar la ejecución.");
@@ -853,7 +870,7 @@ void HiloOrquestadorDeConexiones()
 	my_addr.sin_family = AF_INET;
 	my_addr.sin_port = htons(g_Puerto);
 	my_addr.sin_addr.s_addr = htons(INADDR_ANY );
-	memset(&(my_addr.sin_zero), '\0', 8* sizeof(char));
+	memset(&(my_addr.sin_zero), '\0', 8 * sizeof(char));
 
 	if (bind(socket_host, (struct sockaddr*) &my_addr, sizeof(my_addr)) == -1)
 		ErrorFatal("Error al hacer el Bind. El puerto está en uso");
@@ -898,30 +915,35 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
 	char bufferAux[BUFFERSIZE];
 
 	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-	memset(buffer, 0, 1* sizeof(char));
+	memset(buffer, 0, 1 * sizeof(char));
 
 	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
 	{
-		memset(bufferAux, 0, BUFFERSIZE* sizeof(char)); //-> llenamos el bufferAux con barras ceros.
+		memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
 
 		//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 		if ((*bytesRecibidos = *bytesRecibidos + recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
-			Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
-
-		cantidadBytesRecibidos = strlen(bufferAux);
-		cantidadBytesAcumulados = strlen(buffer);
-		tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
-
-		if (tamanioNuevoBuffer > 0)
 		{
-			buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
-
-			sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
-		}
-
-		//Verificamos si terminó el mensaje
-		if (cantidadBytesRecibidos < BUFFERSIZE)
+			Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
 			mensajeCompleto = 1;
+		}
+		else
+		{
+			cantidadBytesRecibidos = strlen(bufferAux);
+			cantidadBytesAcumulados = strlen(buffer);
+			tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
+
+			if (tamanioNuevoBuffer > 0)
+			{
+				buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
+
+				sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
+			}
+
+			//Verificamos si terminó el mensaje
+			if (cantidadBytesRecibidos < BUFFERSIZE)
+				mensajeCompleto = 1;
+		}
 	}
 
 	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
@@ -988,7 +1010,7 @@ void InstanciarTablaSegmentos()
 {
 	g_ListaSegmentos = list_create();
 	srand(getpid()); // --> esto inicializa la semilla para la generacion de numeros aleatorios.
-	sem_init(&s_AccesoAListadoSegmentos, 0, 1); //-> inicializamos en 1 el semaforo para controlar el acceso a la memoria mientras se compacta.
+//	sem_init(&s_AccesoAListadoSegmentos, 0, 1); //-> inicializamos en 1 el semaforo para controlar el acceso a la memoria mientras se compacta.
 }
 
 void reservarMemoriaPrincipal()
@@ -996,7 +1018,7 @@ void reservarMemoriaPrincipal()
 // Reservamos la memoria
 	g_BaseMemoria = (char*) malloc(g_TamanioMemoria);
 // Rellenamos con ceros.
-	memset(g_BaseMemoria, '0', g_TamanioMemoria* sizeof(char));
+	memset(g_BaseMemoria, '0', g_TamanioMemoria * sizeof(char));
 
 // si no podemos salimos y cerramos el programa.
 	if (g_BaseMemoria == NULL )
@@ -1055,7 +1077,7 @@ int CrearSegmento(int idPrograma, int tamanio)
 
 int DestruirSegmentos(int idPrograma)
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_wrlock(&s_AccesoAListadoSegmentos);
 
 	bool _is_program(t_segmento *p)
 	{
@@ -1069,14 +1091,14 @@ int DestruirSegmentos(int idPrograma)
 
 	Traza("Se borraron los segmentos del programa. Id programa: %d.", idPrograma);
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 
 	return 1;
 }
 
 void CompactarMemoria()
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_wrlock(&s_AccesoAListadoSegmentos);
 
 	int index = 0;
 	int esElPrimero = 1;
@@ -1103,7 +1125,7 @@ void CompactarMemoria()
 			inicioSegmentoAnterior = seg->UbicacionMP; // --> el viejo inicio de segmento
 			inicioSegmentoNuevo = finSegmentoAnterior + 1; // --> el nuevo inicio de segmento es el fin del anterior + 1
 
-			memcpy(inicioSegmentoNuevo, inicioSegmentoAnterior, seg->Tamanio* sizeof(char)); // --> copiamos la memoria
+			memcpy(inicioSegmentoNuevo, inicioSegmentoAnterior, seg->Tamanio * sizeof(char)); // --> copiamos la memoria
 
 			seg->UbicacionMP = inicioSegmentoNuevo; // --> la vieja base ahora es la nueva
 
@@ -1118,12 +1140,12 @@ void CompactarMemoria()
 
 	Traza("Se compactó la memoria.");
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 }
 
 void AgregarSegmentoALista(int idPrograma, int idSegmento, int inicio, int tamanio, char* ubicacionMP)
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_wrlock(&s_AccesoAListadoSegmentos);
 
 // Lo agregamos a la lista (al final)
 	list_add(g_ListaSegmentos, segmento_create(idPrograma, idSegmento, inicio, tamanio, ubicacionMP));
@@ -1136,7 +1158,7 @@ void AgregarSegmentoALista(int idPrograma, int idSegmento, int inicio, int taman
 
 	list_sort(g_ListaSegmentos, (void*) _ubicacion_mp);
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 }
 
 int CalcularIdSegmento(int idPrograma)
@@ -1187,7 +1209,7 @@ int CalcularInicioSegmento(int idPrograma)
 
 t_segmento* ObtenerInfoSegmento(int idPrograma, int idSegmento)
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_rdlock(&s_AccesoAListadoSegmentos);
 
 	t_segmento* aux = NULL;
 	int index = 0;
@@ -1202,7 +1224,7 @@ t_segmento* ObtenerInfoSegmento(int idPrograma, int idSegmento)
 
 	list_iterate(g_ListaSegmentos, (void*) _list_elements);
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 
 	return aux;
 }
@@ -1223,7 +1245,7 @@ char* CalcularUbicacionMP_WorstFit(int tamanioRequeridoSegmento)
 {
 	char* retorno = NULL;
 
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_rdlock(&s_AccesoAListadoSegmentos);
 
 // Obtenemos la canitdad de segmentos deifnidos
 	int cantidadSegmentos = ObtenerCantidadSegmentos();
@@ -1289,13 +1311,13 @@ char* CalcularUbicacionMP_WorstFit(int tamanioRequeridoSegmento)
 			retorno = NULL;
 	}
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 	return retorno;
 }
 
 char* CalcularUbicacionMP_FirstFit(int tamanioRequeridoSegmento)
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_rdlock(&s_AccesoAListadoSegmentos);
 
 	char* retorno = NULL;
 // Obtenemos la canitdad de segmentos deifnidos
@@ -1355,7 +1377,7 @@ char* CalcularUbicacionMP_FirstFit(int tamanioRequeridoSegmento)
 		list_iterate(g_ListaSegmentos, (void*) _list_elements);
 	}
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 
 	return retorno;
 }
@@ -1388,7 +1410,7 @@ int obtenerTotalMemoriaEnUso()
 
 int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer)
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_rdlock(&s_AccesoAListadoSegmentos);
 
 // Primero verificamos que el programa pueda acceder a ese lugar de memoria
 	int ok = VerificarAccesoMemoria(idPrograma, base, desplazamiento, cantidadBytes);
@@ -1398,18 +1420,20 @@ int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBy
 // Si se puede acceder escribo la memoria
 		char* baseSegmento;
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
-		memcpy((baseSegmento + desplazamiento), buffer, cantidadBytes* sizeof(char));
+		memcpy((baseSegmento + (desplazamiento* sizeof(char))), buffer, cantidadBytes * sizeof(char));
 		Traza("Se escribió en memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 
 	return ok;
 }
 
 int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes, char* buffer)
 {
-	sem_wait(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_rdlock(&s_AccesoAListadoSegmentos);
+
+	memset(buffer, 0, cantidadBytes * sizeof(char));
 
 // Primero verificamos que el programa pueda acceder a ese lugar de memoria
 	int ok = VerificarAccesoMemoria(idPrograma, base, desplazamiento, cantidadBytes);
@@ -1419,11 +1443,11 @@ int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes,
 // Si se puede acceder escribo la memoria
 		char* baseSegmento;
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
-		memcpy(buffer, (baseSegmento + desplazamiento), cantidadBytes * sizeof(char));
+		memcpy(buffer, (baseSegmento + (desplazamiento* sizeof(char))), cantidadBytes * sizeof(char));
 		Traza("Se leyó  de memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
-	sem_post(&s_AccesoAListadoSegmentos);
+	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 
 	return ok;
 }
@@ -1639,8 +1663,8 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 	if (ok)
 	{
 		int tamanio = (longitudBuffer + 3) * sizeof(char);
-		buffer = realloc(buffer, tamanio* sizeof(char));
-		memset(buffer, 0, tamanio* sizeof(char));
+		buffer = realloc(buffer, tamanio * sizeof(char));
+		memset(buffer, 0, tamanio * sizeof(char));
 		sprintf(buffer, "%s%s", "1", lectura);
 	}
 	else
@@ -1770,8 +1794,8 @@ char* ComandoCrearSegmento(char *buffer, int tipoCliente)
 		{
 			t_segmento* aux = ObtenerInfoSegmento(idPrograma, idSegmento);
 			int tamanio = (cantidadDigitos(aux->Inicio) + 3) * sizeof(char);
-			buffer = realloc(buffer, tamanio* sizeof(char));
-			memset(buffer, 0, tamanio* sizeof(char));
+			buffer = realloc(buffer, tamanio * sizeof(char));
+			memset(buffer, 0, tamanio * sizeof(char));
 			sprintf(buffer, "%s%d%d", "1", cantidadDigitos(aux->Inicio), aux->Inicio);
 		}
 	}
@@ -1825,8 +1849,8 @@ char* ComandoDestruirSegmento(char *buffer, int tipoCliente)
 char* RespuestaClienteOk(char *buffer)
 {
 	int tamanio = sizeof(char) * 2;
-	buffer = realloc(buffer, tamanio* sizeof(char));
-	memset(buffer, 0, tamanio* sizeof(char));
+	buffer = realloc(buffer, tamanio * sizeof(char));
+	memset(buffer, 0, tamanio * sizeof(char));
 	sprintf(buffer, "%s", "1");
 	return buffer;
 }
@@ -1834,8 +1858,8 @@ char* RespuestaClienteOk(char *buffer)
 char* RespuestaClienteError(char *buffer, char *msj)
 {
 	int tamanio = (strlen(msj) + 2) * sizeof(char);
-	buffer = realloc(buffer, tamanio* sizeof(char));
-	memset(buffer, 0, tamanio* sizeof(char));
+	buffer = realloc(buffer, tamanio * sizeof(char));
+	memset(buffer, 0, tamanio * sizeof(char));
 	sprintf(buffer, "%s%s", "0", msj);
 	return buffer;
 }
