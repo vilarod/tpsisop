@@ -80,9 +80,10 @@ int main(int argv, char** argc) {
 	seminit(&multiCont, Multi);
 
 	//Crear Listas de estados
-	//PCB * NUEVO, LISTO;
-	//NUEVO = PCB * list_create();
-	//LISTO = PCB * list_create();
+	listaNew = list_create();
+	listCPU = list_create();
+	listaReady = list_create();
+	listaFin= list_create();
 
 	//Creacion del hilo plp
 	pthread_t plp;
@@ -1168,8 +1169,10 @@ void comandoWait(char* buffer,int socket){
 			if (aux != NULL ) {
 				aux1 = aux->idPCB;
 				aux->idPCB = NULL;
-				//TODO mandar Estado FINAL y no hacer free
-				free(aux1);
+				pthread_mutex_lock(&mutexFIN);
+				list_add(listaFin, final_create(aux1,1,"Semaforo no encontrado"));
+				pthread_mutex_unlock(&mutexFIN);
+				semsig(&finalizarCont);
 			}
 			pthread_mutex_unlock(&mutexCPU);
 	}

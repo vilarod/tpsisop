@@ -136,6 +136,27 @@ static void sem_destroy(t_sem *self)
 	free(self);
 }
 
+//Lista de CPU
+typedef struct _t_Final {
+	PCB* idPCB;
+	int finalizo;	//0 para correcto 1 para incorrecto
+	char* mensaje;
+} t_Final;
+
+static t_Final *final_create(PCB* pcb,int final, char* msj)
+{
+	t_Final*new = malloc(sizeof(t_Final));
+	new->idPCB = pcb;
+	new->finalizo = final;
+	new->mensaje = msj;
+	return new;
+}
+
+static void final_destroy(t_Final *self)
+{	free(self->idPCB);
+	free(self);
+}
+
 t_CPU l_CPU;
 bool encontrarInt(int actual, int expected);
 t_CPU*  encontrarCPULibre();
@@ -152,8 +173,9 @@ int Quamtum;
 int Retardo;
 int Multi;
 char *UMV_IP;
-t_list *listCPU, *listaNew, *listaReady, *listaBloqueados, *listaSemaforos;
+t_list *listCPU, *listaNew, *listaReady, *listaBloqueados,*listaFin, *listaSemaforos;
 pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutexFIN = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexSemaforos = PTHREAD_MUTEX_INITIALIZER;
