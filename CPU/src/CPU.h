@@ -29,18 +29,18 @@ typedef struct PCBs
 
 
 
-void iniciarPCB(PCB prog);
+void iniciarPCB(PCB* prog);
 void destruirEstructuras();
 void CambioProcesoActivo();
 
 //deserializar
 
-PCB desearilizar_PCB (char* estructura, int pos);
+PCB* desearilizar_PCB (char* estructura, int pos);
 void deserializarDesplLong(char * msj,int despl, int longi);
 
 //serializar
 char* getUMV(int base, int dsp, int tam);
-char* serializar_PCB (PCB prog);
+char* serializar_PCB (PCB* prog);
 void serCadena(char ** msj, char* agr);
 int setUMV(int ptro, int dsp, int tam, char* valor);
 //int saludar(int sld,int tipo, int sRemoto); //el handshake
@@ -51,7 +51,7 @@ char* ObtenerIPKernel();
 int ObtenerPuertoUmv();
 char* ObtenerIPUmv();
 
-int chartToInt(char x);
+
 
 //Manejo de conexiones
 int Enviar (int sRemoto, char * buffer);
@@ -74,10 +74,10 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos);
 int RecibirProceso(); //para recibir el pcb, el retardo y el quantum
 char* PedirSentencia(); //para recibir la instruccion
 
+void AbortarProceso();
 
 //Ejecutar
 void parsearYejecutar (char* instr);
-void salvarContextoProg();
 void limpiarEstructuras();
 void RecuperarDicVariables();
 void RecuperarDicEtiquetas();
