@@ -66,6 +66,7 @@ char* ComandoHandShake2(char *buffer, int *tipoCliente);
 void ComandoRecibirPrograma(char *buffer, int id);
 void comandoFinalQuamtum(char *buffer,int socket);
 void comandoWait(char* buffer,int socket);
+void comandoSignal(char* buffer,int socket);
 
 void crearEscucha();
 int AtiendeCliente(int sockete);

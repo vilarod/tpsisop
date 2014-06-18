@@ -83,7 +83,7 @@ int main(int argv, char** argc) {
 	listaNew = list_create();
 	listCPU = list_create();
 	listaReady = list_create();
-	listaFin= list_create();
+	listaFin = list_create();
 
 	//Creacion del hilo plp
 	pthread_t plp;
@@ -975,10 +975,12 @@ void *HiloOrquestadorDeCPU() {
 							FD_CLR(i, &master); // eliminar del conjunto maestro
 							break;
 						case MSJ_CPU_WAIT:
-							//Resta la variable del wait
-							comandoWait(buffer,i);
+							//Resta la variable del semaforo
+							comandoWait(buffer, i);
 							break;
 						case MSJ_CPU_SIGNAL:
+							//suma la varariable del semaforo
+							comandoSignal(buffer, i);
 							break;
 						case MSJ_CPU_FINAlIZAR:
 							break;
@@ -1149,48 +1151,48 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 	pthread_mutex_unlock(&mutexCPU);
 }
 
-void comandoWait(char* buffer,int socket){
-	char* nombre=obtenerNombreMensaje(buffer);
+void comandoWait(char* buffer, int socket) {
+	char* nombre = obtenerNombreMensaje(buffer);
 	int n;
 	pthread_mutex_unlock(&mutexSemaforos);
 	t_sem* auxSem = encontrarSemaforo(nombre);
-	if (auxSem != NULL){
+	if (auxSem != NULL ) {
 		auxSem->valor--;
-		if(auxSem->valor < 0){
-			n=EnviarDatos(socket, "0");
-		}else{
-			n=EnviarDatos(socket, "1");
+		if (auxSem->valor < 0) {
+			n = EnviarDatos(socket, "0");
+		} else {
+			n = EnviarDatos(socket, "1");
 		}
-	}else{
-		n=EnviarDatos(socket, "A");
+	} else {
+		n = EnviarDatos(socket, "A");
 		pthread_mutex_lock(&mutexCPU);
-			t_CPU *aux = encontrarCPU(socket);
-			PCB* aux1;
-			if (aux != NULL ) {
-				aux1 = aux->idPCB;
-				aux->idPCB = NULL;
-				pthread_mutex_lock(&mutexFIN);
-				list_add(listaFin, final_create(aux1,1,"Semaforo no encontrado"));
-				pthread_mutex_unlock(&mutexFIN);
-				semsig(&finalizarCont);
-			}
-			pthread_mutex_unlock(&mutexCPU);
+		t_CPU *aux = encontrarCPU(socket);
+		PCB* aux1;
+		if (aux != NULL ) {
+			aux1 = aux->idPCB;
+			aux->idPCB = NULL;
+			pthread_mutex_lock(&mutexFIN);
+			list_add(listaFin, final_create(aux1, 1, "Semaforo no encontrado"));
+			pthread_mutex_unlock(&mutexFIN);
+			semsig(&finalizarCont);
+		}
+		pthread_mutex_unlock(&mutexCPU);
 	}
-	if(n < 0){
+	if (n < 0) {
 		//TODO error enviar datos
 	}
 	pthread_mutex_unlock(&mutexSemaforos);
 }
 
-char* obtenerNombreMensaje(char* buffer){
+char* obtenerNombreMensaje(char* buffer) {
 	char* sub;
 	char* nombre;
-	sub="";
+	sub = "";
 	sub = malloc(1 * sizeof(char));
-	nombre="";
+	nombre = "";
 	nombre = malloc(1 * sizeof(char));
-	int final=1;
-	while (string_equals_ignore_case(sub, "-") == 0){
+	int final = 1;
+	while (string_equals_ignore_case(sub, "-") == 0) {
 		string_append(&nombre, sub);
 		sub = string_substring(buffer, final, 1);
 		final++;
@@ -1198,11 +1200,50 @@ char* obtenerNombreMensaje(char* buffer){
 	return nombre;
 }
 
-
-t_sem*  encontrarSemaforo(char* nombre){
+t_sem* encontrarSemaforo(char* nombre) {
 	int _is_sem(t_sem *p) {
-			return string_equals_ignore_case(p->nombre, nombre);
+		return string_equals_ignore_case(p->nombre, nombre);
+	}
+	t_sem *aux = list_find(listaSemaforos, (void*) _is_sem);
+	return aux;
+}
+
+void comandoSignal(char* buffer, int socket) {
+	char* nombre = obtenerNombreMensaje(buffer);
+	int n, cant,i;
+	pthread_mutex_unlock(&mutexSemaforos);
+	t_sem* auxSem = encontrarSemaforo(nombre);
+	if (auxSem != NULL ) {
+		auxSem->valor++;
+		n = EnviarDatos(socket, "1");
+		if (auxSem->valor == 0) {
+			cant =list_size(auxSem->listaSem);
+			if (cant >0){
+				pthread_mutex_lock(&mutexReady);
+				list_add_all(listaReady, auxSem->listaSem);
+				pthread_mutex_unlock(&mutexReady);
+			}
+			for (i=0; i<cant; i++) {
+				semsig(&readyCont);
+			}
 		}
-		t_sem *aux = list_find(listaSemaforos, (void*) _is_sem);
-		return aux;
+	} else {
+		n = EnviarDatos(socket, "A");
+		pthread_mutex_lock(&mutexCPU);
+		t_CPU *aux = encontrarCPU(socket);
+		PCB* aux1;
+		if (aux != NULL ) {
+			aux1 = aux->idPCB;
+			aux->idPCB = NULL;
+			pthread_mutex_lock(&mutexFIN);
+			list_add(listaFin, final_create(aux1, 1, "Semaforo no encontrado"));
+			pthread_mutex_unlock(&mutexFIN);
+			semsig(&finalizarCont);
+		}
+		pthread_mutex_unlock(&mutexCPU);
+	}
+	if (n < 0) {
+		//TODO error enviar datos
+	}
+	pthread_mutex_unlock(&mutexSemaforos);
 }
