@@ -611,65 +611,6 @@ int AtiendeCliente(int sockete) {
 	return code;
 }
 
-//int AtiendeClienteCPU(void * arg) {
-//	int socket = (int) arg;
-//
-////	int id_CPU = 0;
-//	int tipo_Cliente = 0;
-//
-//// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-//	int tipo_mensaje = 0;
-//
-//// Dentro del buffer se guarda el mensaje recibido por el cliente.
-//	char* buffer;
-//	buffer = malloc(1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-//
-//// Cantidad de bytes recibidos.
-//	int bytesRecibidos;
-//
-//// La variable fin se usa cuando el cliente quiere cerrar la conexion: chau chau!
-//	int desconexionCliente = 0;
-//
-//// Código de salida por defecto
-//	int code = 0;
-//
-//	while ((!desconexionCliente)) {
-//		buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-//
-//		//Recibimos los datos del cliente
-//		buffer = RecibirDatos2(socket, buffer, &bytesRecibidos);
-//
-//		if (bytesRecibidos > 0) {
-//			//Analisamos que peticion nos está haciendo (obtenemos el comando)
-//			tipo_mensaje = ObtenerComandoMSJ(buffer);
-//
-//			//Evaluamos los comandos
-//			switch (tipo_mensaje) {
-//
-//			case MSJ_HANDSHAKE:
-//				buffer = ComandoHandShake2(buffer, &tipo_Cliente);
-//				//crear nueva CPU
-//				if (tipo_Cliente == TIPO_CPU) {
-//					agregarNuevaCPU(socket);
-//				}
-//				break;
-//			default:
-//				//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
-//				break;
-//			}
-//
-//			// Enviamos datos al cliente.
-//			EnviarDatos(socket, buffer);
-//		} else
-//			desconexionCliente = 1;
-//
-//	}
-//
-//	CerrarSocket(socket);
-//
-//	return code;
-//}
-
 char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 	*bytesRecibidos = 0;
 	int tamanioNuevoBuffer = 0;

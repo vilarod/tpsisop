@@ -76,7 +76,6 @@ int pedirMemoriaUMV(int socketumv);
 int posicionDeBufferAInt(char* buffer, int posicion);
 char* RespuestaClienteOk(char *buffer);
 void agregarNuevaCPU(int socket);
-//int AtiendeClienteCPU(void * arg);
 
 //Semaforo Contador
 typedef struct{
