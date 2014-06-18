@@ -974,6 +974,8 @@ void *HiloOrquestadorDeCPU() {
 							FD_CLR(i, &master); // eliminar del conjunto maestro
 							break;
 						case MSJ_CPU_WAIT:
+							//Resta la variable del wait
+							comandoWait(buffer,i);
 							break;
 						case MSJ_CPU_SIGNAL:
 							break;
@@ -1146,3 +1148,58 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 	pthread_mutex_unlock(&mutexCPU);
 }
 
+void comandoWait(char* buffer,int socket){
+	char* nombre=obtenerNombreMensaje(buffer);
+	int n;
+	pthread_mutex_unlock(&mutexSemaforos);
+	t_sem* auxSem = encontrarSemaforo(nombre);
+	if (auxSem != NULL){
+		auxSem->valor--;
+		if(auxSem->valor < 0){
+			n=EnviarDatos(socket, "0");
+		}else{
+			n=EnviarDatos(socket, "1");
+		}
+	}else{
+		n=EnviarDatos(socket, "A");
+		pthread_mutex_lock(&mutexCPU);
+			t_CPU *aux = encontrarCPU(socket);
+			PCB* aux1;
+			if (aux != NULL ) {
+				aux1 = aux->idPCB;
+				aux->idPCB = NULL;
+				//TODO mandar Estado FINAL y no hacer free
+				free(aux1);
+			}
+			pthread_mutex_unlock(&mutexCPU);
+	}
+	if(n < 0){
+		//TODO error enviar datos
+	}
+	pthread_mutex_unlock(&mutexSemaforos);
+}
+
+char* obtenerNombreMensaje(char* buffer){
+	char* sub;
+	char* nombre;
+	sub="";
+	sub = malloc(1 * sizeof(char));
+	nombre="";
+	nombre = malloc(1 * sizeof(char));
+	int final=1;
+	while (string_equals_ignore_case(sub, "-") == 0){
+		string_append(&nombre, sub);
+		sub = string_substring(buffer, final, 1);
+		final++;
+	}
+	return nombre;
+}
+
+
+t_sem*  encontrarSemaforo(char* nombre){
+	int _is_sem(t_sem *p) {
+			return string_equals_ignore_case(p->nombre, nombre);
+		}
+		t_sem *aux = list_find(listaSemaforos, (void*) _is_sem);
+		return aux;
+}

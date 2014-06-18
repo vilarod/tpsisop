@@ -51,6 +51,7 @@ PCB PCB1;
 
 //deserealizar
 PCB* desearilizar_PCB(char* estructura, int* pos);
+char* obtenerNombreMensaje(char* buffer);
 
 //serializar
 char* serializar_PCB (PCB* prog);
@@ -64,6 +65,7 @@ void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
 char* ComandoHandShake2(char *buffer, int *tipoCliente);
 void ComandoRecibirPrograma(char *buffer, int id);
 void comandoFinalQuamtum(char *buffer,int socket);
+void comandoWait(char* buffer,int socket);
 
 void crearEscucha();
 int AtiendeCliente(int sockete);
@@ -112,12 +114,34 @@ static void cpu_destroy(t_CPU *self)
 	free(self);
 }
 
+//Lista de semaforos del usuario
+typedef struct _t_sem {
+	char* nombre;
+	int valor;
+	t_list* listaSem;
+} t_sem;
+
+static t_sem *sem_create(char* nombre, int valor)
+{
+	t_sem *new = malloc(sizeof(t_sem));
+	new->nombre = nombre;
+	new->valor = valor;
+	new->listaSem=list_create();
+	return new;
+}
+
+static void sem_destroy(t_sem *self)
+{
+	free(self->nombre);
+	free(self);
+}
 
 t_CPU l_CPU;
 bool encontrarInt(int actual, int expected);
 t_CPU*  encontrarCPULibre();
 t_CPU* encontrarCPU(int idcpu);
 void eliminarCpu(int idcpu);
+t_sem*  encontrarSemaforo(char *nombre);
 
 //Globales
 int ImprimirTrazaPorConsola = 1;
@@ -128,8 +152,8 @@ int Quamtum;
 int Retardo;
 int Multi;
 char *UMV_IP;
-t_list *listCPU, *listaNew, *listaReady, *listaBloqueados;
+t_list *listCPU, *listaNew, *listaReady, *listaBloqueados, *listaSemaforos;
 pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
-
+pthread_mutex_t mutexSemaforos = PTHREAD_MUTEX_INITIALIZER;
