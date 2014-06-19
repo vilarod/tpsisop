@@ -35,7 +35,7 @@ void CambioProcesoActivo();
 
 //deserializar
 
-PCB* desearilizar_PCB (char* estructura, int pos);
+PCB* desearilizar_PCB (char* estructura, int pos, int* cantguiones);
 void deserializarDesplLong(char * msj,int despl, int longi);
 
 //serializar

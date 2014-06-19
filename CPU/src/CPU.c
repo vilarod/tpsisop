@@ -56,9 +56,10 @@ t_log* logger;
 
 PCB* programa;
 int quantum = 0;
-int io = 0;
-int up = 0;
-int retardo = 0;
+int io = 0; //proceso bloqueado por entrada/salida
+int up = 0; //proceso bloqueado por wait
+int ab=0; //proceso abortado
+int retardo = 0; //tiempo que espero entre instruccion e instruccion
 int g_ImprimirTrazaPorConsola = 1;
 
 
@@ -219,6 +220,7 @@ RecibirProceso()
   int indice = 1;
   int r=0;
   int inicio = 0;
+  int control=0;
 
   Traza("%s","TRAZA - ESTOY ESPERANDO RECIBIR UN QUANTUM + RETARDO + PCB");
   r = Recibir(socketKERNEL, estructura);
@@ -249,7 +251,7 @@ RecibirProceso()
                 }
                 break;
               case 3:
-                programa = desearilizar_PCB(estructura, indice);
+                programa = desearilizar_PCB(estructura, indice,&control);
                 break;
                 }
               sub = "";
@@ -261,6 +263,12 @@ RecibirProceso()
     }
   else
     ErrorFatal("%s","ERROR - EL SOCKET REMOTO SE HA DESCONECTADO");
+
+  if ((control<9) || (quantum < 0) || (retardo < 0))
+    {
+      Error("%s","ERROR - NO RECIBI DATOS VÁLIDOS");
+      r=0;
+    }
 
   free(estructura);
   return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
@@ -376,14 +384,13 @@ deserializarDesplLong(char * msj, int despl, int longi)
   else Error("%s","ERROR - EL MENSAJE NO PUEDE SER DESERIALIZADO");
 }
 
-PCB* desearilizar_PCB(char* estructura, int pos) {
+PCB* desearilizar_PCB(char* estructura, int pos, int* cantguiones) {
 
         char* sub = string_new();
         PCB* est_prog;
         est_prog = (struct PCBs *) malloc(sizeof(PCB));
         int aux;
         int i;
-        int cantguiones=0;
         int indice = pos;
         int inicio = pos;
 
@@ -394,10 +401,11 @@ PCB* desearilizar_PCB(char* estructura, int pos) {
                 for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
                         sub = string_substring(estructura, inicio, 1);
                         inicio++;
+                        if (string_equals_ignore_case(sub, "-"))
+                                    *cantguiones= *cantguiones + 1;
                 }
-           if (string_equals_ignore_case(sub, "-"))
-             cantguiones ++;
-
+                if (*cantguiones == aux)
+                  {
                 switch (aux) {
                 case 1:
                   {
@@ -464,13 +472,15 @@ PCB* desearilizar_PCB(char* estructura, int pos) {
                 }
                 sub = "";
                 indice = inicio;
+        } else
+          {
+            Error("%s","ERROR - PCB INCORRECTO");
+            aux=11;
+          }
         }
-        pos = inicio;
 
-        if (cantguiones==9)
+        if (*cantguiones==9)
           Traza("%s","TRAZA - RECIBI TODO EL PCB");
-        else
-          ErrorFatal("%s","ERROR - PCB INCORRECTO");
 
    return est_prog;
 }
@@ -497,6 +507,10 @@ iniciarPCB(PCB* prog)
 void AbortarProceso()
 {
   //enviar "A" al kernel
+  Traza("%s","TRAZA - SE ABORTARÁ EL PROCESO");
+  quantum=0; //se le termina forzosamente el quantum
+  Enviar(socketKERNEL,"A");
+
 }
 
 //Mensajes frecuentes con la UMV ------------------------------------------------
@@ -521,14 +535,14 @@ PedirSentencia()
   else
     {
     Error("%s","ERROR - DESPLAZAMIENTO/OFFSET INVALIDOS");
-    AbortarProceso();
+    ab=1; //señal para abortar el proceso
     }
   if (string_starts_with(instruccion, "1")) //si comienza con 1 -> recibi un mensj valido
     sentencia=string_substring(instruccion, 1, (strlen(instruccion) - 1));
   else
     {
     Error("%s","ERROR - NO SE PUDO OBTENER LA INSTRUCCION");
-    AbortarProceso();
+    ab=1;
     }
 
 return sentencia;
@@ -550,7 +564,7 @@ getUMV(int base, int dsp, int tam)
     {
         Error("%s","ERROR - NO SE ENCONTRÓ VALOR EN ESA DIRECCION");
         Error("ERROR UMV: %s", string_substring(recibo,1,(strlen(recibo))-1));
-        AbortarProceso();
+        ab=1; //señal para abortar el proceso
         }
 
   free(instruccion);
@@ -576,7 +590,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
     {
         Error("%s","ERROR - NO SE PUDO GUARDAR VALOR EN ESA DIRECCION");
         Error("ERROR UMV: %s", string_substring(recibo,1,(strlen(recibo))-1));
-        AbortarProceso();
+        ab=1; //señal para abortar proceso
     }
   free(mensaje);
   return 1;
@@ -587,6 +601,17 @@ CambioProcesoActivo()
 {
   //aviso a la mem que voy a ejecutar tal programa
   Traza("TRAZA - INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d", programa->id);
+  char* pedido="4"; //la UMV sabe que 4 es cambio de proceso
+  pedido=malloc(1*sizeof(char));
+  char* msj=string_new();
+
+  serCadena(&pedido,string_itoa(programa->id));
+  Enviar(socketUMV,pedido);
+  free(pedido);
+  Recibir(socketUMV,msj);
+
+  if (string_starts_with(msj,"1"))
+    Traza("%s","TRAZA - SE INFORMO CORRECTAMENTE EL CAMBIO DE PROCESO ACTIVO");
 
 }
 
@@ -624,7 +649,7 @@ obtener_valor(t_nombre_compartida variable)
   else
     {
     Error("%s","ERROR - NO SE PUDO OBTENER EL VALOR DE LA VARIABLE COMPARTIDA");
-    AbortarProceso();
+    ab=1; //señal para abortar el proceso
     }
 
   return valor;
@@ -648,7 +673,7 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
   else
     {
     Error("%s","ERROR - KERNEL NO HA PODIDO PROCESAR EL PEDIDO");
-    AbortarProceso();
+    ab=1; //señal para abortar el proceso
     }
 }
 
@@ -751,7 +776,8 @@ RecuperarDicVariables()
             {
             Error("%s", "ERROR - NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
             free(variable);
-            AbortarProceso();
+            ab=1; //señal para abortar el proceso
+            quantum=0; //proceso no tendrá quantum
             }
         }
     }
@@ -835,14 +861,18 @@ main(void)
           Traza("TRAZA - EL QUANTUM QUE RESTA ES: %d", quantum);
         }
 
-      limpiarEstructuras();
-      if ((io == 0) && (up == 0))
+      if ((io == 0) && (up == 0) && (ab==0))
         {
-          procesoTerminoQuantum(0, "0", 0); //no necesita e/s ni wait
+          procesoTerminoQuantum(0, "0", 0); //no necesita e/s ni wait ni fue abortado
+        }
+      if (ab==1)
+        {
+          AbortarProceso(); //proceso abortado por errores varios
         }
 
+      limpiarEstructuras();
       seguirConectado(); //aca controla si sigue conectada a kernel y umv
-      CONECTADO_KERNEL = 0;
+
     }
 
   AvisarDescAKernel(); //avisar al kernel asi me saca de sus recursos
