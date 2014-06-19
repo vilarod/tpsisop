@@ -85,6 +85,7 @@ int main(int argv, char** argc) {
 	listaReady = list_create();
 	listaFin = list_create();
 	listaDispositivos = list_create();
+	listaImprimir = list_create();
 
 	//Creacion del hilo plp
 	pthread_t plp;
@@ -934,6 +935,8 @@ void *HiloOrquestadorDeCPU() {
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
 						case MSJ_CPU_IMPRIMI:
+							//manda a la lista de imprimir
+							comandoImprimir(buffer, i);
 							break;
 						case MSJ_CPU_HANDSHAKE:
 							buffer = ComandoHandShake2(buffer, &tipo_Cliente);
@@ -1114,7 +1117,7 @@ void eliminarCpu(int idcpu) {
 void comandoFinalQuamtum(char *buffer, int socket) {
 	PCB* auxPCB;
 	int pos, tiempo;
-	pos =1;
+	pos = 1;
 	char* nombre, disp;
 	auxPCB = desearilizar_PCB(buffer, &pos);
 	int pos2 = pos + 2;
@@ -1157,10 +1160,10 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 				pthread_mutex_unlock(&mutexReady);
 				semsig(&readyCont);
 			}
-		}else{
+		} else {
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin,
-			final_create(auxPCB, 1, "semaforo no encontrado"));
+					final_create(auxPCB, 1, "semaforo no encontrado"));
 			pthread_mutex_unlock(&mutexFIN);
 			semsig(&finalizarCont);
 		}
@@ -1316,4 +1319,19 @@ t_HIO* encontrarDispositivo(char* nombre) {
 	}
 	t_HIO *aux = list_find(listaDispositivos, (void*) _is_dis);
 	return aux;
+}
+
+void comandoImprimir(char* buffer, int socket) {
+	char* mensaje = obtenerNombreMensaje(buffer, 1);
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU* auxCPU = encontrarCPU(socket);
+	if (auxCPU != NULL ) {
+		if (auxCPU->idPCB) {
+			pthread_mutex_lock(&mutexImprimir);
+			list_add(listaImprimir, imp_create(auxCPU->idPCB->id, mensaje));
+			pthread_mutex_unlock(&mutexImprimir);
+			semsig(&imprimirCont);
+		}
+	}
+	pthread_mutex_unlock(&mutexCPU);
 }
