@@ -969,6 +969,8 @@ void *HiloOrquestadorDeCPU() {
 							comandoSignal(buffer, i);
 							break;
 						case MSJ_CPU_FINAlIZAR:
+							//Termino programa y mandar a FIN
+							comandoFinalizar(i, buffer);
 							break;
 						case MSJ_CPU_LIBERAR:
 							//CPU pasa a libre
@@ -1125,16 +1127,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		break;
 	}
 	//Buscar CPU y Borrar Programa
-	t_CPU* aux;
-	PCB* aux1;
-	pthread_mutex_lock(&mutexCPU);
-	aux = encontrarCPU(socket);
-	if (aux != NULL ) {
-		aux1 = aux->idPCB;
-		aux->idPCB = NULL;
-		free(aux1);
-	}
-	pthread_mutex_unlock(&mutexCPU);
+	borrarPCBenCPU(socket);
 }
 
 void comandoWait(char* buffer, int socket) {
@@ -1232,4 +1225,29 @@ void comandoSignal(char* buffer, int socket) {
 		//TODO error enviar datos
 	}
 	pthread_mutex_unlock(&mutexSemaforos);
+}
+
+void comandoFinalizar(int socket, char* buffer){
+	PCB* auxPCB;
+	int pos=1;
+	auxPCB = desearilizar_PCB(buffer, &pos);
+	//Pasa a estado fin
+	pthread_mutex_lock(&mutexFIN);
+	list_add(listaFin, final_create(auxPCB, 0, ""));
+	pthread_mutex_unlock(&mutexFIN);
+	semsig(&finalizarCont);
+	//Borra el viejo PCB en la lista de CPU
+	borrarPCBenCPU(socket);
+}
+
+void borrarPCBenCPU(int idCPU){
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU *aux = encontrarCPU(idCPU);
+	PCB* aux1;
+	if (aux != NULL ) {
+				aux1 = aux->idPCB;
+				aux->idPCB = NULL;
+				free(aux1);
+	}
+	pthread_mutex_unlock(&mutexCPU);
 }

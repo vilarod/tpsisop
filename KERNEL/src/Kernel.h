@@ -68,6 +68,7 @@ void ComandoRecibirPrograma(char *buffer, int id);
 void comandoFinalQuamtum(char *buffer,int socket);
 void comandoWait(char* buffer,int socket);
 void comandoSignal(char* buffer,int socket);
+void comandoFinalizar(int socket,char* buffer);
 
 void crearEscucha();
 int AtiendeCliente(int sockete);
@@ -225,6 +226,7 @@ t_CPU*  encontrarCPULibre();
 t_CPU* encontrarCPU(int idcpu);
 void eliminarCpu(int idcpu);
 t_sem*  encontrarSemaforo(char *nombre);
+void borrarPCBenCPU(int idCPU);
 
 //Globales
 int ImprimirTrazaPorConsola = 1;
