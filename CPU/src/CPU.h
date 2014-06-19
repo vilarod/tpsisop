@@ -28,6 +28,9 @@ typedef struct PCBs
 } PCB;
 
 
+void AtenderSenial(int s);
+
+void *SENIAL(void *arg);
 
 void iniciarPCB(PCB* prog);
 void destruirEstructuras();
