@@ -25,8 +25,9 @@ void *PCP(void *arg);
 void *IMPRIMIRYFIN(void *arg);
 void *HiloOrquestadorDeCPU();
 void *moverEjecutar(void *arg);
-void *moverReady(void *arg);
+void *hiloDispositivos(void *arg);
 void *moverReadyDeNew(void *arg);
+void *bloqueados_fnc(void *arg);
 
 //Manejo de errores
 void error(int code, char *err);
@@ -234,9 +235,10 @@ int Quamtum;
 int Retardo;
 int Multi;
 char *UMV_IP;
-t_list *listCPU, *listaNew, *listaReady, *listaDispositivos,*listaFin, *listaSemaforos, *listaHiloDispositivos;
+t_list *listCPU, *listaNew, *listaReady, *listaDispositivos,*listaFin, *listaSemaforos;
 pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexFIN = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexSemaforos = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutexDispositivos = PTHREAD_MUTEX_INITIALIZER;

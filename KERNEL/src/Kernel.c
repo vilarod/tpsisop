@@ -84,6 +84,7 @@ int main(int argv, char** argc) {
 	listCPU = list_create();
 	listaReady = list_create();
 	listaFin = list_create();
+	listaDispositivos = list_create();
 
 	//Creacion del hilo plp
 	pthread_t plp;
@@ -141,7 +142,7 @@ void *PCP(void *arg) {
 	pthread_create(&plpReady, NULL, moverEjecutar, NULL );
 
 	//crear hilo de bloqueado
-	pthread_create(&plpBloqueado, NULL, moverReady, NULL );
+	pthread_create(&plpBloqueado, NULL, hiloDispositivos, NULL );
 
 	pthread_join(plpCPU, NULL );
 	pthread_join(plpReady, NULL );
@@ -198,11 +199,37 @@ void *moverEjecutar(void *arg) {
 	}
 }
 
-void *moverReady(void *arg) {
-
-	//mandar a ready los bloqueados
-
+void *hiloDispositivos(void *arg) {
+	//crear los hilos de los dipositivos
+	pthread_mutex_lock(&mutexDispositivos);
+	t_list * listaHiloDispositivos = list_create();
+	int cantDispotivos = list_size(listaDispositivos);
+	int i;
+	for (i = 0; i < cantDispotivos; i++) {
+		list_add(listaHiloDispositivos, hilos_create());
+	}
+	t_hilos* auxHilos;
+	t_HIO* auxDisp;
+	//crear Hilos
+	for (i = 0; i < cantDispotivos; i++) {
+		auxHilos = list_get(listaHiloDispositivos, i);
+		auxDisp = list_get(listaDispositivos, i);
+		pthread_create(&(auxHilos->hilo), NULL, bloqueados_fnc,
+				(void*) auxDisp);
+	}
+	pthread_mutex_unlock(&mutexDispositivos);
+	//Esperar hilos
+	for (i = 0; i < cantDispotivos; i++) {
+		auxHilos = list_get(listaHiloDispositivos, i);
+		pthread_join(auxHilos->hilo, NULL );
+	}
+	list_clean_and_destroy_elements(listaHiloDispositivos,
+			(void*) hilos_destroy);
 	return NULL ;
+}
+
+void *bloqueados_fnc(void *arg) {
+
 }
 
 void *moverReadyDeNew(void *arg) {
@@ -1151,20 +1178,20 @@ t_sem* encontrarSemaforo(char* nombre) {
 
 void comandoSignal(char* buffer, int socket) {
 	char* nombre = obtenerNombreMensaje(buffer);
-	int n, cant,i;
+	int n, cant, i;
 	pthread_mutex_unlock(&mutexSemaforos);
 	t_sem* auxSem = encontrarSemaforo(nombre);
 	if (auxSem != NULL ) {
 		auxSem->valor++;
 		n = EnviarDatos(socket, "1");
 		if (auxSem->valor == 0) {
-			cant =list_size(auxSem->listaSem);
-			if (cant >0){
+			cant = list_size(auxSem->listaSem);
+			if (cant > 0) {
 				pthread_mutex_lock(&mutexReady);
 				list_add_all(listaReady, auxSem->listaSem);
 				pthread_mutex_unlock(&mutexReady);
 			}
-			for (i=0; i<cant; i++) {
+			for (i = 0; i < cant; i++) {
 				semsig(&readyCont);
 			}
 		}
