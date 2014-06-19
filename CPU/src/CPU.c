@@ -8,6 +8,7 @@
  ============================================================================
  */
 
+//Includes --------------------------------------------------------------
 #include <stdio.h>
 #include<string.h>
 #include <stdlib.h>
@@ -29,7 +30,10 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <signal.h>
+#include <pthread.h>
 
+//Defines -----------------------------------------------------------------
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/CPU/src/config.cfg"
 #define HandU 3
 #define HandK 3
@@ -39,7 +43,7 @@
 #define TAM_INSTRUCCION 8
 #define VAR_STACK 5
 
-//Variables globales
+//Variables globales ------------------------------------------------------
 int aux_conec_umv = 0;
 int aux_conec_ker = 0;
 
@@ -61,6 +65,7 @@ int up = 0; //proceso bloqueado por wait
 int ab=0; //proceso abortado
 int retardo = 0; //tiempo que espero entre instruccion e instruccion
 int g_ImprimirTrazaPorConsola = 1;
+int senial_SIGUSR1=0; //señal kill
 
 
 //Llamado a las funciones primitivas
@@ -513,6 +518,20 @@ void AbortarProceso()
 
 }
 
+//Manejo de señal SIGUSR1---------------------------------------------------------------
+
+void AtenderSenial(int s){
+
+switch (s) {
+ case SIGUSR1:
+  {
+  Traza("%s","TRAZA - RECIBI LA SEÑAL SIGUSR1");
+  senial_SIGUSR1=1; // marco que recibi la señal
+  break;
+  }
+ }
+}
+
 //Mensajes frecuentes con la UMV ------------------------------------------------
 
 char*
@@ -785,6 +804,14 @@ RecuperarDicVariables()
   free(variable);
 }
 
+//Hilo que atiende SIGUSR1 -----------------------
+void *SENIAL(void *arg)
+{
+  Traza("%s","TRAZA - HOT PLUG ACTIVO");
+  signal(SIGUSR1, AtenderSenial);
+
+  return NULL;
+}
 
 //Main --------------------------------------------------------------------------
 
@@ -793,7 +820,6 @@ int
 main(void)
 
 {
-
 
   //Variables locales
   int UMV_PUERTO = ObtenerPuertoUmv();
@@ -808,6 +834,13 @@ main(void)
   char* sentencia = string_new();
 
   Traza("%s","TRAZA - INICIA LA CPU");
+
+  //Creacion del hilo senial
+      pthread_t senial;
+      pthread_create(&senial, NULL, SENIAL, NULL );
+      pthread_join(senial, NULL );
+
+
   socketUMV = crearSocket(socketUMV);
   socketKERNEL = crearSocket(socketKERNEL);
 
