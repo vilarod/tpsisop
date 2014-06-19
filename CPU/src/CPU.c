@@ -136,7 +136,8 @@ int
 saludar(int sld, int tipo, int sRemoto)
 {
   char respuesta[BUFFERSIZE];
-  char *mensaje = "32";
+  char *mensaje = string_itoa(sld);
+  string_append(&mensaje,string_itoa(tipo));
   int aux = 0;
   Traza("%s", "TRAZA - VOY A ENVIAR HANDSHAKE");
   Enviar(sRemoto, mensaje);
@@ -222,6 +223,7 @@ RecibirProceso()
   char* estructura = malloc(BUFFERSIZE * sizeof(char));
   char* sub = string_new();
   int i, aux;
+  int guiones=0;
   int indice = 1;
   int r=0;
   int inicio = 0;
@@ -236,11 +238,18 @@ RecibirProceso()
         {
           for (aux = 1; aux < 4; aux++)
             {
-              for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++)
+              for (i = 0; (string_equals_ignore_case(sub, "-") == 0) || (inicio == strlen(estructura)); i++)
                 {
                   sub = string_substring(estructura, inicio, 1);
                   inicio++;
+                  if (string_equals_ignore_case(sub, "-"))
+                    guiones= guiones +1;
+
                 }
+
+              if (guiones < aux)
+                  aux=5;
+
               switch (aux)
                 {
               case 1:
@@ -258,6 +267,9 @@ RecibirProceso()
               case 3:
                 programa = desearilizar_PCB(estructura, indice,&control);
                 break;
+              case 5:
+                Error("%s","ERROR - NO RECIBI DATOS VÁLIDOS");
+                break;
                 }
               sub = "";
               indice = inicio;
@@ -269,7 +281,7 @@ RecibirProceso()
   else
     ErrorFatal("%s","ERROR - EL SOCKET REMOTO SE HA DESCONECTADO");
 
-  if ((control<9) || (quantum < 0) || (retardo < 0))
+  if ((control<9) || (quantum < 0) || (retardo < 0) || (guiones<3))
     {
       Error("%s","ERROR - NO RECIBI DATOS VÁLIDOS");
       r=0;
