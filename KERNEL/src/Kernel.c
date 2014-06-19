@@ -226,7 +226,7 @@ void *bloqueados_fnc(void *arg) {
 	t_list* auxLista;
 	t_bloqueado* auxBloq;
 	PCB* auxPCB;
-	while(1){
+	while (1) {
 		semwait(&(HIO->bloqueadosCont));
 		pthread_mutex_lock(&(HIO->mutexBloqueados));
 		if (list_size(HIO->listaBloqueados) > 0) {
@@ -237,11 +237,12 @@ void *bloqueados_fnc(void *arg) {
 			sleep(HIO->valor * auxBloq->tiempo);
 			//Pasar a Ready
 			auxPCB = auxBloq->idPCB;
-			auxBloq->idPCB=NULL;
+			auxBloq->idPCB = NULL;
 			pthread_mutex_lock(&mutexReady);
 			list_add(listaReady, auxPCB);
 			pthread_mutex_unlock(&mutexReady);
-			list_clean_and_destroy_elements(auxLista, (void*) bloqueado_destroy);
+			list_clean_and_destroy_elements(auxLista,
+					(void*) bloqueado_destroy);
 		} else {
 			pthread_mutex_unlock(&(HIO->mutexBloqueados));
 		}
@@ -1112,8 +1113,11 @@ void eliminarCpu(int idcpu) {
 
 void comandoFinalQuamtum(char *buffer, int socket) {
 	PCB* auxPCB;
-	int pos;
+	int pos, tiempo;
+	pos =1;
+	char* nombre, disp;
 	auxPCB = desearilizar_PCB(buffer, &pos);
+	int pos2 = pos + 2;
 	switch (buffer[pos]) {
 	case '0': //termino quamtum colocar en ready
 		pthread_mutex_lock(&mutexReady);
@@ -1122,8 +1126,45 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		semsig(&readyCont);
 		break;
 	case '1':	//Hay que hacer I/O
+		disp = obtenerParteDelMensaje(buffer, &pos2);
+		tiempo = atoi(obtenerParteDelMensaje(buffer, &pos2));
+		t_HIO* auxHIO = encontrarDispositivo(disp);
+		if (auxHIO != NULL ) {
+			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
+			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
+			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
+			semsig(&(auxHIO->bloqueadosCont));
+		} else {
+			pthread_mutex_lock(&mutexFIN);
+			list_add(listaFin,
+					final_create(auxPCB, 1, "Dispositivo no encontrado"));
+			pthread_mutex_unlock(&mutexFIN);
+			semsig(&finalizarCont);
+		}
 		break;
 	case '2':	//Bloqueado por semaforo
+		nombre = obtenerNombreMensaje(buffer, pos2);
+		pthread_mutex_lock(&mutexSemaforos);
+		t_sem* auxSem = encontrarSemaforo(nombre);
+		if (auxSem != NULL ) {
+			if (auxSem->valor < 0) {
+				//Bloquear Programa por semaforo
+				list_add(auxSem->listaSem, auxPCB);
+			} else {
+				//Desbloquar Programa
+				pthread_mutex_lock(&mutexReady);
+				list_add(listaReady, auxPCB);
+				pthread_mutex_unlock(&mutexReady);
+				semsig(&readyCont);
+			}
+		}else{
+			pthread_mutex_lock(&mutexFIN);
+			list_add(listaFin,
+			final_create(auxPCB, 1, "semaforo no encontrado"));
+			pthread_mutex_unlock(&mutexFIN);
+			semsig(&finalizarCont);
+		}
+		pthread_mutex_unlock(&mutexSemaforos);
 		break;
 	}
 	//Buscar CPU y Borrar Programa
@@ -1131,7 +1172,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 }
 
 void comandoWait(char* buffer, int socket) {
-	char* nombre = obtenerNombreMensaje(buffer);
+	char* nombre = obtenerNombreMensaje(buffer, 1);
 	int n;
 	pthread_mutex_unlock(&mutexSemaforos);
 	t_sem* auxSem = encontrarSemaforo(nombre);
@@ -1163,14 +1204,14 @@ void comandoWait(char* buffer, int socket) {
 	pthread_mutex_unlock(&mutexSemaforos);
 }
 
-char* obtenerNombreMensaje(char* buffer) {
+char* obtenerNombreMensaje(char* buffer, int pos) {
 	char* sub;
 	char* nombre;
 	sub = "";
 	sub = malloc(1 * sizeof(char));
 	nombre = "";
 	nombre = malloc(1 * sizeof(char));
-	int final = 1;
+	int final = pos;
 	while (string_equals_ignore_case(sub, "-") == 0) {
 		string_append(&nombre, sub);
 		sub = string_substring(buffer, final, 1);
@@ -1188,7 +1229,7 @@ t_sem* encontrarSemaforo(char* nombre) {
 }
 
 void comandoSignal(char* buffer, int socket) {
-	char* nombre = obtenerNombreMensaje(buffer);
+	char* nombre = obtenerNombreMensaje(buffer, 1);
 	int n, cant, i;
 	pthread_mutex_unlock(&mutexSemaforos);
 	t_sem* auxSem = encontrarSemaforo(nombre);
@@ -1227,9 +1268,9 @@ void comandoSignal(char* buffer, int socket) {
 	pthread_mutex_unlock(&mutexSemaforos);
 }
 
-void comandoFinalizar(int socket, char* buffer){
+void comandoFinalizar(int socket, char* buffer) {
 	PCB* auxPCB;
-	int pos=1;
+	int pos = 1;
 	auxPCB = desearilizar_PCB(buffer, &pos);
 	//Pasa a estado fin
 	pthread_mutex_lock(&mutexFIN);
@@ -1240,14 +1281,39 @@ void comandoFinalizar(int socket, char* buffer){
 	borrarPCBenCPU(socket);
 }
 
-void borrarPCBenCPU(int idCPU){
+void borrarPCBenCPU(int idCPU) {
 	pthread_mutex_lock(&mutexCPU);
 	t_CPU *aux = encontrarCPU(idCPU);
 	PCB* aux1;
 	if (aux != NULL ) {
-				aux1 = aux->idPCB;
-				aux->idPCB = NULL;
-				free(aux1);
+		aux1 = aux->idPCB;
+		aux->idPCB = NULL;
+		free(aux1);
 	}
 	pthread_mutex_unlock(&mutexCPU);
+}
+
+char* obtenerParteDelMensaje(char* buffer, int* pos) {
+	char* sub;
+	char* nombre;
+	sub = "";
+	sub = malloc(1 * sizeof(char));
+	nombre = "";
+	nombre = malloc(1 * sizeof(char));
+	int final = *pos;
+	while (string_equals_ignore_case(sub, "-") == 0) {
+		string_append(&nombre, sub);
+		sub = string_substring(buffer, final, 1);
+		final++;
+	}
+	*pos = final + 1;
+	return nombre;
+}
+
+t_HIO* encontrarDispositivo(char* nombre) {
+	int _is_dis(t_HIO *p) {
+		return string_equals_ignore_case(p->nombre, nombre);
+	}
+	t_HIO *aux = list_find(listaDispositivos, (void*) _is_dis);
+	return aux;
 }

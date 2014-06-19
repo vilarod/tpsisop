@@ -52,7 +52,8 @@ PCB PCB1;
 
 //deserealizar
 PCB* desearilizar_PCB(char* estructura, int* pos);
-char* obtenerNombreMensaje(char* buffer);
+char* obtenerNombreMensaje(char* buffer, int pos);
+char* obtenerParteDelMensaje(char* buffer, int* pos);
 
 //serializar
 char* serializar_PCB (PCB* prog);
@@ -226,6 +227,7 @@ t_CPU*  encontrarCPULibre();
 t_CPU* encontrarCPU(int idcpu);
 void eliminarCpu(int idcpu);
 t_sem*  encontrarSemaforo(char *nombre);
+t_HIO* encontrarDispositivo(char* nombre);
 void borrarPCBenCPU(int idCPU);
 
 //Globales
