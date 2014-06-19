@@ -151,13 +151,6 @@ void *PCP(void *arg) {
 	return NULL ;
 }
 
-void *escuharCPU(void *arg) {
-
-	//Abrir socket de escuchar CPU
-
-	return NULL ;
-}
-
 void *moverEjecutar(void *arg) {
 	t_CPU* auxcpu;
 	PCB* auxPCB;
@@ -229,7 +222,32 @@ void *hiloDispositivos(void *arg) {
 }
 
 void *bloqueados_fnc(void *arg) {
+	t_HIO* HIO = (t_HIO *) arg;
+	t_list* auxLista;
+	t_bloqueado* auxBloq;
+	PCB* auxPCB;
+	while(1){
+		semwait(&(HIO->bloqueadosCont));
+		pthread_mutex_lock(&(HIO->mutexBloqueados));
+		if (list_size(HIO->listaBloqueados) > 0) {
+			auxLista = list_take_and_remove(HIO->listaBloqueados, 1);
+			pthread_mutex_unlock(&(HIO->mutexBloqueados));
+			auxBloq = list_get(auxLista, 0);
+			//Procesando HIO
+			sleep(HIO->valor * auxBloq->tiempo);
+			//Pasar a Ready
+			auxPCB = auxBloq->idPCB;
+			auxBloq->idPCB=NULL;
+			pthread_mutex_lock(&mutexReady);
+			list_add(listaReady, auxPCB);
+			pthread_mutex_unlock(&mutexReady);
+			list_clean_and_destroy_elements(auxLista, (void*) bloqueado_destroy);
+		} else {
+			pthread_mutex_unlock(&(HIO->mutexBloqueados));
+		}
 
+	}
+	return NULL ;
 }
 
 void *moverReadyDeNew(void *arg) {
