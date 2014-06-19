@@ -157,6 +157,67 @@ static void final_destroy(t_Final *self)
 	free(self);
 }
 
+//Lista de Bloqueado por Dispositivo
+typedef struct _t_bloqueado {
+	PCB* idPCB;
+	int tiempo;
+} t_bloqueado;
+
+static t_bloqueado *bloqueado_create(PCB* pcb,int tiempo)
+{
+	t_bloqueado*new = malloc(sizeof(t_bloqueado));
+	new->idPCB = pcb;
+	new->tiempo = tiempo;
+	return new;
+}
+
+static void bloqueado_destroy(t_bloqueado *self)
+{	free(self->idPCB);
+	free(self);
+}
+
+//Lista de Hilos de dispositivos
+typedef struct _t_hilos {
+	pthread_t hilo;
+} t_hilos;
+
+static t_hilos *hilos_create()
+{
+	t_hilos* new = malloc(sizeof(t_hilos));
+	return new;
+}
+
+static void hilos_destroy(t_hilos *self)
+{
+	free(self);
+}
+
+//Lista de dispositivos
+typedef struct _t_HIO {
+	char* nombre;
+	int valor;
+	t_list* listaBloqueados;
+	psem_t bloqueadosCont;
+	pthread_mutex_t mutexBloqueados;
+} t_HIO;
+
+static t_HIO *HIO_create(char* nombre, int valor)
+{
+	t_HIO *new = malloc(sizeof(t_sem));
+	new->nombre = nombre;
+	new->valor = valor;
+	new->listaBloqueados=list_create();
+	seminit(&(new->bloqueadosCont), 0);
+	pthread_mutex_init(&new->mutexBloqueados, NULL );
+	return new;
+}
+
+static void HIO_destroy(t_HIO *self)
+{
+	free(self->nombre);
+	free(self);
+}
+
 t_CPU l_CPU;
 bool encontrarInt(int actual, int expected);
 t_CPU*  encontrarCPULibre();
@@ -173,7 +234,7 @@ int Quamtum;
 int Retardo;
 int Multi;
 char *UMV_IP;
-t_list *listCPU, *listaNew, *listaReady, *listaBloqueados,*listaFin, *listaSemaforos;
+t_list *listCPU, *listaNew, *listaReady, *listaDispositivos,*listaFin, *listaSemaforos, *listaHiloDispositivos;
 pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
