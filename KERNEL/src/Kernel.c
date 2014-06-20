@@ -86,6 +86,7 @@ int main(int argv, char** argc) {
 	listaFin = list_create();
 	listaDispositivos = list_create();
 	listaImprimir = list_create();
+	ListaVarGlobal= list_create();
 
 	//Creacion del hilo plp
 	pthread_t plp;
@@ -157,7 +158,8 @@ void *moverEjecutar(void *arg) {
 	PCB* auxPCB;
 	t_list* auxList;
 	int edatos = 0;
-	char* buffer, cadena;
+	char* buffer;
+	char* cadena;
 	//buscar CPU libre y mandar PCB
 	while (1) {
 		semwait(&readyCont);
@@ -177,7 +179,7 @@ void *moverEjecutar(void *arg) {
 				string_append(&buffer, string_itoa(Retardo));
 				string_append(&buffer, "-");
 				cadena = serializar_PCB(auxPCB);
-				string_append(&buffer, &cadena);
+				string_append(&buffer, cadena);
 				edatos = EnviarDatos(auxcpu->idCPU, buffer);
 				auxcpu->libre = 1;
 				if (edatos > 0) {
@@ -1118,7 +1120,8 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 	PCB* auxPCB;
 	int pos, tiempo;
 	pos = 1;
-	char* nombre, disp;
+	char* nombre;
+	char* disp;
 	auxPCB = desearilizar_PCB(buffer, &pos);
 	int pos2 = pos + 2;
 	switch (buffer[pos]) {

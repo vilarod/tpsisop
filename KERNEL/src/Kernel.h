@@ -125,20 +125,39 @@ typedef struct _t_sem {
 	t_list* listaSem;
 } t_sem;
 
-static t_sem *sem_create(char* nombre, int valor)
-{
-	t_sem *new = malloc(sizeof(t_sem));
-	new->nombre = nombre;
-	new->valor = valor;
-	new->listaSem=list_create();
-	return new;
-}
+//static t_sem *sem_create(char* nombre, int valor)
+//{
+//	t_sem *new = malloc(sizeof(t_sem));
+//	new->nombre = nombre;
+//	new->valor = valor;
+//	new->listaSem=list_create();
+//	return new;
+//}
 
-static void sem_destroy(t_sem *self)
-{
-	free(self->nombre);
-	free(self);
-}
+//static void sem_destroy(t_sem *self)
+//{
+//	free(self->nombre);
+//	free(self);
+//}
+
+//Variables globales
+typedef struct _t_varGlobal{
+	char* nombre;
+	int valor;
+}t_varGlobal;
+
+//static t_varGlobal *varGlobal_create(char* nombre, int valor )
+//{
+//	t_varGlobal*new = malloc(sizeof(t_varGlobal));
+//	new->nombre = nombre;
+//	new->valor = valor;
+//	return new;
+//}
+
+//static void varGlobal_destroy(t_imp *self)
+//{
+//	free(self);
+//}
 
 //Lista de Final
 typedef struct _t_Final {
@@ -146,13 +165,6 @@ typedef struct _t_Final {
 	int finalizo;	//0 para correcto 1 para incorrecto
 	char* mensaje;
 } t_Final;
-
-//Variables globales
-typedef struct _t_varGlobal{
-	char* nombre;
-	int valor;
-	t_list*  listaVar;
-}t_varGlobal;
 
 static t_Final *final_create(PCB* pcb,int final, char* msj)
 {
@@ -163,10 +175,10 @@ static t_Final *final_create(PCB* pcb,int final, char* msj)
 	return new;
 }
 
-static void final_destroy(t_Final *self)
-{	free(self->idPCB);
-	free(self);
-}
+//static void final_destroy(t_Final *self)
+//{	free(self->idPCB);
+//	free(self);
+//}
 
 //Lista de imprimir
 typedef struct _t_imp {
@@ -182,10 +194,10 @@ static t_imp *imp_create(int socket, char* msj)
 	return new;
 }
 
-static void imp_destroy(t_imp *self)
-{
-	free(self);
-}
+//static void imp_destroy(t_imp *self)
+//{
+//	free(self);
+//}
 
 //Lista de Bloqueado por Dispositivo
 typedef struct _t_bloqueado {
@@ -231,22 +243,22 @@ typedef struct _t_HIO {
 	pthread_mutex_t mutexBloqueados;
 } t_HIO;
 
-static t_HIO *HIO_create(char* nombre, int valor)
-{
-	t_HIO *new = malloc(sizeof(t_sem));
-	new->nombre = nombre;
-	new->valor = valor;
-	new->listaBloqueados=list_create();
-	seminit(&(new->bloqueadosCont), 0);
-	pthread_mutex_init(&new->mutexBloqueados, NULL );
-	return new;
-}
+//static t_HIO *HIO_create(char* nombre, int valor)
+//{
+//	t_HIO *new = malloc(sizeof(t_sem));
+//	new->nombre = nombre;
+//	new->valor = valor;
+//	new->listaBloqueados=list_create();
+//	seminit(&(new->bloqueadosCont), 0);
+//	pthread_mutex_init(&new->mutexBloqueados, NULL );
+//	return new;
+//}
 
-static void HIO_destroy(t_HIO *self)
-{
-	free(self->nombre);
-	free(self);
-}
+//static void HIO_destroy(t_HIO *self)
+//{
+//	free(self->nombre);
+//	free(self);
+//}
 
 t_CPU l_CPU;
 bool encontrarInt(int actual, int expected);
@@ -267,7 +279,7 @@ int Retardo;
 int Multi;
 char *UMV_IP;
 t_list *listCPU, *listaNew, *listaReady, *listaDispositivos,*listaFin, *listaSemaforos;
-t_list *listaImprimir;
+t_list *listaImprimir, *ListaVarGlobal;
 pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
