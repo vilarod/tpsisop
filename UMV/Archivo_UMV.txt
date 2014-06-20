@@ -1,5 +1,0 @@
-
-Se creó el siguiente segmento en la memoria: 
-|  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
-|          1|          1|       1239|        100|             134555792|
-Bytes Leidos: 0000000000Bytes Leidos: 0000000000Bytes Leidos: 000000000000000OBytes Leidos: 0000000000

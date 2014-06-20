@@ -258,3 +258,64 @@ Se creó el siguiente segmento en la memoria:
 [INFO] 23:03:20:421 UMV/(18904:18917): Bytes Leidos: 000000000000000O
 [TRACE] 23:03:40:834 UMV/(18904:18917): Se leyó  de memoria. Id programa: 1, base logica: 1239, base real: 134555792,  desplazamiento: 5, cantidad de bytes: 10, buffer: 0000000000
 [INFO] 23:03:44:202 UMV/(18904:18917): Bytes Leidos: 0000000000
+[TRACE] 17:40:34:856 UMV/(19327:19327): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 17:40:34:865 UMV/(19327:19328): El socket está listo para recibir conexiones. Numero de socket: 5, puerto: 7000
+[TRACE] 17:40:43:618 UMV/(19327:19329): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[INFO] 17:40:43:618 UMV/(19327:19329): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 17:40:43:619 UMV/(19327:19329): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 17:40:43:619 UMV/(19327:19329): |          1|          1|       1606|        100|             137189520|
+
+[TRACE] 17:41:15:264 UMV/(19327:19328): Se ha conectado el cliente (127.0.0.1) por el puerto (58788). El número de socket del cliente es: 6
+[TRACE] 17:41:18:474 UMV/(19327:19401): RECIBO datos. socket: 6. buffer: 31
+
+[TRACE] 17:41:18:474 UMV/(19327:19401): ENVIO datos. socket: 6. buffer: 1
+[TRACE] 17:41:20:253 UMV/(19327:19401): RECIBO datos. socket: 6. buffer: 411
+
+[TRACE] 17:41:20:253 UMV/(19327:19401): ENVIO datos. socket: 6. buffer: 1
+[TRACE] 17:41:49:506 UMV/(19327:19401): RECIBO datos. socket: 6. buffer: 4160610210
+
+[TRACE] 17:42:23:895 UMV/(19442:19442): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 17:42:23:922 UMV/(19442:19452): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 17:42:31:124 UMV/(19442:19453): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[INFO] 17:42:31:124 UMV/(19442:19453): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 17:42:31:124 UMV/(19442:19453): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 17:42:31:124 UMV/(19442:19453): |          1|          1|       1494|        100|             134555792|
+
+[TRACE] 17:42:40:140 UMV/(19442:19452): Se ha conectado el cliente (127.0.0.1) por el puerto (59044). El número de socket del cliente es: 8
+[TRACE] 17:42:46:789 UMV/(19472:19472): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[ERROR] 17:42:46:789 UMV/(19472:19473): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+
+[TRACE] 17:42:55:529 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 31
+
+[TRACE] 17:42:55:530 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:42:59:835 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 17:42:59:836 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:43:59:588 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 17:44:09:777 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:45:03:605 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 14149010210
+
+[TRACE] 17:46:39:903 UMV/(19442:19458): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (1) no tiene asignado un segmento con base 1490
+[TRACE] 17:46:35:965 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 0ERROR LEER MEMORIA. SEGMENTATION FAULT. El programa (1) no tiene asignado un segmento con base 1490. Id programa: 1, base: 1490, desplazamiento: 0, longitud buffer: 10
+[TRACE] 17:47:31:10 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 14149410210
+
+[TRACE] 17:48:01:163 UMV/(19442:19458): Se leyó  de memoria. Id programa: 1, base logica: 1494, base real: 134555792,  desplazamiento: 0, cantidad de bytes: 10, buffer: 0000000000
+[TRACE] 17:48:33:118 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 10000000000
+[TRACE] 17:48:55:593 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 31
+
+[TRACE] 17:48:55:593 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:02:28:243 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 412
+
+[TRACE] 18:02:28:244 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:02:49:47 UMV/(19442:19458): RECIBO datos. socket: 8. buffer: 141494103100
+
+[TRACE] 18:02:49:47 UMV/(19442:19458): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (2) no tiene asignado un segmento con base 1494
+[TRACE] 18:02:49:47 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 0ERROR LEER MEMORIA. SEGMENTATION FAULT. El programa (2) no tiene asignado un segmento con base 1494. Id programa: 2, base: 1494, desplazamiento: 0, longitud buffer: 100
