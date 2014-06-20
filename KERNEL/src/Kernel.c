@@ -86,7 +86,7 @@ int main(int argv, char** argc) {
 	listaFin = list_create();
 	listaDispositivos = list_create();
 	listaImprimir = list_create();
-	ListaVarGlobal= list_create();
+	ListaVarGlobal = list_create();
 
 	//Creacion del hilo plp
 	pthread_t plp;
@@ -191,8 +191,8 @@ void *moverEjecutar(void *arg) {
 			pthread_mutex_unlock(&mutexReady);
 			free(buffer);
 		}
-		return NULL ;
 	}
+	return NULL ;
 }
 
 void *hiloDispositivos(void *arg) {
@@ -1130,6 +1130,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		list_add(listaReady, auxPCB);
 		pthread_mutex_unlock(&mutexReady);
 		semsig(&readyCont);
+		Traza("Final Quamtum mover a ready. Programa: %d. buffer: %s", auxPCB->id);
 		break;
 	case '1':	//Hay que hacer I/O
 		disp = obtenerParteDelMensaje(buffer, &pos2);
@@ -1140,6 +1141,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
 			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
 			semsig(&(auxHIO->bloqueadosCont));
+			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s", auxPCB->id, (char*) auxHIO->nombre);
 		} else {
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin,
@@ -1156,6 +1158,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			if (auxSem->valor < 0) {
 				//Bloquear Programa por semaforo
 				list_add(auxSem->listaSem, auxPCB);
+				Traza("Final Quamtum programa: %d. bloqueado por semaforo: %s", auxPCB->id, (char*) auxSem->nombre);
 			} else {
 				//Desbloquar Programa
 				pthread_mutex_lock(&mutexReady);
@@ -1184,6 +1187,7 @@ void comandoWait(char* buffer, int socket) {
 	t_sem* auxSem = encontrarSemaforo(nombre);
 	if (auxSem != NULL ) {
 		auxSem->valor--;
+		Traza("Wait semaforo: %s. valor: %d", (char*) auxSem->nombre,  auxSem->valor);
 		if (auxSem->valor < 0) {
 			n = EnviarDatos(socket, "0");
 		} else {
@@ -1242,12 +1246,14 @@ void comandoSignal(char* buffer, int socket) {
 	if (auxSem != NULL ) {
 		auxSem->valor++;
 		n = EnviarDatos(socket, "1");
+		Traza("signal semaforo: %s valor: %d",(char*) auxSem->nombre, auxSem->valor);
 		if (auxSem->valor == 0) {
 			cant = list_size(auxSem->listaSem);
 			if (cant > 0) {
 				pthread_mutex_lock(&mutexReady);
 				list_add_all(listaReady, auxSem->listaSem);
 				pthread_mutex_unlock(&mutexReady);
+				Traza("Desbloquea programas por semaforo: %s", (char*) auxSem->nombre);
 			}
 			for (i = 0; i < cant; i++) {
 				semsig(&readyCont);
@@ -1282,6 +1288,7 @@ void comandoFinalizar(int socket, char* buffer) {
 	pthread_mutex_lock(&mutexFIN);
 	list_add(listaFin, final_create(auxPCB, 0, ""));
 	pthread_mutex_unlock(&mutexFIN);
+	Traza("Mandar a estado fin. programa: %d. buffer: ",auxPCB->id);
 	semsig(&finalizarCont);
 	//Borra el viejo PCB en la lista de CPU
 	borrarPCBenCPU(socket);
@@ -1334,6 +1341,7 @@ void comandoImprimir(char* buffer, int socket) {
 			list_add(listaImprimir, imp_create(auxCPU->idPCB->id, mensaje));
 			pthread_mutex_unlock(&mutexImprimir);
 			semsig(&imprimirCont);
+			Traza("Mandar a imprimir datos. programa: %d. buffer: %s", auxCPU->idPCB->id, (char*) mensaje);
 		}
 	}
 	pthread_mutex_unlock(&mutexCPU);
