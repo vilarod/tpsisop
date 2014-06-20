@@ -151,6 +151,7 @@ typedef struct _t_Final {
 typedef struct _t_varGlobal{
 	char* nombre;
 	int valor;
+	t_list*  listaVar;
 }t_varGlobal;
 
 static t_Final *final_create(PCB* pcb,int final, char* msj)
