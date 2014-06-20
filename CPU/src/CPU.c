@@ -42,6 +42,14 @@
 #define BUFFERSIZE 10000
 #define TAM_INSTRUCCION 8
 #define VAR_STACK 5
+#define CAMBIO_PROCESO 4
+#define FIN_QUANTUM 4
+#define OBTENER_V_COMP 5
+#define GRABAR_V_COMP 6
+#define AVISO_DESC 7
+#define SET_UMV 2
+#define GET_UMV 1
+
 
 //Variables globales ------------------------------------------------------
 int aux_conec_umv = 0;
@@ -238,7 +246,7 @@ RecibirProceso()
         {
           for (aux = 1; aux < 4; aux++)
             {
-              for (i = 0; (string_equals_ignore_case(sub, "-") == 0) || (inicio == strlen(estructura)); i++)
+              for (i = 0; ((string_equals_ignore_case(sub, "-") == 0) && (inicio < (strlen(estructura) +1 ))); i++)
                 {
                   sub = string_substring(estructura, inicio, 1);
                   inicio++;
@@ -555,6 +563,7 @@ PedirSentencia()
   Traza("%s","TRAZA - SOLICITO SENTENCIA A LA UMV");
   char* instruccion = string_new();
   char* sentencia=string_new();
+
   instruccion = getUMV(programa->indiceCodigo, programa->programCounter * TAM_INSTRUCCION, TAM_INSTRUCCION);
   deserializarDesplLong(instruccion, despl, longi);
 
@@ -582,32 +591,30 @@ return sentencia;
 char*
 getUMV(int base, int dsp, int tam)
 {
-  char* instruccion = malloc(1 * sizeof(char));
-  char* recibo = "";
+  char* respuesta = malloc(BUFFERSIZE * sizeof(char));
+  char *mensaje = string_itoa(GET_UMV);
 
-  serCadena(&instruccion, string_itoa(base)); //base
-  serCadena(&instruccion, string_itoa(dsp)); //desplazamiento
-  serCadena(&instruccion, string_itoa(tam)); //longitud
+  serCadena(&mensaje, string_itoa(base)); //base
+  serCadena(&mensaje, string_itoa(dsp)); //desplazamiento
+  serCadena(&mensaje, string_itoa(tam)); //longitud
   Traza("%s","TRAZA - SOLICITO DATOS A MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÑO: %d",base,dsp,tam);
-  Enviar(socketUMV, instruccion);
-  Recibir(socketUMV, recibo);
-  if (!(string_starts_with(recibo, "1")))
+  Enviar(socketUMV, mensaje);
+  Recibir(socketUMV, respuesta);
+  if (!(string_starts_with(respuesta, "1")))
     {
         Error("%s","ERROR - NO SE ENCONTRÓ VALOR EN ESA DIRECCION");
-        Error("ERROR UMV: %s", string_substring(recibo,1,(strlen(recibo))-1));
+        Error("ERROR UMV: %s", string_substring(respuesta,1,(strlen(respuesta))-1));
         ab=1; //señal para abortar el proceso
         }
 
-  free(instruccion);
-  return recibo;
+  return respuesta;
 }
 
 int
 setUMV(int ptro, int dsp, int tam, char* valor)
 {
-  char* mensaje = "2";
-  mensaje = malloc(1 * sizeof(char));
-  char* recibo = "";
+  char respuesta[BUFFERSIZE];
+  char *mensaje = string_itoa(SET_UMV);
 
   serCadena(&mensaje, string_itoa(ptro));
   serCadena(&mensaje, string_itoa(dsp));
@@ -615,34 +622,30 @@ setUMV(int ptro, int dsp, int tam, char* valor)
   serCadena(&mensaje, valor);
   Traza("%s","TRAZA - SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÑO: %d VALOR: %s",ptro,dsp,tam,valor);
   Enviar(socketUMV, mensaje);
-  Recibir(socketUMV, recibo);
+  Recibir(socketUMV, respuesta);
 
-  if (!(string_starts_with(recibo, "1")))
+  if (!(string_starts_with(respuesta, "1")))
     {
         Error("%s","ERROR - NO SE PUDO GUARDAR VALOR EN ESA DIRECCION");
-        Error("ERROR UMV: %s", string_substring(recibo,1,(strlen(recibo))-1));
+        Error("ERROR UMV: %s", string_substring(respuesta,1,(strlen(respuesta))-1));
         ab=1; //señal para abortar proceso
     }
-  free(mensaje);
+
   return 1;
 }
 
 void
 CambioProcesoActivo()
 {
-  //aviso a la mem que voy a ejecutar tal programa
+  char respuesta[BUFFERSIZE];
+  char *mensaje = string_itoa(CAMBIO_PROCESO);
+  serCadena(&mensaje, string_itoa(programa->id));
   Traza("TRAZA - INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d", programa->id);
-  char* pedido="4"; //la UMV sabe que 4 es cambio de proceso
-  pedido=malloc(1*sizeof(char));
-  char* msj=string_new();
-
-  serCadena(&pedido,string_itoa(programa->id));
-  Enviar(socketUMV,pedido);
-  free(pedido);
-  Recibir(socketUMV,msj);
-
-  if (string_starts_with(msj,"1"))
+  Enviar(socketUMV, mensaje);
+  Recibir(socketUMV, respuesta);
+  if (!(string_starts_with(respuesta, "1")))
     Traza("%s","TRAZA - SE INFORMO CORRECTAMENTE EL CAMBIO DE PROCESO ACTIVO");
+
 
 }
 
@@ -653,28 +656,29 @@ void
 AvisarDescAKernel()
 
 {
-  char* aviso = "7"; // kernel sabe que 7 es que me voy
+  char *mensaje = string_itoa(AVISO_DESC);
   Traza("%s","TRAZA - AVISO AL KERNEL QUE LA CPU SE DESCONECTA");
-  Enviar(socketKERNEL, aviso);
+  Enviar(socketKERNEL, mensaje);
 }
 
 t_valor_variable
 obtener_valor(t_nombre_compartida variable)
 {
   t_valor_variable valor;
-  char* pedido = "5"; //kernel sabe que 5 es obtener valor compartida
-  char* recibo = "";
-  pedido = malloc(1 * sizeof(char));
 
-  string_append(&pedido, variable);
+  char respuesta[BUFFERSIZE];
+  char *mensaje = string_itoa(OBTENER_V_COMP);
+
+  string_append(&mensaje, variable);
+  string_append(&mensaje, "-");
   Traza("TRAZA - SOLICITO VALOR DE LA VARIABLE COMPARTIDA: %s",variable);
-  Enviar(socketKERNEL, pedido);  //envio PedidoVariable
-  free(pedido);
-  Recibir(socketKERNEL, recibo);  //recibo EstadoValor
+  Enviar(socketKERNEL, mensaje);  //envio PedidoVariable
 
-  if (string_starts_with(recibo, "1")) //si comienza con 1 -> recibi un mensj valido
+  Recibir(socketKERNEL, respuesta);  //recibo EstadoValor
+
+  if (string_starts_with(respuesta, "1")) //si comienza con 1 -> recibi un mensj valido
     {
-    valor = atoi(string_substring(recibo, 1, (strlen(recibo) - 1)));
+    valor = atoi(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
     Traza("TRAZA - EL VALOR DE LA VARIABLE ES: %d", valor);
     }
   else
@@ -689,17 +693,18 @@ obtener_valor(t_nombre_compartida variable)
 void
 grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
 {
-  char* pedido = "6"; // kernel sabe que 6 es grabar valor compartida
-  pedido = malloc(1 * sizeof(char));
-  char* msj=string_new();
+  char respuesta[BUFFERSIZE];
+  char *mensaje = string_itoa(GRABAR_V_COMP);
 
-  string_append(&pedido, variable);
-  string_append(&pedido, string_itoa(valor));
+  string_append(&mensaje, variable);
+  string_append(&mensaje, "-");
+  string_append(&mensaje, string_itoa(valor));
+  string_append(&mensaje, "-");
   Traza("TRAZA - SOLICITO AL KERNEL ASIGNAR: %d A LA VARIABLE: %s",valor,variable);
-  Enviar(socketKERNEL, pedido); //el mensaje que le mando es  PedidoVariableValor
-  free(pedido);
-  Recibir(socketKERNEL, msj);
-  if (string_starts_with(msj, "1"))
+  Enviar(socketKERNEL, mensaje); //el mensaje que le mando es  PedidoVariableValor
+
+  Recibir(socketKERNEL, respuesta);
+  if (string_starts_with(respuesta, "1"))
     Traza("%s","TRAZA - KERNEL PROCESÓ OK EL PEDIDO");
   else
     {
@@ -711,18 +716,17 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
 void
 procesoTerminoQuantum(int que, char* donde, int cuanto)
 {
-  char* aviso = "4"; //  kernel sabe que 4 es fin de quantum;
-  aviso = malloc(1 * sizeof(char));
+  char *mensaje = string_itoa(FIN_QUANTUM);
 
-  string_append(&aviso, serializar_PCB(programa));
-  string_append(&aviso, string_itoa(que));
-  string_append(&aviso, "-");
-  string_append(&aviso, donde);
-  string_append(&aviso, "-");
-  string_append(&aviso, string_itoa(cuanto));
+  string_append(&mensaje, serializar_PCB(programa));
+  string_append(&mensaje, string_itoa(que));
+  string_append(&mensaje, "-");
+  string_append(&mensaje, donde);
+  string_append(&mensaje, "-");
+  string_append(&mensaje, string_itoa(cuanto));
+  string_append(&mensaje, "-");
   Traza("TRAZA - INDICO AL KERNEL QUE EL PROCESO TERMINO EL QUANTUM CON MOTIVO : %d",que);
-  Enviar(socketKERNEL, aviso);
-  free(aviso);
+  Enviar(socketKERNEL, mensaje);
 }
 
 //Enviar a parser --------------------------------------------------------------
@@ -783,22 +787,23 @@ RecuperarDicVariables()
   //si es >0 -> cant de variables a leer desde seg stack en umv
   int i;
   int aux=0;
-  char* variable = malloc(1 * sizeof(char));
   int* dato = 0;
-  char* recibo;
+
+  char* respuesta=string_new();
+  char* variable;
 
   Traza("%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE VARIABLES");
   aux = programa->sizeContextoActual;
-  Traza("%s", "TRAZA - CANTIDAD DE VARIABLES A RECUPERAR: %d",aux);
+  Traza("TRAZA - CANTIDAD DE VARIABLES A RECUPERAR: %d",aux);
 
   if (aux > 0) //tengo variables a recuperar
     {
       for (i = 0; i < aux; i++) //voy de 0 a cantidad de variables en contexto actual
         {
-          recibo = getUMV(aux, 0, 1);
-          if (string_starts_with(recibo, "1"))
+          respuesta = getUMV(aux, 0, 1);
+          if (string_starts_with(respuesta, "1"))
             {
-              variable = string_substring(recibo, 1, strlen(recibo) - 1);
+              variable = string_substring(respuesta, 1, strlen(respuesta) - 1);
               *dato = aux + 1;
               dictionary_put(dicVariables, variable, dato);
               aux = aux + 5;
@@ -806,14 +811,13 @@ RecuperarDicVariables()
           else
             {
             Error("%s", "ERROR - NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
-            free(variable);
             ab=1; //señal para abortar el proceso
             quantum=0; //proceso no tendrá quantum
             }
         }
     }
   else Traza("%s", "TRAZA - ES UN PROGRAMA NUEVO, NO TENGO CONTEXTO QUE RECUPERAR");
-  free(variable);
+
 }
 
 //Hilo que atiende SIGUSR1 -----------------------
