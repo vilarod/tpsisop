@@ -108,8 +108,7 @@ typedef struct _t_CPU {
 static t_CPU *cpu_create(int idCPU)
 {
 	t_CPU *new = malloc(sizeof(t_CPU));
-	PCB *nuevo = malloc(sizeof(PCB));
-	new->idPCB = nuevo;
+	new->idPCB = malloc(sizeof(PCB));
 	new->idCPU = idCPU;
 	new->libre = 0;
 	return new;

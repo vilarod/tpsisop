@@ -714,8 +714,8 @@ char* ComandoHandShake2(char *buffer, int *tipoCliente) {
 // Formato del mensaje: CD
 // C = codigo de mensaje ( = 3)
 
-	int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
-
+	//int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
+	int tipoDeCliente = chartToInt(buffer[1]);
 	if (tipoDeCliente == TIPO_CPU) {
 		*tipoCliente = tipoDeCliente;
 		buffer = RespuestaClienteOk(buffer);
@@ -824,7 +824,7 @@ t_CPU* encontrarCPU(int idcpu) {
 void *HiloOrquestadorDeCPU() {
 	int nbytesRecibidos;
 	char* buffer;
-
+	buffer = malloc(1 * sizeof(char));
 	//	int id_CPU = 0;
 	int tipo_Cliente = 0;
 
@@ -915,9 +915,9 @@ void *HiloOrquestadorDeCPU() {
 					// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
 
 					buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-
 					//Recibimos los datos del cliente
 					buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
+					Traza("nos ponemos a recibir %d", nbytesRecibidos);
 					if (nbytesRecibidos <= 0) {
 						// error o conexión cerrada por el cliente
 						if (nbytesRecibidos == 0) {
@@ -932,8 +932,9 @@ void *HiloOrquestadorDeCPU() {
 						close(i); // bye!
 						FD_CLR(i, &master); // eliminar del conjunto maestro
 					} else {
-						tipo_mensaje = ObtenerComandoCPU(buffer);
 
+						tipo_mensaje = ObtenerComandoCPU(buffer);
+						Traza("Tipos de mensaje: %c", tipo_mensaje);
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
 						case MSJ_CPU_IMPRIMI:
@@ -941,12 +942,15 @@ void *HiloOrquestadorDeCPU() {
 							comandoImprimir(buffer, i);
 							break;
 						case MSJ_CPU_HANDSHAKE:
+							Traza("HandShake");
 							buffer = ComandoHandShake2(buffer, &tipo_Cliente);
+							Traza("tipo de cliente: %d", tipo_Cliente);
 							//crear nueva CPU
 							if (tipo_Cliente == TIPO_CPU) {
 								pthread_mutex_lock(&mutexCPU);
+								Traza("creando CPU");
 								agregarNuevaCPU(i);
-								pthread_mutex_lock(&mutexCPU);
+								pthread_mutex_unlock(&mutexCPU);
 							}
 							EnviarDatos(i, buffer);
 							break;
