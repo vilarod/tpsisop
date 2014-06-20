@@ -852,8 +852,7 @@ void *HiloOrquestadorDeCPU() {
 	// SOCK_STREAM: Orientado a la conexion, TCP
 	// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
 	if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		perror("socket");
-		//return 1;
+		ErrorFatal("socket");
 	}
 
 	// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
@@ -867,19 +866,15 @@ void *HiloOrquestadorDeCPU() {
 // Vincular el socket con una direccion de red almacenada en 'socketInfo'.
 	if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
 			!= 0) {
-
-		perror("Error al bindear socket escucha");
-		//return EXIT_FAILURE;
+		ErrorFatal("Error al bindear socket escucha.");
 	}
 
 // Escuchar nuevas conexiones entrantes.
 	if (listen(socketEscucha, 10) != 0) {
-
-		perror("Error al poner a escuchar socket");
-		//return EXIT_FAILURE;
+		ErrorFatal("Error al poner a escuchar socket");
 	}
 
-	printf("Escuchando conexiones entrantes.\n");
+	Traza("Escuchando conexiones entrantes");
 	// añadir listener al conjunto maestro
 	FD_SET(socketEscucha, &master);
 	// seguir la pista del descriptor de fichero mayor
@@ -888,8 +883,8 @@ void *HiloOrquestadorDeCPU() {
 	for (;;) {
 		read_fds = master; // cópialo
 		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
-			perror("select");
-			exit(1);
+			ErrorFatal("select");
+			//exit(1);
 		}
 		// explorar conexiones existentes en busca de datos que leer
 		for (i = 0; i <= fdmax; i++) {
@@ -899,14 +894,14 @@ void *HiloOrquestadorDeCPU() {
 					// addrlen = sizeof(remoteaddr);
 					if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
 							== -1) {
-						perror("accept");
+						Error("accept");
 					} else {
 						FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
 						if (socketNuevaConexion > fdmax) { // actualizar el máximo
 							fdmax = socketNuevaConexion;
 						}
 
-						printf("selectserver: una nueva conneccion socket %d\n",
+						Traza("selectserverCPU: una nueva conneccion socket %d",
 								socketNuevaConexion);
 					}
 				} else {
