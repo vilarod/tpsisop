@@ -86,7 +86,7 @@ int main(int argv, char** argc) {
 	listaFin = list_create();
 	listaDispositivos = list_create();
 	listaImprimir = list_create();
-	ListaVarGlobal = list_create();
+	listaVarGlobal = list_create();
 
 	//Creacion del hilo plp
 	pthread_t plp;
@@ -955,8 +955,10 @@ void *HiloOrquestadorDeCPU() {
 							comandoFinalQuamtum(buffer, i);
 							break;
 						case MSJ_CPU_OBTENERVALORGLOBAL:
+							comandoObtenerValorGlobar(buffer, i);
 							break;
 						case MSJ_CPU_GRABARVALORGLOBAL:
+							comandoGrabarValorGlobar(buffer, i);
 							break;
 						case MSJ_CPU_ABANDONA:
 							//elimina cpu
@@ -1130,7 +1132,8 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		list_add(listaReady, auxPCB);
 		pthread_mutex_unlock(&mutexReady);
 		semsig(&readyCont);
-		Traza("Final Quamtum mover a ready. Programa: %d. buffer: %s", auxPCB->id);
+		Traza("Final Quamtum mover a ready. Programa: %d. buffer: %s",
+				auxPCB->id);
 		break;
 	case '1':	//Hay que hacer I/O
 		disp = obtenerParteDelMensaje(buffer, &pos2);
@@ -1141,7 +1144,8 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
 			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
 			semsig(&(auxHIO->bloqueadosCont));
-			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s", auxPCB->id, (char*) auxHIO->nombre);
+			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
+					auxPCB->id, (char*) auxHIO->nombre);
 		} else {
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin,
@@ -1158,7 +1162,8 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			if (auxSem->valor < 0) {
 				//Bloquear Programa por semaforo
 				list_add(auxSem->listaSem, auxPCB);
-				Traza("Final Quamtum programa: %d. bloqueado por semaforo: %s", auxPCB->id, (char*) auxSem->nombre);
+				Traza("Final Quamtum programa: %d. bloqueado por semaforo: %s",
+						auxPCB->id, (char*) auxSem->nombre);
 			} else {
 				//Desbloquar Programa
 				pthread_mutex_lock(&mutexReady);
@@ -1187,7 +1192,8 @@ void comandoWait(char* buffer, int socket) {
 	t_sem* auxSem = encontrarSemaforo(nombre);
 	if (auxSem != NULL ) {
 		auxSem->valor--;
-		Traza("Wait semaforo: %s. valor: %d", (char*) auxSem->nombre,  auxSem->valor);
+		Traza("Wait semaforo: %s. valor: %d", (char*) auxSem->nombre,
+				auxSem->valor);
 		if (auxSem->valor < 0) {
 			n = EnviarDatos(socket, "0");
 		} else {
@@ -1246,14 +1252,16 @@ void comandoSignal(char* buffer, int socket) {
 	if (auxSem != NULL ) {
 		auxSem->valor++;
 		n = EnviarDatos(socket, "1");
-		Traza("signal semaforo: %s valor: %d",(char*) auxSem->nombre, auxSem->valor);
+		Traza("signal semaforo: %s valor: %d", (char*) auxSem->nombre,
+				auxSem->valor);
 		if (auxSem->valor == 0) {
 			cant = list_size(auxSem->listaSem);
 			if (cant > 0) {
 				pthread_mutex_lock(&mutexReady);
 				list_add_all(listaReady, auxSem->listaSem);
 				pthread_mutex_unlock(&mutexReady);
-				Traza("Desbloquea programas por semaforo: %s", (char*) auxSem->nombre);
+				Traza("Desbloquea programas por semaforo: %s",
+						(char*) auxSem->nombre);
 			}
 			for (i = 0; i < cant; i++) {
 				semsig(&readyCont);
@@ -1288,7 +1296,7 @@ void comandoFinalizar(int socket, char* buffer) {
 	pthread_mutex_lock(&mutexFIN);
 	list_add(listaFin, final_create(auxPCB, 0, ""));
 	pthread_mutex_unlock(&mutexFIN);
-	Traza("Mandar a estado fin. programa: %d. buffer: ",auxPCB->id);
+	Traza("Mandar a estado fin. programa: %d. buffer: ", auxPCB->id);
 	semsig(&finalizarCont);
 	//Borra el viejo PCB en la lista de CPU
 	borrarPCBenCPU(socket);
@@ -1341,8 +1349,84 @@ void comandoImprimir(char* buffer, int socket) {
 			list_add(listaImprimir, imp_create(auxCPU->idPCB->id, mensaje));
 			pthread_mutex_unlock(&mutexImprimir);
 			semsig(&imprimirCont);
-			Traza("Mandar a imprimir datos. programa: %d. buffer: %s", auxCPU->idPCB->id, (char*) mensaje);
+			Traza("Mandar a imprimir datos. programa: %d. buffer: %s",
+					auxCPU->idPCB->id, (char*) mensaje);
 		}
 	}
 	pthread_mutex_unlock(&mutexCPU);
+}
+
+void comandoObtenerValorGlobar(char* buffer, int socket) {
+	//OBtener valor variable compartida y mandarlo a CPU
+	char* variable = obtenerNombreMensaje(buffer, 1);
+	char* respuesta = "";
+	int ndatos;
+	respuesta = malloc(1 * sizeof(char));
+	t_varGlobal* auxVar = encontrarVarGlobal(variable);
+	if (auxVar != NULL ) {
+		string_append(&respuesta, "1");
+		string_append(&buffer, string_itoa(auxVar->valor));
+		string_append(&respuesta, "-");
+		ndatos = EnviarDatos(socket, respuesta);
+		if (ndatos > 0) {
+			Traza("Envio CPU: %d, Respuesta: %s", socket, (char *) respuesta);
+		} else {
+			//TODO falla al enviar
+		}
+	} else {
+		ndatos = EnviarDatos(socket, "A");
+		pthread_mutex_lock(&mutexCPU);
+		t_CPU *aux = encontrarCPU(socket);
+		PCB* aux1;
+		if (aux != NULL ) {
+			aux1 = aux->idPCB;
+			aux->idPCB = NULL;
+			pthread_mutex_lock(&mutexFIN);
+			list_add(listaFin,
+					final_create(aux1, 1, "Variable global no encontrado"));
+			pthread_mutex_unlock(&mutexFIN);
+			semsig(&finalizarCont);
+		}
+		pthread_mutex_unlock(&mutexCPU);
+	}
+}
+
+t_varGlobal* encontrarVarGlobal(char* nombre) {
+	int _is_var(t_varGlobal *p) {
+		return string_equals_ignore_case(p->nombre, nombre);
+	}
+	t_varGlobal *aux = list_find(listaVarGlobal, (void*) _is_var);
+	return aux;
+}
+
+void comandoGrabarValorGlobar(char* buffer, int socket) {
+	int pos = 1;
+	char* variable;
+	int valor;
+	int ndatos;
+	variable = obtenerParteDelMensaje(buffer, &pos);
+	valor = atoi(obtenerParteDelMensaje(buffer, &pos));
+	t_varGlobal* auxVar = encontrarVarGlobal(variable);
+	if (auxVar != NULL ) {
+		auxVar->valor = valor;
+		ndatos = EnviarDatos(socket, "1");
+		Traza("Se guardo %d en variable: %s", valor, (char *) variable);
+		if (ndatos < 0) {
+			//TODO error al enviar
+		}
+	} else {
+		ndatos = EnviarDatos(socket, "A");
+		pthread_mutex_lock(&mutexCPU);
+		t_CPU *aux = encontrarCPU(socket);
+		PCB* aux1;
+		if (aux != NULL ) {
+			aux1 = aux->idPCB;
+			aux->idPCB = NULL;
+			pthread_mutex_lock(&mutexFIN);
+			list_add(listaFin,
+					final_create(aux1, 1, "Variable global no encontrado"));
+			pthread_mutex_unlock(&mutexFIN);
+			semsig(&finalizarCont);
+		}
+	}
 }

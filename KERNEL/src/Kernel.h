@@ -71,6 +71,8 @@ void comandoWait(char* buffer,int socket);
 void comandoSignal(char* buffer,int socket);
 void comandoFinalizar(int socket,char* buffer);
 void comandoImprimir(char* buffer, int socket);
+void comandoObtenerValorGlobar(char* buffer,int socket);
+void comandoGrabarValorGlobar(char* buffer,int socket);
 
 void crearEscucha();
 int AtiendeCliente(int sockete);
@@ -267,6 +269,7 @@ t_CPU* encontrarCPU(int idcpu);
 void eliminarCpu(int idcpu);
 t_sem*  encontrarSemaforo(char *nombre);
 t_HIO* encontrarDispositivo(char* nombre);
+t_varGlobal* encontrarVarGlobal(char* nombre);
 void borrarPCBenCPU(int idCPU);
 
 //Globales
@@ -279,7 +282,7 @@ int Retardo;
 int Multi;
 char *UMV_IP;
 t_list *listCPU, *listaNew, *listaReady, *listaDispositivos,*listaFin, *listaSemaforos;
-t_list *listaImprimir, *ListaVarGlobal;
+t_list *listaImprimir, *listaVarGlobal;
 pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
