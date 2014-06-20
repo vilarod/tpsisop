@@ -74,7 +74,7 @@ int ab=0; //proceso abortado
 int retardo = 0; //tiempo que espero entre instruccion e instruccion
 int g_ImprimirTrazaPorConsola = 1;
 int senial_SIGUSR1=0; //señal kill
-
+int tengoProg=0;
 
 //Llamado a las funciones primitivas
 
@@ -788,6 +788,7 @@ RecuperarDicVariables()
   int i;
   int aux=0;
   int* dato = 0;
+  int ptr_posicion=0;
 
   char* respuesta=string_new();
   char* variable;
@@ -795,6 +796,7 @@ RecuperarDicVariables()
   Traza("%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE VARIABLES");
   aux = programa->sizeContextoActual;
   Traza("TRAZA - CANTIDAD DE VARIABLES A RECUPERAR: %d",aux);
+  ptr_posicion= programa->segmentoStack;
 
   if (aux > 0) //tengo variables a recuperar
     {
@@ -806,13 +808,15 @@ RecuperarDicVariables()
               variable = string_substring(respuesta, 1, strlen(respuesta) - 1);
               *dato = aux + 1;
               dictionary_put(dicVariables, variable, dato);
-              aux = aux + 5;
+              ptr_posicion=ptr_posicion + VAR_STACK ;
             }
           else
             {
             Error("%s", "ERROR - NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
             ab=1; //señal para abortar el proceso
             quantum=0; //proceso no tendrá quantum
+            tengoProg=0; // va a tener que pedir un nuevo pcb
+            i=aux + 1;
             }
         }
     }
@@ -846,7 +850,7 @@ main(void)
   logger = log_create(temp_file, "CPU", g_ImprimirTrazaPorConsola,
       LOG_LEVEL_TRACE);
 
-  int tengoProg = 0;
+  tengoProg = 0;
   char* sentencia = string_new();
 
   Traza("%s","TRAZA - INICIA LA CPU");
