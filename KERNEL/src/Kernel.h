@@ -147,6 +147,12 @@ typedef struct _t_Final {
 	char* mensaje;
 } t_Final;
 
+//Variables globales
+typedef struct _t_varGlobal{
+	char* nombre;
+	int valor;
+}t_varGlobal;
+
 static t_Final *final_create(PCB* pcb,int final, char* msj)
 {
 	t_Final*new = malloc(sizeof(t_Final));
