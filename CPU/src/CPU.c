@@ -263,13 +263,13 @@ RecibirProceso()
               case 1:
                 {
                 quantum = atoi(string_substring(estructura, indice, i));
-                Traza("%s","TRAZA - EL QUANTUM QUE RECIBI ES: %d", quantum);
+                Traza("TRAZA - EL QUANTUM QUE RECIBI ES: %d", quantum);
                 }
                 break;
               case 2:
                 {
                 retardo = atoi(string_substring(estructura, indice, i));
-                Traza("%s","TRAZA - EL RETARDO QUE RECIBI ES: %d", retardo);
+                Traza("TRAZA - EL RETARDO QUE RECIBI ES: %d", retardo);
                 }
                 break;
               case 3:
@@ -534,6 +534,7 @@ void AbortarProceso()
   //enviar "A" al kernel
   Traza("%s","TRAZA - SE ABORTARÁ EL PROCESO");
   quantum=0; //se le termina forzosamente el quantum
+  tengoProg=0;
   Enviar(socketKERNEL,"A");
 
 }
@@ -643,9 +644,15 @@ CambioProcesoActivo()
   Traza("TRAZA - INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d", programa->id);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
-  if (!(string_starts_with(respuesta, "1")))
+  if (string_starts_with(respuesta, "1"))
     Traza("%s","TRAZA - SE INFORMO CORRECTAMENTE EL CAMBIO DE PROCESO ACTIVO");
-
+  else
+    {
+    Error("%s","ERROR - OCURRIÓ UN ERROR AL REALIZAR CAMBIO DE CONTEXTO");
+    Error("ERROR UMV: %s", string_substring(respuesta,1,(strlen(respuesta))-1));
+    ab=1;
+    quantum=0;
+    }
 
 }
 
@@ -767,6 +774,8 @@ destruirEstructuras()
 void
 RecuperarDicEtiquetas()
 {
+  if (ab==0)
+    {
   Traza("%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE ETIQUETAS");
   /*
    t_puntero_instruccion primer_instr;
@@ -775,6 +784,7 @@ RecuperarDicEtiquetas()
 
    primer_instr = metadata_buscar_etiqueta(etiqueta, ptr_etiquetas,
    tam_etiquetas);*/
+    }
 
 }
 
@@ -785,6 +795,9 @@ RecuperarDicVariables()
   //en sizeContextoActual tengo la cant de variables que debo leer
   //si es 0 -> programa nuevo
   //si es >0 -> cant de variables a leer desde seg stack en umv
+
+  if (ab==0) // si el programa no fue abortado antes de entrar aca
+    {
   int i;
   int aux=0;
   int* dato = 0;
@@ -821,8 +834,18 @@ RecuperarDicVariables()
         }
     }
   else Traza("%s", "TRAZA - ES UN PROGRAMA NUEVO, NO TENGO CONTEXTO QUE RECUPERAR");
-
+    }
 }
+
+
+int estoyConectado()
+{
+  if ((CONECTADO_UMV == 1)&&(CONECTADO_KERNEL==1)&&(senial_SIGUSR1==0))
+    return 1;
+  else
+    return 0;
+}
+
 
 //Hilo que atiende SIGUSR1 -----------------------
 void *SENIAL(void *arg)
@@ -888,7 +911,7 @@ main(void)
   dicEtiquetas = dictionary_create();
 
   //voy a trabajar mientras este conectado tanto con kernel como umv
-  while ((CONECTADO_KERNEL == 1) && (CONECTADO_UMV == 1))
+  while (estoyConectado()==1)
     {
       Traza("%s", "TRAZA - ESTOY CONECTADO CON KERNEL Y UMV");
       Traza("CANTIDAD DE PROGRAMAS QUE TENGO: %d", tengoProg);
@@ -913,6 +936,7 @@ main(void)
           quantum--;
           Traza("TRAZA - EL QUANTUM QUE RESTA ES: %d", quantum);
         }
+
 
       if ((io == 0) && (up == 0) && (ab==0))
         {

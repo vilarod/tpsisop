@@ -31,6 +31,7 @@ typedef struct PCBs
 void AtenderSenial(int s);
 
 void *SENIAL(void *arg);
+int estoyConectado();
 
 void iniciarPCB(PCB* prog);
 void destruirEstructuras();
