@@ -126,14 +126,14 @@ typedef struct _t_sem {
 	t_list* listaSem;
 } t_sem;
 
-//static t_sem *sem_create(char* nombre, int valor)
-//{
-//	t_sem *new = malloc(sizeof(t_sem));
-//	new->nombre = nombre;
-//	new->valor = valor;
-//	new->listaSem=list_create();
-//	return new;
-//}
+static t_sem *sem_create(char* nombre, int valor)
+{
+	t_sem *new = malloc(sizeof(t_sem));
+	new->nombre = nombre;
+	new->valor = valor;
+	new->listaSem=list_create();
+	return new;
+}
 
 //static void sem_destroy(t_sem *self)
 //{
@@ -147,13 +147,13 @@ typedef struct _t_varGlobal{
 	int valor;
 }t_varGlobal;
 
-//static t_varGlobal *varGlobal_create(char* nombre, int valor )
-//{
-//	t_varGlobal*new = malloc(sizeof(t_varGlobal));
-//	new->nombre = nombre;
-//	new->valor = valor;
-//	return new;
-//}
+static t_varGlobal *varGlobal_create(char* nombre, int valor )
+{
+	t_varGlobal*new = malloc(sizeof(t_varGlobal));
+	new->nombre = nombre;
+	new->valor = valor;
+	return new;
+}
 
 //static void varGlobal_destroy(t_imp *self)
 //{
@@ -244,17 +244,26 @@ typedef struct _t_HIO {
 	pthread_mutex_t mutexBloqueados;
 } t_HIO;
 
-//static t_HIO *HIO_create(char* nombre, int valor)
-//{
-//	t_HIO *new = malloc(sizeof(t_sem));
-//	new->nombre = nombre;
-//	new->valor = valor;
-//	new->listaBloqueados=list_create();
-//	seminit(&(new->bloqueadosCont), 0);
-//	pthread_mutex_init(&new->mutexBloqueados, NULL );
-//	return new;
-//}
-
+static t_HIO *HIO_create(char* nombre, int valor)
+{
+	t_HIO *new = malloc(sizeof(t_sem));
+	new->nombre = nombre;
+	new->valor = valor;
+	new->listaBloqueados=list_create();
+	seminit(&(new->bloqueadosCont), 0);
+	pthread_mutex_init(&new->mutexBloqueados, NULL );
+	return new;
+}
+//funciones de las listas de config
+void llenarSemaforoConfig();
+void llenarVarGlobConfig();
+void llenarDispositConfig();
+char* obtenerCadenaSem();
+char* obtenerCadenaValSem();
+char* obtenerCadenaDispositivos();
+char* obtenerCadenaValDisp();
+char* obtenerCadenaVarGlob();
+char* obtenerCadenaValVarGlob();
 //static void HIO_destroy(t_HIO *self)
 //{
 //	free(self->nombre);
