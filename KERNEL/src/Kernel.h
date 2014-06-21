@@ -246,7 +246,7 @@ typedef struct _t_HIO {
 
 static t_HIO *HIO_create(char* nombre, int valor)
 {
-	t_HIO *new = malloc(sizeof(t_sem));
+	t_HIO *new = malloc(sizeof(t_HIO));
 	new->nombre = nombre;
 	new->valor = valor;
 	new->listaBloqueados=list_create();
