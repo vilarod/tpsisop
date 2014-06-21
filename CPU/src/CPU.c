@@ -49,7 +49,10 @@
 #define AVISO_DESC 7
 #define SET_UMV 2
 #define GET_UMV 1
-
+#define AB_PROCESO "A"
+#define FIN_PROCESO "F"
+#define S_SIGNAL 9
+#define S_WAIT 8
 
 //Variables globales ------------------------------------------------------
 int aux_conec_umv = 0;
@@ -71,10 +74,12 @@ int quantum = 0;
 int io = 0; //proceso bloqueado por entrada/salida
 int up = 0; //proceso bloqueado por wait
 int ab=0; //proceso abortado
+int f =0;
 int retardo = 0; //tiempo que espero entre instruccion e instruccion
 int g_ImprimirTrazaPorConsola = 1;
 int senial_SIGUSR1=0; //señal kill
 int tengoProg=0;
+char* motivo;
 
 //Llamado a las funciones primitivas
 
@@ -532,10 +537,15 @@ iniciarPCB(PCB* prog)
 void AbortarProceso()
 {
   //enviar "A" al kernel
+  char *mensaje = malloc(BUFFERSIZE * sizeof(char));
+  string_append(&mensaje,AB_PROCESO);
+  string_append(&mensaje,motivo);
   Traza("%s","TRAZA - SE ABORTARÁ EL PROCESO");
+  Enviar(socketKERNEL,mensaje);
   quantum=0; //se le termina forzosamente el quantum
   tengoProg=0;
-  Enviar(socketKERNEL,"A");
+  motivo="";
+
 
 }
 
@@ -598,7 +608,7 @@ getUMV(int base, int dsp, int tam)
   serCadena(&mensaje, string_itoa(base)); //base
   serCadena(&mensaje, string_itoa(dsp)); //desplazamiento
   serCadena(&mensaje, string_itoa(tam)); //longitud
-  Traza("%s","TRAZA - SOLICITO DATOS A MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÑO: %d",base,dsp,tam);
+  Traza("TRAZA - SOLICITO DATOS A MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÑO: %d",base,dsp,tam);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
   if (!(string_starts_with(respuesta, "1")))
@@ -830,6 +840,7 @@ RecuperarDicVariables()
             quantum=0; //proceso no tendrá quantum
             tengoProg=0; // va a tener que pedir un nuevo pcb
             i=aux + 1;
+            motivo=string_substring(respuesta, 1, strlen(respuesta) - 1);
             }
         }
     }
@@ -875,6 +886,7 @@ main(void)
 
   tengoProg = 0;
   char* sentencia = string_new();
+  motivo= malloc(BUFFERSIZE * sizeof(char));
 
   Traza("%s","TRAZA - INICIA LA CPU");
 
@@ -938,7 +950,7 @@ main(void)
         }
 
 
-      if ((io == 0) && (up == 0) && (ab==0))
+      if ((io == 0) && (up == 0) && (ab==0) && (f==0))
         {
           procesoTerminoQuantum(0, "0", 0); //no necesita e/s ni wait ni fue abortado
         }
@@ -1013,25 +1025,51 @@ prim_finalizar(void)
   //recuperar pc y contexto apilados en stack
   Traza("%s","TRAZA - EJECUTO PRIMITIVA Finalizar");
   int aux = programa->cursorStack;
-  limpiarEstructuras();
-  programa->programCounter = atoi(getUMV(aux - VAR_STACK, 0, VAR_STACK));
-  Traza("TRAZA - EL PROGRAM COUNTER ES: %d",programa->programCounter);
-  programa->cursorStack = atoi(getUMV(aux - (VAR_STACK*2), 0, VAR_STACK));
-  Traza("TRAZA - EL CURSOR STACK ES: %d",programa->cursorStack);
-  programa->sizeContextoActual = (aux - programa->cursorStack) / VAR_STACK;
-  Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
+  aux=aux - VAR_STACK;
+  char *pedido = malloc(BUFFERSIZE * sizeof(char));
+  pedido=getUMV(aux, 0, VAR_STACK);
+  if (string_starts_with(pedido,"1"))
+    {programa->programCounter = atoi(string_substring(pedido,1,strlen(pedido)-1));
+     Traza("TRAZA - EL PROGRAM COUNTER ES: %d",programa->programCounter);
+     aux= aux - (VAR_STACK*2);
+     pedido=getUMV(aux, 0, VAR_STACK);
+     if (string_starts_with(pedido,"1"))
+       {
+         programa->cursorStack = atoi(string_substring(pedido,1,strlen(pedido)-1));
+         Traza("TRAZA - EL CURSOR STACK ES: %d",programa->cursorStack);
+         programa->sizeContextoActual =(aux - (programa->cursorStack)) / VAR_STACK;
+         Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
+       } else {
+           Error("ERROR UMV: %s",string_substring(pedido,1,strlen(pedido)-1));
+           ab=1;
+           quantum=0;
+           tengoProg=0;
+       }
+
+       }else {
+           Error("ERROR UMV: %s",string_substring(pedido,1,strlen(pedido)-1));
+           ab=1;
+           quantum=0;
+           tengoProg=0;
+       }
+
   if (programa->sizeContextoActual > 0)
     RecuperarDicVariables();
   else
     {
       Traza("%s","TRAZA - EL PROGRAMA FINALIZO");
-      char* pedido = "F"; // el kernel sabe que F es que finalizó el programa
-      pedido = malloc(1 * sizeof(char));
-      string_append(&pedido, serializar_PCB(programa));
-      Enviar(socketKERNEL, pedido);
+      char *mensaje = malloc(BUFFERSIZE * sizeof(char));
+      string_append(&mensaje,FIN_PROCESO);
+      string_append(&mensaje,serializar_PCB(programa));
+      Enviar(socketKERNEL,mensaje);
+      tengoProg=0;
+      ab=0;
+      f=1;
       quantum=0;
-      free(pedido);
+      free(mensaje);
     }
+free(pedido);
+  limpiarEstructuras();
 
 }
 
@@ -1084,10 +1122,15 @@ t_puntero
 prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
 {
   Traza("%s","TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable");
-  t_puntero posicion = 0;
+  t_puntero posicion;
+
+  char var[1];
+  var[0]=identificador_variable;
+  int* aux=0;
   //busco la posicion de la variable
   //las variables y las posiciones respecto al stack estan en el dicVariables
-  //posicion=dictionary_get(&dicVariables,identificador_variable);
+  aux=dictionary_get(dicVariables,var);
+  posicion=*aux;
   return posicion; //devuelvo la posicion
 }
 
@@ -1097,10 +1140,16 @@ prim_definirVariable(t_nombre_variable identificador_variable)
   Traza("%s","TRAZA - EJECUTO PRIMITIVA DefinirVariable");
   // reserva espacio para la variable,
   //la registra en el stack
-  t_puntero pos_var_stack = programa->cursorStack
-      + (programa->sizeContextoActual * 5);
-  //dictionary_put(&dicVariables,identificador_variable,pos_var_stack);//la registro en el dicc de variables
-  //setUMV();
+  t_puntero pos_var_stack;
+  char var[1];
+  var[0]=identificador_variable;
+  int* aux=0;
+  *aux=programa->cursorStack + (programa->sizeContextoActual * VAR_STACK);
+  pos_var_stack=*aux;
+  dictionary_put(dicVariables,var,aux);//la registro en el dicc de variables
+  setUMV(pos_var_stack,0,1,var);
+
+  //ACA HAY QUE HACER EL CONTROL
   programa->sizeContextoActual++;
 
   return pos_var_stack; //devuelvo la pos en el stack
@@ -1132,49 +1181,51 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
 {
   Traza("%s","TRAZA - EJECUTO PRIMITIVA Wait");
   int senial = 0;
-  char* msj = "";
-  char* pedido = "8"; //kernel sabe que 8 es wait
-  pedido = malloc(1 * sizeof(char));
+  char respuesta[BUFFERSIZE];
+  char *mensaje = string_itoa(S_WAIT);
+
 
   //el mensaje que le mando es  PedidoSemaforo
-  string_append(&pedido, identificador_semaforo);
+  string_append(&mensaje, identificador_semaforo);
   Traza("TRAZA - SOLICITO AL KERNEL EL SEMAFORO: %s", identificador_semaforo);
-  Enviar(socketKERNEL, pedido);
-  Recibir(socketKERNEL, msj);
-  senial = atoi(string_substring(msj, 1, 1));
+  Enviar(socketKERNEL, mensaje);
+  Recibir(socketKERNEL, respuesta);
+  senial = atoi(string_substring(respuesta, 1, 1));
 
   if (senial == 0) //senial==1 -> consegui el sem, senial==0 -> proceso bloqueado por sem
     {
       Traza("%s","TRAZA - EL PROCESO QUEDÓ BLOQUEADO A LA ESPERA DEL SEMAFORO");
       up = 1;
       quantum = 0;
-      procesoTerminoQuantum(2, identificador_semaforo, 0);
+      tengoProg=0;
+      procesoTerminoQuantum(2,identificador_semaforo, 0);
     }
   else
     Traza("%s","TRAZA - EL PROCESO OBTUVO EL SEMAFORO");
-  free(pedido);
+
 }
 
 void
 prim_signal(t_nombre_semaforo identificador_semaforo)
 {
   Traza("%s","TRAZA - EJECUTO PRIMITIVA Signal");
-  char* pedido = "9"; //kernel sabe que 9 es signal
-  pedido = malloc(1 * sizeof(char));
-  char* msj = "";
+  char respuesta[BUFFERSIZE];
+  char *mensaje = string_itoa(S_SIGNAL);
+
   //el mensaje que le mando es  PedidoSemaforo
-  string_append(&pedido, identificador_semaforo);
+  string_append(&mensaje,identificador_semaforo);
   Traza("TRAZA - SOLICITO AL KERNEL LIBERAR UNA INSTANCIA DEL SEMAFORO: %s",identificador_semaforo);
-  Enviar(socketKERNEL, pedido);
-  Recibir(socketKERNEL, msj);
-  if (string_equals_ignore_case(string_substring(msj,0,1), "1")) //si es -1 lo controla recibir
+  Enviar(socketKERNEL, mensaje);
+  Recibir(socketKERNEL,respuesta);
+  if (string_equals_ignore_case(string_substring(respuesta,0,1), "1")) //si es -1 lo controla recibir
     {
       Traza("%s","TRAZA - LA SOLICITUD INGRESO CORRECTAMENTE");
     }
   else
     {
       Error("%s","NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO");
-      AbortarProceso();
+      quantum=0;
+      tengoProg=0;
+      ab=1;
     }
-  free(pedido);
 }
