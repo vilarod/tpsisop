@@ -25,7 +25,6 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <error.h>
 #include <commons/process.h>
 #include <commons/temporal.h>
@@ -51,11 +50,11 @@
 
 //Puerto
 //#define IP "127.0.0.1"
-//#define PORT "6007"
-t_log* logger ;
+//#define PORT "6000"
+
 
 int main(int argc, char* argv[]) {
-//log hasta antes de int index
+
 	char* temp_file = tmpnam(NULL);
 
 	logger = log_create(temp_file, "PROGRAMA",ImprimirTrazaPorConsola, LOG_LEVEL_TRACE);
@@ -66,20 +65,6 @@ int main(int argc, char* argv[]) {
     log_warning(logger, "LOG A NIVEL %s", "WARNING");
     log_error(logger, "LOG A NIVEL %s", "ERROR");
 
-    //
-////    pthread_t th1, th2;
-//
-//	if (temp_file != NULL) {
-//		pthread_create(&th1, NULL, (void*) log_in_disk, temp_file);
-//	    pthread_create(&th2, NULL, (void*) log_in_disk, temp_file);
-//
-//	    pthread_join(th1, NULL);
-//	    pthread_join(th2, NULL);
-//	    printf("\nRevisar el archivo de log que se creo en: %s\n", temp_file);
-//	    } else {
-//	        printf("No se pudo generar el archivo de log\n");
-//	    }
-    //
 	int index;    //para parametros
 
 	for (index = 0; index < argc; index++)    //parametros
@@ -174,8 +159,9 @@ char* obtenerIpKERNEL() {
 
 void conectarAKERNEL(char *archivo) { //tengo que agregar programa para poder enviarlo
 	traza("Intentando conectar a kernel");
-	int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para probar
-	if (hacerhandshakeKERNEL(soquete, archivo) == 0) { //donde esta el puerto y la ip va: ObtenerPuertoKERNEL()y ObtenerIpKERNEL()
+	//int soquete = conexionSocket(obtenerIpKERNEL(), obtenerPuertoKERNEL()); para la prueba
+	int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para prueba local
+	if (hacerhandshakeKERNEL(soquete, archivo) == 0) {
 		errorFatal("No se pudo conectar al kernel");
 	}
 }
@@ -192,7 +178,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	enviarDatos(sockfd, programa); //envio el programa
 	recibirDatos(sockfd, respuestahandshake);
-	if (respuestahandshake[0] == '0') {
+	if (respuestahandshake[0] == '0')  {
 		printf("Error del KERNEL");
 		exit(1);
 	}
