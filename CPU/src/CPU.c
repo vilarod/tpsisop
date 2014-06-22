@@ -735,6 +735,7 @@ PedirSentencia(char** sentencia)
         Error("%s",
             "ERROR - NO SE PUDO OBTENER EL VALOR DE LA VARIABLE COMPARTIDA");
         ab = 1; //señal para abortar el proceso
+        quantum=0;
       }
 
     return valor;
@@ -761,6 +762,7 @@ PedirSentencia(char** sentencia)
       {
         Error("%s", "ERROR - KERNEL NO HA PODIDO PROCESAR EL PEDIDO");
         ab = 1; //señal para abortar el proceso
+        quantum=0;
       }
   }
 
