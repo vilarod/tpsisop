@@ -549,15 +549,16 @@ AbortarProceso()
 {
   //enviar "A" al kernel
   char *mensaje = malloc(BUFFERSIZE * sizeof(char));
-  string_append(&mensaje, AB_PROCESO);
+  string_append(&mensaje,AB_PROCESO);
   string_append(&mensaje, motivo);
   Traza("%s", "TRAZA - SE ABORTARÁ EL PROCESO");
   Enviar(socketKERNEL, mensaje);
+  free(mensaje);
   quantum = 0; //se le termina forzosamente el quantum
   tengoProg = 0;
   motivo = "";
   ab=0;
-  free(mensaje);
+
 
 }
 
@@ -604,21 +605,27 @@ PedirSentencia(char** sentencia)
             {
               *sentencia = string_substring(instruccion, 1,
                   (strlen(instruccion) - 1));
-              aux = 1;
+              aux=1;
             }
           else
             {
               Error("%s", "ERROR - NO SE PUDO OBTENER LA INSTRUCCION");
               ab = 1;
+              quantum=0;
+              motivo=string_substring(instruccion, 1, (strlen(instruccion)) - 1);
             }
         }
       else
         {
           Error("%s", "ERROR - DESPLAZAMIENTO/OFFSET INVALIDOS");
           ab = 1; //señal para abortar el proceso
+          quantum=0;
         }
     }
-      else { aux=0;}
+      else { ab=1;
+      motivo=string_substring(instruccion, 1, (strlen(instruccion)) - 1);
+      quantum=0;
+      }
 
       free(instruccion);
 
@@ -644,7 +651,6 @@ PedirSentencia(char** sentencia)
         Error("%s", "ERROR - NO SE ENCONTRÓ VALOR EN ESA DIRECCION");
         Error("ERROR UMV: %s",
             string_substring(respuesta, 1, (strlen(respuesta)) - 1));
-        ab = 1; //señal para abortar el proceso
       }
 
     return respuesta;
@@ -671,9 +677,11 @@ PedirSentencia(char** sentencia)
         Error("ERROR UMV: %s",
             string_substring(respuesta, 1, (strlen(respuesta)) - 1));
         ab = 1; //señal para abortar proceso
+        motivo=string_substring(respuesta, 1, (strlen(respuesta)) - 1);
       }
 
     return 1;
+
   }
 
   void
@@ -695,6 +703,7 @@ PedirSentencia(char** sentencia)
             string_substring(respuesta, 1, (strlen(respuesta)) - 1));
         ab = 1;
         quantum = 0;
+        motivo=string_substring(respuesta, 1, (strlen(respuesta)) - 1);
       }
 
   }
@@ -964,7 +973,8 @@ PedirSentencia(char** sentencia)
 
     char* sentencia = string_new();
     int sent = 0;
-    motivo = malloc(BUFFERSIZE * sizeof(char));
+
+
 
     Traza("%s", "TRAZA - INICIA LA CPU");
 
