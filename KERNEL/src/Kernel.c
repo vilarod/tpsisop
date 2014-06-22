@@ -87,7 +87,7 @@ int main(int argv, char** argc) {
 	listaDispositivos = list_create();
 	listaImprimir = list_create();
 	listaVarGlobal = list_create();
-	listaSemaforos= list_create();
+	listaSemaforos = list_create();
 
 	//Obtener las listas
 	llenarSemaforoConfig();
@@ -455,28 +455,25 @@ void llenarSemaforoConfig() {
 	cadenaSem = obtenerCadenaSem(); //obtengo cadena del archivo de config de sem
 	char* cadenaValoresSem;
 	cadenaValoresSem = obtenerCadenaValSem(); //obtengo cadena  del archivo de config de valores semaforo
-	Traza("Obteniendo cadenas: %s %s",(char *) cadenaSem,(char *) cadenaValoresSem);
+	Traza("Obteniendo cadenas: %s %s", (char *) cadenaSem,
+			(char *) cadenaValoresSem);
 	int sfin = 1;
 	char* sub1, *sub2;
 	char* nombre1, *nombre2;
-	sub1 = "";
-	sub2 = "";
-	nombre1 =  string_new();
-	nombre1[0]='\0';
+	nombre1 = string_new();
 	nombre2 = string_new();
-	nombre2[0]='\0';
 	int valor;
 	sub1 = malloc(1 * sizeof(char));
 	sub2 = malloc(1 * sizeof(char));
 	int inicio1 = 1;  // supongo q el caracter 0 es [
 	int inicio2 = 1;  // supongo q el caracter 0 es [
 	while (sfin) {
-		sub1 = string_substring(cadenaSem , inicio1, 1);
+		sub1 = string_substring(cadenaSem, inicio1, 1);
 		inicio1++;
 		while ((string_equals_ignore_case(sub1, ",") == 0)
 				&& (string_equals_ignore_case(sub1, "]") == 0)) {
 			string_append(&nombre1, sub1);
-			sub1 = string_substring(cadenaSem , inicio1, 1);
+			sub1 = string_substring(cadenaSem, inicio1, 1);
 			inicio1++;
 		}
 		sub2 = string_substring(cadenaValoresSem, inicio2, 1);
@@ -487,12 +484,12 @@ void llenarSemaforoConfig() {
 			sub2 = string_substring(cadenaValoresSem, inicio2, 1);
 			inicio2++;
 		}
-		Traza("valores obtenidos: %s, %s",(char *) nombre1 , (char *) nombre2);
+		Traza("valores obtenidos: %s, %s", (char *) nombre1, (char *) nombre2);
 		valor = atoi(nombre2);
 		list_add(listaSemaforos, sem_create(nombre1, valor));
 		if ((string_equals_ignore_case(sub1, "]") == 0)) {
-			nombre1[0]='\0';
-			nombre2[0]='\0';
+			nombre1[0] = '\0';
+			nombre2[0] = '\0';
 		} else {
 			sfin = 0;
 		}
@@ -500,9 +497,9 @@ void llenarSemaforoConfig() {
 	free(sub1);
 	free(sub2);
 	t_sem *auxSem;
-	for(sfin=0; sfin < list_size(listaSemaforos); sfin++){
-		auxSem=list_get(listaSemaforos, sfin);
-		Traza("semaforo: %s valor: %d", (char *) auxSem->nombre,auxSem->valor);
+	for (sfin = 0; sfin < list_size(listaSemaforos); sfin++) {
+		auxSem = list_get(listaSemaforos, sfin);
+		Traza("semaforo: %s valor: %d", (char *) auxSem->nombre, auxSem->valor);
 	}
 }
 char* obtenerCadenaDispositivos() {
@@ -523,16 +520,15 @@ void llenarDispositConfig() {
 	cadenaDisposit = obtenerCadenaDispositivos(); //obtengo cadena del archivo de config de dispositivos
 	char* cadenaValDisp;
 	cadenaValDisp = obtenerCadenaValDisp(); //obtengo cadena del archivo  de config de valores dispositivos
-	Traza("Obteniendo cadenas: %s %s",(char *) cadenaDisposit,(char *) cadenaValDisp);
+	Traza("Obteniendo cadenas: %s %s", (char *) cadenaDisposit,
+			(char *) cadenaValDisp);
 	int sfin = 1;
 	char* sub1, *sub2;
 	char* nombre1, *nombre2;
 	sub1 = "";
 	sub2 = "";
-	nombre1 =  string_new();
-	nombre1[0]='\0';
+	nombre1 = string_new();
 	nombre2 = string_new();
-	nombre2[0]='\0';
 	int valor;
 	sub1 = malloc(1 * sizeof(char));
 	sub2 = malloc(1 * sizeof(char));
@@ -555,12 +551,12 @@ void llenarDispositConfig() {
 			sub2 = string_substring(cadenaValDisp, inicio2, 1);
 			inicio2++;
 		}
-		Traza("valores obtenidos: %s, %s",(char *) nombre1 , (char *) nombre2);
+		Traza("valores obtenidos: %s, %s", (char *) nombre1, (char *) nombre2);
 		valor = atoi(nombre2);
 		list_add(listaDispositivos, HIO_create(nombre1, valor));
 		if ((string_equals_ignore_case(sub1, "]") == 0)) {
-			nombre1[0]='\0';
-			nombre2[0]='\0';
+			nombre1[0] = '\0';
+			nombre2[0] = '\0';
 		} else {
 			sfin = 0;
 		}
@@ -588,16 +584,15 @@ void llenarVarGlobConfig() {
 	cadenaVarGlob = obtenerCadenaVarGlob(); //obtengo cadena del archivo de config de variables globales
 	char* cadenaValVarGlob;
 	cadenaValVarGlob = obtenerCadenaValVarGlob(); //obtengo cadena  del archivo  de config de variables globales
-	Traza("Obteniendo cadenas: %s %s",(char *) cadenaVarGlob,(char *) cadenaValVarGlob);
+	Traza("Obteniendo cadenas: %s %s", (char *) cadenaVarGlob,
+			(char *) cadenaValVarGlob);
 	int sfin = 1;
 	char* sub1, *sub2;
 	char* nombre1, *nombre2;
 	sub1 = "";
 	sub2 = "";
-	nombre1 =  string_new();
-	nombre1[0]='\0';
+	nombre1 = string_new();
 	nombre2 = string_new();
-	nombre2[0]='\0';
 	int valor;
 	sub1 = malloc(1 * sizeof(char));
 	sub2 = malloc(1 * sizeof(char));
@@ -620,12 +615,12 @@ void llenarVarGlobConfig() {
 			sub2 = string_substring(cadenaValVarGlob, inicio2, 1);
 			inicio2++;
 		}
-		Traza("valores obtenidos: %s, %s",(char *) nombre1 , (char *) nombre2);
+		Traza("valores obtenidos: %s, %s", (char *) nombre1, (char *) nombre2);
 		valor = atoi(nombre2);
 		list_add(listaVarGlobal, varGlobal_create(nombre1, valor));
 		if ((string_equals_ignore_case(sub1, "]") == 0)) {
-			nombre1[0]='\0';
-			nombre2[0]='\0';
+			nombre1[0] = '\0';
+			nombre2[0] = '\0';
 		} else {
 			sfin = 0;
 		}
@@ -1427,11 +1422,11 @@ void comandoWait(char* buffer, int socket) {
 char* obtenerNombreMensaje(char* buffer, int pos) {
 	char* sub;
 	char* nombre;
-	sub = "";
+	nombre = string_new();
 	sub = malloc(1 * sizeof(char));
-	nombre = "";
-	nombre = malloc(1 * sizeof(char));
 	int final = pos;
+	sub = string_substring(buffer, final, 1);
+	final++;
 	while (string_equals_ignore_case(sub, "-") == 0) {
 		string_append(&nombre, sub);
 		sub = string_substring(buffer, final, 1);
@@ -1521,17 +1516,18 @@ void borrarPCBenCPU(int idCPU) {
 char* obtenerParteDelMensaje(char* buffer, int* pos) {
 	char* sub;
 	char* nombre;
-	sub = "";
 	sub = malloc(1 * sizeof(char));
-	nombre = "";
-	nombre = malloc(1 * sizeof(char));
+	nombre = string_new();
 	int final = *pos;
+	sub = string_substring(buffer, final, 1);
+	final++;
 	while (string_equals_ignore_case(sub, "-") == 0) {
 		string_append(&nombre, sub);
 		sub = string_substring(buffer, final, 1);
 		final++;
 	}
 	*pos = final + 1;
+	free(sub);
 	return nombre;
 }
 
