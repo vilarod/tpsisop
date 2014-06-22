@@ -28,7 +28,8 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
-
+#include <parser/parser.h>
+#include <parser/metadata_program.h>
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
 
@@ -37,9 +38,8 @@
 #define TIPO_PROGRAMA     1
 
 //Mensajes aceptados
-#define MSJ_RECIBO_PROGRAMA       	1
-#define MSJ_IMPRIMI_ESTO	      	2
-#define MSJ_HANDSHAKE             	3
+#define MSJ_RECIBO_PROGRAMA       	'1'
+#define MSJ_HANDSHAKE             	'3'
 #define MSJ_CPU_IMPRIMI	      		'2'
 #define MSJ_CPU_HANDSHAKE           '3'
 #define MSJ_CPU_FINAlQUAMTUM		'4'
@@ -114,19 +114,26 @@ void *PLP(void *arg) {
 	conectarAUMV();
 
 	//Creo el hilo de pcp
-	pthread_t pcp, escuchaFinEImprimir;
+	pthread_t pcp, Imprimir, Fin;
 	pthread_create(&pcp, NULL, PCP, NULL );
 	pthread_join(pcp, NULL );
 
 	crearEscucha();
 
-	pthread_create(&escuchaFinEImprimir, NULL, IMPRIMIRYFIN, NULL );
-	pthread_join(escuchaFinEImprimir, NULL );
+	pthread_create(&Imprimir, NULL, IMPRIMIRConsola, NULL );
+	pthread_create(&Fin, NULL, FinEjecucion, NULL );
+	pthread_join(Imprimir, NULL );
+
+	return NULL ;
+}
+void *FinEjecucion(void *arg) {
+
+	//los waits y while 1 para las cola de fin y de imprimir algo
 
 	return NULL ;
 }
 
-void *IMPRIMIRYFIN(void *arg) {
+void *IMPRIMIRConsola(void *arg) {
 
 	//los waits y while 1 para las cola de fin y de imprimir algo
 
@@ -284,108 +291,135 @@ void *moverReadyDeNew(void *arg) {
 }
 
 void crearEscucha() {
-//	fd_set master;   // conjunto maestro de descriptores de fichero
-//	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
-//	struct sockaddr_in myaddr;     // dirección del servidor
-//	struct sockaddr_in remoteaddr; // dirección del cliente
-//	int fdmax;        // número máximo de descriptores de fichero
-//	int listener;     // descriptor de socket a la escucha
-//	int newfd;        // descriptor de socket de nueva conexión aceptada
-//	char buf[BUFFERSIZE];    // buffer para datos del cliente
-//	int nbytes;
-//	int yes = 1;        // para setsockopt() SO_REUSEADDR, más abajo
-//	int addrlen;
-//	int i, j;
-//	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
-//	FD_ZERO(&read_fds);
-//	// obtener socket a la escucha
-//	if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-//		perror("error al crear socket");
-//		exit(1);
-//	}
-//	// obviar el mensaje "address already in use" (la dirección ya se está usando)
-//	if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
-//			== -1) {
-//		perror("setsockopt, la direccion ya se esta usando");
-//		exit(1);
-//	}
-//	// enlazar
-//	myaddr.sin_family = AF_INET;
-//	myaddr.sin_addr.s_addr = INADDR_ANY;
-//	myaddr.sin_port = htons(Puerto);
-//	memset(&(myaddr.sin_zero), '\0', 8);
-//	if (bind(listener, (struct sockaddr *) &myaddr, sizeof(myaddr)) == -1) {
-//		perror("error en el bind");
-//		exit(1);
-//	}
-//	// escuchar
-//	if (listen(listener, 10) == -1) {
-//		perror("error en el listen");
-//		exit(1);
-//	}
-//	// añadir listener al conjunto maestro
-//	FD_SET(listener, &master);
-//	// seguir la pista del descriptor de fichero mayor
-//	fdmax = listener; // por ahora es éste
-//	// bucle principal
-//	for (;;) {
-//		read_fds = master; // cópialo
-//		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
-//			perror("select");
-//			exit(1);
-//		}
-//		// explorar conexiones existentes en busca de datos que leer
-//		for (i = 0; i <= fdmax; i++) {
-//			if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
-//				if (i == listener) {
-//					// gestionar nuevas conexiones
-//					addrlen = sizeof(remoteaddr);
-//					if ((newfd = accept(listener,
-//							(struct sockaddr *) &remoteaddr, &addrlen)) == -1) {
-//						perror("accept");
-//					} else {
-//						FD_SET(newfd, &master); // añadir al conjunto maestro
-//						if (newfd > fdmax) {    // actualizar el máximo
-//							fdmax = newfd;
-//						}
-//						printf("selectserver: new connection from %s on "
-//								"socket %d\n", inet_ntoa(remoteaddr.sin_addr),
-//								newfd);
-//					}
-//				} else {
-//					// gestionar datos de un cliente
-//					if ((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
-//						// error o conexión cerrada por el cliente
-//						if (nbytes == 0) {
-//							// conexión cerrada
-//							printf("selectserver: socket %d hung up\n", i);
-//						} else {
-//							perror("recv");
-//						}
-//						close(i); // bye!
-//						FD_CLR(i, &master); // eliminar del conjunto maestro
-//					} else {
-//						// tenemos datos de algún cliente
-//						for (j = 0; j <= fdmax; j++) {
-//							// ¡enviar a todoos el mundo!
-//							if (FD_ISSET(j, &master)) {
-//								// excepto al listener y a nosotros mismos
-//								if (j != listener && j != i) {
-//									if (send(j, buf, nbytes, 0) == -1) {
-//										perror("send");
-//									}
-//								}
-//							}
-//						}
-//					}
-//				} // Esto es ¡TAN FEO! demasiado feo
-//			}
-//		}
-//	}
-//
-//	int AtiendeCliente(int sockete); //Handshake y recibir programa
+	int nbytesRecibidos;
+		char* buffer;
+		buffer = malloc(1 * sizeof(char));
+		//	int id_CPU = 0;
 
-	return;
+		int id_Programa = 0;
+		int tipo_Conexion = 0;
+
+		char tipo_mensaje = '0';
+
+		//int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
+		//	struct sockaddr_in myaddr;     // dirección del servidor
+
+		fd_set master;   // conjunto maestro de descriptores de fichero
+		fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
+		int fdmax;        // número máximo de descriptores de fichero
+		int socketEscucha;     // descriptor de socket a la escucha
+		int socketNuevaConexion; // descriptor de socket de nueva conexión aceptada
+		int i;
+		FD_ZERO(&master);    // borra los conjuntos maestro y temporal
+		FD_ZERO(&read_fds);
+
+		struct sockaddr_in socketInfo;
+	//	char buffer[BUFF_SIZE];
+		int optval = 1;
+
+		// Crear un socket:
+		// AF_INET: Socket de internet IPv4
+		// SOCK_STREAM: Orientado a la conexion, TCP
+		// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
+		if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+			perror("socket");
+			//return 1;
+		}
+
+		// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
+		setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
+				sizeof(optval));
+
+		socketInfo.sin_family = AF_INET;
+		socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
+		socketInfo.sin_port = htons(Puerto);
+
+	// Vincular el socket con una direccion de red almacenada en 'socketInfo'.
+		if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
+				!= 0) {
+
+			perror("Error al bindear socket escucha");
+			//return EXIT_FAILURE;
+		}
+
+	// Escuchar nuevas conexiones entrantes.
+		if (listen(socketEscucha, 10) != 0) {
+
+			perror("Error al poner a escuchar socket");
+			//return EXIT_FAILURE;
+		}
+
+		printf("Escuchando conexiones entrantes.\n");
+		// añadir listener al conjunto maestro
+		FD_SET(socketEscucha, &master);
+		// seguir la pista del descriptor de fichero mayor
+		fdmax = socketEscucha; // por ahora es éste
+
+		for (;;) {
+			read_fds = master; // cópialo
+			if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
+				perror("select");
+				exit(1);
+			}
+			// explorar conexiones existentes en busca de datos que leer
+			for (i = 0; i <= fdmax; i++) {
+				if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
+					if (i == socketEscucha) {
+						// gestionar nuevas conexiones
+						// addrlen = sizeof(remoteaddr);
+						if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
+								== -1) {
+							perror("accept");
+						} else {
+							FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
+							if (socketNuevaConexion > fdmax) { // actualizar el máximo
+								fdmax = socketNuevaConexion;
+							}
+
+							printf("selectserver: una nueva conneccion socket %d\n",
+									socketNuevaConexion);
+						}
+					} else {
+
+						// gestionar datos de un cliente
+						// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
+
+						buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+						//Recibimos los datos del cliente
+						buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
+						Traza("nos ponemos a recibir %d", nbytesRecibidos);
+						if (nbytesRecibidos <= 0) {
+							// error o conexión cerrada por el cliente
+							if (nbytesRecibidos == 0) {
+								// conexión cerrada
+								printf("selectserver: socket %d hung up\n", i);
+							} else {
+								perror("recv");
+							}
+
+							FD_CLR(i, &master); // eliminar del conjunto maestro
+						} else {
+							tipo_mensaje = ObtenerComandoMSJ(buffer);
+							Traza("Tipos de mensaje: %c", tipo_mensaje);
+							//Evaluamos los comandos
+							switch (tipo_mensaje) {
+							case MSJ_HANDSHAKE:
+								ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
+								EnviarDatos(i, "1");
+								break;
+							case MSJ_RECIBO_PROGRAMA:
+								ComandoRecibirPrograma(buffer, i);
+								EnviarDatos(i, "1");
+							}
+
+							buffer[0] = '\0';
+						}
+					}
+				}
+			}
+		}
+
+		return;
 }
 
 int pedirMemoriaUMV(int socketumv) {
@@ -815,45 +849,6 @@ void ComandoRecibirPrograma(char *buffer, int idProg) {
 //	}
 }
 
-int AtiendeCliente(int sockete) {
-
-	//Nos es de gran utilidad para controlar los permisos de acceso (lectura/escritura) del programa.
-	//(en otras palabras que no se pase de vivo y quiera acceder a una posicion de memoria que no le corresponde.)
-	int id_Programa = 0;
-
-	int tipo_Conexion = 0;
-
-	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-	int tipo_mensaje = 0;
-
-	// Dentro del buffer se guarda el mensaje recibido por el cliente.
-	char buffer[BUFFERSIZE];
-
-	// Cantidad de bytes recibidos.
-	int bytesRecibidos;
-
-	// Código de salida por defecto
-	int code = 0;
-
-	bytesRecibidos = RecibirDatos(sockete, buffer);
-
-	if (bytesRecibidos > 0) {
-		//Analisamos que peticion nos está haciendo (obtenemos el comando)
-		tipo_mensaje = ObtenerComandoMSJ(buffer);
-
-		//Evaluamos los comandos
-		switch (tipo_mensaje) {
-		case MSJ_HANDSHAKE:
-			ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
-			EnviarDatos(sockete, "1");
-			break;
-		case MSJ_RECIBO_PROGRAMA:
-			ComandoRecibirPrograma(buffer, sockete);
-			EnviarDatos(sockete, "1");
-		}
-	}
-	return code;
-}
 
 char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 	*bytesRecibidos = 0;
