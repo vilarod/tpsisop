@@ -497,10 +497,13 @@ void llenarSemaforoConfig() {
 			sfin = 0;
 		}
 	}
-	free(nombre2);
-	free(nombre1);
 	free(sub1);
 	free(sub2);
+	t_sem *auxSem;
+	for(sfin=0; sfin < list_size(listaSemaforos); sfin++){
+		auxSem=list_get(listaSemaforos, sfin);
+		Traza("semaforo: %s valor: %d", (char *) auxSem->nombre,auxSem->valor);
+	}
 }
 char* obtenerCadenaDispositivos() {
 	t_config* config = config_create(PATH_CONFIG);
@@ -562,8 +565,6 @@ void llenarDispositConfig() {
 			sfin = 0;
 		}
 	}
-	free(nombre2);
-	free(nombre1);
 	free(sub1);
 	free(sub2);
 
@@ -629,8 +630,6 @@ void llenarVarGlobConfig() {
 			sfin = 0;
 		}
 	}
-	free(nombre2);
-	free(nombre1);
 	free(sub1);
 	free(sub2);
 }
