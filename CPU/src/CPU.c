@@ -846,11 +846,11 @@ PedirSentencia(char** sentencia)
       {
         int i;
         int aux = 0;
-        int dato = 0;
         int ptr_posicion = 0;
 
         char* respuesta=malloc(BUFFERSIZE * sizeof(char));
-        char* variable;
+        char* var=string_new();
+
 
         Traza("%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE VARIABLES");
         aux = programa->sizeContextoActual;
@@ -859,15 +859,37 @@ PedirSentencia(char** sentencia)
 
         if (aux > 0) //tengo variables a recuperar
           {
+            //dictionary_resize(dicVariables,aux);
             for (i = 0; i < aux; i++) //voy de 0 a cantidad de variables en contexto actual
               {
-                respuesta = getUMV(aux, 0, 1);
+                respuesta = getUMV(ptr_posicion, 0, 1);
                 if (string_starts_with(respuesta, "1"))
                   {
-                    variable = string_substring(respuesta, 1,strlen(respuesta) - 1);
-                    dato = aux + 1;
-                    dictionary_put(dicVariables, variable, &dato);
+                    var= string_substring(respuesta,1,1);
+                    if (!(dictionary_has_key(dicVariables,var))) //si no encuentra la key
+                      {
+                    Traza("TRAZA - VARIABLE %s",var);
+                    Traza("TRAZA - POSICION %d",ptr_posicion);
+                    dictionary_put(dicVariables, var, (void*)ptr_posicion);
+                    //solo de control
+                    if (dictionary_is_empty(dicVariables))
+                      Traza("%s","TRAZA - DICCIONARIO VACIO");
+                    else
+                      if (dictionary_has_key(dicVariables,var))
+                        {
+                        Traza("%s","TENGO LA VARIABLE");
+                      Traza("dato: %d",dictionary_get(dicVariables,var));
+                  } //fin control
+
+                    programa->sizeContextoActual ++;
                     ptr_posicion = ptr_posicion + VAR_STACK;
+                      } else {
+                          Error("%s","ERROR - SE INTENTA AGREGAR UNA VARIABLE QUE YA EXISTE EN EL CONTEXTO");
+                          ab=1;
+                          quantum=0;
+                          i=aux + 1;
+                          motivo="ERROR AL RECUPERAR CONTEXTO EJECUCION";
+                      }
                   }
                 else
                   {
@@ -1196,26 +1218,42 @@ PedirSentencia(char** sentencia)
   prim_irAlLabel(t_nombre_etiqueta etiqueta)
   {
     Traza("%s", "TRAZA - EJECUTO PRIMITIVA IrAlLabel");
-    //int posicion;
+    int* posicion;
 
-    //posicion=dictionary_get(&dicEtiquetas,etiqueta);
-    //aca tengo que asignarle la posicion al cursorstack?
+    if(dictionary_has_key(dicEtiquetas,etiqueta))
+      {
+      posicion=dictionary_get(dicEtiquetas,etiqueta);
+      programa->programCounter=*posicion; //asigno la primer instruccion ejecutable de etiqueta al PC
+      } else{
+          programa->programCounter=-1;
+          Error("ERROR - NO SE HA ENCONTRADO LA ETIQUETA: %s EL PROGRAM COUNTER ES: %d",etiqueta,programa->programCounter);
+          ab=1;
+          quantum=0;
+      }
   }
 
   t_puntero
   prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   {
     Traza("%s", "TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable");
-    t_puntero posicion;
+    t_puntero* posicion=0;
 
-    char var[1];
-    var[0] = identificador_variable;
-    int* aux = 0;
+    char* var=string_new();
+    var[0]= identificador_variable;
+
     //busco la posicion de la variable
     //las variables y las posiciones respecto al stack estan en el dicVariables
-    aux = dictionary_get(dicVariables, var);
-    posicion = *aux;
-    return posicion; //devuelvo la posicion
+    if (dictionary_has_key(dicVariables,"s"))
+      {
+    posicion = dictionary_get(dicVariables, "s");
+    Traza("encontre la variable, posicion %d",posicion);
+      }
+    else{
+        Error("ERROR - LA VARIABLE: %s NO EXISTE EN EL CONTEXTO DE EJECUCION","s");
+        ab=1;
+        quantum=0;
+    }
+    return (*posicion); //devuelvo la posicion
   }
 
   t_puntero
@@ -1227,14 +1265,28 @@ PedirSentencia(char** sentencia)
     t_puntero pos_var_stack;
     char var[1];
     var[0] = identificador_variable;
-    int* aux = 0;
-    *aux = programa->cursorStack + (programa->sizeContextoActual * VAR_STACK);
-    pos_var_stack = *aux;
-    dictionary_put(dicVariables, var, aux); //la registro en el dicc de variables
-    setUMV(pos_var_stack, 0, 1, var);
 
-    //ACA HAY QUE HACER EL CONTROL
-    programa->sizeContextoActual++;
+    Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s",var);
+    pos_var_stack = programa->cursorStack + (programa->sizeContextoActual * VAR_STACK);
+
+    Traza("TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d",pos_var_stack);
+
+    if(!(dictionary_has_key(dicVariables,var)))
+      {
+        if ((setUMV(pos_var_stack, 0, 1, var)) > 0)
+          {
+        dictionary_put(dicVariables, var, &pos_var_stack); //la registro en el dicc de variables
+        programa->sizeContextoActual++;
+        Traza("TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE");
+          } else {
+              Error("%s","ERROR - NO SE PUDO INGRESAR LA VARIABLE EN EL STACK");
+              quantum=0;
+              ab=1;
+          }
+      } else{
+          Error("%s","ERROR - LA VARIABLE YA SE ENCUENTRA EN EL CONTEXTO ACTUAL");
+          quantum=0;
+          ab=1;}
 
     return pos_var_stack; //devuelvo la pos en el stack
   }
