@@ -68,6 +68,7 @@ int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
 struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
+void inciarVariables();
 
 void ErrorFatal(const char* mensaje, ...);
 void Traza(const char* mensaje, ...);

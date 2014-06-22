@@ -660,8 +660,7 @@ PedirSentencia(char** sentencia)
     serCadena(&mensaje, string_itoa(dsp));
     serCadena(&mensaje, string_itoa(tam));
     serCadena(&mensaje, valor);
-    Traza("%s",
-        "TRAZA - SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÑO: %d VALOR: %s",
+    Traza("TRAZA - SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÑO: %d VALOR: %s",
         ptro, dsp, tam, valor);
     Enviar(socketUMV, mensaje);
     Recibir(socketUMV, respuesta);
@@ -913,6 +912,16 @@ PedirSentencia(char** sentencia)
 
   }
 
+  void inciarVariables()
+  {
+    quantum=0;
+    retardo=0;
+    io=0;
+    up=0;
+    ab=0;
+    tengoProg=0;
+  }
+
   int
   estoyConectado()
   {
@@ -991,6 +1000,7 @@ PedirSentencia(char** sentencia)
     //voy a trabajar mientras este conectado tanto con kernel como umv
     while (estoyConectado() == 1)
       {
+        inciarVariables();
         Traza("%s", "TRAZA - ESTOY CONECTADO CON KERNEL Y UMV");
         Traza("CANTIDAD DE PROGRAMAS QUE TENGO: %d", tengoProg);
 
@@ -1006,6 +1016,7 @@ PedirSentencia(char** sentencia)
 
         while (quantum > 0) //mientras tengo quantum
           {
+            Traza("TRAZA - EL QUANTUM QUE RESTA ES: %d", quantum);
             programa->programCounter++; //Incremento el PC
             Traza("TRAZA - LA PROXIMA INSTRUCCION ES: %d",
                 programa->programCounter);
@@ -1015,7 +1026,7 @@ PedirSentencia(char** sentencia)
                 parsearYejecutar(sentencia); //ejecuto sentencia
                 esperarTiempoRetardo(); // espero X milisegundo para volver a ejecutar
                 quantum--;
-                Traza("TRAZA - EL QUANTUM QUE RESTA ES: %d", quantum);
+
               }
             else
               {
@@ -1145,16 +1156,13 @@ PedirSentencia(char** sentencia)
                 string_substring(pedido, 1, strlen(pedido) - 1));
             ab = 1;
             quantum = 0;
-            tengoProg = 0;
           }
-
       }
     else
       {
         Error("ERROR UMV: %s", string_substring(pedido, 1, strlen(pedido) - 1));
         ab = 1;
         quantum = 0;
-        tengoProg = 0;
       }
 
     if (programa->sizeContextoActual > 0)
@@ -1166,7 +1174,6 @@ PedirSentencia(char** sentencia)
         string_append(&mensaje, FIN_PROCESO);
         string_append(&mensaje, serializar_PCB(programa));
         Enviar(socketKERNEL, mensaje);
-        tengoProg = 0;
         ab = 0;
         f = 1;
         quantum = 0;
@@ -1236,24 +1243,26 @@ PedirSentencia(char** sentencia)
   prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   {
     Traza("%s", "TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable");
-    t_puntero* posicion=0;
+    t_puntero posicion=0;
 
-    char* var=string_new();
+    char* var= malloc(1 * sizeof(char));
     var[0]= identificador_variable;
 
     //busco la posicion de la variable
     //las variables y las posiciones respecto al stack estan en el dicVariables
-    if (dictionary_has_key(dicVariables,"s"))
+    if (dictionary_has_key(dicVariables,var))
       {
-    posicion = dictionary_get(dicVariables, "s");
+    posicion = *(int*)dictionary_get(dicVariables,var);
     Traza("encontre la variable, posicion %d",posicion);
       }
     else{
-        Error("ERROR - LA VARIABLE: %s NO EXISTE EN EL CONTEXTO DE EJECUCION","s");
+        Error("ERROR - LA VARIABLE: %s NO EXISTE EN EL CONTEXTO DE EJECUCION",var);
         ab=1;
         quantum=0;
     }
-    return (*posicion); //devuelvo la posicion
+    free(var);
+
+    return posicion; //devuelvo la posicion
   }
 
   t_puntero
@@ -1263,8 +1272,9 @@ PedirSentencia(char** sentencia)
     // reserva espacio para la variable,
     //la registra en el stack
     t_puntero pos_var_stack;
-    char var[1];
-    var[0] = identificador_variable;
+
+    char* var= malloc(1 * sizeof(char));
+    var[0]= identificador_variable;
 
     Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s",var);
     pos_var_stack = programa->cursorStack + (programa->sizeContextoActual * VAR_STACK);
@@ -1275,7 +1285,7 @@ PedirSentencia(char** sentencia)
       {
         if ((setUMV(pos_var_stack, 0, 1, var)) > 0)
           {
-        dictionary_put(dicVariables, var, &pos_var_stack); //la registro en el dicc de variables
+        dictionary_put(dicVariables, var,(void*)pos_var_stack); //la registro en el dicc de variables
         programa->sizeContextoActual++;
         Traza("TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE");
           } else {
@@ -1325,7 +1335,7 @@ PedirSentencia(char** sentencia)
     Traza("TRAZA - SOLICITO AL KERNEL EL SEMAFORO: %s", identificador_semaforo);
     Enviar(socketKERNEL, mensaje);
     Recibir(socketKERNEL, respuesta);
-    senial = atoi(string_substring(respuesta, 1, 1));
+    senial = atoi(string_substring(respuesta, 0, 1));
 
     if (senial == 0) //senial==1 -> consegui el sem, senial==0 -> proceso bloqueado por sem
       {
