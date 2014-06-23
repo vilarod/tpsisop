@@ -1257,15 +1257,17 @@ PedirSentencia(char** sentencia)
     Traza("%s", "TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable");
     t_puntero posicion=0;
 
-    char* var= malloc(1 * sizeof(char));
+    char* var= malloc(5 * sizeof(char));
+    //char* var=string_new();
     var[0]= identificador_variable;
 
     //busco la posicion de la variable
     //las variables y las posiciones respecto al stack estan en el dicVariables
     if (dictionary_has_key(dicVariables,var))
       {
-    posicion = *(int*)dictionary_get(dicVariables,var);
-    Traza("encontre la variable, posicion %d",posicion);
+    int* aux = dictionary_get(dicVariables,var);
+    posicion= (t_puntero)aux;
+    Traza("encontre la variable %s, posicion %d",var,aux);
       }
     else{
         Error("ERROR - LA VARIABLE: %s NO EXISTE EN EL CONTEXTO DE EJECUCION",var);
@@ -1273,6 +1275,9 @@ PedirSentencia(char** sentencia)
         quantum=0;
     }
     free(var);
+
+
+    Traza("la posicion que me llevo es %d",posicion);
 
     return posicion; //devuelvo la posicion
   }
@@ -1285,7 +1290,7 @@ PedirSentencia(char** sentencia)
     //la registra en el stack
     t_puntero pos_var_stack;
 
-    char* var= malloc(1 * sizeof(char));
+    char* var= malloc(5 * sizeof(char));
     var[0]= identificador_variable;
 
     Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s",var);
@@ -1310,6 +1315,7 @@ PedirSentencia(char** sentencia)
           quantum=0;
           ab=1;}
 
+    free(var);
     return pos_var_stack; //devuelvo la pos en el stack
   }
 
