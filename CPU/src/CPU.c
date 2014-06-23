@@ -661,6 +661,7 @@ PedirSentencia(char** sentencia)
   {
     char respuesta[BUFFERSIZE];
     char *mensaje = string_itoa(SET_UMV);
+    int validar=1;
 
     serCadena(&mensaje, string_itoa(ptro));
     serCadena(&mensaje, string_itoa(dsp));
@@ -678,9 +679,10 @@ PedirSentencia(char** sentencia)
             string_substring(respuesta, 1, (strlen(respuesta)) - 1));
         ab = 1; //señal para abortar proceso
         motivo=string_substring(respuesta, 1, (strlen(respuesta)) - 1);
+        validar=0;
       }
 
-    return 1;
+    return validar;
 
   }
 
@@ -1103,15 +1105,18 @@ PedirSentencia(char** sentencia)
     int aux;
 
     aux = programa->cursorStack + (VAR_STACK * programa->sizeContextoActual);
-    setUMV(aux, 0, VAR_STACK, string_itoa(programa->cursorStack));
-    setUMV((aux + VAR_STACK), 0, VAR_STACK,
-        string_itoa(programa->programCounter));
-    programa->cursorStack = aux + (VAR_STACK * 2);
-    Traza("TRAZA - EL CURSOR STACK APUNTA A: %d", programa->cursorStack);
-    programa->sizeContextoActual = 0;
-    Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",
-        programa->sizeContextoActual);
-    dictionary_clean(dicVariables); //limpio el dic de variables
+    if (setUMV(aux, 0, VAR_STACK, string_itoa(programa->cursorStack)) == 1)
+      {
+          if(setUMV((aux + VAR_STACK), 0, VAR_STACK,string_itoa(programa->programCounter))==1)
+            {
+              programa->cursorStack = aux + (VAR_STACK * 2);
+              Traza("TRAZA - EL CURSOR STACK APUNTA A: %d", programa->cursorStack);
+              programa->sizeContextoActual = 0;
+              Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",
+                  programa->sizeContextoActual);
+              dictionary_clean(dicVariables); //limpio el dic de variables
+            }
+      }
 
   }
 
@@ -1124,16 +1129,21 @@ PedirSentencia(char** sentencia)
     int aux;
 
     aux = programa->cursorStack + (VAR_STACK * programa->sizeContextoActual);
-    setUMV(aux, 0, VAR_STACK, string_itoa(programa->cursorStack));
-    setUMV((aux + VAR_STACK), 0, VAR_STACK,
-        string_itoa(programa->programCounter));
-    setUMV((aux + (VAR_STACK * 2)), 0, VAR_STACK, string_itoa(donde_retornar));
-    programa->cursorStack = aux + (VAR_STACK * 3);
-    Traza("TRAZA - EL CURSOR STACK APUNTA A: %d", programa->cursorStack);
-    programa->sizeContextoActual = 0;
-    Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",
-        programa->sizeContextoActual);
-    dictionary_clean(dicVariables); //limpio el dic de variables
+    if (setUMV(aux, 0, VAR_STACK, string_itoa(programa->cursorStack)) == 1)
+      {
+        if(setUMV((aux + VAR_STACK), 0, VAR_STACK,string_itoa(programa->programCounter)) == 1)
+          {
+            if(setUMV((aux + (VAR_STACK * 2)), 0, VAR_STACK, string_itoa(donde_retornar)) ==1)
+              {
+              programa->cursorStack = aux + (VAR_STACK * 3);
+              Traza("TRAZA - EL CURSOR STACK APUNTA A: %d", programa->cursorStack);
+              programa->sizeContextoActual = 0;
+              Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
+              dictionary_clean(dicVariables); //limpio el dic de variables
+              Traza("TRAZA - LA DIRECCION POR DONDE RETORNAR ES: %d", donde_retornar);
+              }
+          }
+      }
   }
 
   void
@@ -1141,31 +1151,42 @@ PedirSentencia(char** sentencia)
   {
     //recuperar pc y contexto apilados en stack
     Traza("%s", "TRAZA - EJECUTO PRIMITIVA Finalizar");
-    int aux = programa->cursorStack;
+    int aux = programa->cursorStack; //tengo que leer desde la base del stack anterior hacia abajo
     aux = aux - VAR_STACK;
     char *pedido = malloc(BUFFERSIZE * sizeof(char));
     pedido = getUMV(aux, 0, VAR_STACK);
+
     if (string_starts_with(pedido, "1"))
       {
-        programa->programCounter = atoi(
-            string_substring(pedido, 1, strlen(pedido) - 1));
+        programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
         Traza("TRAZA - EL PROGRAM COUNTER ES: %d", programa->programCounter);
         aux = aux - (VAR_STACK * 2);
         pedido = getUMV(aux, 0, VAR_STACK);
         if (string_starts_with(pedido, "1"))
           {
-            programa->cursorStack = atoi(
-                string_substring(pedido, 1, strlen(pedido) - 1));
+            programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
             Traza("TRAZA - EL CURSOR STACK ES: %d", programa->cursorStack);
-            programa->sizeContextoActual = (aux - (programa->cursorStack))
-                / VAR_STACK;
-            Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",
-                programa->sizeContextoActual);
+            programa->sizeContextoActual = ((aux - (programa->cursorStack))/ VAR_STACK);
+            Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
+            if (programa->sizeContextoActual > 0)
+                RecuperarDicVariables();
+              else
+                {
+                  Traza("%s", "TRAZA - EL PROGRAMA FINALIZO");
+                  char *mensaje = malloc(BUFFERSIZE * sizeof(char));
+                  string_append(&mensaje, FIN_PROCESO);
+                  string_append(&mensaje, serializar_PCB(programa));
+                  Traza("TRAZA - EL MENSAJE QUE LE ENVIO AL KERNEL ES: %s",mensaje);
+                  Enviar(socketKERNEL, mensaje);
+                  free(mensaje);
+                  ab = 0;
+                  f = 1;
+                  quantum = 0;
+                }
           }
         else
           {
-            Error("ERROR UMV: %s",
-                string_substring(pedido, 1, strlen(pedido) - 1));
+            Error("ERROR UMV: %s",string_substring(pedido, 1, strlen(pedido) - 1));
             ab = 1;
             quantum = 0;
           }
@@ -1177,22 +1198,9 @@ PedirSentencia(char** sentencia)
         quantum = 0;
       }
 
-    if (programa->sizeContextoActual > 0)
-      RecuperarDicVariables();
-    else
-      {
-        Traza("%s", "TRAZA - EL PROGRAMA FINALIZO");
-        char *mensaje = malloc(BUFFERSIZE * sizeof(char));
-        string_append(&mensaje, FIN_PROCESO);
-        string_append(&mensaje, serializar_PCB(programa));
-        Enviar(socketKERNEL, mensaje);
-        ab = 0;
-        f = 1;
-        quantum = 0;
-        free(mensaje);
-      }
+
     free(pedido);
-    limpiarEstructuras();
+    dictionary_clean(dicVariables);
 
   }
 
@@ -1200,6 +1208,55 @@ PedirSentencia(char** sentencia)
   prim_retornar(t_valor_variable retorno)
   {  //acá tengo que volver a retorno
     Traza("%s", "TRAZA - EJECUTO PRIMITIVA Retornar");
+
+    int retor;
+    int aux = programa->cursorStack; //tengo que leer desde la base del stack anterior hacia abajo
+    aux = aux - VAR_STACK;
+    char *pedido = malloc(BUFFERSIZE * sizeof(char));
+    pedido = getUMV(aux, 0, VAR_STACK);
+
+    if (string_starts_with(pedido, "1"))
+      {
+        retor=atoi(string_substring(pedido, 1, strlen(pedido) - 1));
+        Traza("TRAZA - LA DIRECCION DONDE RETORNAR ES: %d", retor);
+        if (setUMV(retor,0,(VAR_STACK - 1),string_itoa(retorno)) == 1)
+        {
+        aux = aux - (VAR_STACK * 2);
+        pedido = getUMV(aux, 0, VAR_STACK);
+        if (string_starts_with(pedido, "1"))
+          {
+            programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
+            Traza("TRAZA - EL PROGRAM COUNTER ES: %d", programa->programCounter);
+            aux= aux -(VAR_STACK*3);
+            pedido= getUMV(aux,0,VAR_STACK);
+            if (string_starts_with(pedido, "1"))
+              {
+              programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
+              Traza("TRAZA - EL CURSOR DEL STACK ES: %d", programa->cursorStack);
+              programa->sizeContextoActual = ((aux - (programa->cursorStack))/ VAR_STACK);
+              Traza("TRAZA - EL TAMAÑO DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
+              if (programa->sizeContextoActual > 0)
+                RecuperarDicVariables();
+              }else
+                {
+                  Error("ERROR UMV: %s",string_substring(pedido, 1, strlen(pedido) - 1));
+                  ab = 1;
+                  quantum = 0;}
+          }else
+            {
+              Error("ERROR UMV: %s", string_substring(pedido, 1, strlen(pedido) - 1));
+              ab = 1;
+              quantum = 0;}
+        }else
+          {
+            Error("%s","ERROR - NO SE PUDO GUARDAR EL VALOR DE RETORNO");
+            Error("ERROR UMV: %s", string_substring(pedido, 1, strlen(pedido) - 1));
+            ab = 1;
+            quantum = 0;}
+        }
+
+    free(pedido);
+
   }
 
   void
