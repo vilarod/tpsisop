@@ -27,5 +27,7 @@ int enviarConfirmacionDeRecepcionDeDatos();
 int analizarSiEsFinDeEjecucion(char *respuesta);
 int imprimirRespuesta(char *texto);
 void Error1(int code, char *err);
+//log
+t_log* logger ;
 
 #endif /* PROGRAMA_H_ */
