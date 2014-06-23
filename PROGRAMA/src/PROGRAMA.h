@@ -29,5 +29,12 @@ int imprimirRespuesta(char *texto);
 void Error1(int code, char *err);
 //log
 t_log* logger ;
+//cunit
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+int correrTests();
+char* leerArchivo(char* nombre);
 
 #endif /* PROGRAMA_H_ */
