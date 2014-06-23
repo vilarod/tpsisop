@@ -22,7 +22,8 @@ int ObtenerMulti();
 //Hilos
 void *PLP(void *arg);
 void *PCP(void *arg);
-void *IMPRIMIRYFIN(void *arg);
+void *IMPRIMIRConsola(void *arg);
+void *FinEjecucion(void *arg);
 void *HiloOrquestadorDeCPU();
 void *moverEjecutar(void *arg);
 void *hiloDispositivos(void *arg);
@@ -75,7 +76,6 @@ void comandoObtenerValorGlobar(char* buffer,int socket);
 void comandoGrabarValorGlobar(char* buffer,int socket);
 
 void crearEscucha();
-int AtiendeCliente(int sockete);
 int chartToInt(char x);
 //int pedirMemoriaUMV(int socketumv, PCB programa);
 int pedirMemoriaUMV(int socketumv);

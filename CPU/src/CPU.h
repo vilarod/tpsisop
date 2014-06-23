@@ -40,7 +40,7 @@ void CambioProcesoActivo();
 //deserializar
 
 PCB* desearilizar_PCB (char* estructura, int pos, int* cantguiones);
-void deserializarDesplLong(char * msj,int despl, int longi);
+void deserializarDesplLong(char * msj,int* despl, int* longi);
 
 //serializar
 char* getUMV(int base, int dsp, int tam);
@@ -68,6 +68,7 @@ int Recibir (int sRemoto, char* buffer);
 int crearSocket(int socketConec);
 struct sockaddr_in prepararDestino(struct sockaddr_in dest,int puerto,char* ip);
 
+void inciarVariables();
 
 void ErrorFatal(const char* mensaje, ...);
 void Traza(const char* mensaje, ...);
@@ -76,7 +77,7 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos);
 
 //Recibir-Enviar datos con el kernel
 int RecibirProceso(); //para recibir el pcb, el retardo y el quantum
-char* PedirSentencia(); //para recibir la instruccion
+int PedirSentencia(char** sentencia); //para recibir la instruccion
 
 void AbortarProceso();
 

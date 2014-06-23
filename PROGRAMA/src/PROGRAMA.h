@@ -30,4 +30,8 @@ void Error1(int code, char *err);
 //log
 t_log* logger ;
 
+int correrTests();
+char* leerArchivo(char* nombre);
+
+
 #endif /* PROGRAMA_H_ */
