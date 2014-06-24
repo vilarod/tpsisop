@@ -53,7 +53,15 @@
 
 
 int main(int argc, char* argv[]) {
+    printf("%s\n", argv[1]);
 
+    if (strcmp(argv[1], "correrTests") == 0)
+    	{
+    	traza("corremos los tests");
+		correrTests();
+    	}
+    else
+    {
 
 
 	char* temp_file = tmpnam(NULL);
@@ -103,7 +111,7 @@ int index;    //para parametros
 
 	nuevo = NULL;
 	programa = NULL;
-
+    }
 	return (EXIT_SUCCESS);
 
 }
@@ -368,37 +376,38 @@ void traza(const char* mensaje, ...) {
 	}
 }
 int correrTests() {
+	void test1() {
+		printf("Soy el test 1!, y pruebo que 2 sea igual a 1+1");
+		CU_ASSERT_EQUAL(1+1, 2);
+	}
 
-//	CU_initialize_registry();
-//	void test1() {
-//		printf("Soy el test 1!, y pruebo que 2 sea igual a 1+1");
-//		CU_ASSERT_EQUAL(1+1, 2);
-//	}
-//
-//	void test2() {
-//		printf("Soy el test 2!, y doy segmentation fault");
-//		char* ptr = NULL;
-//		*ptr = 9;
-//	}
-//	void test3() {
-//		printf("Soy el test 3!");
-//	}
+	void test2() {
+		printf("Soy el test 2!, y doy segmentation fault");
+		char* ptr = NULL;
+		*ptr = 9;
+	}
+	void test3() {
+		printf("Soy el test 3!");
+	}
 
 
 
 
-//	  CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
-//	  CU_add_test(prueba, "uno", test1);
-//	  CU_add_test(prueba, "dos", test2);
-//	  CU_add_test(prueba, "tres", test3);
-//
-//	  CU_basic_set_mode(CU_BRM_VERBOSE);
-//	  CU_basic_run_tests();
-//	  CU_cleanup_registry();
-//
 
 
-//   return CU_get_error();
+
+	  CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
+	  CU_add_test(prueba, "uno", test1);
+	  CU_add_test(prueba, "dos", test2);
+	  CU_add_test(prueba, "tres", test3);
+
+	  CU_basic_set_mode(CU_BRM_VERBOSE);
+	  CU_basic_run_tests();
+	  CU_cleanup_registry();
+
+
+
+	  return CU_get_error();
 	return 0;
 
 }
