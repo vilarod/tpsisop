@@ -28,8 +28,8 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
-#include <parser/parser.h>
-#include <parser/metadata_program.h>
+//#include <parser/parser.h>
+//#include <parser/metadata_program.h>
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
 
@@ -48,6 +48,7 @@
 #define MSJ_CPU_ABANDONA			'7'
 #define MSJ_CPU_WAIT				'8'
 #define MSJ_CPU_SIGNAL				'9'
+#define MSJ_CPU_ABORTAR				'A'
 #define MSJ_CPU_FINAlIZAR			'F'
 #define MSJ_CPU_LIBERAR				'L'
 
@@ -292,134 +293,135 @@ void *moverReadyDeNew(void *arg) {
 
 void crearEscucha() {
 	int nbytesRecibidos;
-		char* buffer;
-		buffer = malloc(1 * sizeof(char));
-		//	int id_CPU = 0;
+	char* buffer;
+	buffer = malloc(1 * sizeof(char));
+	//	int id_CPU = 0;
 
-		int id_Programa = 0;
-		int tipo_Conexion = 0;
+	int id_Programa = 0;
+	int tipo_Conexion = 0;
 
-		char tipo_mensaje = '0';
+	char tipo_mensaje = '0';
 
-		//int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
-		//	struct sockaddr_in myaddr;     // dirección del servidor
+	//int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
+	//	struct sockaddr_in myaddr;     // dirección del servidor
 
-		fd_set master;   // conjunto maestro de descriptores de fichero
-		fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
-		int fdmax;        // número máximo de descriptores de fichero
-		int socketEscucha;     // descriptor de socket a la escucha
-		int socketNuevaConexion; // descriptor de socket de nueva conexión aceptada
-		int i;
-		FD_ZERO(&master);    // borra los conjuntos maestro y temporal
-		FD_ZERO(&read_fds);
+	fd_set master;   // conjunto maestro de descriptores de fichero
+	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
+	int fdmax;        // número máximo de descriptores de fichero
+	int socketEscucha;     // descriptor de socket a la escucha
+	int socketNuevaConexion; // descriptor de socket de nueva conexión aceptada
+	int i;
+	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
+	FD_ZERO(&read_fds);
 
-		struct sockaddr_in socketInfo;
+	struct sockaddr_in socketInfo;
 	//	char buffer[BUFF_SIZE];
-		int optval = 1;
+	int optval = 1;
 
-		// Crear un socket:
-		// AF_INET: Socket de internet IPv4
-		// SOCK_STREAM: Orientado a la conexion, TCP
-		// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
-		if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-			perror("socket");
-			//return 1;
-		}
+	// Crear un socket:
+	// AF_INET: Socket de internet IPv4
+	// SOCK_STREAM: Orientado a la conexion, TCP
+	// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
+	if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		//return 1;
+	}
 
-		// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
-		setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
-				sizeof(optval));
+	// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
+	setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
+			sizeof(optval));
 
-		socketInfo.sin_family = AF_INET;
-		socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
-		socketInfo.sin_port = htons(Puerto);
+	socketInfo.sin_family = AF_INET;
+	socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
+	socketInfo.sin_port = htons(Puerto);
 
 	// Vincular el socket con una direccion de red almacenada en 'socketInfo'.
-		if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
-				!= 0) {
+	if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
+			!= 0) {
 
-			perror("Error al bindear socket escucha");
-			//return EXIT_FAILURE;
-		}
+		perror("Error al bindear socket escucha");
+		//return EXIT_FAILURE;
+	}
 
 	// Escuchar nuevas conexiones entrantes.
-		if (listen(socketEscucha, 10) != 0) {
+	if (listen(socketEscucha, 10) != 0) {
 
-			perror("Error al poner a escuchar socket");
-			//return EXIT_FAILURE;
+		perror("Error al poner a escuchar socket");
+		//return EXIT_FAILURE;
+	}
+
+	printf("Escuchando conexiones entrantes.\n");
+	// añadir listener al conjunto maestro
+	FD_SET(socketEscucha, &master);
+	// seguir la pista del descriptor de fichero mayor
+	fdmax = socketEscucha; // por ahora es éste
+
+	for (;;) {
+		read_fds = master; // cópialo
+		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
+			perror("select");
+			exit(1);
 		}
-
-		printf("Escuchando conexiones entrantes.\n");
-		// añadir listener al conjunto maestro
-		FD_SET(socketEscucha, &master);
-		// seguir la pista del descriptor de fichero mayor
-		fdmax = socketEscucha; // por ahora es éste
-
-		for (;;) {
-			read_fds = master; // cópialo
-			if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
-				perror("select");
-				exit(1);
-			}
-			// explorar conexiones existentes en busca de datos que leer
-			for (i = 0; i <= fdmax; i++) {
-				if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
-					if (i == socketEscucha) {
-						// gestionar nuevas conexiones
-						// addrlen = sizeof(remoteaddr);
-						if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
-								== -1) {
-							perror("accept");
-						} else {
-							FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
-							if (socketNuevaConexion > fdmax) { // actualizar el máximo
-								fdmax = socketNuevaConexion;
-							}
-
-							printf("selectserver: una nueva conneccion socket %d\n",
-									socketNuevaConexion);
-						}
+		// explorar conexiones existentes en busca de datos que leer
+		for (i = 0; i <= fdmax; i++) {
+			if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
+				if (i == socketEscucha) {
+					// gestionar nuevas conexiones
+					// addrlen = sizeof(remoteaddr);
+					if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
+							== -1) {
+						perror("accept");
 					} else {
-
-						// gestionar datos de un cliente
-						// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
-
-						buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-						//Recibimos los datos del cliente
-						buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
-						Traza("nos ponemos a recibir %d", nbytesRecibidos);
-						if (nbytesRecibidos <= 0) {
-							// error o conexión cerrada por el cliente
-							if (nbytesRecibidos == 0) {
-								// conexión cerrada
-								printf("selectserver: socket %d hung up\n", i);
-							} else {
-								perror("recv");
-							}
-
-							FD_CLR(i, &master); // eliminar del conjunto maestro
-						} else {
-							tipo_mensaje = ObtenerComandoMSJ(buffer);
-							Traza("Tipos de mensaje: %c", tipo_mensaje);
-							//Evaluamos los comandos
-							switch (tipo_mensaje) {
-							case MSJ_HANDSHAKE:
-								ComandoHandShake(buffer, &id_Programa, &tipo_Conexion);
-								EnviarDatos(i, "1");
-								break;
-							case MSJ_RECIBO_PROGRAMA:
-								ComandoRecibirPrograma(buffer, i);
-								EnviarDatos(i, "1");
-							}
-
-							buffer[0] = '\0';
+						FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
+						if (socketNuevaConexion > fdmax) { // actualizar el máximo
+							fdmax = socketNuevaConexion;
 						}
+
+						printf("selectserver: una nueva conneccion socket %d\n",
+								socketNuevaConexion);
+					}
+				} else {
+
+					// gestionar datos de un cliente
+					// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
+
+					buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+					//Recibimos los datos del cliente
+					buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
+					Traza("nos ponemos a recibir %d", nbytesRecibidos);
+					if (nbytesRecibidos <= 0) {
+						// error o conexión cerrada por el cliente
+						if (nbytesRecibidos == 0) {
+							// conexión cerrada
+							printf("selectserver: socket %d hung up\n", i);
+						} else {
+							perror("recv");
+						}
+
+						FD_CLR(i, &master); // eliminar del conjunto maestro
+					} else {
+						tipo_mensaje = ObtenerComandoMSJ(buffer);
+						Traza("Tipos de mensaje: %c", tipo_mensaje);
+						//Evaluamos los comandos
+						switch (tipo_mensaje) {
+						case MSJ_HANDSHAKE:
+							ComandoHandShake(buffer, &id_Programa,
+									&tipo_Conexion);
+							EnviarDatos(i, "1");
+							break;
+						case MSJ_RECIBO_PROGRAMA:
+							ComandoRecibirPrograma(buffer, i);
+							EnviarDatos(i, "1");
+						}
+
+						buffer[0] = '\0';
 					}
 				}
 			}
 		}
+	}
 
-		return;
+	return;
 }
 
 int pedirMemoriaUMV(int socketumv) {
@@ -849,7 +851,6 @@ void ComandoRecibirPrograma(char *buffer, int idProg) {
 //	}
 }
 
-
 char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 	*bytesRecibidos = 0;
 	int tamanioNuevoBuffer = 0;
@@ -1170,6 +1171,10 @@ void *HiloOrquestadorDeCPU() {
 							//suma la varariable del semaforo
 							comandoSignal(buffer, i);
 							break;
+						case MSJ_CPU_ABORTAR:
+							//Aborta programa por erro
+							comandoAbortar(buffer, i);
+							break;
 						case MSJ_CPU_FINAlIZAR:
 							//Termino programa y mandar a FIN
 							comandoFinalizar(i, buffer);
@@ -1395,18 +1400,6 @@ void comandoWait(char* buffer, int socket) {
 		}
 	} else {
 		n = EnviarDatos(socket, "A");
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU *aux = encontrarCPU(socket);
-		PCB* aux1;
-		if (aux != NULL ) {
-			aux1 = aux->idPCB;
-			aux->idPCB = NULL;
-			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin, final_create(aux1, 1, "Semaforo no encontrado"));
-			pthread_mutex_unlock(&mutexFIN);
-			semsig(&finalizarCont);
-		}
-		pthread_mutex_unlock(&mutexCPU);
 	}
 	if (n < 0) {
 		//TODO error enviar datos
@@ -1462,19 +1455,7 @@ void comandoSignal(char* buffer, int socket) {
 			}
 		}
 	} else {
-		n = EnviarDatos(socket, "A");
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU *aux = encontrarCPU(socket);
-		PCB* aux1;
-		if (aux != NULL ) {
-			aux1 = aux->idPCB;
-			aux->idPCB = NULL;
-			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin, final_create(aux1, 1, "Semaforo no encontrado"));
-			pthread_mutex_unlock(&mutexFIN);
-			semsig(&finalizarCont);
-		}
-		pthread_mutex_unlock(&mutexCPU);
+		n = EnviarDatos(socket, "0");
 	}
 	if (n < 0) {
 		//TODO error enviar datos
@@ -1569,20 +1550,7 @@ void comandoObtenerValorGlobar(char* buffer, int socket) {
 			//TODO falla al enviar
 		}
 	} else {
-		ndatos = EnviarDatos(socket, "A");
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU *aux = encontrarCPU(socket);
-		PCB* aux1;
-		if (aux != NULL ) {
-			aux1 = aux->idPCB;
-			aux->idPCB = NULL;
-			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin,
-					final_create(aux1, 1, "Variable global no encontrado"));
-			pthread_mutex_unlock(&mutexFIN);
-			semsig(&finalizarCont);
-		}
-		pthread_mutex_unlock(&mutexCPU);
+		ndatos = EnviarDatos(socket, "0");
 	}
 }
 
@@ -1610,18 +1578,22 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 			//TODO error al enviar
 		}
 	} else {
-		ndatos = EnviarDatos(socket, "A");
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU *aux = encontrarCPU(socket);
-		PCB* aux1;
-		if (aux != NULL ) {
-			aux1 = aux->idPCB;
-			aux->idPCB = NULL;
-			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin,
-					final_create(aux1, 1, "Variable global no encontrado"));
-			pthread_mutex_unlock(&mutexFIN);
-			semsig(&finalizarCont);
-		}
+		ndatos = EnviarDatos(socket, "0");
+	}
+}
+
+void comandoAbortar(char* buffer, int socket) {
+	char* msj;
+	msj = obtenerNombreMensaje(buffer, 1);
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU *auxCPU = encontrarCPU(socket);
+	PCB* auxPCB;
+	if (auxCPU != NULL ) {
+		auxPCB = auxCPU->idPCB;
+		auxCPU->idPCB = NULL;
+		pthread_mutex_lock(&mutexFIN);
+		list_add(listaFin, final_create(auxPCB, 1, msj));
+		pthread_mutex_unlock(&mutexFIN);
+		semsig(&finalizarCont);
 	}
 }

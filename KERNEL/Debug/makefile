@@ -29,7 +29,7 @@ all: KERNEL
 KERNEL: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -lpthread -L"/home/utnso/tp-2014-1c-garras/Commons/Debug" -o "KERNEL" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -lpthread  -o "KERNEL" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

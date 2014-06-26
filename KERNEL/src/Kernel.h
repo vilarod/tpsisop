@@ -74,6 +74,7 @@ void comandoFinalizar(int socket,char* buffer);
 void comandoImprimir(char* buffer, int socket);
 void comandoObtenerValorGlobar(char* buffer,int socket);
 void comandoGrabarValorGlobar(char* buffer,int socket);
+void comandoAbortar(char* buffer, int socket);
 
 void crearEscucha();
 int chartToInt(char x);
