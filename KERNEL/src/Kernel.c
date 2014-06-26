@@ -124,20 +124,30 @@ void *PLP(void *arg) {
 	pthread_create(&Imprimir, NULL, IMPRIMIRConsola, NULL );
 	pthread_create(&Fin, NULL, FinEjecucion, NULL );
 	pthread_join(Imprimir, NULL );
+	pthread_join(Fin, NULL );
 
 	return NULL ;
 }
 void *FinEjecucion(void *arg) {
 
-	//los waits y while 1 para las cola de fin y de imprimir algo
+	//wait(semaforofin)
+	//while(haya pcb en la lista fin)
+	//free de toodo
+	//signal(multiprogramacion)
 
 	return NULL ;
 }
 
 void *IMPRIMIRConsola(void *arg) {
 
-	//los waits y while 1 para las cola de fin y de imprimir algo
-
+	//declaras un puntero new
+	//puntero new = puntero
+	//wait(semaforodeimpresion)
+	//while(imprension.lenght>0)
+	//*puntero new.impresion.id
+	//*puntero new.impresion.mensaje
+	//EnviarDatos(impresion.id;impresion.mensaje)
+	//Dispose puntero new
 	return NULL ;
 }
 
@@ -268,6 +278,7 @@ void *bloqueados_fnc(void *arg) {
 	return NULL ;
 }
 
+//DANI NO MOVES DE NEW A READY
 void *moverReadyDeNew(void *arg) {
 	t_list *aux;
 	//mandar a ready de new
