@@ -36,7 +36,7 @@
 
 #if 1 // CONSTANTES //
 //Ruta del config
-#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/UMV/src/config.cfg"
+#define PATH_CONFIG "config.cfg"
 
 //Tipo de cliente conectado
 #define TIPO_KERNEL       1
