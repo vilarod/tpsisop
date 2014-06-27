@@ -319,3 +319,5 @@ ERROR FATAL--> Error al hacer el Bind. El puerto está en uso
 
 [TRACE] 18:02:49:47 UMV/(19442:19458): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (2) no tiene asignado un segmento con base 1494
 [TRACE] 18:02:49:47 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 0ERROR LEER MEMORIA. SEGMENTATION FAULT. El programa (2) no tiene asignado un segmento con base 1494. Id programa: 2, base: 1494, desplazamiento: 0, longitud buffer: 100
+[TRACE] 21:26:01:397 UMV/(20162:20162): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 21:26:01:402 UMV/(20162:20163): El socket está listo para recibir conexiones. Numero de socket: 5, puerto: 7000
