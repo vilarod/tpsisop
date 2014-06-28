@@ -299,4 +299,4 @@ pthread_mutex_t mutexSemaforos = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexDispositivos = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexImprimir = PTHREAD_MUTEX_INITIALIZER;
 
-
+int cantidadDigitos(int num);

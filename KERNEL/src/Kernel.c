@@ -8,7 +8,8 @@
  Testing	 : Para probarlo es tan simple como ejecutar en el terminator
  ============================================================================
  */
-
+#include <parser/parser.h>
+#include <parser/metadata_program.h>
 #include <netdb.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -28,8 +29,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
-#include <parser/parser.h>
-#include <parser/metadata_program.h>
+
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
 
@@ -42,7 +42,7 @@
 #define MSJ_HANDSHAKE             	'H'
 #define MSJ_PROGRAMAIMPRIMI			'I'
 #define MSJ_PROGRAMAFIN				'F'
-#define MSJ_CONFIRMACION 			"C"
+#define MSJ_CONFIRMACION 			"1"
 #define MSJ_CPU_IMPRIMI	      		'2'
 #define MSJ_CPU_HANDSHAKE           '3'
 #define MSJ_CPU_FINAlQUAMTUM		'4'
@@ -60,7 +60,6 @@
 /** Longitud del buffer  */
 #define BUFFERSIZE 1024 * 4
 #define DIRECCION INADDR_ANY
-
 
 int main(int argv, char** argc) {
 
@@ -118,14 +117,18 @@ void *PLP(void *arg) {
 	conectarAUMV();
 
 	//Creo el hilo de pcp
-	pthread_t pcp, Imprimir, Fin;
+	pthread_t pcp, Imprimir, Fin, plpNew;
 	pthread_create(&pcp, NULL, PCP, NULL );
-	pthread_join(pcp, NULL );
 
 	crearEscucha();
 
 	pthread_create(&Imprimir, NULL, IMPRIMIRConsola, NULL );
 	pthread_create(&Fin, NULL, FinEjecucion, NULL );
+	//crear hilo de new
+	pthread_create(&plpNew, NULL, moverReadyDeNew, NULL );
+
+	pthread_join(plpNew, NULL );
+	pthread_join(pcp, NULL );
 	pthread_join(Imprimir, NULL );
 	pthread_join(Fin, NULL );
 
@@ -163,11 +166,8 @@ void *PCP(void *arg) {
 
 	listCPU = list_create();
 	//crear hilo de escucha CPU
-	pthread_t plpCPU, plpNew, plpReady, plpBloqueado;
+	pthread_t plpCPU, plpReady, plpBloqueado;
 	pthread_create(&plpCPU, NULL, HiloOrquestadorDeCPU, NULL );
-
-	//crear hilo de new
-	pthread_create(&plpNew, NULL, moverReadyDeNew, NULL );
 
 	//crear hilo de ready
 	pthread_create(&plpReady, NULL, moverEjecutar, NULL );
@@ -283,7 +283,6 @@ void *bloqueados_fnc(void *arg) {
 	return NULL ;
 }
 
-//DANI NO MOVES DE NEW A READY
 void *moverReadyDeNew(void *arg) {
 	t_list *aux;
 	//mandar a ready de new
@@ -311,7 +310,6 @@ void crearEscucha() {
 	int nbytesRecibidos;
 	char* buffer;
 	buffer = malloc(1 * sizeof(char));
-	//	int id_CPU = 0;
 
 	int id_Programa = 0;
 	int tipo_Conexion = 0;
@@ -421,13 +419,13 @@ void crearEscucha() {
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
 						case MSJ_HANDSHAKE:
-							ComandoHandShake(buffer, &id_Programa,&tipo_Conexion);
+							ComandoHandShake(buffer, &id_Programa,
+									&tipo_Conexion);
 							EnviarDatos(i, "1");
 							break;
 						case MSJ_RECIBO_PROGRAMA:
-							if(ComandoRecibirPrograma(buffer, i)== 0)
-							{
-								EnviarDatos(i,"0");
+							if (ComandoRecibirPrograma(buffer, i) == 0) {
+								EnviarDatos(i, "0");
 							}
 							EnviarDatos(i, MSJ_CONFIRMACION);
 						}
@@ -441,7 +439,6 @@ void crearEscucha() {
 
 	return;
 }
-
 
 int ObtenerPuertoUMV() {
 	t_config* config = config_create(PATH_CONFIG);
@@ -833,28 +830,52 @@ int chartToInt(char x) {
 
 int ComandoRecibirPrograma(char *buffer, int id) {
 	//QUITAR DEL BUFFER EL COD DE MSJ
-	//int i = 1;
-	//char respuestaumv[BUFFERSIZE];
-	//PCB PCBAUX;
-	//char *programa;
-	//programa = malloc(1 * sizeof(char));
-	//while (buffer[i]!= '/0')
-	//	{
-	//	programa[i]= buffer[i];
-	//	i++;
-	//	}
-	//LLAMAR AL PARSER
-	//t_metadata_program metadataprograma = metadata_desde_literal(programa);
-	//LLENAR PCB AUXILIAR
-	//PCBAUX.id= id;
-	//PCBAUX.programCounter= metadataprograma.instruccion_inicio;
-	//EnviarDatos(socketumv, '4'+lenght(id)+id);
-	//EnviarDatos(socketumv, )
-	//RecibirDatos(socketumv,respuestaumv);
-	//PCBAUX.segmentoCodigo= respuestaumv;
-	//EnviarDatos(socketumv, )
-	//PCBAUX.segmentoStack= respuestaumv2;
 
+	int digitos;
+
+	char *programa;
+	programa = malloc(1 * sizeof(char));
+	digitos = cantidadDigitos(id);
+	char* cadenaCambioContexto;
+	cadenaCambioContexto = string_new();
+	string_append(&cadenaCambioContexto, string_itoa(4));
+	string_append(&cadenaCambioContexto, string_itoa(digitos));
+	string_append(&cadenaCambioContexto, string_itoa(id));
+
+	programa = string_substring(programa, 1, strlen(programa) - 1);
+	//LLAMAR AL PARSER
+	t_metadata_program* metadataprograma = metadata_desde_literal(programa);
+	//LLENAR PCB AUXILIAR
+	char respuestaumv[BUFFERSIZE];
+	char respuestaumv2[BUFFERSIZE];
+	PCB PCBAUX;
+	PCBAUX.id = id;
+	PCBAUX.programCounter = metadataprograma->instruccion_inicio;
+
+	EnviarDatos(socketumv, cadenaCambioContexto);
+	RecibirDatos(socketumv, respuestaumv);
+	if (analisarRespuestaUMV(respuestaumv) != 0) {
+		int digitos2 = cantidadDigitos(strlen(programa));
+		char* cadenaSegmento = string_new();
+		string_append(&cadenaSegmento, string_itoa(5));
+		string_append(&cadenaSegmento, string_itoa(digitos));
+		string_append(&cadenaSegmento, string_itoa(id));
+		string_append(&cadenaSegmento, string_itoa(digitos2));
+		string_append(&cadenaSegmento, string_itoa(strlen(programa)));
+		EnviarDatos(socketumv, cadenaSegmento);
+		RecibirDatos(socketumv, respuestaumv2); //COD + DIGITO + BASE
+		if (analisarRespuestaUMV(respuestaumv2) != 0) {
+			char *codesegment = string_substring(respuestaumv2, 2,
+					strlen(respuestaumv2) - 2);
+			PCBAUX.segmentoCodigo = atoi(codesegment);
+			//	EnviarDatos(socketumv, );
+			//	PCBAUX.segmentoStack=
+		}
+	}
+	//Calcular PESO
+	//PCBAUX
+	return 1;
+}
 
 //	programa.cursorStack;
 //	//int indiceCodigo;
@@ -864,6 +885,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 //	//int sizeIndiceEtiquetas;
 //
 //
+
 //
 //		// * Crear segmento 1° cod mensaje (5)
 //		// * Parametros a pasar 2° cantidad de dijitos del id programa
@@ -871,8 +893,16 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 //		// *  4° cantidad dijitos tamaño
 //		// *  5° tamaño
 //		// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
-//	}
-return 1;
+
+int cantidadDigitos(int num) {
+	int contador = 1;
+
+	while (num / 10 > 0) {
+		num = num / 10;
+		contador++;
+	}
+
+	return contador;
 }
 
 char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
@@ -882,7 +912,7 @@ char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 	int cantidadBytesRecibidos = 0;
 	int cantidadBytesAcumulados = 0;
 
-	// memset se usa para llenar el buffer con 0s
+// memset se usa para llenar el buffer con 0s
 	char bufferAux[BUFFERSIZE];
 
 	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
@@ -929,7 +959,7 @@ char* ComandoHandShake2(char *buffer, int *tipoCliente) {
 // Formato del mensaje: CD
 // C = codigo de mensaje ( = 3)
 
-	//int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
+//int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
 	int tipoDeCliente = chartToInt(buffer[1]);
 	if (tipoDeCliente == TIPO_CPU) {
 		*tipoCliente = tipoDeCliente;
@@ -1040,10 +1070,10 @@ void *HiloOrquestadorDeCPU() {
 	int nbytesRecibidos;
 	char* buffer;
 	buffer = malloc(1 * sizeof(char));
-	//	int id_CPU = 0;
+//	int id_CPU = 0;
 	int tipo_Cliente = 0;
 
-	// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
+// Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
 	char tipo_mensaje = '0';
 
 //int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
@@ -1062,16 +1092,16 @@ void *HiloOrquestadorDeCPU() {
 //	char buffer[BUFF_SIZE];
 	int optval = 1;
 
-	// Crear un socket:
-	// AF_INET: Socket de internet IPv4
-	// SOCK_STREAM: Orientado a la conexion, TCP
-	// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
+// Crear un socket:
+// AF_INET: Socket de internet IPv4
+// SOCK_STREAM: Orientado a la conexion, TCP
+// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
 	if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("socket");
 		//return 1;
 	}
 
-	// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
+// Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
 	setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
 			sizeof(optval));
 
@@ -1095,9 +1125,9 @@ void *HiloOrquestadorDeCPU() {
 	}
 
 	printf("Escuchando conexiones entrantes.\n");
-	// añadir listener al conjunto maestro
+// añadir listener al conjunto maestro
 	FD_SET(socketEscucha, &master);
-	// seguir la pista del descriptor de fichero mayor
+// seguir la pista del descriptor de fichero mayor
 	fdmax = socketEscucha; // por ahora es éste
 
 	for (;;) {
@@ -1281,7 +1311,7 @@ PCB* desearilizar_PCB(char* estructura, int* pos) {
 		indice = inicio;
 	}
 	*pos = inicio;
-	//free(sub);
+//free(sub);
 	return est_prog;
 }
 
@@ -1404,7 +1434,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		pthread_mutex_unlock(&mutexSemaforos);
 		break;
 	}
-	//Buscar CPU y Borrar Programa
+//Buscar CPU y Borrar Programa
 	borrarPCBenCPU(socket);
 }
 
@@ -1491,13 +1521,13 @@ void comandoFinalizar(int socket, char* buffer) {
 	PCB* auxPCB;
 	int pos = 1;
 	auxPCB = desearilizar_PCB(buffer, &pos);
-	//Pasa a estado fin
+//Pasa a estado fin
 	pthread_mutex_lock(&mutexFIN);
 	list_add(listaFin, final_create(auxPCB, 0, ""));
 	pthread_mutex_unlock(&mutexFIN);
 	Traza("Mandar a estado fin. programa: %d. buffer: ", auxPCB->id);
 	semsig(&finalizarCont);
-	//Borra el viejo PCB en la lista de CPU
+//Borra el viejo PCB en la lista de CPU
 	borrarPCBenCPU(socket);
 }
 
@@ -1557,7 +1587,7 @@ void comandoImprimir(char* buffer, int socket) {
 }
 
 void comandoObtenerValorGlobar(char* buffer, int socket) {
-	//OBtener valor variable compartida y mandarlo a CPU
+//OBtener valor variable compartida y mandarlo a CPU
 	char* variable = obtenerNombreMensaje(buffer, 1);
 	char* respuesta = "";
 	int ndatos;
