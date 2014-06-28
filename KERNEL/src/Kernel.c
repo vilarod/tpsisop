@@ -28,8 +28,8 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
-//#include <parser/parser.h>
-//#include <parser/metadata_program.h>
+#include <parser/parser.h>
+#include <parser/metadata_program.h>
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
 
@@ -38,8 +38,11 @@
 #define TIPO_PROGRAMA     1
 
 //Mensajes aceptados
-#define MSJ_RECIBO_PROGRAMA       	'1'
-#define MSJ_HANDSHAKE             	'3'
+#define MSJ_RECIBO_PROGRAMA       	'E'
+#define MSJ_HANDSHAKE             	'H'
+#define MSJ_PROGRAMAIMPRIMI			'I'
+#define MSJ_PROGRAMAFIN				'F'
+#define MSJ_CONFIRMACION 			"C"
 #define MSJ_CPU_IMPRIMI	      		'2'
 #define MSJ_CPU_HANDSHAKE           '3'
 #define MSJ_CPU_FINAlQUAMTUM		'4'
@@ -58,7 +61,7 @@
 #define BUFFERSIZE 1024 * 4
 #define DIRECCION INADDR_ANY
 
-int socketumv;
+
 int main(int argv, char** argc) {
 
 	//Obtener puertos e ip de la umv
@@ -416,13 +419,15 @@ void crearEscucha() {
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
 						case MSJ_HANDSHAKE:
-							ComandoHandShake(buffer, &id_Programa,
-									&tipo_Conexion);
+							ComandoHandShake(buffer, &id_Programa,&tipo_Conexion);
 							EnviarDatos(i, "1");
 							break;
 						case MSJ_RECIBO_PROGRAMA:
-							ComandoRecibirPrograma(buffer, i);
-							EnviarDatos(i, "1");
+							if(ComandoRecibirPrograma(buffer, i)== 0)
+							{
+								EnviarDatos(i,"0");
+							}
+							EnviarDatos(i, MSJ_CONFIRMACION);
 						}
 
 						buffer[0] = '\0';
@@ -435,15 +440,6 @@ void crearEscucha() {
 	return;
 }
 
-int pedirMemoriaUMV(int socketumv) {
-	char respuestaMemoria[BUFFERSIZE];
-	char *mensaje = "5";
-	//ENVIAR TODOS LOS CREAR SEGMENTOS
-	EnviarDatos(socketumv, mensaje);
-	RecibirDatos(socketumv, respuestaMemoria);
-
-	return analisarRespuestaUMV(respuestaMemoria);
-}
 
 int ObtenerPuertoUMV() {
 	t_config* config = config_create(PATH_CONFIG);
@@ -833,26 +829,40 @@ int chartToInt(char x) {
 	return a;
 }
 
-void ComandoRecibirPrograma(char *buffer, int idProg) {
-//void ComandoRecibirPrograma(char *buffer, int *idProg, int *tipoCliente) {
-//	memset(buffer, 0, BUFFERSIZE);
-//	PCB programa;
-//	programa.id = id;
-//	programa.programCounter= 0; // o 1
-//	programa.segmentoCodigo;
-//	programa.segmentoStack;
+int ComandoRecibirPrograma(char *buffer, int id) {
+	//QUITAR DEL BUFFER EL COD DE MSJ
+	//int i = 1;
+	//char respuestaumv[BUFFERSIZE];
+	//PCB PCBAUX;
+	//char *programa;
+	//programa = malloc(1 * sizeof(char));
+	//while (buffer[i]!= '/0')
+	//	{
+	//	programa[i]= buffer[i];
+	//	i++;
+	//	}
+	//LLAMAR AL PARSER
+	//t_metadata_program metadataprograma = metadata_desde_literal(programa);
+	//LLENAR PCB AUXILIAR
+	//PCBAUX.id= id;
+	//PCBAUX.programCounter= metadataprograma.instruccion_inicio;
+	//EnviarDatos(socketumv, '4'+lenght(id)+id);
+	//EnviarDatos(socketumv, )
+	//RecibirDatos(socketumv,respuestaumv);
+	//PCBAUX.segmentoCodigo= respuestaumv;
+	//EnviarDatos(socketumv, )
+	//PCBAUX.segmentoStack= respuestaumv2;
+
+
 //	programa.cursorStack;
 //	//int indiceCodigo;
 //	//int indiceEtiquetas;
-//	//int programCounter;
+
 //	//int sizeContextoActual;
 //	//int sizeIndiceEtiquetas;
 //
 //
-//	if (pedirMemoriaUMV(socketumv,programa)) {
-//		//Responder programa too ok
-//	} else {
-//		//responder programa too mal
+//
 //		// * Crear segmento 1° cod mensaje (5)
 //		// * Parametros a pasar 2° cantidad de dijitos del id programa
 //		// *  3° id programa
@@ -860,6 +870,7 @@ void ComandoRecibirPrograma(char *buffer, int idProg) {
 //		// *  5° tamaño
 //		// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
 //	}
+return 1;
 }
 
 char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {

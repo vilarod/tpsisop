@@ -66,7 +66,7 @@ char ObtenerComandoCPU(char buffer[]);
 int ObtenerComandoMSJ(char buffer[]);
 void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
 char* ComandoHandShake2(char *buffer, int *tipoCliente);
-void ComandoRecibirPrograma(char *buffer, int id);
+int ComandoRecibirPrograma(char *buffer, int id);
 void comandoFinalQuamtum(char *buffer,int socket);
 void comandoWait(char* buffer,int socket);
 void comandoSignal(char* buffer,int socket);
@@ -78,8 +78,6 @@ void comandoAbortar(char* buffer, int socket);
 
 void crearEscucha();
 int chartToInt(char x);
-//int pedirMemoriaUMV(int socketumv, PCB programa);
-int pedirMemoriaUMV(int socketumv);
 int posicionDeBufferAInt(char* buffer, int posicion);
 char* RespuestaClienteOk(char *buffer);
 void agregarNuevaCPU(int socket);
@@ -282,6 +280,7 @@ t_varGlobal* encontrarVarGlobal(char* nombre);
 void borrarPCBenCPU(int idCPU);
 
 //Globales
+int socketumv;
 int ImprimirTrazaPorConsola = 1;
 int Puerto;
 int PuertoPCP;
@@ -299,3 +298,5 @@ pthread_mutex_t mutexFIN = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexSemaforos = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexDispositivos = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexImprimir = PTHREAD_MUTEX_INITIALIZER;
+
+
