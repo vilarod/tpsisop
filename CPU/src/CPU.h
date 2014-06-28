@@ -30,6 +30,12 @@ typedef struct PCBs
   int sizeIndiceEtiquetas;
 } PCB;
 
+typedef struct val
+{
+  char* nombre;
+  int valor;
+} val;
+
 
 
 
@@ -54,6 +60,9 @@ PCB*
 desearilizar_PCB(char* estructura, int pos, int* cantguiones);
 void
 deserializarDesplLong(char * msj, int* despl, int* longi);
+
+void
+imprimirContextoActual();
 
 //serializar
 char*
@@ -83,8 +92,8 @@ void
 ConexionConSocket(int* Conec, int socketConec, struct sockaddr_in dest);
 void
 Cerrar(int sRemoto);
-int
-seguirConectado();
+void
+CPULibre();
 void
 AvisarDescAKernel();
 void
@@ -102,7 +111,7 @@ char*
 valoresVariablesContextoActual();
 
 void
-agregarDicValoresVariables(char* var, void* valor);
+agregarDicValoresVariables(char* var, int valor);
 
 void
 ErrorFatal(const char* mensaje, ...);
