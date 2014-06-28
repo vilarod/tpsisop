@@ -35,13 +35,13 @@
 //Tipo de servidor conectado: KERNEL
 
 //Mensajes 	enviados
-#define HANDSHAKE "31"
-#define ENVIARPROGRAMA "11"
-#define CONFIRMACION "33"
+#define HANDSHAKE "H"
+#define ENVIARPROGRAMA "E"
+#define CONFIRMACION "C"
 
 //Mensajes aceptados
-//MSJ_IMPRIMI_ESTO comienza con 2
-//MSJ_FIN_DE_EJECUCION 4
+//MSJ_IMPRIMI_ESTO comienza con "I" y termina con "\0"
+//MSJ_FIN_DE_EJECUCION "F"
 
 //Tamaño buffer
 #define BUFFERSIZE 1024
@@ -51,18 +51,17 @@
 //#define PORT "6000"
 
 int main(int argc, char* argv[]) {
-	printf("%s\n", argv[1]);
+	//log
+	char* temp_file = tmpnam(NULL );
+
+	logger = log_create(temp_file, "PROGRAMA", ImprimirTrazaPorConsola,
+			LOG_LEVEL_TRACE);
+    //opcion para correr los tests
 
 	if (strcmp(argv[1], "correrTests") == 0) {
-		traza("corremos los tests");
-		//correrTests();
+		printf("Corremos los tests" );//si uso la traza da segmentation fault
+		correrTests();
 	} else {
-
-		char* temp_file = tmpnam(NULL );
-
-		logger = log_create(temp_file, "PROGRAMA", ImprimirTrazaPorConsola,
-				LOG_LEVEL_TRACE);
-
 
 		int index;    //para parametros
 		for (index = 0; index < argc; index++)    //parametros
@@ -150,6 +149,7 @@ int main(int argc, char* argv[]) {
 
 		nuevo = NULL;
 		programa = NULL;
+
 	}
 	return (EXIT_SUCCESS);
 
@@ -171,18 +171,19 @@ char* obtenerIpKERNEL() {
 
 void conectarAKERNEL(char *archivo) { //tengo que agregar programa para poder enviarlo
 	traza("Intentando conectar a kernel");
+	int puerto = obtenerPuertoKERNEL();
+	char *IP = obtenerIpKERNEL();
+	int soquete = conexionConSocket(puerto, IP); // para la prueba
 
-	//int soquete = conexionConSocket(obtenerPuertoKERNEL(), obtenerIpKERNEL());// para la prueba
-
-	int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para prueba local
+	//int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para prueba local
 	if (hacerhandshakeKERNEL(soquete, archivo) == 0) {
-		errorFatal("No se pudo conectar al kernel");
+		ErrorFatal("No se pudo conectar al kernel");
 	}
 }
 int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	char respuestahandshake[BUFFERSIZE];
 
-	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE reemplaza a "31"
+	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE ES H
 	traza("Envio handshake");
 	recibirDatos(sockfd, respuestahandshake);
 	if (respuestahandshake[0] == '0') {
@@ -220,7 +221,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 }
 int imprimirRespuesta(char *mensaje) {
 
-	if ((string_starts_with(mensaje, "2"))
+	if ((string_starts_with(mensaje, "I"))
 			&& (string_ends_with(mensaje, "\0"))) {
 		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
 		traza("Se imprime el mensaje enviado por el kernel");
@@ -237,7 +238,7 @@ int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 
 int analizarSiEsFinDeEjecucion(char *respuestahandshake) {
 
-	if (respuestahandshake[0] == '4')
+	if (respuestahandshake[0] == 'F')
 		return 0;
 	else
 		return 1;
@@ -258,19 +259,19 @@ int conexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el i
 	he = gethostbyname(IP);
 
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		errorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
+		ErrorFatal("Error al querer crear el socket. puerto %d, ip %s", puerto,
 				IP);
 		exit(1);
 	}
-	//ordenacion de bytes de la red es htons = "h" de ordenacion de la maquina [Host Byte Order], "to" (a), "n" de "network" y "s" de "short"
-	their_addr.sin_family = AF_INET; //tipo de conexion
-	their_addr.sin_port = htons(puerto); //tipo de servicio puerto
+
+	their_addr.sin_family = AF_INET; // Ordenación de bytes de la máquina
+	their_addr.sin_port = htons(puerto); // short, Ordenación de bytes de la red
 	bcopy(he->h_addr, &(their_addr.sin_addr.s_addr),he->h_length); //their_addr.sin_addr = *((struct in_addr *)he->h_addr);
 	memset(&(their_addr.sin_zero), '\0', 8); // poner a cero el resto de la estructura
 
 	if (connect(sockfd, (struct sockaddr *) &their_addr,
 			sizeof(struct sockaddr)) == -1) {
-		errorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
+		ErrorFatal("Error al querer conectar. puerto %d, ip %s", puerto, IP);
 		exit(1);
 	}
 
@@ -320,7 +321,7 @@ void cerrarSocket(int socket) {
 	traza("Se cerró el socket (%d).", socket);
 }
 
-void errorFatal(char mensaje[], ...) {
+void ErrorFatal(char mensaje[], ...) {
 	char* nuevo;
 	va_list arguments;
 	va_start(arguments, mensaje);
@@ -370,19 +371,14 @@ int correrTests() {
 		CU_ASSERT_EQUAL(1 + 1, 2);
 	}
 
+
 	void test2() {
-		printf("Soy el test 2!, y doy segmentation fault");
-		char* ptr = NULL;
-		*ptr = 9;
-	}
-	void test3() {
-		printf("Soy el test 3!");
+		printf("Soy el test 2!");
 	}
 
 	CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL );
 	CU_add_test(prueba, "uno", test1);
 	CU_add_test(prueba, "dos", test2);
-	CU_add_test(prueba, "tres", test3);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();

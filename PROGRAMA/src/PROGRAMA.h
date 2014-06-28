@@ -15,7 +15,7 @@ char* ObtenerIpKERNEL();
 int ImprimirTrazaPorConsola = 1; //si es cero no imprime la traza
 void traza(const char* mensaje, ...);
 void Error(const char* mensaje, ...);
-void errorFatal(char mensaje[], ...);
+void ErrorFatal(char mensaje[], ...);
 //void CerrarSocket(int socket);
 int enviarDatos(int socket, void *buffer);
 int recibirDatos(int socket, char *buffer);
