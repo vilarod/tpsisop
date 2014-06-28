@@ -194,10 +194,10 @@ static t_imp *imp_create(int socket, char* msj)
 	return new;
 }
 
-//static void imp_destroy(t_imp *self)
-//{
-//	free(self);
-//}
+static void imp_destroy(t_imp *self)
+{
+	free(self);
+}
 
 //Lista de Bloqueado por Dispositivo
 typedef struct _t_bloqueado {

@@ -142,15 +142,17 @@ void *FinEjecucion(void *arg) {
 }
 
 void *IMPRIMIRConsola(void *arg) {
+	t_imp* auxImp;
+	t_list* auxList;
 
-	//declaras un puntero new
-	//puntero new = puntero
-	//wait(semaforodeimpresion)
-	//while(imprension.lenght>0)
-	//*puntero new.impresion.id
-	//*puntero new.impresion.mensaje
-	//EnviarDatos(impresion.id;impresion.mensaje)
-	//Dispose puntero new
+	semwait(&imprimirCont);
+	while(list_size(listaImprimir)>0){
+		auxList=list_take(listaImprimir, 1);
+		auxImp=list_get(auxList,0);
+		EnviarDatos(auxImp->prog,auxImp->mensaje);
+		list_clean_and_destroy_elements(auxList,(void*) imp_destroy);
+	}
+
 	return NULL ;
 }
 
