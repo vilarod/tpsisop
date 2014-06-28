@@ -34,7 +34,7 @@
 #include <pthread.h>
 
 //Defines -----------------------------------------------------------------
-#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/CPU/src/config.cfg"
+#define PATH_CONFIG "config.cfg"
 #define HandU 3
 #define HandK 3
 #define tCPUU 2
@@ -74,7 +74,7 @@ t_log* logger;
 PCB* programa;
 int quantum = 0;
 int io = 0; //proceso bloqueado por entrada/salida
-int up = 0; //proceso bloqueado por wait
+int down = 0; //proceso bloqueado por wait
 int ab = 0; //proceso abortado
 int f = 0;
 int retardo = 0; //tiempo que espero entre instruccion e instruccion
@@ -120,7 +120,7 @@ ConexionConSocket(int* Conec, int socketConec, struct sockaddr_in destino)
 void
 Cerrar(int sRemoto)
 {
-  Traza("%s", "TRAZA - SE CIERRA LA CONEXIÃ“N");
+  Traza("%s", "TRAZA - SE CIERRA LA CONEXION");
   close(sRemoto);
 }
 
@@ -178,7 +178,6 @@ ObtenerPuertoKernel()
 {
   t_config* config = config_create(PATH_CONFIG);
   return config_get_int_value(config, "PUERTO_KERNEL");
-
 }
 
 char*
@@ -309,6 +308,7 @@ RecibirProceso()
     {
       Error("%s", "ERROR - NO RECIBI DATOS VALIDOS");
       r = -2;
+      motivo="ERROR - NO RECIBI DATOS VALIDOS";
     }
 
   free(estructura);
@@ -356,7 +356,7 @@ ErrorFatal(const char* mensaje, ...)
   char fin;
 
   printf(
-      "El programa se cerrara. Presione ENTER para finalizar la ejecuciÃ³n.");
+      "El programa se cerrara. Presione ENTER para finalizar la ejecucion.");
   scanf("%c", &fin);
 
   va_end(arguments);
@@ -509,7 +509,7 @@ desearilizar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->sizeContextoActual = atoi(
                   string_substring(estructura, indice, i));
-              Traza("TRAZA - EL TAMAÃ‘O DEL CONTEXTO ACTUAL ES: %d",
+              Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
                   est_prog->sizeContextoActual);
               break;
             }
@@ -517,7 +517,7 @@ desearilizar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->sizeIndiceEtiquetas = atoi(
                   string_substring(estructura, indice, i));
-              Traza("TRAZA - EL TAMAÃ‘O DEL INDICE DE ETIQUETAS ES: %d",
+              Traza("TRAZA - EL SIZE DEL INDICE DE ETIQUETAS ES: %d",
                   est_prog->sizeIndiceEtiquetas);
               break;
             }
@@ -563,7 +563,7 @@ AbortarProceso()
   string_append(&mensaje, AB_PROCESO);
   string_append(&mensaje, motivo);
   string_append(&mensaje, "-");
-  Traza("%s", "TRAZA - SE ABORTARÃ EL PROCESO");
+  Traza("%s", "TRAZA - SE ABORTARA EL PROCESO");
   Enviar(socketKERNEL, mensaje);
   free(mensaje);
   quantum = 0; //se le termina forzosamente el quantum
@@ -583,7 +583,7 @@ AtenderSenial(int s)
     {
   case SIGUSR1:
     {
-      Traza("%s", "TRAZA - RECIBI LA SEÃ‘AL SIGUSR1");
+      Traza("%s", "TRAZA - RECIBI LA SENIAL SIGUSR1");
       senial_SIGUSR1 = 1; // marco que recibi la seÃ±al
       break;
     }
@@ -656,7 +656,7 @@ getUMV(int base, int dsp, int tam)
   serCadena(&mensaje, string_itoa(dsp)); //desplazamiento
   serCadena(&mensaje, string_itoa(tam)); //longitud
   Traza(
-      "TRAZA - SOLICITO DATOS A MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÃ‘O: %d",
+      "TRAZA - SOLICITO DATOS A MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMANIO: %d",
       base, dsp, tam);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
@@ -682,7 +682,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
   serCadena(&mensaje, string_itoa(tam));
   serCadena(&mensaje, valor);
   Traza(
-      "TRAZA - SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMAÃ‘O: %d VALOR: %s",
+      "TRAZA - SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMANIO: %d VALOR: %s",
       ptro, dsp, tam, valor);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
@@ -1049,7 +1049,7 @@ inciarVariables()
   quantum = 0;
   retardo = 0;
   io = 0;
-  up = 0;
+  down = 0;
   ab = 0;
   tengoProg = 0;
   f = 0;
@@ -1142,7 +1142,6 @@ main(void)
           tengoProg = RecibirProceso();
           if (tengoProg == (-2))
             AbortarProceso();
-
         }
 
       //Si salio del ciclo anterior es que ya tengo un programa
@@ -1171,7 +1170,7 @@ main(void)
             }
         }
 
-      if ((io == 0) && (up == 0) && (ab == 0) && (f == 0))
+      if ((io == 0) && (down == 0) && (ab == 0) && (f == 0))
         procesoTerminoQuantum(0, "0", 0); //no necesita e/s ni wait ni fue abortado
 
       if (ab == 1)
@@ -1198,7 +1197,7 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
   validar = setUMV(direccion_variable, 1, 4, string_itoa(valor));
   if (validar == 1) //si es <=0 el set aborta el proceso
     {
-      Traza("%s", "TRAZA - ASIGNACIÃ“N EXITOSA");
+      Traza("%s", "TRAZA - ASIGNACION EXITOSA");
       //ver como obtener nombre variable y como modificar el valor
       //agregarDicValoresVariables((void*)valor);
     }
@@ -1237,7 +1236,7 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
           programa->cursorStack = aux + (VAR_STACK * 2);
           Traza("TRAZA - EL CURSOR STACK APUNTA A: %d", programa->cursorStack);
           programa->sizeContextoActual = 0;
-          Traza("TRAZA - EL TAMAÃ‘O DEL CONTEXTO ACTUAL ES: %d",
+          Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
               programa->sizeContextoActual);
           dictionary_clean(dicVariables); //limpio el dic de variables
           dictionary_clean(dicValoresVariables);
@@ -1267,7 +1266,7 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
               Traza("TRAZA - EL CURSOR STACK APUNTA A: %d",
                   programa->cursorStack);
               programa->sizeContextoActual = 0;
-              Traza("TRAZA - EL TAMAÃ‘O DEL CONTEXTO ACTUAL ES: %d",
+              Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
                   programa->sizeContextoActual);
               dictionary_clean(dicVariables); //limpio el dic de variables
               dictionary_clean(dicValoresVariables);
@@ -1302,7 +1301,7 @@ prim_finalizar(void)
           Traza("TRAZA - EL CURSOR STACK ES: %d", programa->cursorStack);
           programa->sizeContextoActual = ((aux - (programa->cursorStack))
               / VAR_STACK);
-          Traza("TRAZA - EL TAMAÃ‘O DEL CONTEXTO ACTUAL ES: %d",
+          Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
               programa->sizeContextoActual);
           if (programa->sizeContextoActual > 0)
             {
@@ -1341,7 +1340,6 @@ prim_finalizar(void)
     }
 
   free(pedido);
-  dictionary_clean(dicVariables);
 
 }
 
@@ -1586,7 +1584,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
 
   if (string_equals_ignore_case(senial, "A"))
     {
-      Traza("TRAZA - EL PROCESO OBTUVO EL SEMAFORO %s",
+      Traza("TRAZA - EL KERNEL NO ENCONTRO EL SEMAFORO %s",
           string_substring(respuesta, 1, strlen(respuesta)));
       motivo = string_substring(respuesta, 1, strlen(respuesta));
       ab = 1;
@@ -1597,8 +1595,8 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
       if (string_equals_ignore_case(senial, "0")) //senial==1 -> consegui el sem, senial==0 -> proceso bloqueado por sem
         {
           Traza("%s",
-              "TRAZA - EL PROCESO QUEDÃ“ BLOQUEADO A LA ESPERA DEL SEMAFORO");
-          up = 1;
+              "TRAZA - EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO");
+          down = 1;
           quantum = 0;
           tengoProg = 0;
           procesoTerminoQuantum(2, identificador_semaforo, 0);
