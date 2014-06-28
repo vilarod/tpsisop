@@ -831,15 +831,15 @@ int chartToInt(char x) {
 int ComandoRecibirPrograma(char *buffer, int id) {
 	//QUITAR DEL BUFFER EL COD DE MSJ
 
-	int digitos;
+	int digitosID;
 
 	char *programa;
 	programa = malloc(1 * sizeof(char));
-	digitos = cantidadDigitos(id);
+	digitosID = cantidadDigitos(id);
 	char* cadenaCambioContexto;
 	cadenaCambioContexto = string_new();
 	string_append(&cadenaCambioContexto, string_itoa(4));
-	string_append(&cadenaCambioContexto, string_itoa(digitos));
+	string_append(&cadenaCambioContexto, string_itoa(digitosID));
 	string_append(&cadenaCambioContexto, string_itoa(id));
 
 	programa = string_substring(programa, 1, strlen(programa) - 1);
@@ -855,12 +855,12 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	EnviarDatos(socketumv, cadenaCambioContexto);
 	RecibirDatos(socketumv, respuestaumv);
 	if (analisarRespuestaUMV(respuestaumv) != 0) {
-		int digitos2 = cantidadDigitos(strlen(programa));
+		int digitosProg = cantidadDigitos(strlen(programa));
 		char* cadenaSegmento = string_new();
 		string_append(&cadenaSegmento, string_itoa(5));
-		string_append(&cadenaSegmento, string_itoa(digitos));
+		string_append(&cadenaSegmento, string_itoa(digitosID));
 		string_append(&cadenaSegmento, string_itoa(id));
-		string_append(&cadenaSegmento, string_itoa(digitos2));
+		string_append(&cadenaSegmento, string_itoa(digitosProg));
 		string_append(&cadenaSegmento, string_itoa(strlen(programa)));
 		EnviarDatos(socketumv, cadenaSegmento);
 		RecibirDatos(socketumv, respuestaumv2); //COD + DIGITO + BASE

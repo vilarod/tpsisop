@@ -49,7 +49,6 @@ typedef struct PCBs {
 	int sizeIndiceEtiquetas;
 } PCB;
 
-PCB PCB1;
 
 //deserealizar
 PCB* desearilizar_PCB(char* estructura, int* pos);
