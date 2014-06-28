@@ -135,9 +135,18 @@ void *PLP(void *arg) {
 	return NULL ;
 }
 void *FinEjecucion(void *arg) {
+     t_Final* auxFinal;
+     t_list* auxList;
 
-	//wait(semaforofin)
-	//while(haya pcb en la lista fin)
+
+     semwait(&finalizarCont);
+     while(list_size(listaFin)>0){
+    	 auxList=list_take(listaFin, 1);
+    	 auxFinal=list_get(auxList,0);
+    	 final_destroy(auxFinal);
+    	 list_clean_and_destroy_elements(auxList,(void*) final_destroy);
+    }
+
 	//free de toodo
 	//signal(multiprogramacion)
 

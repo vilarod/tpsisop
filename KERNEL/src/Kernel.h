@@ -174,10 +174,10 @@ static t_Final *final_create(PCB* pcb,int final, char* msj)
 	return new;
 }
 
-//static void final_destroy(t_Final *self)
-//{	free(self->idPCB);
-//	free(self);
-//}
+static void final_destroy(t_Final *self)
+{	free(self->idPCB);
+	free(self);
+}
 
 //Lista de imprimir
 typedef struct _t_imp {
