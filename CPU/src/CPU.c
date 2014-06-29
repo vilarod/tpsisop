@@ -882,6 +882,7 @@ void
 parsearYejecutar(char* instr)
 {
   Traza("TRAZA - LA SENTENCIA: %s SE ENVIARA AL PARSER", instr);
+
   analizadorLinea(instr, &funciones_p, &funciones_k);
 }
 
