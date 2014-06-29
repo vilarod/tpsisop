@@ -44,7 +44,7 @@ typedef struct PCBs {
 	int segmentoCodigo;
 	int segmentoStack;
 	int cursorStack;
-	t_intructions* indiceCodigo;
+	int indiceCodigo;
 	int indiceEtiquetas;
 	int sizeContextoActual;
 	int sizeIndiceEtiquetas;

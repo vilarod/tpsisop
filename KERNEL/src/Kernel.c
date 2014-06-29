@@ -871,14 +871,15 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	char respuestaumv[BUFFERSIZE];
 	char respuestaumv2[BUFFERSIZE];
 	char respuestaumv3[BUFFERSIZE];
+	char respuestaumv4[BUFFERSIZE];
+	char respuestaumv5[BUFFERSIZE];
+	char respuestaumv6[BUFFERSIZE];
 	PCB PCBAUX;
 
 	PCBAUX.id = id;
 	PCBAUX.programCounter = metadataprograma->instruccion_inicio;
-	PCBAUX.indiceCodigo = metadataprograma->instrucciones_serializado;
-	PCBAUX.indiceEtiquetas = atoi(metadataprograma->etiquetas);
 	PCBAUX.sizeIndiceEtiquetas = metadataprograma->etiquetas_size;
-	PCBAUX.sizeContextoActual = metadataprograma->instrucciones_size;
+	PCBAUX.sizeContextoActual = 0;
 
 	//lo imprimi para q no de error de compilacion pq dice q no lo utiliza
 	Traza("%d", PCBAUX.id);
@@ -902,10 +903,10 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 					strlen(respuestaumv2) - 2);
 			//Valor Segmento Codigo asignado
 			PCBAUX.segmentoCodigo = atoi(codesegment);
-			int digitosBase = cantidadDigitos(PCBAUX.segmentoCodigo);
+			int digitosBaseCOD = cantidadDigitos(PCBAUX.segmentoCodigo);
 			//Escribimos el codigo
 			string_append(&escribodatos, string_itoa(2));
-			string_append(&escribodatos, string_itoa(digitosBase));
+			string_append(&escribodatos, string_itoa(digitosBaseCOD));
 			string_append(&escribodatos, string_itoa(PCBAUX.segmentoCodigo));
 			string_append(&escribodatos, string_itoa(1));
 			string_append(&escribodatos, string_itoa(0));
@@ -913,808 +914,849 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			string_append(&escribodatos, string_itoa(strlen(programa)));
 			string_append(&escribodatos, programa);
 			EnviarDatos(socketumv, escribodatos);
+			RecibirDatos(socketumv, respuestaumv5);
+			if (analisarRespuestaUMV(respuestaumv5) != 0) {
+				//Preparamos mensaje para Tamaño Stack
+				char* stack = string_new();
+				int digitosStack = cantidadDigitos(ObtenerTamanioStack());
+				string_append(&stack, string_itoa(5));
+				string_append(&stack, string_itoa(digitosID));
+				string_append(&stack, string_itoa(id));
+				string_append(&stack, string_itoa(digitosStack));
+				string_append(&stack, string_itoa(ObtenerTamanioStack()));
+				EnviarDatos(socketumv, stack);
+				RecibirDatos(socketumv, respuestaumv3); //COD + DIGITO + BASE
+				if (analisarRespuestaUMV(respuestaumv3) != 0) {
+					char *stacksegment = string_substring(respuestaumv3, 2,
+							strlen(respuestaumv3) - 2);
+					//Valor Segmento Codigo Asignado
+					PCBAUX.cursorStack = atoi(stacksegment);
 
-			//Preparamos mensaje para Tamaño Stack
-			char* stack = string_new();
-			int digitosStack = cantidadDigitos(ObtenerTamanioStack());
-			string_append(&stack, string_itoa(5));
-			string_append(&stack, string_itoa(digitosID));
-			string_append(&stack, string_itoa(id));
-			string_append(&stack, string_itoa(digitosStack));
-			string_append(&stack, string_itoa(ObtenerTamanioStack()));
-			EnviarDatos(socketumv, stack);
-			RecibirDatos(socketumv, respuestaumv3); //COD + DIGITO + BASE
-			if (analisarRespuestaUMV(respuestaumv2) != 0) {
-				char *stacksegment = string_substring(respuestaumv3, 2,
-						strlen(respuestaumv3) - 2);
-				//Valor Segmento Codigo Asignado
-				PCBAUX.cursorStack = atoi(stacksegment);
-				}
-				else return 0;
-			}
-			else return 0;
-		}
-		else return 0;
-	int pesito = (5*(metadataprograma->etiquetas_size)+3*(metadataprograma->cantidad_de_funciones)+(metadataprograma->instrucciones_size));
-	Traza("%d", pesito);
+					//Creacion segmento Indice Etiquetas
+					char* etiqueta = string_new();
+					int digitoEtiqueta = cantidadDigitos(
+							metadataprograma->etiquetas_size);
+					string_append(&etiqueta, string_itoa(5));
+					string_append(&etiqueta, string_itoa(digitosID));
+					string_append(&etiqueta, string_itoa(id));
+					string_append(&etiqueta, string_itoa(digitoEtiqueta));
+					string_append(&etiqueta,
+							string_itoa(metadataprograma->etiquetas_size));
+					EnviarDatos(socketumv, etiqueta);
+					RecibirDatos(socketumv, respuestaumv4); //COD + DIGITO + BASE
+					if (analisarRespuestaUMV(respuestaumv4) != 0) {
+						char *Etiquetasegment = string_substring(respuestaumv3,
+								2, strlen(respuestaumv4) - 2);
+						PCBAUX.indiceEtiquetas = atoi(Etiquetasegment);
+						char*escribirEtiq = string_new();
+						int digitosBaseEtiq = cantidadDigitos(
+								PCBAUX.indiceEtiquetas);
+						string_append(&escribirEtiq, string_itoa(2));
+						string_append(&escribirEtiq,
+								string_itoa(digitosBaseEtiq));
+						string_append(&escribirEtiq,
+								string_itoa(PCBAUX.indiceEtiquetas));
+						string_append(&escribirEtiq, string_itoa(1));
+						string_append(&escribirEtiq, string_itoa(0));
+						string_append(&escribirEtiq,
+								string_itoa(
+										cantidadDigitos(
+												metadataprograma->etiquetas_size)));
+						string_append(&escribirEtiq,
+								string_itoa(metadataprograma->etiquetas_size));
+						string_append(&escribirEtiq,
+								metadataprograma->etiquetas);
+						EnviarDatos(socketumv, escribirEtiq);
+						RecibirDatos(socketumv, respuestaumv6);
+						if (analisarRespuestaUMV(respuestaumv6) != 0) {
+							//	PCBAUX.indiceCodigo = base de indice de codigo    escribir los indices en la umv
+
+						} else
+							return 0;
+					} else
+						return 0;
+				} else
+					return 0;
+			} else
+				return 0;
+		} else
+			return 0;
+	} else
+		return 0;
 
 
+	//ROMI LEE ESTO
+	int comienzo = &(metadataprograma->instrucciones_serializado)->start;
+
+	int pesito = (5 * (metadataprograma->etiquetas_size)
+			+ 3 * (metadataprograma->cantidad_de_funciones)
+			+ (metadataprograma->instrucciones_size));
+	Traza("%d", comienzo);
+
+	list_add(listaNew, new_create(&(PCBAUX), pesito));
 	return 1;
+}
+
+
+int cantidadDigitos(int num) {
+	int contador = 1;
+
+	while (num / 10 > 0) {
+		num = num / 10;
+		contador++;
 	}
 
-//
-//		// * Crear segmento 1° cod mensaje (5)
-//		// * Parametros a pasar 2° cantidad de dijitos del id programa
-//		// *  3° id programa
-//		// *  4° cantidad dijitos tamaño
-//		// *  5° tamaño
-//		// *  Destruir seg: idem menos 4° y 5°, cod mensaje (6)*/
+	return contador;
+}
 
-	int cantidadDigitos(int num) {
-		int contador = 1;
-
-		while (num / 10 > 0) {
-			num = num / 10;
-			contador++;
-		}
-
-		return contador;
-	}
-
-	char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
-		*bytesRecibidos = 0;
-		int tamanioNuevoBuffer = 0;
-		int mensajeCompleto = 0;
-		int cantidadBytesRecibidos = 0;
-		int cantidadBytesAcumulados = 0;
+char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
+	*bytesRecibidos = 0;
+	int tamanioNuevoBuffer = 0;
+	int mensajeCompleto = 0;
+	int cantidadBytesRecibidos = 0;
+	int cantidadBytesAcumulados = 0;
 
 // memset se usa para llenar el buffer con 0s
-		char bufferAux[BUFFERSIZE];
+	char bufferAux[BUFFERSIZE];
 
-		buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-		memset(buffer, 0, 1 * sizeof(char));
+	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
+	memset(buffer, 0, 1 * sizeof(char));
 
-		while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
-		{
-			memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
+	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
+	{
+		memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
 
-			//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
-			if ((*bytesRecibidos = *bytesRecibidos
-					+ recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
-				Error(
-						"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
-						socket);
+		//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+		if ((*bytesRecibidos = *bytesRecibidos
+				+ recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
+			Error(
+					"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+					socket);
 
-			cantidadBytesRecibidos = strlen(bufferAux);
-			cantidadBytesAcumulados = strlen(buffer);
-			tamanioNuevoBuffer = cantidadBytesRecibidos
-					+ cantidadBytesAcumulados;
+		cantidadBytesRecibidos = strlen(bufferAux);
+		cantidadBytesAcumulados = strlen(buffer);
+		tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
 
-			if (tamanioNuevoBuffer > 0) {
-				buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
+		if (tamanioNuevoBuffer > 0) {
+			buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
 
-				sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
-			}
-
-			//Verificamos si terminó el mensaje
-			if (cantidadBytesRecibidos < BUFFERSIZE)
-				mensajeCompleto = 1;
+			sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
 		}
 
-		Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-
-		return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+		//Verificamos si terminó el mensaje
+		if (cantidadBytesRecibidos < BUFFERSIZE)
+			mensajeCompleto = 1;
 	}
 
-	char ObtenerComandoCPU(char buffer[]) {
+	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+
+	return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+}
+
+char ObtenerComandoCPU(char buffer[]) {
 //Hay que obtener el comando dado el buffer.
 //El comando está dado por el primer caracter, que tiene que ser un número.
-		return buffer[0];
-	}
+	return buffer[0];
+}
 
-	char* ComandoHandShake2(char *buffer, int *tipoCliente) {
+char* ComandoHandShake2(char *buffer, int *tipoCliente) {
 // Formato del mensaje: CD
 // C = codigo de mensaje ( = 3)
 
 //int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
-		int tipoDeCliente = chartToInt(buffer[1]);
-		if (tipoDeCliente == TIPO_CPU) {
-			*tipoCliente = tipoDeCliente;
-			buffer = RespuestaClienteOk(buffer);
-		} else {
-			*tipoCliente = 0;
-			//SetearErrorGlobal("HANDSHAKE ERROR. Tipo de cliente invalido (%d). KERNEL o '2' = CPU.", posicionDeBufferAInt(buffer, 1));
-			//buffer = RespuestaClienteError(buffer, g_MensajeError);
-		}
-
-		return buffer;
+	int tipoDeCliente = chartToInt(buffer[1]);
+	if (tipoDeCliente == TIPO_CPU) {
+		*tipoCliente = tipoDeCliente;
+		buffer = RespuestaClienteOk(buffer);
+	} else {
+		*tipoCliente = 0;
+		//SetearErrorGlobal("HANDSHAKE ERROR. Tipo de cliente invalido (%d). KERNEL o '2' = CPU.", posicionDeBufferAInt(buffer, 1));
+		//buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
 
-	int posicionDeBufferAInt(char* buffer, int posicion) {
-		int logitudBuffer = 0;
-		logitudBuffer = strlen(buffer);
+	return buffer;
+}
 
-		if (logitudBuffer <= posicion)
-			return 0;
-		else
-			return chartToInt(buffer[posicion]);
-	}
+int posicionDeBufferAInt(char* buffer, int posicion) {
+	int logitudBuffer = 0;
+	logitudBuffer = strlen(buffer);
 
-	char* RespuestaClienteOk(char *buffer) {
-		int tamanio = sizeof(char) * 2;
-		buffer = realloc(buffer, tamanio * sizeof(char));
-		memset(buffer, 0, tamanio * sizeof(char));
-		sprintf(buffer, "%s", "1");
-		return buffer;
-	}
+	if (logitudBuffer <= posicion)
+		return 0;
+	else
+		return chartToInt(buffer[posicion]);
+}
 
-	void seminit(psem_t *ps, int n) {
-		pthread_mutex_init(&ps->semdata, NULL );
+char* RespuestaClienteOk(char *buffer) {
+	int tamanio = sizeof(char) * 2;
+	buffer = realloc(buffer, tamanio * sizeof(char));
+	memset(buffer, 0, tamanio * sizeof(char));
+	sprintf(buffer, "%s", "1");
+	return buffer;
+}
 
-		pthread_mutex_init(&ps->sem_mutex, NULL );
+void seminit(psem_t *ps, int n) {
+	pthread_mutex_init(&ps->semdata, NULL );
 
-		/* para inicializar el semaforo binario a 0 */
+	pthread_mutex_init(&ps->sem_mutex, NULL );
+
+	/* para inicializar el semaforo binario a 0 */
+
+	pthread_mutex_lock(&ps->sem_mutex);
+
+	ps->n = n;
+}
+
+void semwait(psem_t *ps) {
+
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n--;
+	if (ps->n < 0) {
+		pthread_mutex_unlock(&ps->semdata);
 
 		pthread_mutex_lock(&ps->sem_mutex);
-
-		ps->n = n;
 	}
 
-	void semwait(psem_t *ps) {
-
-		pthread_mutex_lock(&ps->semdata);
-
-		ps->n--;
-		if (ps->n < 0) {
-			pthread_mutex_unlock(&ps->semdata);
-
-			pthread_mutex_lock(&ps->sem_mutex);
-		}
-
-		else
-			pthread_mutex_unlock(&ps->semdata);
-
-	}
-
-	void semsig(psem_t *ps) {
-		pthread_mutex_lock(&ps->semdata);
-
-		ps->n++;
-		if (ps->n < 1)
-			pthread_mutex_unlock(&ps->sem_mutex);
-
+	else
 		pthread_mutex_unlock(&ps->semdata);
+
+}
+
+void semsig(psem_t *ps) {
+	pthread_mutex_lock(&ps->semdata);
+
+	ps->n++;
+	if (ps->n < 1)
+		pthread_mutex_unlock(&ps->sem_mutex);
+
+	pthread_mutex_unlock(&ps->semdata);
+}
+
+void semdestroy(psem_t *ps) {
+	pthread_mutex_destroy(&ps->semdata);
+	pthread_mutex_destroy(&ps->sem_mutex);
+}
+
+void agregarNuevaCPU(int socket) {
+	list_add(listCPU, cpu_create(socket));
+}
+
+bool encontrarInt(int actual, int expected) {
+	return actual == expected;
+}
+
+t_CPU* encontrarCPULibre() {
+	int _is_CPU_Libre(t_CPU *p) {
+		return encontrarInt(p->libre, 0);
 	}
-
-	void semdestroy(psem_t *ps) {
-		pthread_mutex_destroy(&ps->semdata);
-		pthread_mutex_destroy(&ps->sem_mutex);
+	if (list_any_satisfy(listCPU, (void*) _is_CPU_Libre)) {
+		t_CPU * aux = list_find(listCPU, (void*) _is_CPU_Libre);
+		return aux;
 	}
+	return NULL ;
 
-	void agregarNuevaCPU(int socket) {
-		list_add(listCPU, cpu_create(socket));
+}
+
+t_CPU* encontrarCPU(int idcpu) {
+	int _is_CPU(t_CPU *p) {
+		return encontrarInt(p->idCPU, idcpu);
 	}
-
-	bool encontrarInt(int actual, int expected) {
-		return actual == expected;
+	if (list_any_satisfy(listCPU, (void*) _is_CPU)) {
+		t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
+		return aux;
 	}
+	return NULL ;
 
-	t_CPU* encontrarCPULibre() {
-		int _is_CPU_Libre(t_CPU *p) {
-			return encontrarInt(p->libre, 0);
-		}
-		if (list_any_satisfy(listCPU, (void*) _is_CPU_Libre)) {
-			t_CPU * aux = list_find(listCPU, (void*) _is_CPU_Libre);
-			return aux;
-		}
-		return NULL ;
+}
 
-	}
-
-	t_CPU* encontrarCPU(int idcpu) {
-		int _is_CPU(t_CPU *p) {
-			return encontrarInt(p->idCPU, idcpu);
-		}
-		if (list_any_satisfy(listCPU, (void*) _is_CPU)) {
-			t_CPU * aux = list_find(listCPU, (void*) _is_CPU);
-			return aux;
-		}
-		return NULL ;
-
-	}
-
-	void *HiloOrquestadorDeCPU() {
-		int nbytesRecibidos;
-		char* buffer;
-		buffer = malloc(1 * sizeof(char));
+void *HiloOrquestadorDeCPU() {
+	int nbytesRecibidos;
+	char* buffer;
+	buffer = malloc(1 * sizeof(char));
 //	int id_CPU = 0;
-		int tipo_Cliente = 0;
+	int tipo_Cliente = 0;
 
 // Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
-		char tipo_mensaje = '0';
+	char tipo_mensaje = '0';
 
 //int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 //	struct sockaddr_in myaddr;     // dirección del servidor
 
-		fd_set master;   // conjunto maestro de descriptores de fichero
-		fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
-		int fdmax;        // número máximo de descriptores de fichero
-		int socketEscucha;     // descriptor de socket a la escucha
-		int socketNuevaConexion; // descriptor de socket de nueva conexión aceptada
-		int i;
-		FD_ZERO(&master);    // borra los conjuntos maestro y temporal
-		FD_ZERO(&read_fds);
+	fd_set master;   // conjunto maestro de descriptores de fichero
+	fd_set read_fds; // conjunto temporal de descriptores de fichero para select()
+	int fdmax;        // número máximo de descriptores de fichero
+	int socketEscucha;     // descriptor de socket a la escucha
+	int socketNuevaConexion; // descriptor de socket de nueva conexión aceptada
+	int i;
+	FD_ZERO(&master);    // borra los conjuntos maestro y temporal
+	FD_ZERO(&read_fds);
 
-		struct sockaddr_in socketInfo;
+	struct sockaddr_in socketInfo;
 //	char buffer[BUFF_SIZE];
-		int optval = 1;
+	int optval = 1;
 
 // Crear un socket:
 // AF_INET: Socket de internet IPv4
 // SOCK_STREAM: Orientado a la conexion, TCP
 // 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
-		if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-			perror("socket");
-			//return 1;
-		}
+	if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		//return 1;
+	}
 
 // Hacer que el SO libere el puerto inmediatamente luego de cerrar el socket.
-		setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
-				sizeof(optval));
+	setsockopt(socketEscucha, SOL_SOCKET, SO_REUSEADDR, &optval,
+			sizeof(optval));
 
-		socketInfo.sin_family = AF_INET;
-		socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
-		socketInfo.sin_port = htons(PuertoPCP);
+	socketInfo.sin_family = AF_INET;
+	socketInfo.sin_addr.s_addr = DIRECCION; //Notar que aca no se usa inet_addr()
+	socketInfo.sin_port = htons(PuertoPCP);
 
 // Vincular el socket con una direccion de red almacenada en 'socketInfo'.
-		if (bind(socketEscucha, (struct sockaddr*) &socketInfo,
-				sizeof(socketInfo)) != 0) {
+	if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
+			!= 0) {
 
-			perror("Error al bindear socket escucha");
-			//return EXIT_FAILURE;
-		}
+		perror("Error al bindear socket escucha");
+		//return EXIT_FAILURE;
+	}
 
 // Escuchar nuevas conexiones entrantes.
-		if (listen(socketEscucha, 10) != 0) {
+	if (listen(socketEscucha, 10) != 0) {
 
-			perror("Error al poner a escuchar socket");
-			//return EXIT_FAILURE;
-		}
+		perror("Error al poner a escuchar socket");
+		//return EXIT_FAILURE;
+	}
 
-		printf("Escuchando conexiones entrantes.\n");
+	printf("Escuchando conexiones entrantes.\n");
 // añadir listener al conjunto maestro
-		FD_SET(socketEscucha, &master);
+	FD_SET(socketEscucha, &master);
 // seguir la pista del descriptor de fichero mayor
-		fdmax = socketEscucha; // por ahora es éste
+	fdmax = socketEscucha; // por ahora es éste
 
-		for (;;) {
-			read_fds = master; // cópialo
-			if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
-				perror("select");
-				exit(1);
-			}
-			// explorar conexiones existentes en busca de datos que leer
-			for (i = 0; i <= fdmax; i++) {
-				if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
-					if (i == socketEscucha) {
-						// gestionar nuevas conexiones
-						// addrlen = sizeof(remoteaddr);
-						if ((socketNuevaConexion = accept(socketEscucha, NULL,
-								0)) == -1) {
-							perror("accept");
-						} else {
-							FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
-							if (socketNuevaConexion > fdmax) { // actualizar el máximo
-								fdmax = socketNuevaConexion;
-							}
-
-							printf(
-									"selectserver: una nueva conneccion socket %d\n",
-									socketNuevaConexion);
+	for (;;) {
+		read_fds = master; // cópialo
+		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
+			perror("select");
+			exit(1);
+		}
+		// explorar conexiones existentes en busca de datos que leer
+		for (i = 0; i <= fdmax; i++) {
+			if (FD_ISSET(i, &read_fds)) { // ¡¡tenemos datos!!
+				if (i == socketEscucha) {
+					// gestionar nuevas conexiones
+					// addrlen = sizeof(remoteaddr);
+					if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
+							== -1) {
+						perror("accept");
+					} else {
+						FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
+						if (socketNuevaConexion > fdmax) { // actualizar el máximo
+							fdmax = socketNuevaConexion;
 						}
+
+						printf("selectserver: una nueva conneccion socket %d\n",
+								socketNuevaConexion);
+					}
+				} else {
+
+					// gestionar datos de un cliente
+					// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
+
+					buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+					//Recibimos los datos del cliente
+					buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
+					Traza("nos ponemos a recibir %d", nbytesRecibidos);
+					if (nbytesRecibidos <= 0) {
+						// error o conexión cerrada por el cliente
+						if (nbytesRecibidos == 0) {
+							// conexión cerrada
+							printf("selectserver: socket %d hung up\n", i);
+						} else {
+							perror("recv");
+						}
+						pthread_mutex_lock(&mutexCPU);
+						eliminarCpu(i);
+						pthread_mutex_lock(&mutexCPU);
+						close(i); // bye!
+						FD_CLR(i, &master); // eliminar del conjunto maestro
 					} else {
 
-						// gestionar datos de un cliente
-						// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
-
-						buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-						//Recibimos los datos del cliente
-						buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
-						Traza("nos ponemos a recibir %d", nbytesRecibidos);
-						if (nbytesRecibidos <= 0) {
-							// error o conexión cerrada por el cliente
-							if (nbytesRecibidos == 0) {
-								// conexión cerrada
-								printf("selectserver: socket %d hung up\n", i);
-							} else {
-								perror("recv");
+						tipo_mensaje = ObtenerComandoCPU(buffer);
+						Traza("Tipos de mensaje: %c", tipo_mensaje);
+						//Evaluamos los comandos
+						switch (tipo_mensaje) {
+						case MSJ_CPU_IMPRIMI:
+							//manda a la lista de imprimir
+							comandoImprimir(buffer, i);
+							break;
+						case MSJ_CPU_HANDSHAKE:
+							Traza("HandShake");
+							buffer = ComandoHandShake2(buffer, &tipo_Cliente);
+							Traza("tipo de cliente: %d", tipo_Cliente);
+							//crear nueva CPU
+							if (tipo_Cliente == TIPO_CPU) {
+								pthread_mutex_lock(&mutexCPU);
+								Traza("creando CPU");
+								agregarNuevaCPU(i);
+								pthread_mutex_unlock(&mutexCPU);
 							}
+							EnviarDatos(i, buffer);
+							break;
+
+						case MSJ_CPU_FINAlQUAMTUM:
+							comandoFinalQuamtum(buffer, i);
+							break;
+						case MSJ_CPU_OBTENERVALORGLOBAL:
+							comandoObtenerValorGlobar(buffer, i);
+							break;
+						case MSJ_CPU_GRABARVALORGLOBAL:
+							comandoGrabarValorGlobar(buffer, i);
+							break;
+						case MSJ_CPU_ABANDONA:
+							//elimina cpu
 							pthread_mutex_lock(&mutexCPU);
 							eliminarCpu(i);
 							pthread_mutex_lock(&mutexCPU);
 							close(i); // bye!
 							FD_CLR(i, &master); // eliminar del conjunto maestro
-						} else {
+							break;
+						case MSJ_CPU_WAIT:
+							//Resta la variable del semaforo
+							comandoWait(buffer, i);
+							break;
+						case MSJ_CPU_SIGNAL:
+							//suma la varariable del semaforo
+							comandoSignal(buffer, i);
+							break;
+						case MSJ_CPU_ABORTAR:
+							//Aborta programa por erro
+							comandoAbortar(buffer, i);
+							break;
+						case MSJ_CPU_FINAlIZAR:
+							//Termino programa y mandar a FIN
+							comandoFinalizar(i, buffer);
+							break;
+						case MSJ_CPU_LIBERAR:
+							//CPU pasa a libre
+							comandoLiberar(i);
+							break;
+						default:
+							//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
+							break;
 
-							tipo_mensaje = ObtenerComandoCPU(buffer);
-							Traza("Tipos de mensaje: %c", tipo_mensaje);
-							//Evaluamos los comandos
-							switch (tipo_mensaje) {
-							case MSJ_CPU_IMPRIMI:
-								//manda a la lista de imprimir
-								comandoImprimir(buffer, i);
-								break;
-							case MSJ_CPU_HANDSHAKE:
-								Traza("HandShake");
-								buffer = ComandoHandShake2(buffer,
-										&tipo_Cliente);
-								Traza("tipo de cliente: %d", tipo_Cliente);
-								//crear nueva CPU
-								if (tipo_Cliente == TIPO_CPU) {
-									pthread_mutex_lock(&mutexCPU);
-									Traza("creando CPU");
-									agregarNuevaCPU(i);
-									pthread_mutex_unlock(&mutexCPU);
-								}
-								EnviarDatos(i, buffer);
-								break;
-
-							case MSJ_CPU_FINAlQUAMTUM:
-								comandoFinalQuamtum(buffer, i);
-								break;
-							case MSJ_CPU_OBTENERVALORGLOBAL:
-								comandoObtenerValorGlobar(buffer, i);
-								break;
-							case MSJ_CPU_GRABARVALORGLOBAL:
-								comandoGrabarValorGlobar(buffer, i);
-								break;
-							case MSJ_CPU_ABANDONA:
-								//elimina cpu
-								pthread_mutex_lock(&mutexCPU);
-								eliminarCpu(i);
-								pthread_mutex_lock(&mutexCPU);
-								close(i); // bye!
-								FD_CLR(i, &master); // eliminar del conjunto maestro
-								break;
-							case MSJ_CPU_WAIT:
-								//Resta la variable del semaforo
-								comandoWait(buffer, i);
-								break;
-							case MSJ_CPU_SIGNAL:
-								//suma la varariable del semaforo
-								comandoSignal(buffer, i);
-								break;
-							case MSJ_CPU_ABORTAR:
-								//Aborta programa por erro
-								comandoAbortar(buffer, i);
-								break;
-							case MSJ_CPU_FINAlIZAR:
-								//Termino programa y mandar a FIN
-								comandoFinalizar(i, buffer);
-								break;
-							case MSJ_CPU_LIBERAR:
-								//CPU pasa a libre
-								comandoLiberar(i);
-								break;
-							default:
-								//buffer = RespuestaClienteError(buffer, "El ingresado no es un comando válido");
-								break;
-
-							}
-
-							buffer[0] = '\0';
 						}
+
+						buffer[0] = '\0';
 					}
 				}
 			}
 		}
-
-		return 0;
 	}
 
-	PCB* desearilizar_PCB(char* estructura, int* pos) {
-		printf("%s\n", estructura);
-		char* sub = "";
-		sub = malloc(1 * sizeof(char));
-		PCB* est_prog;
-		est_prog = (struct PCBs *) malloc(sizeof(PCB));
-		int aux;
-		int i;
-		int indice = *pos;
-		int inicio = *pos;
+	return 0;
+}
 
-		iniciarPCB(est_prog);
-		for (aux = 1; aux < 10; aux++) {
-			for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
-				sub = string_substring(estructura, inicio, 1);
-				inicio++;
-			}
-			switch (aux) {
-			case 1:
-				est_prog->id = atoi(string_substring(estructura, indice, i));
-				break;
-			case 2:
-				est_prog->segmentoCodigo = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 3:
-				est_prog->segmentoStack = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 4:
-				est_prog->cursorStack = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 5:
-				est_prog->indiceCodigo = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 6:
-				est_prog->indiceEtiquetas = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 7:
-				est_prog->programCounter = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 8:
-				est_prog->sizeContextoActual = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			case 9:
-				est_prog->sizeIndiceEtiquetas = atoi(
-						string_substring(estructura, indice, i));
-				break;
-			}
-			sub = "";
-			indice = inicio;
+PCB* desearilizar_PCB(char* estructura, int* pos) {
+	printf("%s\n", estructura);
+	char* sub = "";
+	sub = malloc(1 * sizeof(char));
+	PCB* est_prog;
+	est_prog = (struct PCBs *) malloc(sizeof(PCB));
+	int aux;
+	int i;
+	int indice = *pos;
+	int inicio = *pos;
+
+	iniciarPCB(est_prog);
+	for (aux = 1; aux < 10; aux++) {
+		for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
+			sub = string_substring(estructura, inicio, 1);
+			inicio++;
 		}
-		*pos = inicio;
+		switch (aux) {
+		case 1:
+			est_prog->id = atoi(string_substring(estructura, indice, i));
+			break;
+		case 2:
+			est_prog->segmentoCodigo = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 3:
+			est_prog->segmentoStack = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 4:
+			est_prog->cursorStack = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 5:
+			est_prog->indiceCodigo = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 6:
+			est_prog->indiceEtiquetas = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 7:
+			est_prog->programCounter = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 8:
+			est_prog->sizeContextoActual = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		case 9:
+			est_prog->sizeIndiceEtiquetas = atoi(
+					string_substring(estructura, indice, i));
+			break;
+		}
+		sub = "";
+		indice = inicio;
+	}
+	*pos = inicio;
 //free(sub);
-		return est_prog;
+	return est_prog;
+}
+
+void iniciarPCB(PCB* prog) {
+	prog->id = 0;
+	prog->segmentoCodigo = 0;
+	prog->segmentoStack = 0;
+	prog->cursorStack = 0;
+	prog->indiceCodigo = 0;
+	prog->indiceEtiquetas = 0;
+	prog->programCounter = 0;
+	prog->sizeContextoActual = 0;
+	prog->sizeIndiceEtiquetas = 0;
+}
+
+char* serializar_PCB(PCB* prog) {
+	char* cadena;
+	cadena = malloc(1 * sizeof(char));
+
+	string_append(&cadena, string_itoa(prog->id));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->segmentoCodigo));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->segmentoStack));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->cursorStack));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->indiceCodigo));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->indiceEtiquetas));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->programCounter));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->sizeContextoActual));
+	string_append(&cadena, "-");
+	string_append(&cadena, string_itoa(prog->sizeIndiceEtiquetas));
+	string_append(&cadena, "-");
+	return cadena;
+
+}
+
+void comandoLiberar(int socket) {
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU* aux = encontrarCPU(socket);
+	if (aux != NULL ) {
+		aux->libre = 0;
 	}
+	pthread_mutex_lock(&mutexCPU);
+	semsig(&CPUCont);
+}
 
-	void iniciarPCB(PCB* prog) {
-		prog->id = 0;
-		prog->segmentoCodigo = 0;
-		prog->segmentoStack = 0;
-		prog->cursorStack = 0;
-		prog->indiceCodigo = 0;
-		prog->indiceEtiquetas = 0;
-		prog->programCounter = 0;
-		prog->sizeContextoActual = 0;
-		prog->sizeIndiceEtiquetas = 0;
+void eliminarCpu(int idcpu) {
+	int _is_CPU_ID(t_CPU *p) {
+		return encontrarInt(p->idCPU, idcpu);
 	}
-
-	char* serializar_PCB(PCB* prog) {
-		char* cadena;
-		cadena = malloc(1 * sizeof(char));
-
-		string_append(&cadena, string_itoa(prog->id));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->segmentoCodigo));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->segmentoStack));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->cursorStack));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->indiceCodigo));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->indiceEtiquetas));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->programCounter));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->sizeContextoActual));
-		string_append(&cadena, "-");
-		string_append(&cadena, string_itoa(prog->sizeIndiceEtiquetas));
-		string_append(&cadena, "-");
-		return cadena;
-
+	if (list_any_satisfy(listCPU, (void*) _is_CPU_ID)) {
+		list_remove_by_condition(listCPU, (void*) _is_CPU_ID);
 	}
+}
 
-	void comandoLiberar(int socket) {
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU* aux = encontrarCPU(socket);
-		if (aux != NULL ) {
-			aux->libre = 0;
-		}
-		pthread_mutex_lock(&mutexCPU);
-		semsig(&CPUCont);
-	}
-
-	void eliminarCpu(int idcpu) {
-		int _is_CPU_ID(t_CPU *p) {
-			return encontrarInt(p->idCPU, idcpu);
-		}
-		if (list_any_satisfy(listCPU, (void*) _is_CPU_ID)) {
-			list_remove_by_condition(listCPU, (void*) _is_CPU_ID);
-		}
-	}
-
-	void comandoFinalQuamtum(char *buffer, int socket) {
-		PCB* auxPCB;
-		int pos, tiempo;
-		pos = 1;
-		char* nombre;
-		char* disp;
-		auxPCB = desearilizar_PCB(buffer, &pos);
-		int pos2 = pos + 2;
-		switch (buffer[pos]) {
-		case '0': //termino quamtum colocar en ready
-			pthread_mutex_lock(&mutexReady);
-			list_add(listaReady, auxPCB);
-			pthread_mutex_unlock(&mutexReady);
-			semsig(&readyCont);
-			Traza("Final Quamtum mover a ready. Programa: %d. buffer: %s",
-					auxPCB->id);
-			break;
-		case '1':	//Hay que hacer I/O
-			disp = obtenerParteDelMensaje(buffer, &pos2);
-			tiempo = atoi(obtenerParteDelMensaje(buffer, &pos2));
-			t_HIO* auxHIO = encontrarDispositivo(disp);
-			if (auxHIO != NULL ) {
-				pthread_mutex_lock(&(auxHIO->mutexBloqueados));
-				list_add(auxHIO->listaBloqueados,
-						bloqueado_create(auxPCB, tiempo));
-				pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
-				semsig(&(auxHIO->bloqueadosCont));
-				Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
-						auxPCB->id, (char*) auxHIO->nombre);
-			} else {
-				pthread_mutex_lock(&mutexFIN);
-				list_add(listaFin,
-						final_create(auxPCB, 1, "Dispositivo no encontrado"));
-				pthread_mutex_unlock(&mutexFIN);
-				semsig(&finalizarCont);
-				semsig(&multiCont);
-			}
-			break;
-		case '2':	//Bloqueado por semaforo
-			nombre = obtenerNombreMensaje(buffer, pos2);
-			pthread_mutex_lock(&mutexSemaforos);
-			t_sem* auxSem = encontrarSemaforo(nombre);
-			if (auxSem != NULL ) {
-				if (auxSem->valor < 0) {
-					//Bloquear Programa por semaforo
-					list_add(auxSem->listaSem, auxPCB);
-					Traza(
-							"Final Quamtum programa: %d. bloqueado por semaforo: %s",
-							auxPCB->id, (char*) auxSem->nombre);
-				} else {
-					//Desbloquar Programa
-					pthread_mutex_lock(&mutexReady);
-					list_add(listaReady, auxPCB);
-					pthread_mutex_unlock(&mutexReady);
-					semsig(&readyCont);
-				}
-			} else {
-				pthread_mutex_lock(&mutexFIN);
-				list_add(listaFin,
-						final_create(auxPCB, 1, "semaforo no encontrado"));
-				pthread_mutex_unlock(&mutexFIN);
-				semsig(&finalizarCont);
-				semsig(&multiCont);
-			}
-			pthread_mutex_unlock(&mutexSemaforos);
-			break;
-		}
-//Buscar CPU y Borrar Programa
-		borrarPCBenCPU(socket);
-	}
-
-	void comandoWait(char* buffer, int socket) {
-		char* nombre = obtenerNombreMensaje(buffer, 1);
-		int n;
-		pthread_mutex_unlock(&mutexSemaforos);
-		t_sem* auxSem = encontrarSemaforo(nombre);
-		if (auxSem != NULL ) {
-			auxSem->valor--;
-			Traza("Wait semaforo: %s. valor: %d", (char*) auxSem->nombre,
-					auxSem->valor);
-			if (auxSem->valor < 0) {
-				n = EnviarDatos(socket, "0");
-			} else {
-				n = EnviarDatos(socket, "1");
-			}
+void comandoFinalQuamtum(char *buffer, int socket) {
+	PCB* auxPCB;
+	int pos, tiempo;
+	pos = 1;
+	char* nombre;
+	char* disp;
+	auxPCB = desearilizar_PCB(buffer, &pos);
+	int pos2 = pos + 2;
+	switch (buffer[pos]) {
+	case '0': //termino quamtum colocar en ready
+		pthread_mutex_lock(&mutexReady);
+		list_add(listaReady, auxPCB);
+		pthread_mutex_unlock(&mutexReady);
+		semsig(&readyCont);
+		Traza("Final Quamtum mover a ready. Programa: %d. buffer: %s",
+				auxPCB->id);
+		break;
+	case '1':	//Hay que hacer I/O
+		disp = obtenerParteDelMensaje(buffer, &pos2);
+		tiempo = atoi(obtenerParteDelMensaje(buffer, &pos2));
+		t_HIO* auxHIO = encontrarDispositivo(disp);
+		if (auxHIO != NULL ) {
+			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
+			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
+			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
+			semsig(&(auxHIO->bloqueadosCont));
+			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
+					auxPCB->id, (char*) auxHIO->nombre);
 		} else {
-			n = EnviarDatos(socket, "A");
-		}
-		if (n < 0) {
-			//TODO error enviar datos
-		}
-		pthread_mutex_unlock(&mutexSemaforos);
-	}
-
-	char* obtenerNombreMensaje(char* buffer, int pos) {
-		char* sub;
-		char* nombre;
-		nombre = string_new();
-		sub = malloc(1 * sizeof(char));
-		int final = pos;
-		sub = string_substring(buffer, final, 1);
-		final++;
-		while (string_equals_ignore_case(sub, "-") == 0) {
-			string_append(&nombre, sub);
-			sub = string_substring(buffer, final, 1);
-			final++;
-		}
-		return nombre;
-	}
-
-	t_sem* encontrarSemaforo(char* nombre) {
-		int _is_sem(t_sem *p) {
-			return string_equals_ignore_case(p->nombre, nombre);
-		}
-		t_sem *aux = list_find(listaSemaforos, (void*) _is_sem);
-		return aux;
-	}
-
-	void comandoSignal(char* buffer, int socket) {
-		char* nombre = obtenerNombreMensaje(buffer, 1);
-		int n, cant, i;
-		pthread_mutex_unlock(&mutexSemaforos);
-		t_sem* auxSem = encontrarSemaforo(nombre);
-		if (auxSem != NULL ) {
-			auxSem->valor++;
-			n = EnviarDatos(socket, "1");
-			Traza("signal semaforo: %s valor: %d", (char*) auxSem->nombre,
-					auxSem->valor);
-			if (auxSem->valor == 0) {
-				cant = list_size(auxSem->listaSem);
-				if (cant > 0) {
-					pthread_mutex_lock(&mutexReady);
-					list_add_all(listaReady, auxSem->listaSem);
-					pthread_mutex_unlock(&mutexReady);
-					Traza("Desbloquea programas por semaforo: %s",
-							(char*) auxSem->nombre);
-				}
-				for (i = 0; i < cant; i++) {
-					semsig(&readyCont);
-				}
-			}
-		} else {
-			n = EnviarDatos(socket, "0");
-		}
-		if (n < 0) {
-			//TODO error enviar datos
-		}
-		pthread_mutex_unlock(&mutexSemaforos);
-	}
-
-	void comandoFinalizar(int socket, char* buffer) {
-		PCB* auxPCB;
-		int pos = 1;
-		auxPCB = desearilizar_PCB(buffer, &pos);
-//Pasa a estado fin
-		pthread_mutex_lock(&mutexFIN);
-		list_add(listaFin, final_create(auxPCB, 0, "Finalizado OK"));
-		pthread_mutex_unlock(&mutexFIN);
-		Traza("Mandar a estado fin. programa: %d. buffer: ", auxPCB->id);
-		semsig(&finalizarCont);
-		semsig(&multiCont);
-//Borra el viejo PCB en la lista de CPU
-		borrarPCBenCPU(socket);
-	}
-
-	void borrarPCBenCPU(int idCPU) {
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU *aux = encontrarCPU(idCPU);
-		PCB* aux1;
-		if (aux != NULL ) {
-			aux1 = aux->idPCB;
-			aux->idPCB = NULL;
-			free(aux1);
-		}
-		pthread_mutex_unlock(&mutexCPU);
-	}
-
-	char* obtenerParteDelMensaje(char* buffer, int* pos) {
-		char* sub;
-		char* nombre;
-		sub = malloc(1 * sizeof(char));
-		nombre = string_new();
-		int final = *pos;
-		sub = string_substring(buffer, final, 1);
-		final++;
-		while (string_equals_ignore_case(sub, "-") == 0) {
-			string_append(&nombre, sub);
-			sub = string_substring(buffer, final, 1);
-			final++;
-		}
-		*pos = final + 1;
-		free(sub);
-		return nombre;
-	}
-
-	t_HIO* encontrarDispositivo(char* nombre) {
-		int _is_dis(t_HIO *p) {
-			return string_equals_ignore_case(p->nombre, nombre);
-		}
-		t_HIO *aux = list_find(listaDispositivos, (void*) _is_dis);
-		return aux;
-	}
-
-	void comandoImprimir(char* buffer, int socket) {
-		char* mensaje = obtenerNombreMensaje(buffer, 1);
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU* auxCPU = encontrarCPU(socket);
-		if (auxCPU != NULL ) {
-			if (auxCPU->idPCB) {
-				pthread_mutex_lock(&mutexImprimir);
-				list_add(listaImprimir, imp_create(auxCPU->idPCB->id, mensaje));
-				pthread_mutex_unlock(&mutexImprimir);
-				semsig(&imprimirCont);
-				Traza("Mandar a imprimir datos. programa: %d. buffer: %s",
-						auxCPU->idPCB->id, (char*) mensaje);
-			}
-		}
-		pthread_mutex_unlock(&mutexCPU);
-	}
-
-	void comandoObtenerValorGlobar(char* buffer, int socket) {
-//OBtener valor variable compartida y mandarlo a CPU
-		char* variable = obtenerNombreMensaje(buffer, 1);
-		char* respuesta = "";
-		int ndatos;
-		respuesta = malloc(1 * sizeof(char));
-		t_varGlobal* auxVar = encontrarVarGlobal(variable);
-		if (auxVar != NULL ) {
-			string_append(&respuesta, "1");
-			string_append(&buffer, string_itoa(auxVar->valor));
-			string_append(&respuesta, "-");
-			ndatos = EnviarDatos(socket, respuesta);
-			if (ndatos > 0) {
-				Traza("Envio CPU: %d, Respuesta: %s", socket,
-						(char *) respuesta);
-			} else {
-				//TODO falla al enviar
-			}
-		} else {
-			ndatos = EnviarDatos(socket, "0");
-		}
-	}
-
-	t_varGlobal* encontrarVarGlobal(char* nombre) {
-		int _is_var(t_varGlobal *p) {
-			return string_equals_ignore_case(p->nombre, nombre);
-		}
-		t_varGlobal *aux = list_find(listaVarGlobal, (void*) _is_var);
-		return aux;
-	}
-
-	void comandoGrabarValorGlobar(char* buffer, int socket) {
-		int pos = 1;
-		char* variable;
-		int valor;
-		int ndatos;
-		variable = obtenerParteDelMensaje(buffer, &pos);
-		valor = atoi(obtenerParteDelMensaje(buffer, &pos));
-		t_varGlobal* auxVar = encontrarVarGlobal(variable);
-		if (auxVar != NULL ) {
-			auxVar->valor = valor;
-			ndatos = EnviarDatos(socket, "1");
-			Traza("Se guardo %d en variable: %s", valor, (char *) variable);
-			if (ndatos < 0) {
-				//TODO error al enviar
-			}
-		} else {
-			ndatos = EnviarDatos(socket, "0");
-		}
-	}
-
-	void comandoAbortar(char* buffer, int socket) {
-		char* msj;
-		msj = obtenerNombreMensaje(buffer, 1);
-		pthread_mutex_lock(&mutexCPU);
-		t_CPU *auxCPU = encontrarCPU(socket);
-		PCB* auxPCB;
-		if (auxCPU != NULL ) {
-			auxPCB = auxCPU->idPCB;
-			auxCPU->idPCB = NULL;
 			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin, final_create(auxPCB, 1, msj));
+			list_add(listaFin,
+					final_create(auxPCB, 1, "Dispositivo no encontrado"));
 			pthread_mutex_unlock(&mutexFIN);
 			semsig(&finalizarCont);
 			semsig(&multiCont);
 		}
+		break;
+	case '2':	//Bloqueado por semaforo
+		nombre = obtenerNombreMensaje(buffer, pos2);
+		pthread_mutex_lock(&mutexSemaforos);
+		t_sem* auxSem = encontrarSemaforo(nombre);
+		if (auxSem != NULL ) {
+			if (auxSem->valor < 0) {
+				//Bloquear Programa por semaforo
+				list_add(auxSem->listaSem, auxPCB);
+				Traza("Final Quamtum programa: %d. bloqueado por semaforo: %s",
+						auxPCB->id, (char*) auxSem->nombre);
+			} else {
+				//Desbloquar Programa
+				pthread_mutex_lock(&mutexReady);
+				list_add(listaReady, auxPCB);
+				pthread_mutex_unlock(&mutexReady);
+				semsig(&readyCont);
+			}
+		} else {
+			pthread_mutex_lock(&mutexFIN);
+			list_add(listaFin,
+					final_create(auxPCB, 1, "semaforo no encontrado"));
+			pthread_mutex_unlock(&mutexFIN);
+			semsig(&finalizarCont);
+			semsig(&multiCont);
+		}
+		pthread_mutex_unlock(&mutexSemaforos);
+		break;
 	}
+//Buscar CPU y Borrar Programa
+	borrarPCBenCPU(socket);
+}
+
+void comandoWait(char* buffer, int socket) {
+	char* nombre = obtenerNombreMensaje(buffer, 1);
+	int n;
+	pthread_mutex_unlock(&mutexSemaforos);
+	t_sem* auxSem = encontrarSemaforo(nombre);
+	if (auxSem != NULL ) {
+		auxSem->valor--;
+		Traza("Wait semaforo: %s. valor: %d", (char*) auxSem->nombre,
+				auxSem->valor);
+		if (auxSem->valor < 0) {
+			n = EnviarDatos(socket, "0");
+		} else {
+			n = EnviarDatos(socket, "1");
+		}
+	} else {
+		n = EnviarDatos(socket, "A");
+	}
+	if (n < 0) {
+		//TODO error enviar datos
+	}
+	pthread_mutex_unlock(&mutexSemaforos);
+}
+
+char* obtenerNombreMensaje(char* buffer, int pos) {
+	char* sub;
+	char* nombre;
+	nombre = string_new();
+	sub = malloc(1 * sizeof(char));
+	int final = pos;
+	sub = string_substring(buffer, final, 1);
+	final++;
+	while (string_equals_ignore_case(sub, "-") == 0) {
+		string_append(&nombre, sub);
+		sub = string_substring(buffer, final, 1);
+		final++;
+	}
+	return nombre;
+}
+
+t_sem* encontrarSemaforo(char* nombre) {
+	int _is_sem(t_sem *p) {
+		return string_equals_ignore_case(p->nombre, nombre);
+	}
+	t_sem *aux = list_find(listaSemaforos, (void*) _is_sem);
+	return aux;
+}
+
+void comandoSignal(char* buffer, int socket) {
+	char* nombre = obtenerNombreMensaje(buffer, 1);
+	int n, cant, i;
+	pthread_mutex_unlock(&mutexSemaforos);
+	t_sem* auxSem = encontrarSemaforo(nombre);
+	if (auxSem != NULL ) {
+		auxSem->valor++;
+		n = EnviarDatos(socket, "1");
+		Traza("signal semaforo: %s valor: %d", (char*) auxSem->nombre,
+				auxSem->valor);
+		if (auxSem->valor == 0) {
+			cant = list_size(auxSem->listaSem);
+			if (cant > 0) {
+				pthread_mutex_lock(&mutexReady);
+				list_add_all(listaReady, auxSem->listaSem);
+				pthread_mutex_unlock(&mutexReady);
+				Traza("Desbloquea programas por semaforo: %s",
+						(char*) auxSem->nombre);
+			}
+			for (i = 0; i < cant; i++) {
+				semsig(&readyCont);
+			}
+		}
+	} else {
+		n = EnviarDatos(socket, "0");
+	}
+	if (n < 0) {
+		//TODO error enviar datos
+	}
+	pthread_mutex_unlock(&mutexSemaforos);
+}
+
+void comandoFinalizar(int socket, char* buffer) {
+	PCB* auxPCB;
+	int pos = 1;
+	auxPCB = desearilizar_PCB(buffer, &pos);
+//Pasa a estado fin
+	pthread_mutex_lock(&mutexFIN);
+	list_add(listaFin, final_create(auxPCB, 0, "Finalizado OK"));
+	pthread_mutex_unlock(&mutexFIN);
+	Traza("Mandar a estado fin. programa: %d. buffer: ", auxPCB->id);
+	semsig(&finalizarCont);
+	semsig(&multiCont);
+//Borra el viejo PCB en la lista de CPU
+	borrarPCBenCPU(socket);
+}
+
+void borrarPCBenCPU(int idCPU) {
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU *aux = encontrarCPU(idCPU);
+	PCB* aux1;
+	if (aux != NULL ) {
+		aux1 = aux->idPCB;
+		aux->idPCB = NULL;
+		free(aux1);
+	}
+	pthread_mutex_unlock(&mutexCPU);
+}
+
+char* obtenerParteDelMensaje(char* buffer, int* pos) {
+	char* sub;
+	char* nombre;
+	sub = malloc(1 * sizeof(char));
+	nombre = string_new();
+	int final = *pos;
+	sub = string_substring(buffer, final, 1);
+	final++;
+	while (string_equals_ignore_case(sub, "-") == 0) {
+		string_append(&nombre, sub);
+		sub = string_substring(buffer, final, 1);
+		final++;
+	}
+	*pos = final + 1;
+	free(sub);
+	return nombre;
+}
+
+t_HIO* encontrarDispositivo(char* nombre) {
+	int _is_dis(t_HIO *p) {
+		return string_equals_ignore_case(p->nombre, nombre);
+	}
+	t_HIO *aux = list_find(listaDispositivos, (void*) _is_dis);
+	return aux;
+}
+
+void comandoImprimir(char* buffer, int socket) {
+	char* mensaje = obtenerNombreMensaje(buffer, 1);
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU* auxCPU = encontrarCPU(socket);
+	if (auxCPU != NULL ) {
+		if (auxCPU->idPCB) {
+			pthread_mutex_lock(&mutexImprimir);
+			list_add(listaImprimir, imp_create(auxCPU->idPCB->id, mensaje));
+			pthread_mutex_unlock(&mutexImprimir);
+			semsig(&imprimirCont);
+			Traza("Mandar a imprimir datos. programa: %d. buffer: %s",
+					auxCPU->idPCB->id, (char*) mensaje);
+		}
+	}
+	pthread_mutex_unlock(&mutexCPU);
+}
+
+void comandoObtenerValorGlobar(char* buffer, int socket) {
+//OBtener valor variable compartida y mandarlo a CPU
+	char* variable = obtenerNombreMensaje(buffer, 1);
+	char* respuesta = "";
+	int ndatos;
+	respuesta = malloc(1 * sizeof(char));
+	t_varGlobal* auxVar = encontrarVarGlobal(variable);
+	if (auxVar != NULL ) {
+		string_append(&respuesta, "1");
+		string_append(&buffer, string_itoa(auxVar->valor));
+		string_append(&respuesta, "-");
+		ndatos = EnviarDatos(socket, respuesta);
+		if (ndatos > 0) {
+			Traza("Envio CPU: %d, Respuesta: %s", socket, (char *) respuesta);
+		} else {
+			//TODO falla al enviar
+		}
+	} else {
+		ndatos = EnviarDatos(socket, "0");
+	}
+}
+
+t_varGlobal* encontrarVarGlobal(char* nombre) {
+	int _is_var(t_varGlobal *p) {
+		return string_equals_ignore_case(p->nombre, nombre);
+	}
+	t_varGlobal *aux = list_find(listaVarGlobal, (void*) _is_var);
+	return aux;
+}
+
+void comandoGrabarValorGlobar(char* buffer, int socket) {
+	int pos = 1;
+	char* variable;
+	int valor;
+	int ndatos;
+	variable = obtenerParteDelMensaje(buffer, &pos);
+	valor = atoi(obtenerParteDelMensaje(buffer, &pos));
+	t_varGlobal* auxVar = encontrarVarGlobal(variable);
+	if (auxVar != NULL ) {
+		auxVar->valor = valor;
+		ndatos = EnviarDatos(socket, "1");
+		Traza("Se guardo %d en variable: %s", valor, (char *) variable);
+		if (ndatos < 0) {
+			//TODO error al enviar
+		}
+	} else {
+		ndatos = EnviarDatos(socket, "0");
+	}
+}
+
+void comandoAbortar(char* buffer, int socket) {
+	char* msj;
+	msj = obtenerNombreMensaje(buffer, 1);
+	pthread_mutex_lock(&mutexCPU);
+	t_CPU *auxCPU = encontrarCPU(socket);
+	PCB* auxPCB;
+	if (auxCPU != NULL ) {
+		auxPCB = auxCPU->idPCB;
+		auxCPU->idPCB = NULL;
+		pthread_mutex_lock(&mutexFIN);
+		list_add(listaFin, final_create(auxPCB, 1, msj));
+		pthread_mutex_unlock(&mutexFIN);
+		semsig(&finalizarCont);
+		semsig(&multiCont);
+	}
+}
