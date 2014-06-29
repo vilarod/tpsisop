@@ -858,9 +858,12 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	char respuestaumv[BUFFERSIZE];
 	char respuestaumv2[BUFFERSIZE];
 	PCB PCBAUX;
+
 	PCBAUX.id = id;
 	PCBAUX.programCounter = metadataprograma->instruccion_inicio;
-
+	//lo imprimi para q no de error de compilacion pq dice q no lo utiliza
+	Traza("%d",PCBAUX.id);
+	//
 	EnviarDatos(socketumv, cadenaCambioContexto);
 	RecibirDatos(socketumv, respuestaumv);
 	if (analisarRespuestaUMV(respuestaumv) != 0) {
@@ -1369,6 +1372,7 @@ void comandoLiberar(int socket) {
 		aux->libre = 0;
 	}
 	pthread_mutex_lock(&mutexCPU);
+	semsig(&CPUCont);
 }
 
 void eliminarCpu(int idcpu) {
@@ -1414,6 +1418,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 					final_create(auxPCB, 1, "Dispositivo no encontrado"));
 			pthread_mutex_unlock(&mutexFIN);
 			semsig(&finalizarCont);
+			semsig(&multiCont);
 		}
 		break;
 	case '2':	//Bloqueado por semaforo
@@ -1439,6 +1444,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 					final_create(auxPCB, 1, "semaforo no encontrado"));
 			pthread_mutex_unlock(&mutexFIN);
 			semsig(&finalizarCont);
+			semsig(&multiCont);
 		}
 		pthread_mutex_unlock(&mutexSemaforos);
 		break;
@@ -1532,10 +1538,11 @@ void comandoFinalizar(int socket, char* buffer) {
 	auxPCB = desearilizar_PCB(buffer, &pos);
 //Pasa a estado fin
 	pthread_mutex_lock(&mutexFIN);
-	list_add(listaFin, final_create(auxPCB, 0, ""));
+	list_add(listaFin, final_create(auxPCB, 0, "Finalizado OK"));
 	pthread_mutex_unlock(&mutexFIN);
 	Traza("Mandar a estado fin. programa: %d. buffer: ", auxPCB->id);
 	semsig(&finalizarCont);
+	semsig(&multiCont);
 //Borra el viejo PCB en la lista de CPU
 	borrarPCBenCPU(socket);
 }
@@ -1658,5 +1665,6 @@ void comandoAbortar(char* buffer, int socket) {
 		list_add(listaFin, final_create(auxPCB, 1, msj));
 		pthread_mutex_unlock(&mutexFIN);
 		semsig(&finalizarCont);
+		semsig(&multiCont);
 	}
 }

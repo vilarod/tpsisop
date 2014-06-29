@@ -108,7 +108,7 @@ static t_CPU *cpu_create(int idCPU)
 	t_CPU *new = malloc(sizeof(t_CPU));
 	new->idPCB = malloc(sizeof(PCB));
 	new->idCPU = idCPU;
-	new->libre = 0;
+	new->libre = 1;
 	return new;
 }
 
