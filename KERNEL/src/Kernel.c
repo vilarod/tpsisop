@@ -293,21 +293,29 @@ void *bloqueados_fnc(void *arg) {
 }
 
 void *moverReadyDeNew(void *arg) {
-	t_list *aux;
+	t_list *auxList;
+	t_New *auxNew;
+	PCB *auxPCB;
 	//mandar a ready de new
 	while (1) {
 		semwait(&multiCont);
 		semwait(&newCont);
 		pthread_mutex_lock(&mutexNew);
 		if (list_size(listaNew) > 0) {
-			aux = list_take_and_remove(listaNew, 1);
+			auxList = list_take_and_remove(listaNew, 1);
 			pthread_mutex_unlock(&mutexNew);
+			auxNew= list_get(auxList,0);
+			auxPCB= auxNew->idPCB;
+			auxNew->idPCB=NULL;
 			pthread_mutex_lock(&mutexReady);
-			list_add_all(listaReady, aux);
+			list_add(listaReady, auxPCB);
 			pthread_mutex_unlock(&mutexReady);
+			Traza("Moviendo a ready programa: %d", auxPCB->id);
+			list_clean_and_destroy_elements(auxList, (void*) new_destroy);
 			semsig(&readyCont);
 		} else {
 			pthread_mutex_unlock(&mutexNew);
+			semsig(&multiCont);
 		}
 
 	}

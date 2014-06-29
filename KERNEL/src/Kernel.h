@@ -117,6 +117,25 @@ static void cpu_destroy(t_CPU *self)
 	free(self);
 }
 
+//Lista de New
+typedef struct _t_NEW {
+	PCB* idPCB;
+	int peso;
+} t_New;
+
+//static t_New *new_create(PCB* pcb, int peso)
+//{
+//	t_New *new = malloc(sizeof(t_New));
+//	new->idPCB = pcb;
+//	new->peso = peso;
+//	return new;
+//}
+
+static void new_destroy(t_New *self)
+{
+	free(self);
+}
+
 //Lista de semaforos del usuario
 typedef struct _t_sem {
 	char* nombre;
