@@ -83,6 +83,8 @@ int senial_SIGUSR1 = 0; //seÃ±al kill
 int tengoProg = 0;
 char* motivo;
 
+char* variable_ref;
+
 //Llamado a las funciones primitivas
 
 AnSISOP_funciones funciones_p =
@@ -109,7 +111,7 @@ ConexionConSocket(int* Conec, int socketConec, struct sockaddr_in destino)
 
   if ((connect(socketConec, (struct sockaddr*) &destino,
       sizeof(struct sockaddr))) == -1)
-    Error("ERROR AL CONECTARME CON SOCKET: %d", socketConec);
+    ErrorFatal("ERROR AL CONECTARME CON SOCKET: %d", socketConec);
   else
     {
       *Conec = 1;
@@ -171,6 +173,27 @@ CPULibre()
   Enviar(socketKERNEL, LIBRE);
 }
 
+void
+umvDesconectada()
+{
+
+  Error("%s", "ERROR - LA UMV SE HA DESCONECTADO");
+  ab = 1;
+  quantum = 0;
+  motivo = "LA UMV SE HA DESCONECTADO";
+  CONECTADO_UMV = 0;
+
+}
+
+void
+kernelDesconectado()
+{
+  Error("%s", "ERROR - LA KERNEL SE HA DESCONECTADO");
+  quantum = 0;
+  CONECTADO_KERNEL = 0;
+  f = 1;
+}
+
 //Leer archivo de configuracion ------------------------------------------------
 
 int
@@ -183,6 +206,7 @@ ObtenerPuertoKernel()
 char*
 ObtenerIPKernel()
 {
+
   t_config* config = config_create(PATH_CONFIG);
   return config_get_string_value(config, "IP_KERNEL");
 
@@ -302,13 +326,13 @@ RecibirProceso()
         }
     }
   else
-    ErrorFatal("%s", "ERROR - EL SOCKET REMOTO SE HA DESCONECTADO");
+    kernelDesconectado();
 
   if ((control < 9) || (quantum < 0) || (retardo < 0) || (guiones < 3))
     {
       Error("%s", "ERROR - NO RECIBI DATOS VALIDOS");
       r = -2;
-      motivo="ERROR - NO RECIBI DATOS VALIDOS";
+      motivo = "ERROR - NO RECIBI DATOS VALIDOS";
     }
 
   free(estructura);
@@ -355,8 +379,7 @@ ErrorFatal(const char* mensaje, ...)
   log_error(logger, "\nERROR FATAL--> %s \n", nuevo);
   char fin;
 
-  printf(
-      "El programa se cerrara. Presione ENTER para finalizar la ejecucion.");
+  printf("El programa se cerrara. Presione ENTER para finalizar la ejecucion.");
   scanf("%c", &fin);
 
   va_end(arguments);
@@ -415,10 +438,10 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
     {
       tamanio1 = atoi(string_substring(msj, 1, 1));
       *despl = atoi(string_substring(msj, 2, tamanio1));
-      Traza("TRAZA - DESPLAZAMIENTO: %d", despl);
+      Traza("TRAZA - DESPLAZAMIENTO: %p", despl);
       tamanio2 = atoi(string_substring(msj, tamanio1 + 2, 1));
       *longi = atoi(string_substring(msj, tamanio1 + 3, tamanio2));
-      Traza("TRAZA - LONGITUD: %d", longi);
+      Traza("TRAZA - LONGITUD: %p", longi);
     }
   else
     Error("%s", "ERROR - EL MENSAJE NO PUEDE SER DESERIALIZADO");
@@ -566,10 +589,7 @@ AbortarProceso()
   Traza("%s", "TRAZA - SE ABORTARA EL PROCESO");
   Enviar(socketKERNEL, mensaje);
   free(mensaje);
-  quantum = 0; //se le termina forzosamente el quantum
-  tengoProg = 0;
   motivo = "";
-  ab = 0;
 
 }
 
@@ -587,6 +607,9 @@ AtenderSenial(int s)
       senial_SIGUSR1 = 1; // marco que recibi la seÃ±al
       break;
     }
+  case SIGSEGV:
+    Traza("%s", "TRAZA - RECIBI SIGSEGV");
+    break;
     }
 }
 
@@ -636,9 +659,15 @@ PedirSentencia(char** sentencia)
     }
   else
     {
-      ab = 1;
-      motivo = string_substring(instruccion, 1, (strlen(instruccion)) - 1);
-      quantum = 0;
+      if (string_starts_with(instruccion, "0"))
+        {
+          Error("ERROR - UMV: %s",string_substring(instruccion, 1, (strlen(instruccion)) - 1));
+          ab = 1;
+          motivo = string_substring(instruccion, 1, (strlen(instruccion)) - 1);
+          quantum = 0;
+        }
+      else
+        umvDesconectada();
     }
 
   //free(instruccion);
@@ -687,7 +716,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
 
-  if (!(string_starts_with(respuesta, "1")))
+  if (string_starts_with(respuesta, "0"))
     {
       Error("%s", "ERROR - NO SE PUDO GUARDAR VALOR EN ESA DIRECCION");
       Error("ERROR UMV: %s",
@@ -696,6 +725,12 @@ setUMV(int ptro, int dsp, int tam, char* valor)
       motivo = string_substring(respuesta, 1, (strlen(respuesta)) - 1);
       validar = 0;
     }
+  else
+    { if (!(string_starts_with(respuesta, "1")))
+      umvDesconectada();
+    validar=0;
+    }
+
 
   return validar;
 
@@ -714,12 +749,18 @@ CambioProcesoActivo()
     Traza("%s", "TRAZA - SE INFORMO CORRECTAMENTE EL CAMBIO DE PROCESO ACTIVO");
   else
     {
-      Error("%s", "ERROR - OCURRIÃ“ UN ERROR AL REALIZAR CAMBIO DE CONTEXTO");
-      Error("ERROR UMV: %s",
-          string_substring(respuesta, 1, (strlen(respuesta)) - 1));
-      ab = 1;
-      quantum = 0;
-      motivo = string_substring(respuesta, 1, (strlen(respuesta)) - 1);
+      if (string_starts_with(respuesta, "0"))
+        {
+          Error("%s",
+              "ERROR - OCURRIO UN ERROR AL REALIZAR CAMBIO DE CONTEXTO");
+          Error("ERROR UMV: %s",
+              string_substring(respuesta, 1, (strlen(respuesta)) - 1));
+          ab = 1;
+          quantum = 0;
+          motivo = string_substring(respuesta, 1, (strlen(respuesta)) - 1);
+        }
+      else
+        umvDesconectada();
     }
 
 }
@@ -730,9 +771,13 @@ void
 AvisarDescAKernel()
 
 {
-  char *mensaje = string_itoa(AVISO_DESC);
-  Traza("%s", "TRAZA - AVISO AL KERNEL QUE LA CPU SE DESCONECTA");
-  Enviar(socketKERNEL, mensaje);
+  if (CONECTADO_KERNEL == 1) //hace esto solo si el kernel sigue conectado
+    {
+      char *mensaje = string_itoa(AVISO_DESC);
+      string_append(&mensaje, "-");
+      Traza("%s", "TRAZA - AVISO AL KERNEL QUE LA CPU SE DESCONECTA");
+      Enviar(socketKERNEL, mensaje);
+    }
 }
 
 t_valor_variable
@@ -754,14 +799,22 @@ obtener_valor(t_nombre_compartida variable)
     {
       valor = atoi(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       Traza("TRAZA - EL VALOR DE LA VARIABLE ES: %d", valor);
+      variable_ref="";
+      variable_ref=variable;
+
     }
   else
     {
-      Error("%s",
-          "ERROR - NO SE PUDO OBTENER EL VALOR DE LA VARIABLE COMPARTIDA");
-      ab = 1; //seÃ±al para abortar el proceso
-      quantum = 0;
-      motivo = string_substring(respuesta, 1, (strlen(respuesta) - 1));
+      if (string_starts_with(respuesta, "0"))
+        {
+          Error("%s",
+              "ERROR - NO SE PUDO OBTENER EL VALOR DE LA VARIABLE COMPARTIDA");
+          ab = 1; //seÃ±al para abortar el proceso
+          quantum = 0;
+          motivo = string_substring(respuesta, 1, (strlen(respuesta) - 1));
+        }
+      else
+        kernelDesconectado();
     }
 
   free(mensaje);
@@ -784,15 +837,20 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
 
   Recibir(socketKERNEL, respuesta);
   if (string_starts_with(respuesta, "1"))
-    Traza("%s", "TRAZA - KERNEL PROCESÃ“ OK EL PEDIDO");
+    Traza("%s", "TRAZA - KERNEL PROCESO OK EL PEDIDO");
   else
     {
-      Error("%s", "ERROR - KERNEL NO HA PODIDO PROCESAR EL PEDIDO");
-      ab = 1; //seÃ±al para abortar el proceso
-      quantum = 0;
-      motivo = string_substring(respuesta, 1, (strlen(respuesta) - 1));
-    }
+      if (string_starts_with(respuesta, "0"))
+        {
 
+          Error("%s", "ERROR - KERNEL NO HA PODIDO PROCESAR EL PEDIDO");
+          ab = 1; //seÃ±al para abortar el proceso
+          quantum = 0;
+          motivo = string_substring(respuesta, 1, (strlen(respuesta) - 1));
+        }
+      else
+        kernelDesconectado();
+    }
   free(mensaje);
 }
 
@@ -831,7 +889,7 @@ void
 esperarTiempoRetardo()
 {
   Traza("TRAZA - TENGO UN TIEMPO DE ESPERA DE: %d MILISEGUNDOS", retardo);
-  sleep(retardo);
+  usleep(retardo); //retardo en milisegundos
 }
 
 //Manejo diccionarios ----------------------------------------------------------
@@ -904,10 +962,16 @@ RecuperarDicEtiquetas()
         }
       else
         {
-          Error("%s", "ERROR - NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
-          ab = 1;
-          quantum = 0;
-          motivo = "ERROR AL RECUPERAR LAS ETIQUETAS DEL PROCESO";
+          if (string_starts_with(respuesta, "0"))
+            {
+              Error("%s",
+                  "ERROR - NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
+              ab = 1;
+              quantum = 0;
+              motivo = "ERROR AL RECUPERAR LAS ETIQUETAS DEL PROCESO";
+            }
+          else
+            umvDesconectada();
         }
       free(respuesta);
     }
@@ -956,13 +1020,18 @@ RecuperarDicVariables()
             }
           else
             {
-              Error("%s",
-                  "ERROR - NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
-              ab = 1; //seÃ±al para abortar el proceso
-              quantum = 0; //proceso no tendrÃ¡ quantum
-              motivo = "ERROR AL RECUPERAR LAS VARIABLES DEL CONTEXTO ACTUAL";
+              if (string_starts_with(respuesta, "0"))
+                {
+                  Error("%s",
+                      "ERROR - NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
+                  ab = 1; //seÃ±al para abortar el proceso
+                  quantum = 0; //proceso no tendrÃ¡ quantum
+                  motivo =
+                      "ERROR AL RECUPERAR LAS VARIABLES DEL CONTEXTO ACTUAL";
+                }
+              else
+                umvDesconectada();
             }
-
         }
       else
         Traza("%s",
@@ -971,7 +1040,6 @@ RecuperarDicVariables()
       free(respuesta);
       free(variables);
       free(var);
-
     }
 }
 
@@ -980,18 +1048,11 @@ RecuperarDicVariables()
 void
 agregarDicValoresVariables(char* var, int valor)
 {
-  val* valores = malloc(1 * sizeof(val));
+  dictionary_put(dicValoresVariables, var, (void*) valor);
 
-  valores->nombre = var;
-  valores->valor = valor;
-
-  dictionary_put(dicValoresVariables, var, (void*) valores);
-
-  val* aux = dictionary_get(dicValoresVariables, var);
   Traza("Agregado: %s", var);
-  Traza("Agregado: %s ::: %d", aux->nombre, aux->valor);
+  Traza("Agregado: %d", dictionary_get(dicValoresVariables, var));
 
-  free(valores);
 }
 
 void
@@ -1019,9 +1080,9 @@ imprimirContextoActual()
           for (i = 0; i < aux; i++)
             {
 
-              string_append(&mensaje, "Variable:");
+              string_append(&mensaje, "Variable ");
               string_append(&mensaje, string_substring(variables, pos, 1));
-              string_append(&mensaje, "Valor:");
+              string_append(&mensaje, ":");
               string_append(&mensaje,
                   string_itoa(atoi(string_substring(variables, (pos + 1), 4))));
               string_append(&mensaje, " // ");
@@ -1029,7 +1090,14 @@ imprimirContextoActual()
             }
         }
       else
-        string_append(&mensaje, "ERROR AL RECUPERAR VALORES VARIABLES");
+        {
+          string_append(&mensaje, "ERROR AL RECUPERAR VALORES VARIABLES");
+        if (!(string_starts_with(respuesta, "0")))
+          {
+          umvDesconectada();
+          ab=0;
+          }
+        }
     }
   else
     string_append(&mensaje, "NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL");
@@ -1070,6 +1138,7 @@ SENIAL(void *arg)
 {
   Traza("%s", "TRAZA - HOT PLUG ACTIVO");
   signal(SIGUSR1, AtenderSenial);
+  signal(SIGSEGV, AtenderSenial);
 
   return NULL ;
 }
@@ -1089,8 +1158,6 @@ main(void)
   char* temp_file = tmpnam(NULL );
   logger = log_create(temp_file, "CPU", g_ImprimirTrazaPorConsola,
       LOG_LEVEL_TRACE);
-
-  tengoProg = 0;
 
   char* sentencia = string_new();
   int sent = 0;
@@ -1132,8 +1199,8 @@ main(void)
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while (estoyConectado() == 1)
     {
-      CPULibre();
       inciarVariables();
+      CPULibre();
       Traza("%s", "TRAZA - ESTOY CONECTADO CON KERNEL Y UMV");
       Traza("CANTIDAD DE PROGRAMAS QUE TENGO: %d", tengoProg);
 
@@ -1156,7 +1223,7 @@ main(void)
           Traza("TRAZA - LA PROXIMA INSTRUCCION ES: %d",
               programa->programCounter);
           sent = PedirSentencia(&sentencia);
-          if (sent == 1) //le pido a la umv la sentencia a ejecutar
+          if (sent == 1) //la sentencia es valida
             {
               parsearYejecutar(sentencia); //ejecuto sentencia
               esperarTiempoRetardo(); // espero X milisegundo para volver a ejecutar
@@ -1424,12 +1491,15 @@ prim_imprimir(t_valor_variable valor_mostrar)
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA Imprimir");
 
   char *mensaje = string_itoa(IMPRIMIR);
-
+  string_append(&mensaje,"Variable ");
+  string_append(&mensaje,variable_ref);
+  string_append(&mensaje,":");
   string_append(&mensaje, string_itoa(valor_mostrar)); //por el momento muestra valor
   Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION",
       valor_mostrar);
   Enviar(socketKERNEL, mensaje);
 
+  variable_ref="";
 }
 
 t_valor_variable
@@ -1476,6 +1546,8 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable");
   t_puntero posicion = 0;
 
+  variable_ref= "";
+
   char* var = malloc(5 * sizeof(char));
   var[0] = identificador_variable;
 
@@ -1486,6 +1558,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
       int* aux = dictionary_get(dicVariables, var);
       posicion = (t_puntero) aux;
       Traza("encontre la variable %s, posicion %d", var, aux);
+      variable_ref=var;
     }
   else
     {

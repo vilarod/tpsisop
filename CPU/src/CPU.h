@@ -30,14 +30,6 @@ typedef struct PCBs
   int sizeIndiceEtiquetas;
 } PCB;
 
-typedef struct val
-{
-  char* nombre;
-  int valor;
-} val;
-
-
-
 
 void
 AtenderSenial(int s);
@@ -112,6 +104,11 @@ valoresVariablesContextoActual();
 
 void
 agregarDicValoresVariables(char* var, int valor);
+
+void
+umvDesconectada();
+void
+kernelDesconectado();
 
 void
 ErrorFatal(const char* mensaje, ...);
