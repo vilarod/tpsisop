@@ -49,9 +49,9 @@
 #define AVISO_DESC 7
 #define SET_UMV 2
 #define GET_UMV 1
-#define AB_PROCESO "A"
-#define FIN_PROCESO "F"
-#define LIBRE "L"
+#define AB_PROCESO "A-"
+#define FIN_PROCESO "F-"
+#define LIBRE "L-"
 #define S_SIGNAL 9
 #define S_WAIT 8
 #define IMPRIMIR 2
@@ -82,8 +82,7 @@ int g_ImprimirTrazaPorConsola = 1;
 int senial_SIGUSR1 = 0; //seÃ±al kill
 int tengoProg = 0;
 char* motivo;
-
-char* variable_ref;
+char* variable_ref; //guardara el nombre de la variable llamada por ObtenerDireccionVariable o ObtenerValorCompartida
 
 //Llamado a las funciones primitivas
 
@@ -103,26 +102,24 @@ AnSISOP_funciones funciones_p =
 AnSISOP_kernel funciones_k =
   { .AnSISOP_signal = prim_signal, .AnSISOP_wait = prim_wait, };
 
+
 //Manejo de conexiones --------------------------------------------------------
 
 void
 ConexionConSocket(int* Conec, int socketConec, struct sockaddr_in destino)
 {
-
   if ((connect(socketConec, (struct sockaddr*) &destino,
       sizeof(struct sockaddr))) == -1)
     ErrorFatal("ERROR AL CONECTARME CON SOCKET: %d", socketConec);
   else
-    {
-      *Conec = 1;
-      Traza("ME CONECTE CON SOCKET: %d", socketConec);
-    }
+    {*Conec = 1;
+      Traza("ME CONECTE CON SOCKET: %d", socketConec);}
 }
 
 void
 Cerrar(int sRemoto)
 {
-  Traza("%s", "TRAZA - SE CIERRA LA CONEXION");
+  Traza("%s", "TRAZA - SE CIERRA LA CONEXION SOCKET: %d",sRemoto);
   close(sRemoto);
 }
 
@@ -131,7 +128,7 @@ crearSocket(int socketConec)
 {
   socketConec = socket(AF_INET, SOCK_STREAM, 0);
   if (socketConec == -1) //Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
-    ErrorFatal("%s", "ERROR - NO SE PUEDE CONECTAR EL SOCKET");
+    ErrorFatal("%s", "ERROR - NO SE PUEDE CONECTAR EL SOCKET: %d", socketConec);
   return socketConec;
 }
 
@@ -168,21 +165,13 @@ saludar(int sld, int tipo, int sRemoto)
 }
 
 void
-CPULibre()
-{
-  Enviar(socketKERNEL, LIBRE);
-}
-
-void
 umvDesconectada()
 {
-
   Error("%s", "ERROR - LA UMV SE HA DESCONECTADO");
   ab = 1;
   quantum = 0;
   motivo = "LA UMV SE HA DESCONECTADO";
   CONECTADO_UMV = 0;
-
 }
 
 void
@@ -206,10 +195,8 @@ ObtenerPuertoKernel()
 char*
 ObtenerIPKernel()
 {
-
   t_config* config = config_create(PATH_CONFIG);
   return config_get_string_value(config, "IP_KERNEL");
-
 }
 
 int
@@ -217,7 +204,6 @@ ObtenerPuertoUmv()
 {
   t_config* config = config_create(PATH_CONFIG);
   return config_get_int_value(config, "PUERTO_UMV");
-
 }
 
 char*
@@ -225,7 +211,6 @@ ObtenerIPUmv()
 {
   t_config* config = config_create(PATH_CONFIG);
   return config_get_string_value(config, "IP_UMV");
-
 }
 
 // Enviar - Recibir datos con sockets --------------------------------------
@@ -272,20 +257,14 @@ RecibirProceso()
   r = Recibir(socketKERNEL, estructura);
 
   if (r > 0)
-    {
-      if (string_starts_with(estructura, "1")) // ponele que dice que me esta enviando datos..
-        {
-          for (aux = 1; aux < 4; aux++)
-            {
-              for (i = 0;
-                  ((string_equals_ignore_case(sub, "-") == 0)
-                      && (inicio < (strlen(estructura) + 1))); i++)
+    {if (string_starts_with(estructura, "1")) // ponele que dice que me esta enviando datos..
+        {for (aux = 1; aux < 4; aux++)
+            {for (i = 0;((string_equals_ignore_case(sub, "-") == 0) && (inicio < (strlen(estructura) + 1))); i++)
                 {
                   sub = string_substring(estructura, inicio, 1);
                   inicio++;
                   if (string_equals_ignore_case(sub, "-"))
                     guiones = guiones + 1;
-
                 }
 
               if (guiones < aux)
@@ -306,11 +285,11 @@ RecibirProceso()
                 }
                 break;
               case 3:
-                programa = desearilizar_PCB(estructura, indice, &control);
+                programa = deserializar_PCB(estructura, indice, &control);
                 break;
               case 5:
                 {
-                  Error("%s", "ERROR - NO RECIBI DATOS VALIDOS");
+                  Error("%s", "ERROR - HA OCURRIDO UN ERROR");
                   r = -2;
                 }
                 break;
@@ -326,7 +305,10 @@ RecibirProceso()
         }
     }
   else
+    {
     kernelDesconectado();
+    r=-3;
+    }
 
   if ((control < 9) || (quantum < 0) || (retardo < 0) || (guiones < 3))
     {
@@ -438,19 +420,18 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
     {
       tamanio1 = atoi(string_substring(msj, 1, 1));
       *despl = atoi(string_substring(msj, 2, tamanio1));
-      Traza("TRAZA - DESPLAZAMIENTO: %p", despl);
+      Traza("TRAZA - DESPLAZAMIENTO: %d", *despl);
       tamanio2 = atoi(string_substring(msj, tamanio1 + 2, 1));
       *longi = atoi(string_substring(msj, tamanio1 + 3, tamanio2));
-      Traza("TRAZA - LONGITUD: %p", longi);
+      Traza("TRAZA - LONGITUD: %d", *longi);
     }
   else
     Error("%s", "ERROR - EL MENSAJE NO PUEDE SER DESERIALIZADO");
 }
 
 PCB*
-desearilizar_PCB(char* estructura, int pos, int* cantguiones)
+deserializar_PCB(char* estructura, int pos, int* cantguiones)
 {
-
   char* sub = string_new();
   PCB* est_prog;
   est_prog = (struct PCBs *) malloc(sizeof(PCB));
@@ -463,8 +444,7 @@ desearilizar_PCB(char* estructura, int pos, int* cantguiones)
   iniciarPCB(est_prog);
 
   for (aux = 1; aux < 10; aux++)
-    {
-      for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++)
+    {for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++)
         {
           sub = string_substring(estructura, inicio, 1);
           inicio++;
@@ -598,18 +578,15 @@ AbortarProceso()
 void
 AtenderSenial(int s)
 {
-
   switch (s)
     {
-  case SIGUSR1:
-    {
-      Traza("%s", "TRAZA - RECIBI LA SENIAL SIGUSR1");
-      senial_SIGUSR1 = 1; // marco que recibi la seÃ±al
-      break;
-    }
-  case SIGSEGV:
-    Traza("%s", "TRAZA - RECIBI SIGSEGV");
-    break;
+    case SIGUSR1:
+      {
+        Traza("%s", "TRAZA - RECIBI LA SENIAL SIGUSR1");
+        senial_SIGUSR1 = 1; // marco que recibi la seÃ±al
+        break;
+      }
+
     }
 }
 
@@ -643,11 +620,8 @@ PedirSentencia(char** sentencia)
             }
           else
             {
-              Error("%s", "ERROR - NO SE PUDO OBTENER LA INSTRUCCION");
-              ab = 1;
-              quantum = 0;
-              motivo = string_substring(instruccion, 1,
-                  (strlen(instruccion)) - 1);
+              instruccion="";
+              instruccion=string_substring(instruccion,0,1);
             }
         }
       else
@@ -657,18 +631,19 @@ PedirSentencia(char** sentencia)
           quantum = 0;
         }
     }
-  else
-    {
-      if (string_starts_with(instruccion, "0"))
+  if (string_starts_with(instruccion, "0"))
         {
           Error("ERROR - UMV: %s",string_substring(instruccion, 1, (strlen(instruccion)) - 1));
           ab = 1;
           motivo = string_substring(instruccion, 1, (strlen(instruccion)) - 1);
           quantum = 0;
         }
-      else
-        umvDesconectada();
-    }
+      else{
+          if (!(string_starts_with(instruccion, "1")))
+            umvDesconectada();
+      }
+
+
 
   //free(instruccion);
 
@@ -689,12 +664,11 @@ getUMV(int base, int dsp, int tam)
       base, dsp, tam);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
-  if (!(string_starts_with(respuesta, "1")))
-    {
-      Error("%s", "ERROR - NO SE ENCONTRÃ“ VALOR EN ESA DIRECCION");
-      Error("ERROR UMV: %s",
-          string_substring(respuesta, 1, (strlen(respuesta)) - 1));
-    }
+  if (string_starts_with(respuesta, "0"))
+      Error("ERROR UMV: %s",string_substring(respuesta, 1, (strlen(respuesta)) - 1));
+    else{
+        if (!(string_starts_with(respuesta, "1")))
+          umvDesconectada();}
 
   return respuesta;
 }
@@ -739,6 +713,8 @@ setUMV(int ptro, int dsp, int tam, char* valor)
 void
 CambioProcesoActivo()
 {
+  if ((ab==0) && (f==0))
+    {
   char respuesta[BUFFERSIZE];
   char *mensaje = string_itoa(CAMBIO_PROCESO);
   serCadena(&mensaje, string_itoa(programa->id));
@@ -762,10 +738,18 @@ CambioProcesoActivo()
       else
         umvDesconectada();
     }
+   }
 
 }
 
 //Mensajes frecuentes al kernel ---------------------------------------------------------
+
+
+void
+CPULibre()
+{
+  Enviar(socketKERNEL,LIBRE);
+}
 
 void
 AvisarDescAKernel()
@@ -916,7 +900,7 @@ destruirEstructuras()
 void
 RecuperarDicEtiquetas()
 {
-  if (ab == 0) // Solo buscarÃ¡ los datos si el programa no se abortÃ³
+  if ((ab==0) && (f==0))// Solo buscarÃ¡ los datos si el programa no se abortÃ³
     {
       Traza("%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE ETIQUETAS");
 
@@ -986,7 +970,7 @@ RecuperarDicVariables()
   //si es 0 -> programa nuevo
   //si es >0 -> cant de variables a leer desde seg stack en umv
 
-  if (ab == 0) // si el programa no fue abortado antes de entrar aca
+  if ((ab==0) && (f==0)) // si el programa no fue abortado antes de entrar aca
     {
       int i;
       int aux = 0;
@@ -1210,6 +1194,10 @@ main(void)
           tengoProg = RecibirProceso();
           if (tengoProg == (-2))
             AbortarProceso();
+          if(tengoProg==(-3))
+            {
+              ab=0;
+            }
         }
 
       //Si salio del ciclo anterior es que ya tengo un programa
