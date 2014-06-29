@@ -1,4 +1,5 @@
 
+
 //Sockets
 int ConexionConSocket(int puerto, char* IP );
 int EnviarDatos(int sRemoto, void *buffer);
@@ -18,7 +19,7 @@ int ObtenerPuertoPCPConfig();
 int ObtenerQuamtum();
 int ObtenerRetardo();
 int ObtenerMulti();
-
+int ObtenerTamanioStack();
 //Hilos
 void *PLP(void *arg);
 void *PCP(void *arg);
@@ -39,16 +40,15 @@ void Traza(const char* mensaje, ...);
 /* Definición del pcb */
 typedef struct PCBs {
 	int id;
+	int programCounter;
 	int segmentoCodigo;
 	int segmentoStack;
 	int cursorStack;
-	int indiceCodigo;
+	t_intructions* indiceCodigo;
 	int indiceEtiquetas;
-	int programCounter;
 	int sizeContextoActual;
 	int sizeIndiceEtiquetas;
 } PCB;
-
 
 //deserealizar
 PCB* desearilizar_PCB(char* estructura, int* pos);
@@ -123,13 +123,13 @@ typedef struct _t_NEW {
 	int peso;
 } t_New;
 
-//static t_New *new_create(PCB* pcb, int peso)
-//{
-//	t_New *new = malloc(sizeof(t_New));
-//	new->idPCB = pcb;
-//	new->peso = peso;
-//	return new;
-//}
+static t_New *new_create(PCB* pcb, int peso)
+{
+	t_New *new = malloc(sizeof(t_New));
+	new->idPCB = pcb;
+	new->peso = peso;
+	return new;
+}
 
 static void new_destroy(t_New *self)
 {
