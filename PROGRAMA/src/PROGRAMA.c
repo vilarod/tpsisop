@@ -79,15 +79,18 @@ int main(int argc, char* argv[]) {
 	nombreArchivo = (char*) malloc(strlen(argv[1] - 2));
 
 	if (string_starts_with(argv[1], begin))
-		nombreArchivo = string_substring_from(argv[1], 2);
-
-	printf("nombre archivo: %s", nombreArchivo);
+		nombreArchivo = string_substring_from(argv[1], 2);//nombre del archivo sin ./ adelante
+	else
+		traza("%s\n", "Error al ingresar el archivo");
+	printf("nombre archivo: %s\n", nombreArchivo);
 	file = fopen(nombreArchivo, "r");    //abre el archivo en modo read
 	if (file == NULL ) {
-		fprintf(stderr, "Error no existe el archivo: %s\n", argv[1]); //No existe el archivo
+		traza("No existe el archivo %s\n", argv[1]); //No existe el archivo
 		exit(1);
 	}
 	traza("Abre el archivo:%s\n", argv[1]);
+    free(nombreArchivo);
+    nombreArchivo=NULL;
 
 	fseek(file, 0, SEEK_END);    //nos situamos al final del archivo
 	len = ftell(file);    //nos da la cantidad de bytes del archivo
@@ -95,25 +98,25 @@ int main(int argc, char* argv[]) {
 
 	contents = (char*) malloc(sizeof(char) * len + 1); //para guardar lo que lee
 	contents[len] = '\0'; // para indicar que termina el texto
-//		if (contents == NULL ) {
-//			fprintf(stderr, "Error: no hay memoria disponible"); //imprime error sino tiene memoria
-//			exit(1);
-//		}
+		if (contents == NULL ) {
+			traza("%s\n","Error no hay memoria disponible");
+			exit(1);
+		}
 
 	bytesRead = fread(contents, sizeof(char), len, file); //bytes leidos
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
 	traza("El programa en el script es:\n %s\n", contents);
-	//printf("Contents:\n %s", contents); //imprime el programa tal como esta en el script
+
 	txt_close_file(file); //cierro el archivo
 
 	char **linea;
 	char *separator = NULL;
 	char *nuevo = NULL;
 	nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
-//		if(nuevo == NULL){
-//			fprintf(stderr, "Error: no hay memoria disponible"); //imprime error sino tiene memoria
-//						exit(1);
-//		}
+		if(nuevo == NULL){
+			traza("%s\n","Error no hay memoria disponible"); //imprime error sino tiene memoria
+						exit(1);
+		}
 	strcpy(nuevo, "");
 	separator = "\n";
 
@@ -135,7 +138,7 @@ int main(int argc, char* argv[]) {
 	char *programa = NULL;
 	programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
 	if (programa == NULL ) {
-		fprintf(stderr, "Error: no hay memoria disponible"); //imprime error sino tiene memoria
+		traza("%s", "Error no hay memoria disponible"); //imprime error sino tiene memoria
 		exit(1);
 	}
 	programa = strdup(nuevo);
@@ -170,13 +173,13 @@ char* obtenerIpKERNEL() {
 
 }
 
-void conectarAKERNEL(char *archivo) { //tengo que agregar programa para poder enviarlo
-	traza("Intentando conectar a kernel");
-	int puerto = obtenerPuertoKERNEL();
-	char *IP = obtenerIpKERNEL();
-	int soquete = conexionConSocket(puerto, IP); // para la prueba
+void conectarAKERNEL(char *archivo) { //el parametro es el programa
+	traza("%s\n","Intentando conectar a kernel");
+	//int puerto = obtenerPuertoKERNEL(); //descomentar para la prueba en laboratorio
+	//char *IP = obtenerIpKERNEL();//idem anterior
+	//int soquete = conexionConSocket(puerto, IP); // para la prueba en laboratorio
 
-//int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para prueba local
+int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para prueba local
 	if (hacerhandshakeKERNEL(soquete, archivo) == 0) {
 		ErrorFatal("No se pudo conectar al kernel");
 	}
@@ -185,22 +188,22 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	char respuestahandshake[BUFFERSIZE];
 
 	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE ES H
-	traza("Envio handshake");
+	traza("%s\n","Envio handshake");
 	recibirDatos(sockfd, respuestahandshake);
 	if (respuestahandshake[0] == '0') {
 		printf("Error del KERNEL");
 		exit(1);
 	} else
-		traza("Kernel recibio hanshake");
+		traza("%s\n","Kernel recibio hanshake");
 	analizarRespuestaKERNEL(respuestahandshake);
-	traza("Envio programa");
+	traza("%s\n","Envio programa");
 	enviarDatos(sockfd, programa); //envio el programa
 	recibirDatos(sockfd, respuestahandshake);
 	if (respuestahandshake[0] == '0') {
 		printf("Error del KERNEL");
 		exit(1);
 	}
-	traza("Kernel recibio el programa");
+	traza("%s","Kernel recibio el programa");
 	int finDeEjecucion;
 	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestahandshake);
 	while (finDeEjecucion != 0) {
@@ -222,11 +225,9 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 }
 int imprimirRespuesta(char *mensaje) {
 
-	if (((string_starts_with(mensaje, "I"))
-			|| (string_starts_with(mensaje, "i")))
-			&& (string_ends_with(mensaje, "\0"))) {
+	if ((string_starts_with(mensaje, "I"))&& (string_ends_with(mensaje, "\0"))) {
 		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
-		traza("Se imprime el mensaje enviado por el kernel");
+		traza("%s\n","Se imprime el mensaje enviado por el kernel");
 	}
 
 	return 0;
@@ -235,12 +236,13 @@ int imprimirRespuesta(char *mensaje) {
 int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 
 	enviarDatos(sockfd, CONFIRMACION);
+	traza("%s\n", "Envio confirmacion de recepcion de datos");
 	return 0;
 }
 
 int analizarSiEsFinDeEjecucion(char *respuestahandshake) {
 
-	if ((respuestahandshake[0] == 'F') || (respuestahandshake[0] == 'f'))
+	if (respuestahandshake[0] == 'F')
 		return 0;
 	else
 		return 1;
@@ -287,11 +289,10 @@ int recibirDatos(int socket, char *buffer) {
 
 //Nos ponemos a la escucha de las peticiones que nos envie el kernel //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-		Error(
-				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
+		Error("Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
 
-	traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	traza("RECIBO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
 	return bytecount;
 }
 
@@ -299,29 +300,29 @@ int enviarDatos(int socket, void *buffer) {
 	int bytecount;
 
 	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
-		Error("No puedo enviar información al kernel. Socket: %d", socket);
+		Error("No puedo enviar información al kernel. Socket: %d\n", socket);
 
-	traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	traza("ENVIO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
 
 	return bytecount;
 }
 
-void Error1(int code, char *err) {
-	char *msg = (char*) malloc(strlen(err) + 14);
-	sprintf(msg, "Error %d: %s\n", code, err);
-	fprintf(stderr, "%s", msg);
-	exit(1);
-}
+//void Error1(int code, char *err) {
+//	char *msg = (char*) malloc(strlen(err) + 14);
+//	sprintf(msg, "Error %d: %s\n", code, err);
+//	fprintf(stderr, "%s", msg);
+//	exit(1);
+//}
 
-void cerrar(int sRemoto) {
+//void cerrar(int sRemoto) {
+//
+//	close(sRemoto);
+//}
 
-	close(sRemoto);
-}
-
-void cerrarSocket(int socket) {
-	close(socket);
-	traza("Se cerró el socket (%d).", socket);
-}
+//void cerrarSocket(int socket) {
+//	close(socket);
+//	traza("Se cerró el socket (%d).", socket);
+//}
 
 void ErrorFatal(char mensaje[], ...) {
 	char* nuevo;
@@ -335,8 +336,7 @@ void ErrorFatal(char mensaje[], ...) {
 
 	char fin;
 
-	printf(
-			"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
+	printf(	"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
 	scanf("%c", &fin);
 
 	exit(EXIT_FAILURE);
