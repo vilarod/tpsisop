@@ -49,7 +49,7 @@
 #define AVISO_DESC 7
 #define SET_UMV 2
 #define GET_UMV 1
-#define AB_PROCESO "A-"
+#define AB_PROCESO "A"
 #define FIN_PROCESO "F-"
 #define LIBRE "L-"
 #define S_SIGNAL 9
@@ -119,7 +119,7 @@ ConexionConSocket(int* Conec, int socketConec, struct sockaddr_in destino)
 void
 Cerrar(int sRemoto)
 {
-  Traza("%s", "TRAZA - SE CIERRA LA CONEXION SOCKET: %d",sRemoto);
+  Traza("TRAZA - SE CIERRA LA CONEXION SOCKET: %d",sRemoto);
   close(sRemoto);
 }
 
@@ -128,7 +128,7 @@ crearSocket(int socketConec)
 {
   socketConec = socket(AF_INET, SOCK_STREAM, 0);
   if (socketConec == -1) //Si al crear el socket devuelve -1 quiere decir que no lo puedo usar
-    ErrorFatal("%s", "ERROR - NO SE PUEDE CONECTAR EL SOCKET: %d", socketConec);
+    ErrorFatal("ERROR - NO SE PUEDE CONECTAR EL SOCKET: %d", socketConec);
   return socketConec;
 }
 
@@ -561,6 +561,8 @@ iniciarPCB(PCB* prog)
 void
 AbortarProceso()
 {
+  if (CONECTADO_KERNEL==1)
+    {
   //enviar "A" al kernel
   char *mensaje = malloc(BUFFERSIZE * sizeof(char));
   string_append(&mensaje, AB_PROCESO);
@@ -569,7 +571,8 @@ AbortarProceso()
   Traza("%s", "TRAZA - SE ABORTARA EL PROCESO");
   Enviar(socketKERNEL, mensaje);
   free(mensaje);
-  motivo = "";
+  motivo = "ERROR";
+    }
 
 }
 
@@ -618,17 +621,13 @@ PedirSentencia(char** sentencia)
                   (strlen(instruccion) - 1));
               aux = 1;
             }
-          else
-            {
-              instruccion="";
-              instruccion=string_substring(instruccion,0,1);
-            }
         }
       else
         {
           Error("%s", "ERROR - DESPLAZAMIENTO/OFFSET INVALIDOS");
           ab = 1; //seÃ±al para abortar el proceso
           quantum = 0;
+          instruccion = "1";
         }
     }
   if (string_starts_with(instruccion, "0"))
@@ -640,10 +639,8 @@ PedirSentencia(char** sentencia)
         }
       else{
           if (!(string_starts_with(instruccion, "1")))
-            umvDesconectada();
+            {umvDesconectada();}
       }
-
-
 
   //free(instruccion);
 
@@ -841,8 +838,9 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
 void
 procesoTerminoQuantum(int que, char* donde, int cuanto)
 {
+  if (CONECTADO_KERNEL == 1)
+    {
   imprimirContextoActual();
-
   char *mensaje = string_itoa(FIN_QUANTUM);
 
   string_append(&mensaje, serializar_PCB(programa));
@@ -858,6 +856,7 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
   Enviar(socketKERNEL, mensaje);
 
   free(mensaje);
+    }
 }
 
 //Enviar a parser --------------------------------------------------------------
@@ -1106,6 +1105,7 @@ inciarVariables()
   ab = 0;
   tengoProg = 0;
   f = 0;
+  motivo = "ERROR";
 }
 
 int
@@ -1546,7 +1546,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
     {
       int* aux = dictionary_get(dicVariables, var);
       posicion = (t_puntero) aux;
-      Traza("encontre la variable %s, posicion %d", var, aux);
+      Traza("TRAZA - ENCONTRE LA VARIABLE: %s, POSICION: %d", var, aux);
       variable_ref=var;
     }
   else
@@ -1558,7 +1558,6 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
     }
   free(var);
 
-  Traza("la posicion que me llevo es %d", posicion);
 
   return posicion; //devuelvo la posicion
 }
@@ -1664,7 +1663,12 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
           procesoTerminoQuantum(2, identificador_semaforo, 0);
         }
       else
+        {
+        if (!(string_equals_ignore_case(senial, "1")))
+          kernelDesconectado();
+        else
         Traza("%s", "TRAZA - EL PROCESO OBTUVO EL SEMAFORO");
+        }
     }
 
 }
@@ -1688,9 +1692,12 @@ prim_signal(t_nombre_semaforo identificador_semaforo)
     }
   else
     {
+      if (string_equals_ignore_case(string_substring(respuesta, 0, 1), "0"))
+        {
       Error("%s", "NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO");
       quantum = 0;
-      tengoProg = 0;
       ab = 1;
+        } else
+          kernelDesconectado();
     }
 }
