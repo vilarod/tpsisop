@@ -146,7 +146,8 @@ typedef struct _t_sem {
 static t_sem *sem_create(char* nombre, int valor)
 {
 	t_sem *new = malloc(sizeof(t_sem));
-	new->nombre = nombre;
+	new->nombre=string_new();
+	string_append(&(new->nombre),nombre);
 	new->valor = valor;
 	new->listaSem=list_create();
 	return new;
@@ -194,7 +195,8 @@ static t_Final *final_create(PCB* pcb,int final, char* msj)
 }
 
 static void final_destroy(t_Final *self)
-{	free(self->idPCB);
+{
+//	free(self->idPCB);
 	free(self);
 }
 
@@ -232,7 +234,7 @@ static t_bloqueado *bloqueado_create(PCB* pcb,int tiempo)
 }
 
 static void bloqueado_destroy(t_bloqueado *self)
-{	free(self->idPCB);
+{	//free(self->idPCB);
 	free(self);
 }
 
@@ -268,7 +270,7 @@ static t_HIO *HIO_create(char* nombre, int valor)
 	new->valor = valor;
 	new->listaBloqueados=list_create();
 	seminit(&(new->bloqueadosCont), 0);
-	pthread_mutex_init(&new->mutexBloqueados, NULL );
+	pthread_mutex_init(&(new->mutexBloqueados), NULL );
 	return new;
 }
 //funciones de las listas de config

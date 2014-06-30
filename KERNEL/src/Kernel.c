@@ -138,22 +138,23 @@ void *PLP(void *arg) {
 	return NULL ;
 }
 void *FinEjecucion(void *arg) {
-	t_Final* auxFinal;
+//	t_Final* auxFinal;
 	t_list* auxList;
 	//free de toodo
+	while(1){
 	semwait(&finalizarCont);
-	while (list_size(listaFin) > 0) {
+	if (list_size(listaFin) > 0) {
 		auxList = list_take(listaFin, 1);
-		auxFinal = list_get(auxList, 0);
+//		auxFinal = list_get(auxList, 0);
 		//Mensajes de destruir Segmento aqui, 
 		//Enviar mensaje a programa que finalizo
-		final_destroy(auxFinal);
+//		final_destroy(auxFinal); para mi esta mal
 		list_clean_and_destroy_elements(auxList, (void*) final_destroy);
 	}
 
 
 	semsig(&multiCont);
-
+	}
 	return NULL ;
 }
 
@@ -624,7 +625,7 @@ void llenarDispositConfig() {
 		valor = atoi(nombre2);
 		list_add(listaDispositivos, HIO_create(nombre1, valor));
 		if ((string_equals_ignore_case(sub1, "]") == 0)) {
-			nombre1[0] = '\0';
+			nombre1 = string_new();
 			nombre2[0] = '\0';
 		} else {
 			sfin = 0;
@@ -632,7 +633,11 @@ void llenarDispositConfig() {
 	}
 	free(sub1);
 	free(sub2);
-
+	t_HIO *auxHIO;
+	for (sfin = 0; sfin < list_size(listaDispositivos); sfin++) {
+		auxHIO = list_get(listaDispositivos, sfin);
+		Traza("Dispositivo: %s valor: %d", (char *) auxHIO->nombre, auxHIO->valor);
+	}
 }
 char* obtenerCadenaVarGlob() {
 	t_config* config = config_create(PATH_CONFIG);
@@ -688,7 +693,7 @@ void llenarVarGlobConfig() {
 		valor = atoi(nombre2);
 		list_add(listaVarGlobal, varGlobal_create(nombre1, valor));
 		if ((string_equals_ignore_case(sub1, "]") == 0)) {
-			nombre1[0] = '\0';
+			nombre1 = string_new();
 			nombre2[0] = '\0';
 		} else {
 			sfin = 0;
@@ -696,6 +701,11 @@ void llenarVarGlobConfig() {
 	}
 	free(sub1);
 	free(sub2);
+	t_varGlobal *auxG;
+	for (sfin = 0; sfin < list_size(listaVarGlobal); sfin++) {
+		auxG = list_get(listaVarGlobal, sfin);
+		Traza("Variable Global: %s valor: %d", (char *) auxG->nombre, auxG->valor);
+	}
 }
 
 void conectarAUMV() {
@@ -1558,16 +1568,24 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		break;
 	case '1':	//Hay que hacer I/O
 		disp = obtenerParteDelMensaje(buffer, &pos2);
+		pos2=pos2-2;
 		tiempo = atoi(obtenerParteDelMensaje(buffer, &pos2));
+		Traza("entro aqui %d, %d", pos2, tiempo);
 		t_HIO* auxHIO = encontrarDispositivo(disp);
+		Traza("encontrar HIO");
 		if (auxHIO != NULL ) {
+			Traza("1");
 			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
+			Traza("2");
 			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
+			Traza("3");
 			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
+			Traza("4");
 			semsig(&(auxHIO->bloqueadosCont));
 			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
 					auxPCB->id, (char*) auxHIO->nombre);
 		} else {
+			Traza("No encontro dispositivo");
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin,
 					final_create(auxPCB, 1, "Dispositivo no encontrado"));
@@ -1605,7 +1623,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		break;
 	}
 //Buscar CPU y Borrar Programa
-	borrarPCBenCPU(socket);
+//	borrarPCBenCPU(socket);
 }
 
 void comandoWait(char* buffer, int socket) {
@@ -1717,7 +1735,7 @@ void borrarPCBenCPU(int idCPU) {
 char* obtenerParteDelMensaje(char* buffer, int* pos) {
 	char* sub;
 	char* nombre;
-	sub = malloc(1 * sizeof(char));
+	sub = string_new();
 	nombre = string_new();
 	int final = *pos;
 	sub = string_substring(buffer, final, 1);
@@ -1733,9 +1751,11 @@ char* obtenerParteDelMensaje(char* buffer, int* pos) {
 }
 
 t_HIO* encontrarDispositivo(char* nombre) {
+	Traza("nombre: %s", (char*) nombre);
 	int _is_dis(t_HIO *p) {
 		return string_equals_ignore_case(p->nombre, nombre);
 	}
+
 	t_HIO *aux = list_find(listaDispositivos, (void*) _is_dis);
 	return aux;
 }
