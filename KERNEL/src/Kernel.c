@@ -137,7 +137,7 @@ void *PLP(void *arg) {
 void *FinEjecucion(void *arg) {
 	t_Final* auxFinal;
 	t_list* auxList;
-
+	//free de toodo
 	semwait(&finalizarCont);
 	while (list_size(listaFin) > 0) {
 		auxList = list_take(listaFin, 1);
@@ -146,8 +146,8 @@ void *FinEjecucion(void *arg) {
 		list_clean_and_destroy_elements(auxList, (void*) final_destroy);
 	}
 
-	//free de toodo
-	//signal(multiprogramacion)
+
+	semsig(&multiCont);
 
 	return NULL ;
 }
@@ -874,6 +874,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	char respuestaumv4[BUFFERSIZE];
 	char respuestaumv5[BUFFERSIZE];
 	char respuestaumv6[BUFFERSIZE];
+	char respuestaumv7[BUFFERSIZE];
+	char respuestaumv8[BUFFERSIZE];
 	PCB PCBAUX;
 
 	PCBAUX.id = id;
@@ -881,12 +883,12 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	PCBAUX.sizeIndiceEtiquetas = metadataprograma->etiquetas_size;
 	PCBAUX.sizeContextoActual = 0;
 
-	//lo imprimi para q no de error de compilacion pq dice q no lo utiliza
-	Traza("%d", PCBAUX.id);
 	//Cambio de Contexxto
 	EnviarDatos(socketumv, cadenaCambioContexto);
 	RecibirDatos(socketumv, respuestaumv);
+
 	if (analisarRespuestaUMV(respuestaumv) != 0) {
+
 		//Preparamos mensaje para Segmento Codigo
 		int digitosProg = cantidadDigitos(strlen(programa));
 		char* cadenaSegmento = string_new();
@@ -901,9 +903,11 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 		if (analisarRespuestaUMV(respuestaumv2) != 0) {
 			char *codesegment = string_substring(respuestaumv2, 2,
 					strlen(respuestaumv2) - 2);
+
 			//Valor Segmento Codigo asignado
 			PCBAUX.segmentoCodigo = atoi(codesegment);
 			int digitosBaseCOD = cantidadDigitos(PCBAUX.segmentoCodigo);
+
 			//Escribimos el codigo
 			string_append(&escribodatos, string_itoa(2));
 			string_append(&escribodatos, string_itoa(digitosBaseCOD));
@@ -915,7 +919,9 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			string_append(&escribodatos, programa);
 			EnviarDatos(socketumv, escribodatos);
 			RecibirDatos(socketumv, respuestaumv5);
+
 			if (analisarRespuestaUMV(respuestaumv5) != 0) {
+
 				//Preparamos mensaje para Tamaño Stack
 				char* stack = string_new();
 				int digitosStack = cantidadDigitos(ObtenerTamanioStack());
@@ -945,9 +951,11 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 					EnviarDatos(socketumv, etiqueta);
 					RecibirDatos(socketumv, respuestaumv4); //COD + DIGITO + BASE
 					if (analisarRespuestaUMV(respuestaumv4) != 0) {
-						char *Etiquetasegment = string_substring(respuestaumv3,
+						char *Etiquetasegment = string_substring(respuestaumv4,
 								2, strlen(respuestaumv4) - 2);
 						PCBAUX.indiceEtiquetas = atoi(Etiquetasegment);
+
+						//Grabar las etiquetas
 						char*escribirEtiq = string_new();
 						int digitosBaseEtiq = cantidadDigitos(
 								PCBAUX.indiceEtiquetas);
@@ -968,9 +976,62 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 								metadataprograma->etiquetas);
 						EnviarDatos(socketumv, escribirEtiq);
 						RecibirDatos(socketumv, respuestaumv6);
-						if (analisarRespuestaUMV(respuestaumv6) != 0) {
-							//	PCBAUX.indiceCodigo = base de indice de codigo    escribir los indices en la umv
 
+						if (analisarRespuestaUMV(respuestaumv6) != 0) {
+
+							//Creacion segmento Indice codigo
+							char* codex = string_new();
+							int digitocode = cantidadDigitos(
+									metadataprograma->instrucciones_size);
+							string_append(&codex, string_itoa(5));
+							string_append(&codex, string_itoa(digitosID));
+							string_append(&codex, string_itoa(id));
+							string_append(&codex, string_itoa(digitocode));
+							string_append(&codex,
+									string_itoa(
+											metadataprograma->instrucciones_size));
+							EnviarDatos(socketumv, codex);
+							RecibirDatos(socketumv, respuestaumv7); //COD + DIGITO + BASE
+							if (analisarRespuestaUMV(respuestaumv7) != 0) {
+								char *codexsegment = string_substring(
+										respuestaumv7, 2,
+										strlen(respuestaumv7) - 2);
+								PCBAUX.indiceCodigo = atoi(codexsegment);
+
+								//Grabar los indices
+								char*escribirCodex = string_new();
+								int digitosBaseCodex = cantidadDigitos(
+										PCBAUX.indiceCodigo);
+								string_append(&escribirCodex, string_itoa(2));
+								string_append(&escribirCodex,
+										string_itoa(digitosBaseCodex));
+								string_append(&escribirCodex,
+										string_itoa(PCBAUX.indiceCodigo));
+								string_append(&escribirCodex, string_itoa(1));
+								string_append(&escribirCodex, string_itoa(0));
+								string_append(&escribirCodex,
+										string_itoa(
+												cantidadDigitos(
+														metadataprograma->instrucciones_size)));
+								int i = 0;
+								while (i
+										!= (metadataprograma->instrucciones_size)) {
+									string_append(&escribirCodex,
+											string_itoa(
+													metadataprograma->instrucciones_serializado->start));
+									string_append(&escribirCodex,
+											string_itoa(
+													metadataprograma->instrucciones_serializado->offset));
+									i++;
+								}
+								EnviarDatos(socketumv, escribirCodex);
+								RecibirDatos(socketumv, respuestaumv8);
+								if (analisarRespuestaUMV(respuestaumv8) == 0) {
+									return 0;
+								}
+								//	PCBAUX.indiceCodigo = base de indice de codigo    escribir los indices en la umv
+							} else
+								return 0;
 						} else
 							return 0;
 					} else
@@ -984,19 +1045,13 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	} else
 		return 0;
 
-
-	//ROMI LEE ESTO
-	int comienzo = metadataprograma->instrucciones_serializado->start;
-
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
-	Traza("%d", comienzo);
 
 	list_add(listaNew, new_create(&(PCBAUX), pesito));
 	return 1;
 }
-
 
 int cantidadDigitos(int num) {
 	int contador = 1;
