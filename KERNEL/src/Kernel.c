@@ -986,7 +986,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 
 	//ROMI LEE ESTO
-	int comienzo = &(metadataprograma->instrucciones_serializado)->start;
+	int comienzo = metadataprograma->instrucciones_serializado->start;
 
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
