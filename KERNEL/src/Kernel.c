@@ -142,6 +142,7 @@ void *FinEjecucion(void *arg) {
 	while (list_size(listaFin) > 0) {
 		auxList = list_take(listaFin, 1);
 		auxFinal = list_get(auxList, 0);
+		//Mensajes de destruir Segmento aqui, 
 		final_destroy(auxFinal);
 		list_clean_and_destroy_elements(auxList, (void*) final_destroy);
 	}
