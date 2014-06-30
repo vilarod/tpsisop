@@ -116,16 +116,19 @@ void *PLP(void *arg) {
 	//Me conecto a la UMV
 	conectarAUMV();
 
-	//Creo el hilo de pcp
+	
 	pthread_t pcp, Imprimir, Fin, plpNew;
+	//Creo el hilo de pcp
 	pthread_create(&pcp, NULL, PCP, NULL );
-
-	crearEscucha();
-
+	//Crear hilo de imprimir por consola
 	pthread_create(&Imprimir, NULL, IMPRIMIRConsola, NULL );
+	//Crear hilo de finalizacion de ejecucion
 	pthread_create(&Fin, NULL, FinEjecucion, NULL );
 	//crear hilo de new
 	pthread_create(&plpNew, NULL, moverReadyDeNew, NULL );
+	crearEscucha();
+
+
 
 	pthread_join(plpNew, NULL );
 	pthread_join(pcp, NULL );
@@ -143,6 +146,7 @@ void *FinEjecucion(void *arg) {
 		auxList = list_take(listaFin, 1);
 		auxFinal = list_get(auxList, 0);
 		//Mensajes de destruir Segmento aqui, 
+		//Enviar mensaje a programa que finalizo
 		final_destroy(auxFinal);
 		list_clean_and_destroy_elements(auxList, (void*) final_destroy);
 	}
