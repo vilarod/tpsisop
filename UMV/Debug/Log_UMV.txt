@@ -1,0 +1,2 @@
+[TRACE] 11:16:26:559 UMV/(21179:21179): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 11:16:26:560 UMV/(21179:21180): El socket está listo para recibir conexiones. Numero de socket: 5, puerto: 7000
