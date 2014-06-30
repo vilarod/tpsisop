@@ -207,8 +207,8 @@ void *moverEjecutar(void *arg) {
 		semwait(&readyCont);
 		semwait(&CPUCont);
 		pthread_mutex_lock(&mutexReady);
-		buffer = malloc(1 * sizeof(char) + 1);
-		buffer = "1";
+		buffer = string_new();
+		string_append(&buffer, "1");
 		pthread_mutex_lock(&mutexCPU);
 		auxcpu = encontrarCPULibre();
 		if (auxcpu != NULL ) {
@@ -1124,6 +1124,7 @@ char* ComandoHandShake2(char *buffer, int *tipoCliente) {
 // C = codigo de mensaje ( = 3)
 
 //int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
+	Traza("bufer %s", (char*) buffer);
 	int tipoDeCliente = chartToInt(buffer[1]);
 	if (tipoDeCliente == TIPO_CPU) {
 		*tipoCliente = tipoDeCliente;
@@ -1337,7 +1338,7 @@ void *HiloOrquestadorDeCPU() {
 						}
 						pthread_mutex_lock(&mutexCPU);
 						eliminarCpu(i);
-						pthread_mutex_lock(&mutexCPU);
+						pthread_mutex_unlock(&mutexCPU);
 						close(i); // bye!
 						FD_CLR(i, &master); // eliminar del conjunto maestro
 					} else {
@@ -1493,7 +1494,7 @@ void iniciarPCB(PCB* prog) {
 
 char* serializar_PCB(PCB* prog) {
 	char* cadena;
-	cadena = malloc(1 * sizeof(char));
+	cadena = string_new();
 
 	string_append(&cadena, string_itoa(prog->id));
 	string_append(&cadena, "-");
@@ -1523,8 +1524,9 @@ void comandoLiberar(int socket) {
 	if (aux != NULL ) {
 		aux->libre = 0;
 	}
-	pthread_mutex_lock(&mutexCPU);
+	pthread_mutex_unlock(&mutexCPU);
 	semsig(&CPUCont);
+	Traza("Se librera CPU: %d", aux->idCPU);
 }
 
 void eliminarCpu(int idcpu) {
@@ -1546,11 +1548,12 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 	int pos2 = pos + 2;
 	switch (buffer[pos]) {
 	case '0': //termino quamtum colocar en ready
+		Traza("lo deseareliza %d", pos);
 		pthread_mutex_lock(&mutexReady);
 		list_add(listaReady, auxPCB);
 		pthread_mutex_unlock(&mutexReady);
 		semsig(&readyCont);
-		Traza("Final Quamtum mover a ready. Programa: %d. buffer: %s",
+		Traza("Final Quamtum mover a ready. Programa: %d",
 				auxPCB->id);
 		break;
 	case '1':	//Hay que hacer I/O
