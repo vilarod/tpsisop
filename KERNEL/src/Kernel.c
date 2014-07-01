@@ -272,6 +272,7 @@ void *bloqueados_fnc(void *arg) {
 	t_list* auxLista;
 	t_bloqueado* auxBloq;
 	PCB* auxPCB;
+	Traza("Levanto hilo dispositivo: %s",(char*) HIO->nombre);
 	while (1) {
 		semwait(&(HIO->bloqueadosCont));
 		pthread_mutex_lock(&(HIO->mutexBloqueados));
@@ -280,13 +281,16 @@ void *bloqueados_fnc(void *arg) {
 			pthread_mutex_unlock(&(HIO->mutexBloqueados));
 			auxBloq = list_get(auxLista, 0);
 			//Procesando HIO
+			Traza("Entrada HIO disp %s programa: %d tiempo: %d", (char*) HIO->nombre, auxBloq->idPCB->id,auxBloq->tiempo);
 			sleep(HIO->valor * auxBloq->tiempo);
 			//Pasar a Ready
+			Traza("vuelve programa: %d",auxBloq->idPCB->id);
 			auxPCB = auxBloq->idPCB;
 			auxBloq->idPCB = NULL;
 			pthread_mutex_lock(&mutexReady);
 			list_add(listaReady, auxPCB);
 			pthread_mutex_unlock(&mutexReady);
+			semsig(&readyCont);
 			list_clean_and_destroy_elements(auxLista,
 					(void*) bloqueado_destroy);
 		} else {
@@ -333,8 +337,8 @@ void crearEscucha() {
 	char* buffer;
 	buffer = malloc(1 * sizeof(char));
 
-	int id_Programa = 0;
-	int tipo_Conexion = 0;
+//	int id_Programa = 0;
+//	int tipo_Conexion = 0;
 
 	char tipo_mensaje;
 
@@ -728,7 +732,7 @@ int hacerhandshakeUMV(int sockfd) {
 }
 
 int analisarRespuestaUMV(char *mensaje) {
-	if (mensaje[0] == "0") {
+	if (mensaje[0] == '0') {
 		Error("La umv nos devolvio un error: %s", mensaje);
 		return 0;
 	} else
@@ -1315,7 +1319,7 @@ void *HiloOrquestadorDeCPU() {
 		//return EXIT_FAILURE;
 	}
 
-	printf("Escuchando conexiones entrantes.\n");
+	Traza("Escuchando conexiones entrantes PCP(%d).\n", PuertoPCP);
 // añadir listener al conjunto maestro
 	FD_SET(socketEscucha, &master);
 // seguir la pista del descriptor de fichero mayor
@@ -1588,15 +1592,10 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		tiempo = atoi(obtenerParteDelMensaje(buffer, &pos2));
 		Traza("entro aqui %d, %d", pos2, tiempo);
 		t_HIO* auxHIO = encontrarDispositivo(disp);
-		Traza("encontrar HIO");
 		if (auxHIO != NULL ) {
-			Traza("1");
 			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
-			Traza("2");
 			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
-			Traza("3");
 			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
-			Traza("4");
 			semsig(&(auxHIO->bloqueadosCont));
 			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
 					auxPCB->id, (char*) auxHIO->nombre);
@@ -1639,7 +1638,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		break;
 	}
 //Buscar CPU y Borrar Programa
-//	borrarPCBenCPU(socket);
+	borrarPCBenCPU(socket);
 }
 
 void comandoWait(char* buffer, int socket) {
@@ -1741,9 +1740,11 @@ void borrarPCBenCPU(int idCPU) {
 	t_CPU *aux = encontrarCPU(idCPU);
 	PCB* aux1;
 	if (aux != NULL ) {
-		aux1 = aux->idPCB;
-		aux->idPCB = NULL;
-		free(aux1);
+		if (aux->idPCB != NULL){
+			aux1 = aux->idPCB;
+			aux->idPCB = NULL;
+			free(aux1);
+		}
 	}
 	pthread_mutex_unlock(&mutexCPU);
 }
