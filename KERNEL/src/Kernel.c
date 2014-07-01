@@ -138,22 +138,23 @@ void *PLP(void *arg) {
 	return NULL ;
 }
 void *FinEjecucion(void *arg) {
-	t_Final* auxFinal;
+//	t_Final* auxFinal;
 	t_list* auxList;
 	//free de toodo
+	while(1){
 	semwait(&finalizarCont);
-	while (list_size(listaFin) > 0) {
+	if (list_size(listaFin) > 0) {
 		auxList = list_take(listaFin, 1);
-		auxFinal = list_get(auxList, 0);
+//		auxFinal = list_get(auxList, 0);
 		//Mensajes de destruir Segmento aqui, 
 		//Enviar mensaje a programa que finalizo
-		final_destroy(auxFinal);
+//		final_destroy(auxFinal); para mi esta mal
 		list_clean_and_destroy_elements(auxList, (void*) final_destroy);
 	}
 
 
 	semsig(&multiCont);
-
+	}
 	return NULL ;
 }
 
@@ -207,8 +208,8 @@ void *moverEjecutar(void *arg) {
 		semwait(&readyCont);
 		semwait(&CPUCont);
 		pthread_mutex_lock(&mutexReady);
-		buffer = malloc(1 * sizeof(char) + 1);
-		buffer = "1";
+		buffer = string_new();
+		string_append(&buffer, "1");
 		pthread_mutex_lock(&mutexCPU);
 		auxcpu = encontrarCPULibre();
 		if (auxcpu != NULL ) {
@@ -335,7 +336,7 @@ void crearEscucha() {
 	int id_Programa = 0;
 	int tipo_Conexion = 0;
 
-	char tipo_mensaje = '0';
+	char tipo_mensaje;
 
 	//int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 	//	struct sockaddr_in myaddr;     // dirección del servidor
@@ -385,7 +386,7 @@ void crearEscucha() {
 		//return EXIT_FAILURE;
 	}
 
-	printf("Escuchando conexiones entrantes.\n");
+	Traza("Escuchando conexiones entrantes PLP(%d).\n", Puerto);
 	// añadir listener al conjunto maestro
 	FD_SET(socketEscucha, &master);
 	// seguir la pista del descriptor de fichero mayor
@@ -440,9 +441,9 @@ void crearEscucha() {
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
 						case MSJ_HANDSHAKE:
-							ComandoHandShake(buffer, &id_Programa,
-									&tipo_Conexion);
-							EnviarDatos(i, "1");
+//							ComandoHandShake(buffer, &id_Programa,
+//									&tipo_Conexion);
+							EnviarDatos(i, "C");
 							break;
 						case MSJ_RECIBO_PROGRAMA:
 							if (ComandoRecibirPrograma(buffer, i) == 0) {
@@ -624,7 +625,7 @@ void llenarDispositConfig() {
 		valor = atoi(nombre2);
 		list_add(listaDispositivos, HIO_create(nombre1, valor));
 		if ((string_equals_ignore_case(sub1, "]") == 0)) {
-			nombre1[0] = '\0';
+			nombre1 = string_new();
 			nombre2[0] = '\0';
 		} else {
 			sfin = 0;
@@ -632,7 +633,11 @@ void llenarDispositConfig() {
 	}
 	free(sub1);
 	free(sub2);
-
+	t_HIO *auxHIO;
+	for (sfin = 0; sfin < list_size(listaDispositivos); sfin++) {
+		auxHIO = list_get(listaDispositivos, sfin);
+		Traza("Dispositivo: %s valor: %d", (char *) auxHIO->nombre, auxHIO->valor);
+	}
 }
 char* obtenerCadenaVarGlob() {
 	t_config* config = config_create(PATH_CONFIG);
@@ -688,7 +693,7 @@ void llenarVarGlobConfig() {
 		valor = atoi(nombre2);
 		list_add(listaVarGlobal, varGlobal_create(nombre1, valor));
 		if ((string_equals_ignore_case(sub1, "]") == 0)) {
-			nombre1[0] = '\0';
+			nombre1 = string_new();
 			nombre2[0] = '\0';
 		} else {
 			sfin = 0;
@@ -696,6 +701,11 @@ void llenarVarGlobConfig() {
 	}
 	free(sub1);
 	free(sub2);
+	t_varGlobal *auxG;
+	for (sfin = 0; sfin < list_size(listaVarGlobal); sfin++) {
+		auxG = list_get(listaVarGlobal, sfin);
+		Traza("Variable Global: %s valor: %d", (char *) auxG->nombre, auxG->valor);
+	}
 }
 
 void conectarAUMV() {
@@ -718,7 +728,7 @@ int hacerhandshakeUMV(int sockfd) {
 }
 
 int analisarRespuestaUMV(char *mensaje) {
-	if (mensaje[0] == 0) {
+	if (mensaje[0] == "0") {
 		Error("La umv nos devolvio un error: %s", mensaje);
 		return 0;
 	} else
@@ -838,16 +848,16 @@ void Traza(const char* mensaje, ...) {
 int ObtenerComandoMSJ(char buffer[]) {
 //Hay que obtener el comando dado el buffer.
 //El comando está dado por el primer caracter, que tiene que ser un número.
-	return chartToInt(buffer[0]);
+	return buffer[0];
 }
-void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente) {
-	(*idProg) = chartToInt(buffer[1]);
-	(*tipoCliente) = chartToInt(buffer[2]);
-
-	memset(buffer, 0, BUFFERSIZE);
-	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ",
-			*idProg, *tipoCliente);
-}
+//void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente) {
+//	(*idProg) = chartToInt(buffer[1]);
+//	(*tipoCliente) = chartToInt(buffer[2]);
+//
+//	memset(buffer, 0, BUFFERSIZE);
+//	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ",
+//			*idProg, *tipoCliente);
+//}
 int chartToInt(char x) {
 	char str[1];
 	str[0] = x;
@@ -860,18 +870,16 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 	int digitosID;
 
-	char *programa;
-	programa = malloc(1 * sizeof(char));
 	digitosID = cantidadDigitos(id);
 	char* cadenaCambioContexto;
 	cadenaCambioContexto = string_new();
 	string_append(&cadenaCambioContexto, string_itoa(4));
 	string_append(&cadenaCambioContexto, string_itoa(digitosID));
 	string_append(&cadenaCambioContexto, string_itoa(id));
-
-	programa = string_substring(programa, 1, strlen(programa) - 1);
+	char* prog = string_new();
+	prog = string_substring(buffer, 1, strlen(buffer) - 1);
 	//LLAMAR AL PARSER
-	t_metadata_program* metadataprograma = metadata_desde_literal(programa);
+	t_metadata_program* metadataprograma = metadata_desde_literal(prog);
 	//LLENAR PCB AUXILIAR
 	char respuestaumv[BUFFERSIZE];
 	char respuestaumv2[BUFFERSIZE];
@@ -890,19 +898,22 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 	//Cambio de Contexxto
 	EnviarDatos(socketumv, cadenaCambioContexto);
-	RecibirDatos(socketumv, respuestaumv);
+	if(RecibirDatos(socketumv, respuestaumv)<= 0 )
+	{
+		ErrorFatal("Error en la comunicacion con la umv");
+	}
 
-	if (analisarRespuestaUMV(respuestaumv) != 0) {
+	if (analisarRespuestaUMV(respuestaumv)) {
 
 		//Preparamos mensaje para Segmento Codigo
-		int digitosProg = cantidadDigitos(strlen(programa));
+		int digitosProg = cantidadDigitos(strlen(prog));
 		char* cadenaSegmento = string_new();
 		char*escribodatos = string_new();
 		string_append(&cadenaSegmento, string_itoa(5));
 		string_append(&cadenaSegmento, string_itoa(digitosID));
 		string_append(&cadenaSegmento, string_itoa(id));
 		string_append(&cadenaSegmento, string_itoa(digitosProg));
-		string_append(&cadenaSegmento, string_itoa(strlen(programa)));
+		string_append(&cadenaSegmento, string_itoa(strlen(prog)));
 		EnviarDatos(socketumv, cadenaSegmento);
 		RecibirDatos(socketumv, respuestaumv2); //COD + DIGITO + BASE
 		if (analisarRespuestaUMV(respuestaumv2) != 0) {
@@ -920,12 +931,12 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			string_append(&escribodatos, string_itoa(1));
 			string_append(&escribodatos, string_itoa(0));
 			string_append(&escribodatos, string_itoa(digitosProg));
-			string_append(&escribodatos, string_itoa(strlen(programa)));
-			string_append(&escribodatos, programa);
+			string_append(&escribodatos, string_itoa(strlen(prog)));
+			string_append(&escribodatos, prog);
 			EnviarDatos(socketumv, escribodatos);
 			RecibirDatos(socketumv, respuestaumv5);
 
-			if (analisarRespuestaUMV(respuestaumv5) != 0) {
+			if (analisarRespuestaUMV(respuestaumv5)) {
 
 				//Preparamos mensaje para Tamaño Stack
 				char* stack = string_new();
@@ -945,21 +956,24 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 					//Creacion segmento Indice Etiquetas
 					char* etiqueta = string_new();
+
 					int digitoEtiqueta = cantidadDigitos(
 							metadataprograma->etiquetas_size);
 					string_append(&etiqueta, string_itoa(5));
 					string_append(&etiqueta, string_itoa(digitosID));
 					string_append(&etiqueta, string_itoa(id));
 					string_append(&etiqueta, string_itoa(digitoEtiqueta));
+					if ((metadataprograma->etiquetas_size)!=0)
 					string_append(&etiqueta,
 							string_itoa(metadataprograma->etiquetas_size));
+					else string_append(&etiqueta,"1");
 					EnviarDatos(socketumv, etiqueta);
 					RecibirDatos(socketumv, respuestaumv4); //COD + DIGITO + BASE
 					if (analisarRespuestaUMV(respuestaumv4) != 0) {
 						char *Etiquetasegment = string_substring(respuestaumv4,
 								2, strlen(respuestaumv4) - 2);
 						PCBAUX.indiceEtiquetas = atoi(Etiquetasegment);
-
+						if (metadataprograma->etiquetas_size != 0){
 						//Grabar las etiquetas
 						char*escribirEtiq = string_new();
 						int digitosBaseEtiq = cantidadDigitos(
@@ -981,7 +995,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 								metadataprograma->etiquetas);
 						EnviarDatos(socketumv, escribirEtiq);
 						RecibirDatos(socketumv, respuestaumv6);
-
+						}else respuestaumv6[0]= '1';
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
 							//Creacion segmento Indice codigo
@@ -1034,7 +1048,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 								if (analisarRespuestaUMV(respuestaumv8) == 0) {
 									return 0;
 								}
-								//	PCBAUX.indiceCodigo = base de indice de codigo    escribir los indices en la umv
+
 							} else
 								return 0;
 						} else
@@ -1124,6 +1138,7 @@ char* ComandoHandShake2(char *buffer, int *tipoCliente) {
 // C = codigo de mensaje ( = 3)
 
 //int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
+	Traza("bufer %s", (char*) buffer);
 	int tipoDeCliente = chartToInt(buffer[1]);
 	if (tipoDeCliente == TIPO_CPU) {
 		*tipoCliente = tipoDeCliente;
@@ -1337,7 +1352,7 @@ void *HiloOrquestadorDeCPU() {
 						}
 						pthread_mutex_lock(&mutexCPU);
 						eliminarCpu(i);
-						pthread_mutex_lock(&mutexCPU);
+						pthread_mutex_unlock(&mutexCPU);
 						close(i); // bye!
 						FD_CLR(i, &master); // eliminar del conjunto maestro
 					} else {
@@ -1493,7 +1508,7 @@ void iniciarPCB(PCB* prog) {
 
 char* serializar_PCB(PCB* prog) {
 	char* cadena;
-	cadena = malloc(1 * sizeof(char));
+	cadena = string_new();
 
 	string_append(&cadena, string_itoa(prog->id));
 	string_append(&cadena, "-");
@@ -1523,8 +1538,9 @@ void comandoLiberar(int socket) {
 	if (aux != NULL ) {
 		aux->libre = 0;
 	}
-	pthread_mutex_lock(&mutexCPU);
+	pthread_mutex_unlock(&mutexCPU);
 	semsig(&CPUCont);
+	Traza("Se librera CPU: %d", aux->idCPU);
 }
 
 void eliminarCpu(int idcpu) {
@@ -1546,25 +1562,34 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 	int pos2 = pos + 2;
 	switch (buffer[pos]) {
 	case '0': //termino quamtum colocar en ready
+		Traza("lo deseareliza %d", pos);
 		pthread_mutex_lock(&mutexReady);
 		list_add(listaReady, auxPCB);
 		pthread_mutex_unlock(&mutexReady);
 		semsig(&readyCont);
-		Traza("Final Quamtum mover a ready. Programa: %d. buffer: %s",
+		Traza("Final Quamtum mover a ready. Programa: %d",
 				auxPCB->id);
 		break;
 	case '1':	//Hay que hacer I/O
 		disp = obtenerParteDelMensaje(buffer, &pos2);
+		pos2=pos2-2;
 		tiempo = atoi(obtenerParteDelMensaje(buffer, &pos2));
+		Traza("entro aqui %d, %d", pos2, tiempo);
 		t_HIO* auxHIO = encontrarDispositivo(disp);
+		Traza("encontrar HIO");
 		if (auxHIO != NULL ) {
+			Traza("1");
 			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
+			Traza("2");
 			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
+			Traza("3");
 			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
+			Traza("4");
 			semsig(&(auxHIO->bloqueadosCont));
 			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
 					auxPCB->id, (char*) auxHIO->nombre);
 		} else {
+			Traza("No encontro dispositivo");
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin,
 					final_create(auxPCB, 1, "Dispositivo no encontrado"));
@@ -1602,7 +1627,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		break;
 	}
 //Buscar CPU y Borrar Programa
-	borrarPCBenCPU(socket);
+//	borrarPCBenCPU(socket);
 }
 
 void comandoWait(char* buffer, int socket) {
@@ -1714,7 +1739,7 @@ void borrarPCBenCPU(int idCPU) {
 char* obtenerParteDelMensaje(char* buffer, int* pos) {
 	char* sub;
 	char* nombre;
-	sub = malloc(1 * sizeof(char));
+	sub = string_new();
 	nombre = string_new();
 	int final = *pos;
 	sub = string_substring(buffer, final, 1);
@@ -1730,9 +1755,11 @@ char* obtenerParteDelMensaje(char* buffer, int* pos) {
 }
 
 t_HIO* encontrarDispositivo(char* nombre) {
+	Traza("nombre: %s", (char*) nombre);
 	int _is_dis(t_HIO *p) {
 		return string_equals_ignore_case(p->nombre, nombre);
 	}
+
 	t_HIO *aux = list_find(listaDispositivos, (void*) _is_dis);
 	return aux;
 }
