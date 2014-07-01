@@ -934,8 +934,11 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			string_append(&escribodatos, string_itoa(strlen(prog)));
 			string_append(&escribodatos, prog);
 			EnviarDatos(socketumv, escribodatos);
-			RecibirDatos(socketumv, respuestaumv5);
-
+			if(RecibirDatos(socketumv, respuestaumv5)<= 0 )
+			{
+			ErrorFatal("Error en la comunicacion con la umv");
+			}
+			
 			if (analisarRespuestaUMV(respuestaumv5)) {
 
 				//Preparamos mensaje para Tamaño Stack
@@ -947,7 +950,11 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 				string_append(&stack, string_itoa(digitosStack));
 				string_append(&stack, string_itoa(ObtenerTamanioStack()));
 				EnviarDatos(socketumv, stack);
-				RecibirDatos(socketumv, respuestaumv3); //COD + DIGITO + BASE
+				 //COD + DIGITO + BASE
+				if(RecibirDatos(socketumv, respuestaumv3)<= 0 )
+				{
+				ErrorFatal("Error en la comunicacion con la umv");
+				}
 				if (analisarRespuestaUMV(respuestaumv3) != 0) {
 					char *stacksegment = string_substring(respuestaumv3, 2,
 							strlen(respuestaumv3) - 2);
@@ -966,9 +973,14 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 					if ((metadataprograma->etiquetas_size)!=0)
 					string_append(&etiqueta,
 							string_itoa(metadataprograma->etiquetas_size));
+					
 					else string_append(&etiqueta,"1");
 					EnviarDatos(socketumv, etiqueta);
-					RecibirDatos(socketumv, respuestaumv4); //COD + DIGITO + BASE
+					if(RecibirDatos(socketumv, respuestaumv4)<= 0 )
+					{
+					ErrorFatal("Error en la comunicacion con la umv");
+					}
+					//COD + DIGITO + BASE
 					if (analisarRespuestaUMV(respuestaumv4) != 0) {
 						char *Etiquetasegment = string_substring(respuestaumv4,
 								2, strlen(respuestaumv4) - 2);
