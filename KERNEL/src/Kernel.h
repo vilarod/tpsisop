@@ -63,7 +63,7 @@ void iniciarPCB(PCB* prog);
 void comandoLiberar(int socket);
 char ObtenerComandoCPU(char buffer[]);
 int ObtenerComandoMSJ(char buffer[]);
-void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
+//void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente);
 char* ComandoHandShake2(char *buffer, int *tipoCliente);
 int ComandoRecibirPrograma(char *buffer, int id);
 void comandoFinalQuamtum(char *buffer,int socket);

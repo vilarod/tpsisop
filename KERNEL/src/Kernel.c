@@ -336,7 +336,7 @@ void crearEscucha() {
 	int id_Programa = 0;
 	int tipo_Conexion = 0;
 
-	char tipo_mensaje = '0';
+	char tipo_mensaje;
 
 	//int yes=1;        // para setsockopt() SO_REUSEADDR, más abajo
 	//	struct sockaddr_in myaddr;     // dirección del servidor
@@ -386,7 +386,7 @@ void crearEscucha() {
 		//return EXIT_FAILURE;
 	}
 
-	printf("Escuchando conexiones entrantes.\n");
+	Traza("Escuchando conexiones entrantes PLP(%d).\n", Puerto);
 	// añadir listener al conjunto maestro
 	FD_SET(socketEscucha, &master);
 	// seguir la pista del descriptor de fichero mayor
@@ -441,9 +441,9 @@ void crearEscucha() {
 						//Evaluamos los comandos
 						switch (tipo_mensaje) {
 						case MSJ_HANDSHAKE:
-							ComandoHandShake(buffer, &id_Programa,
-									&tipo_Conexion);
-							EnviarDatos(i, "1");
+//							ComandoHandShake(buffer, &id_Programa,
+//									&tipo_Conexion);
+							EnviarDatos(i, "C");
 							break;
 						case MSJ_RECIBO_PROGRAMA:
 							if (ComandoRecibirPrograma(buffer, i) == 0) {
@@ -728,7 +728,7 @@ int hacerhandshakeUMV(int sockfd) {
 }
 
 int analisarRespuestaUMV(char *mensaje) {
-	if (mensaje[0] == 0) {
+	if (mensaje[0] == "0") {
 		Error("La umv nos devolvio un error: %s", mensaje);
 		return 0;
 	} else
@@ -848,16 +848,16 @@ void Traza(const char* mensaje, ...) {
 int ObtenerComandoMSJ(char buffer[]) {
 //Hay que obtener el comando dado el buffer.
 //El comando está dado por el primer caracter, que tiene que ser un número.
-	return chartToInt(buffer[0]);
+	return buffer[0];
 }
-void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente) {
-	(*idProg) = chartToInt(buffer[1]);
-	(*tipoCliente) = chartToInt(buffer[2]);
-
-	memset(buffer, 0, BUFFERSIZE);
-	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ",
-			*idProg, *tipoCliente);
-}
+//void ComandoHandShake(char *buffer, int *idProg, int *tipoCliente) {
+//	(*idProg) = chartToInt(buffer[1]);
+//	(*tipoCliente) = chartToInt(buffer[2]);
+//
+//	memset(buffer, 0, BUFFERSIZE);
+//	sprintf(buffer, "HandShake: OK! INFO-->  idPRog: %d, tipoCliente: %d ",
+//			*idProg, *tipoCliente);
+//}
 int chartToInt(char x) {
 	char str[1];
 	str[0] = x;
@@ -870,18 +870,16 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 	int digitosID;
 
-	char *programa;
-	programa = malloc(1 * sizeof(char));
 	digitosID = cantidadDigitos(id);
 	char* cadenaCambioContexto;
 	cadenaCambioContexto = string_new();
 	string_append(&cadenaCambioContexto, string_itoa(4));
 	string_append(&cadenaCambioContexto, string_itoa(digitosID));
 	string_append(&cadenaCambioContexto, string_itoa(id));
-
-	programa = string_substring(programa, 1, strlen(programa) - 1);
+	char* prog = string_new();
+	prog = string_substring(buffer, 1, strlen(buffer) - 1);
 	//LLAMAR AL PARSER
-	t_metadata_program* metadataprograma = metadata_desde_literal(programa);
+	t_metadata_program* metadataprograma = metadata_desde_literal(prog);
 	//LLENAR PCB AUXILIAR
 	char respuestaumv[BUFFERSIZE];
 	char respuestaumv2[BUFFERSIZE];
@@ -900,19 +898,22 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 	//Cambio de Contexxto
 	EnviarDatos(socketumv, cadenaCambioContexto);
-	RecibirDatos(socketumv, respuestaumv);
+	if(RecibirDatos(socketumv, respuestaumv)<= 0 )
+	{
+		ErrorFatal("Error en la comunicacion con la umv");
+	}
 
-	if (analisarRespuestaUMV(respuestaumv) != 0) {
+	if (analisarRespuestaUMV(respuestaumv)) {
 
 		//Preparamos mensaje para Segmento Codigo
-		int digitosProg = cantidadDigitos(strlen(programa));
+		int digitosProg = cantidadDigitos(strlen(prog));
 		char* cadenaSegmento = string_new();
 		char*escribodatos = string_new();
 		string_append(&cadenaSegmento, string_itoa(5));
 		string_append(&cadenaSegmento, string_itoa(digitosID));
 		string_append(&cadenaSegmento, string_itoa(id));
 		string_append(&cadenaSegmento, string_itoa(digitosProg));
-		string_append(&cadenaSegmento, string_itoa(strlen(programa)));
+		string_append(&cadenaSegmento, string_itoa(strlen(prog)));
 		EnviarDatos(socketumv, cadenaSegmento);
 		RecibirDatos(socketumv, respuestaumv2); //COD + DIGITO + BASE
 		if (analisarRespuestaUMV(respuestaumv2) != 0) {
@@ -930,12 +931,12 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			string_append(&escribodatos, string_itoa(1));
 			string_append(&escribodatos, string_itoa(0));
 			string_append(&escribodatos, string_itoa(digitosProg));
-			string_append(&escribodatos, string_itoa(strlen(programa)));
-			string_append(&escribodatos, programa);
+			string_append(&escribodatos, string_itoa(strlen(prog)));
+			string_append(&escribodatos, prog);
 			EnviarDatos(socketumv, escribodatos);
 			RecibirDatos(socketumv, respuestaumv5);
 
-			if (analisarRespuestaUMV(respuestaumv5) != 0) {
+			if (analisarRespuestaUMV(respuestaumv5)) {
 
 				//Preparamos mensaje para Tamaño Stack
 				char* stack = string_new();
@@ -955,21 +956,24 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 					//Creacion segmento Indice Etiquetas
 					char* etiqueta = string_new();
+
 					int digitoEtiqueta = cantidadDigitos(
 							metadataprograma->etiquetas_size);
 					string_append(&etiqueta, string_itoa(5));
 					string_append(&etiqueta, string_itoa(digitosID));
 					string_append(&etiqueta, string_itoa(id));
 					string_append(&etiqueta, string_itoa(digitoEtiqueta));
+					if ((metadataprograma->etiquetas_size)!=0)
 					string_append(&etiqueta,
 							string_itoa(metadataprograma->etiquetas_size));
+					else string_append(&etiqueta,"1");
 					EnviarDatos(socketumv, etiqueta);
 					RecibirDatos(socketumv, respuestaumv4); //COD + DIGITO + BASE
 					if (analisarRespuestaUMV(respuestaumv4) != 0) {
 						char *Etiquetasegment = string_substring(respuestaumv4,
 								2, strlen(respuestaumv4) - 2);
 						PCBAUX.indiceEtiquetas = atoi(Etiquetasegment);
-
+						if (metadataprograma->etiquetas_size != 0){
 						//Grabar las etiquetas
 						char*escribirEtiq = string_new();
 						int digitosBaseEtiq = cantidadDigitos(
@@ -991,7 +995,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 								metadataprograma->etiquetas);
 						EnviarDatos(socketumv, escribirEtiq);
 						RecibirDatos(socketumv, respuestaumv6);
-
+						}else respuestaumv6[0]= '1';
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
 							//Creacion segmento Indice codigo
@@ -1044,7 +1048,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 								if (analisarRespuestaUMV(respuestaumv8) == 0) {
 									return 0;
 								}
-								//	PCBAUX.indiceCodigo = base de indice de codigo    escribir los indices en la umv
+
 							} else
 								return 0;
 						} else
