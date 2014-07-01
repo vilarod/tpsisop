@@ -112,12 +112,13 @@ int main(int argc, char* argv[]) {
 	char **linea;
 	char *separator = NULL;
 	char *nuevo = NULL;
-	nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
-		if(nuevo == NULL){
-			traza("%s\n","Error no hay memoria disponible"); //imprime error sino tiene memoria
-						exit(1);
-		}
-	strcpy(nuevo, "");
+//	nuevo = (char*) malloc(len * sizeof(char) + 1); //aca guardo el programa sin "\n"
+//		if(nuevo == NULL){
+//			traza("%s\n","Error no hay memoria disponible"); //imprime error sino tiene memoria
+//						exit(1);
+//		}
+//	strcpy(nuevo, "");
+	nuevo = string_new();
 	separator = "\n";
 
 	linea = string_split(contents, separator); //separa el programa ansisop en lineas
@@ -136,12 +137,14 @@ int main(int argc, char* argv[]) {
 	printf("\n");
 
 	char *programa = NULL;
-	programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
-	if (programa == NULL ) {
-		traza("%s", "Error no hay memoria disponible"); //imprime error sino tiene memoria
-		exit(1);
-	}
-	programa = strdup(nuevo);
+//	programa = (char*) malloc(len * sizeof(char)); //aca guardo el programa que envio al kernel
+//	if (programa == NULL ) {
+//		traza("%s", "Error no hay memoria disponible"); //imprime error sino tiene memoria
+//		exit(1);
+//	}
+//	programa = strdup(nuevo);
+	programa = string_new();
+	programa = string_duplicate(nuevo);
 	int largo;
 	largo = strlen(programa);
 	printf("el tamanio del programa es: %d\n", largo);
@@ -175,9 +178,9 @@ char* obtenerIpKERNEL() {
 
 void conectarAKERNEL(char *archivo) { //el parametro es el programa
 	traza("%s\n","Intentando conectar a kernel");
-	//int puerto = obtenerPuertoKERNEL(); //descomentar para la prueba en laboratorio
-	//char *IP = obtenerIpKERNEL();//idem anterior
-	//int soquete = conexionConSocket(puerto, IP); // para la prueba en laboratorio
+//	int puerto = obtenerPuertoKERNEL(); //descomentar para la prueba en laboratorio
+//	char *IP = obtenerIpKERNEL();//idem anterior
+//	int soquete = conexionConSocket(puerto, IP); // para la prueba en laboratorio
 
 int soquete = conexionConSocket(5000, "127.0.0.1"); //el puerto 5000 y el ip 127.0.01 son para prueba local
 	if (hacerhandshakeKERNEL(soquete, archivo) == 0) {
@@ -196,8 +199,11 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	} else
 		traza("%s\n","Kernel recibio hanshake");
 	analizarRespuestaKERNEL(respuestahandshake);
+	char* msj=string_new();
+	string_append(&msj,"E");
+	string_append(&msj,programa);
 	traza("%s\n","Envio programa");
-	enviarDatos(sockfd, programa); //envio el programa
+	enviarDatos(sockfd, msj); //envio el programa
 	recibirDatos(sockfd, respuestahandshake);
 	if (respuestahandshake[0] == '0') {
 		printf("Error del KERNEL");
