@@ -1983,7 +1983,7 @@ int subCadenaAInt(char* text, int start, int length)
 	int logitudBuffer = 0;
 	logitudBuffer = strlen(text);
 
-	if (logitudBuffer > (start + length))
+	if (logitudBuffer >= (start + length))
 	{
 		char* aux;
 		aux = string_substring(text, start, length);

@@ -321,3 +321,108 @@ ERROR FATAL--> Error al hacer el Bind. El puerto está en uso
 [TRACE] 18:02:49:47 UMV/(19442:19458): ENVIO datos. socket: 8. buffer: 0ERROR LEER MEMORIA. SEGMENTATION FAULT. El programa (2) no tiene asignado un segmento con base 1494. Id programa: 2, base: 1494, desplazamiento: 0, longitud buffer: 100
 [TRACE] 21:26:01:397 UMV/(20162:20162): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
 [TRACE] 21:26:01:402 UMV/(20162:20163): El socket está listo para recibir conexiones. Numero de socket: 5, puerto: 7000
+[TRACE] 14:15:02:87 UMV/(21858:21858): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 14:15:02:88 UMV/(21858:21863): El socket está listo para recibir conexiones. Numero de socket: 5, puerto: 7000
+[TRACE] 20:21:18:75 UMV/(22688:22688): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 20:21:18:103 UMV/(22688:22699): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 20:22:29:958 UMV/(22688:22699): Se ha conectado el cliente (192.168.43.117) por el puerto (19905). El número de socket del cliente es: 8
+[TRACE] 20:22:48:684 UMV/(22688:22768): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:23:00:778 UMV/(22688:22768): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:24:06:476 UMV/(22688:22768): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:26:18:777 UMV/(22688:22768): ENVIO datos. socket: 8. buffer: 0ERROR CAMBIO PROGRAMA ACTIVO. MENSAJE ENVIADO = 418
+[TRACE] 20:27:14:538 UMV/(22688:22768): RECIBO datos. socket: 8. buffer: 51814
+[TRACE] 20:27:26:675 UMV/(22688:22768): No se pudo crear un segmento en la memoria. El tamaño debe ser mayor a 0. Id programa: 8, Tamaño solicitado segmento: 0
+[TRACE] 20:27:32:236 UMV/(22688:22768): ENVIO datos. socket: 8. buffer: 0No se pudo crear un segmento en la memoria. Id programa: 8, Tamaño solicitado segmento: 0
+[TRACE] 20:30:39:329 UMV/(23022:23022): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 20:30:39:364 UMV/(23022:23035): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 20:35:55:375 UMV/(23022:23035): Se ha conectado el cliente (192.168.43.117) por el puerto (24001). El número de socket del cliente es: 8
+[TRACE] 20:36:12:480 UMV/(23022:23043): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:37:34:119 UMV/(23022:23043): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:39:30:922 UMV/(23022:23043): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:39:47:195 UMV/(23022:23043): Se cerró el socket (8).
+[TRACE] 20:41:44:147 UMV/(23022:23035): Se ha conectado el cliente (192.168.43.117) por el puerto (24769). El número de socket del cliente es: 8
+[TRACE] 20:41:47:94 UMV/(23022:23122): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:41:51:33 UMV/(23022:23122): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:42:05:477 UMV/(23022:23122): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:45:03:987 UMV/(23245:23245): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 20:45:04:14 UMV/(23245:23253): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 20:45:24:625 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (25025). El número de socket del cliente es: 8
+[TRACE] 20:45:26:836 UMV/(23245:23258): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:45:29:349 UMV/(23245:23258): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:46:39:973 UMV/(23245:23258): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:47:03:47 UMV/(23245:23258): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:47:21:854 UMV/(23245:23258): RECIBO datos. socket: 8. buffer: 518246
+[TRACE] 20:47:49:627 UMV/(23245:23258): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 46
+[TRACE] 20:47:56:542 UMV/(23245:23258): ENVIO datos. socket: 8. buffer: 141253
+[TRACE] 20:49:16:865 UMV/(23245:23258): RECIBO datos. socket: 8. buffer: 24125310246begin	variables a, b	a = 3	b = 5	a = b + 12end
+[TRACE] 20:50:16:151 UMV/(23245:23258): Se escribió en memoria. Id programa: 8, base logica: 1253, base real: 134555752,  desplazamiento: 0, cantidad de bytes: 46, buffer: begin	variables a, b	a = 3	b = 5	a = b + 12end
+[TRACE] 20:50:20:514 UMV/(23245:23258): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:50:34:157 UMV/(23245:23258): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 20:51:04:52 UMV/(23245:23258): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:51:08:923 UMV/(23245:23258): ENVIO datos. socket: 8. buffer: 142430
+[TRACE] 20:51:44:614 UMV/(23245:23258): RECIBO datos. socket: 8. buffer: 51810
+[TRACE] 20:51:52:366 UMV/(23245:23258): No se pudo crear un segmento en la memoria. El tamaño debe ser mayor a 0. Id programa: 8, Tamaño solicitado segmento: 0
+[TRACE] 20:51:53:905 UMV/(23245:23258): ENVIO datos. socket: 8. buffer: 0No se pudo crear un segmento en la memoria. Id programa: 8, Tamaño solicitado segmento: 0
+[TRACE] 20:53:32:461 UMV/(23245:23258): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:53:37:555 UMV/(23245:23258): Se cerró el socket (8).
+[TRACE] 20:56:33:692 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (27073). El número de socket del cliente es: 8
+[TRACE] 20:56:52:252 UMV/(23245:23550): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:56:54:692 UMV/(23245:23550): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:57:14:850 UMV/(23245:23550): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:57:18:758 UMV/(23245:23550): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:57:27:455 UMV/(23245:23550): RECIBO datos. socket: 8. buffer: 518246
+[TRACE] 20:57:30:252 UMV/(23245:23550): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 46
+[TRACE] 20:57:30:889 UMV/(23245:23550): ENVIO datos. socket: 8. buffer: 144034
+[TRACE] 20:57:41:680 UMV/(23245:23550): RECIBO datos. socket: 8. buffer: 24403410246begin	variables a, b	a = 3	b = 5	a = b + 12end
+[TRACE] 20:57:45:869 UMV/(23245:23550): Se escribió en memoria. Id programa: 8, base logica: 4034, base real: 134556310,  desplazamiento: 0, cantidad de bytes: 46, buffer: begin	variables a, b	a = 3	b = 5	a = b + 12end
+[TRACE] 20:57:46:564 UMV/(23245:23550): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:58:05:545 UMV/(23245:23550): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 20:58:10:742 UMV/(23245:23550): Se compactó la memoria.
+[TRACE] 20:58:10:742 UMV/(23245:23550): No se pudo crear un segmento en la memoria. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:58:11:710 UMV/(23245:23550): ENVIO datos. socket: 8. buffer: 0No se pudo crear un segmento en la memoria. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:58:27:557 UMV/(23245:23550): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 20:58:30:164 UMV/(23245:23550): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 20:58:31:182 UMV/(23245:23550): ENVIO datos. socket: 8. buffer: 146003
+[TRACE] 20:59:15:211 UMV/(23245:23550): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:59:24:902 UMV/(23245:23550): Se cerró el socket (8).
+[TRACE] 21:05:03:131 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (30401). El número de socket del cliente es: 8
+[TRACE] 21:05:04:956 UMV/(23245:23679): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:05:07:563 UMV/(23245:23679): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:05:40:277 UMV/(23245:23679): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:05:42:53 UMV/(23245:23679): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:05:48:778 UMV/(23245:23679): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:05:51:12 UMV/(23245:23679): Se cerró el socket (8).
+[TRACE] 21:06:17:459 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (30913). El número de socket del cliente es: 8
+[TRACE] 21:06:18:333 UMV/(23245:23717): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:06:19:897 UMV/(23245:23717): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:06:42:536 UMV/(23245:23717): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:06:46:541 UMV/(23245:23717): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:06:57:888 UMV/(23245:23717): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:10:38:899 UMV/(23245:23717): Se cerró el socket (8).
+[TRACE] 21:10:43:281 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (33217). El número de socket del cliente es: 8
+[TRACE] 21:10:45:542 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:10:45:542 UMV/(23245:23754): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:11:01:274 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:11:01:274 UMV/(23245:23754): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:11:09:58 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 518246
+[TRACE] 21:11:09:58 UMV/(23245:23754): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 46
+[TRACE] 21:11:09:59 UMV/(23245:23754): ENVIO datos. socket: 8. buffer: 147056
+[TRACE] 21:11:17:90 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 24705610246begin	variables a, b	a = 3	b = 5	a = b + 12end
+[TRACE] 21:11:17:90 UMV/(23245:23754): Se escribió en memoria. Id programa: 8, base logica: 7056, base real: 134556357,  desplazamiento: 0, cantidad de bytes: 46, buffer: begin	variables a, b	a = 3	b = 5	a = b + 12end
+[TRACE] 21:11:17:90 UMV/(23245:23754): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:11:23:726 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 21:11:23:727 UMV/(23245:23754): Se compactó la memoria.
+[TRACE] 21:11:23:727 UMV/(23245:23754): No se pudo crear un segmento en la memoria. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:11:23:727 UMV/(23245:23754): ENVIO datos. socket: 8. buffer: 0No se pudo crear un segmento en la memoria. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:11:47:481 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 21:11:47:481 UMV/(23245:23754): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 21:11:47:481 UMV/(23245:23754): ENVIO datos. socket: 8. buffer: 148231
+[TRACE] 21:12:07:711 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 51810
+[TRACE] 21:13:31:398 UMV/(23245:23754): No se pudo crear un segmento en la memoria. El tamaño debe ser mayor a 0. Id programa: 8, Tamaño solicitado segmento: 0
+[TRACE] 21:13:31:399 UMV/(23245:23754): ENVIO datos. socket: 8. buffer: 0No se pudo crear un segmento en la memoria. Id programa: 8, Tamaño solicitado segmento: 0
+[TRACE] 21:13:39:277 UMV/(23245:23754): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:13:41:965 UMV/(23245:23754): Se cerró el socket (8).
+[TRACE] 21:14:55:222 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (33729). El número de socket del cliente es: 8
+[TRACE] 21:14:57:245 UMV/(23245:23789): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:14:57:246 UMV/(23245:23789): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:23:58:570 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (33985). El número de socket del cliente es: 9
