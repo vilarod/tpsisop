@@ -54,6 +54,7 @@ typedef struct PCBs {
 PCB* desearilizar_PCB(char* estructura, int* pos);
 char* obtenerNombreMensaje(char* buffer, int pos);
 char* obtenerParteDelMensaje(char* buffer, int* pos);
+int obtenerValorDelMensaje(char* buffer, int pos);
 
 //serializar
 char* serializar_PCB (PCB* prog);

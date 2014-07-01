@@ -1450,8 +1450,7 @@ void *HiloOrquestadorDeCPU() {
 
 PCB* desearilizar_PCB(char* estructura, int* pos) {
 	printf("%s\n", estructura);
-	char* sub = "";
-	sub = malloc(1 * sizeof(char));
+	char* sub = string_new();
 	PCB* est_prog;
 	est_prog = (struct PCBs *) malloc(sizeof(PCB));
 	int aux;
@@ -1506,7 +1505,7 @@ PCB* desearilizar_PCB(char* estructura, int* pos) {
 		indice = inicio;
 	}
 	*pos = inicio;
-//free(sub);
+//	free(sub);
 	return est_prog;
 }
 
@@ -1588,9 +1587,8 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		break;
 	case '1':	//Hay que hacer I/O
 		disp = obtenerParteDelMensaje(buffer, &pos2);
-		pos2=pos2-2;
-		tiempo = atoi(obtenerParteDelMensaje(buffer, &pos2));
-		Traza("entro aqui %d, %d", pos2, tiempo);
+		pos2--;
+		tiempo = obtenerValorDelMensaje(buffer, pos2);
 		t_HIO* auxHIO = encontrarDispositivo(disp);
 		if (auxHIO != NULL ) {
 			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
@@ -1767,6 +1765,27 @@ char* obtenerParteDelMensaje(char* buffer, int* pos) {
 	return nombre;
 }
 
+int obtenerValorDelMensaje(char* buffer, int pos) {
+	char* sub;
+	char* nombre;
+	int result;
+	sub = string_new();
+	nombre = string_new();
+	int final = pos;
+	sub = string_substring(buffer, final, 1);
+	final++;
+	while (string_equals_ignore_case(sub, "-") == 0) {
+		string_append(&nombre, sub);
+		sub = string_substring(buffer, final, 1);
+		final++;
+	}
+	result= atoi(nombre);
+	Traza ("obtenerValorMensaje: %d, %s", result,nombre);
+	free(nombre);
+	free(sub);
+	return result;
+}
+
 t_HIO* encontrarDispositivo(char* nombre) {
 	Traza("nombre: %s", (char*) nombre);
 	int _is_dis(t_HIO *p) {
@@ -1797,13 +1816,12 @@ void comandoImprimir(char* buffer, int socket) {
 void comandoObtenerValorGlobar(char* buffer, int socket) {
 //OBtener valor variable compartida y mandarlo a CPU
 	char* variable = obtenerNombreMensaje(buffer, 1);
-	char* respuesta = "";
+	char* respuesta = string_new();
 	int ndatos;
-	respuesta = malloc(1 * sizeof(char));
 	t_varGlobal* auxVar = encontrarVarGlobal(variable);
 	if (auxVar != NULL ) {
 		string_append(&respuesta, "1");
-		string_append(&buffer, string_itoa(auxVar->valor));
+		string_append(&respuesta, string_itoa(auxVar->valor));
 		string_append(&respuesta, "-");
 		ndatos = EnviarDatos(socket, respuesta);
 		if (ndatos > 0) {
@@ -1814,6 +1832,7 @@ void comandoObtenerValorGlobar(char* buffer, int socket) {
 	} else {
 		ndatos = EnviarDatos(socket, "0");
 	}
+	free(respuesta);
 }
 
 t_varGlobal* encontrarVarGlobal(char* nombre) {
@@ -1830,7 +1849,9 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 	int valor;
 	int ndatos;
 	variable = obtenerParteDelMensaje(buffer, &pos);
-	valor = atoi(obtenerParteDelMensaje(buffer, &pos));
+	pos--;
+	valor = obtenerValorDelMensaje(buffer, pos);
+	Traza("Actualizar variable: %s valor: %d",(char*) variable,valor);
 	t_varGlobal* auxVar = encontrarVarGlobal(variable);
 	if (auxVar != NULL ) {
 		auxVar->valor = valor;
@@ -1840,6 +1861,7 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 			//TODO error al enviar
 		}
 	} else {
+		Traza("Variable: %s no encontrada",(char*) variable);
 		ndatos = EnviarDatos(socket, "0");
 	}
 }
