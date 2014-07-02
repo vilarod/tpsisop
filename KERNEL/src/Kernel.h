@@ -299,6 +299,7 @@ t_sem*  encontrarSemaforo(char *nombre);
 t_HIO* encontrarDispositivo(char* nombre);
 t_varGlobal* encontrarVarGlobal(char* nombre);
 void borrarPCBenCPU(int idCPU);
+void mandarAFinProgramaPorBajaCPU(int socket);
 
 //Globales
 int socketumv;
