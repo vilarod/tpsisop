@@ -42,7 +42,8 @@
 #define MSJ_HANDSHAKE             	'H'
 #define MSJ_PROGRAMAIMPRIMI			'I'
 #define MSJ_PROGRAMAFIN				'F'
-#define MSJ_CONFIRMACION 			"1"
+#define MSJ_CONFIRMACION 			"S"
+#define MSJ_NEGACION				"N"
 #define MSJ_CPU_IMPRIMI	      		'2'
 #define MSJ_CPU_HANDSHAKE           '3'
 #define MSJ_CPU_FINAlQUAMTUM		'4'
@@ -157,15 +158,17 @@ void *FinEjecucion(void *arg) {
 void *IMPRIMIRConsola(void *arg) {
 	t_imp* auxImp;
 	t_list* auxList;
-
-	semwait(&imprimirCont);
-	while (list_size(listaImprimir) > 0) {
-		auxList = list_take(listaImprimir, 1);
-		auxImp = list_get(auxList, 0);
-		EnviarDatos(auxImp->prog, auxImp->mensaje);
-		list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
+	while (1) {
+		semwait(&imprimirCont);
+		if (list_size(listaImprimir) > 0) {
+			pthread_mutex_lock(&mutexImprimir);
+			auxList = list_take(listaImprimir, 1);
+			pthread_mutex_unlock(&mutexImprimir);
+			auxImp = list_get(auxList, 0);
+			EnviarDatos(auxImp->prog, auxImp->mensaje);
+			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
+		}
 	}
-
 	return NULL ;
 }
 
@@ -448,7 +451,7 @@ void crearEscucha() {
 							break;
 						case MSJ_RECIBO_PROGRAMA:
 							if (ComandoRecibirPrograma(buffer, i) == 0) {
-								EnviarDatos(i, "0");
+								EnviarDatos(i, MSJ_NEGACION);
 							}
 							EnviarDatos(i, MSJ_CONFIRMACION);
 						}
@@ -1046,17 +1049,17 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 										string_itoa(
 												cantidadDigitos(
 														metadataprograma->instrucciones_size)));
-								int i = 0;
-								while (i
-										!= (metadataprograma->instrucciones_size)) {
-									string_append(&escribirCodex,
-											string_itoa(
-													metadataprograma->instrucciones_serializado->start));
-									string_append(&escribirCodex,
-											string_itoa(
-													metadataprograma->instrucciones_serializado->offset));
-									i++;
-								}
+//								int i = 0;
+//								while (i
+//										!= (metadataprograma->instrucciones_size)) {
+								string_append(&escribirCodex,
+										string_itoa(
+												metadataprograma->instrucciones_serializado->start));
+								string_append(&escribirCodex,
+										string_itoa(
+												metadataprograma->instrucciones_serializado->offset));
+//									i++;
+//								}
 								EnviarDatos(socketumv, escribirCodex);
 								RecibirDatos(socketumv, respuestaumv8);
 								if (analisarRespuestaUMV(respuestaumv8) == 0) {
@@ -1878,13 +1881,12 @@ void comandoAbortar(char* buffer, int socket) {
 	}
 }
 
-
-void mandarAFinProgramaPorBajaCPU(int socket){
-	t_CPU* auxCPU=encontrarCPU(socket);
+void mandarAFinProgramaPorBajaCPU(int socket) {
+	t_CPU* auxCPU = encontrarCPU(socket);
 	PCB* auxPCB;
 	if (auxCPU != NULL ) {
 		auxPCB = auxCPU->idPCB;
-		if (auxPCB != NULL){
+		if (auxPCB != NULL ) {
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin, final_create(auxPCB, 1, "Se cayo CPU"));
 			pthread_mutex_unlock(&mutexFIN);
