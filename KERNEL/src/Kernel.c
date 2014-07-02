@@ -284,7 +284,7 @@ void *bloqueados_fnc(void *arg) {
 			Traza("Entrada HIO disp %s programa: %d tiempo: %d", (char*) HIO->nombre, auxBloq->idPCB->id,auxBloq->tiempo);
 			sleep(HIO->valor * auxBloq->tiempo);
 			//Pasar a Ready
-			Traza("vuelve programa: %d",auxBloq->idPCB->id);
+			Traza("Termino HIO programa: %d",auxBloq->idPCB->id);
 			auxPCB = auxBloq->idPCB;
 			auxBloq->idPCB = NULL;
 			pthread_mutex_lock(&mutexReady);
@@ -1587,7 +1587,6 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		break;
 	case '1':	//Hay que hacer I/O
 		disp = obtenerParteDelMensaje(buffer, &pos2);
-		pos2--;
 		tiempo = obtenerValorDelMensaje(buffer, pos2);
 		t_HIO* auxHIO = encontrarDispositivo(disp);
 		if (auxHIO != NULL ) {
@@ -1760,7 +1759,7 @@ char* obtenerParteDelMensaje(char* buffer, int* pos) {
 		sub = string_substring(buffer, final, 1);
 		final++;
 	}
-	*pos = final + 1;
+	*pos = final;
 	free(sub);
 	return nombre;
 }
@@ -1849,7 +1848,6 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 	int valor;
 	int ndatos;
 	variable = obtenerParteDelMensaje(buffer, &pos);
-	pos--;
 	valor = obtenerValorDelMensaje(buffer, pos);
 	Traza("Actualizar variable: %s valor: %d",(char*) variable,valor);
 	t_varGlobal* auxVar = encontrarVarGlobal(variable);
