@@ -65,6 +65,7 @@
 int main(int argv, char** argc) {
 
 	//Obtener puertos e ip de la umv
+
 	UMV_PUERTO = ObtenerPuertoUMV();
 	UMV_IP = ObtenerIPUMV();
 	Puerto = ObtenerPuertoConfig();
@@ -165,7 +166,11 @@ void *IMPRIMIRConsola(void *arg) {
 			auxList = list_take(listaImprimir, 1);
 			pthread_mutex_unlock(&mutexImprimir);
 			auxImp = list_get(auxList, 0);
-			EnviarDatos(auxImp->prog, auxImp->mensaje);
+			char* mensaje = string_new();
+			string_append(&mensaje, "I");
+			string_append(&mensaje, auxImp->mensaje);
+			EnviarDatos(auxImp->prog,  mensaje);
+			free(mensaje);
 			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
 		}
 	}
@@ -1015,17 +1020,18 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 							respuestaumv6[0] = '1';
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
-							//Creacion segmento Indice codigo
+//							//Creacion segmento Indice codigo
+//							int tamaniodeindice = sizeof( t_intructions)*metadataprograma->instrucciones_size;
+							int tamaniodeindice = 8;
 							char* codex = string_new();
 							int digitocode = cantidadDigitos(
-									metadataprograma->instrucciones_size);
+									tamaniodeindice);
 							string_append(&codex, string_itoa(5));
 							string_append(&codex, string_itoa(digitosID));
 							string_append(&codex, string_itoa(id));
 							string_append(&codex, string_itoa(digitocode));
 							string_append(&codex,
-									string_itoa(
-											metadataprograma->instrucciones_size));
+									string_itoa(tamaniodeindice));
 							EnviarDatos(socketumv, codex);
 							RecibirDatos(socketumv, respuestaumv7); //COD + DIGITO + BASE
 							if (analisarRespuestaUMV(respuestaumv7) != 0) {
@@ -1045,21 +1051,25 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 										string_itoa(PCBAUX.indiceCodigo));
 								string_append(&escribirCodex, string_itoa(1));
 								string_append(&escribirCodex, string_itoa(0));
+
 								string_append(&escribirCodex,
 										string_itoa(
 												cantidadDigitos(
-														metadataprograma->instrucciones_size)));
-//								int i = 0;
-//								while (i
-//										!= (metadataprograma->instrucciones_size)) {
-								string_append(&escribirCodex,
-										string_itoa(
-												metadataprograma->instrucciones_serializado->start));
-								string_append(&escribirCodex,
-										string_itoa(
-												metadataprograma->instrucciones_serializado->offset));
-//									i++;
-//								}
+														tamaniodeindice)));
+
+								string_append(&escribirCodex, string_itoa(tamaniodeindice));
+								string_append(&escribirCodex, "000");
+								string_append(&escribirCodex, string_itoa(metadataprograma->instrucciones_serializado->start));
+								string_append(&escribirCodex,"00");
+
+								string_append(&escribirCodex, string_itoa(metadataprograma->instrucciones_serializado->offset - 1));
+								string_append(&escribirCodex,"00160003");
+
+								//char* indicecodex= malloc(tamaniodeindice);
+//								memcpy(indicecodex,metadataprograma->instrucciones_serializado, tamaniodeindice);
+//								string_append(&escribirCodex, indicecodex);
+//								t_intructions* segundo = (metadataprograma->instrucciones_serializado)+8;
+//								printf("%d", segundo->offset);
 								EnviarDatos(socketumv, escribirCodex);
 								RecibirDatos(socketumv, respuestaumv8);
 								if (analisarRespuestaUMV(respuestaumv8) == 0) {
@@ -1086,6 +1096,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			+ (metadataprograma->instrucciones_size));
 
 	list_add(listaNew, new_create(&(PCBAUX), pesito));
+	semsig(&newCont);
 	return 1;
 }
 
