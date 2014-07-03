@@ -671,7 +671,7 @@ void ImprimirMemoriaSegmentosDeProgramaTSeg(int imprimirArchivo, t_segmento *seg
 	{
 		char* aux = malloc(bytesPorLinea * sizeof(char));
 		memset(aux, 0, bytesPorLinea * sizeof(char));
-		memcpy(aux, buffer + (id* sizeof(char)), bytesPorLinea * sizeof(char));
+		memcpy(aux, buffer + (id * sizeof(char)), bytesPorLinea * sizeof(char));
 		Imprimir(imprimirArchivo, "-%10d-   %s\n", id, aux);
 		free(aux);
 		id = id + bytesPorLinea;
@@ -803,21 +803,21 @@ void Error(const char* mensaje, ...)
 
 void Traza(const char* mensaje, ...)
 {
-	char* nuevo;
+	/*char* nuevo = string_new();
 
-	va_list arguments;
-	va_start(arguments, mensaje);
-	nuevo = string_from_vformat(mensaje, arguments);
+	 va_list arguments;
+	 va_start(arguments, mensaje);
+	 nuevo = string_from_vformat(mensaje, arguments);
 
-	if (g_ImprimirTrazaPorConsola)
-	{
-		printf("TRAZA--> %s \n", nuevo);
-	}
+	 if (g_ImprimirTrazaPorConsola)
+	 {
+		 printf("TRAZA--> %s \n", nuevo);
+	 }
 
-	log_trace(logger, "%s", nuevo);
+	 log_trace(logger, "%s", nuevo);
 
-	free(nuevo);
-	va_end(arguments);
+	 free(nuevo);
+	 va_end(arguments);*/
 }
 
 void ErrorFatal(const char* mensaje, ...)
@@ -914,8 +914,10 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
 	// memset se usa para llenar el buffer con 0s
 	char bufferAux[BUFFERSIZE];
 
-	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-	memset(buffer, 0, 1 * sizeof(char));
+	free(buffer);
+	buffer = string_new();
+	//buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
+	//memset(buffer, 0, 1 * sizeof(char));
 
 	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
 	{
@@ -1086,7 +1088,7 @@ int DestruirSegmentos(int idPrograma)
 
 	while (list_remove_by_condition(g_ListaSegmentos, (void*) _is_program) != NULL )
 	{
-// borra el segmento
+		// borra el segmento
 	}
 
 	Traza("Se borraron los segmentos del programa. Id programa: %d.", idPrograma);
@@ -1420,7 +1422,7 @@ int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBy
 // Si se puede acceder escribo la memoria
 		char* baseSegmento;
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
-		memcpy((baseSegmento + (desplazamiento* sizeof(char))), buffer, cantidadBytes * sizeof(char));
+		memcpy((baseSegmento + (desplazamiento * sizeof(char))), buffer, cantidadBytes * sizeof(char));
 		Traza("Se escribió en memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
@@ -1443,7 +1445,7 @@ int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes,
 // Si se puede acceder escribo la memoria
 		char* baseSegmento;
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
-		memcpy(buffer, (baseSegmento + (desplazamiento* sizeof(char))), cantidadBytes * sizeof(char));
+		memcpy(buffer, (baseSegmento + (desplazamiento * sizeof(char))), (cantidadBytes)* sizeof(char));
 		Traza("Se leyó  de memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
@@ -1544,8 +1546,9 @@ int AtiendeCliente(void * arg)
 
 	while ((!desconexionCliente) & g_Ejecutando)
 	{
-		buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-
+	//	buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+		free(buffer);
+		buffer = string_new();
 		//Recibimos los datos del cliente
 		buffer = RecibirDatos(socket, buffer, &bytesRecibidos);
 
@@ -1662,14 +1665,21 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 
 	if (ok)
 	{
-		int tamanio = (longitudBuffer + 3) * sizeof(char);
+		free(buffer);
+		buffer = string_new();
+		string_append(&buffer, "1");
+		string_append(&buffer, lectura);
+
+		/*int tamanio = (longitudBuffer + 1) * sizeof(char);
 		buffer = realloc(buffer, tamanio * sizeof(char));
 		memset(buffer, 0, tamanio * sizeof(char));
-		sprintf(buffer, "%s%s", "1", lectura);
+		sprintf(buffer, "%s%s", "1", lectura);*/
 	}
 	else
 	{
-		SetearErrorGlobal("ERROR LEER MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", g_MensajeError, idProg, base, desplazamiento, longitudBuffer);
+		char* stringErrorAux = string_new();
+		string_append(&stringErrorAux, g_MensajeError);
+		SetearErrorGlobal("ERROR LEER MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", stringErrorAux, idProg, base, desplazamiento, longitudBuffer);
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
 
@@ -1710,21 +1720,32 @@ char* ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 	cantidadDigitoslongitudBuffer = posicionDeBufferAInt(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento);
 	longitudBuffer = subCadenaAInt(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1, cantidadDigitoslongitudBuffer);
 
-	char* mensaje = string_substring(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1 + cantidadDigitoslongitudBuffer, longitudBuffer);
-
-	ok = EscribirMemoria(idProg, base, desplazamiento, longitudBuffer, mensaje);
-
-	if (ok)
+	int posicionComienzoMensaje = 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1 + cantidadDigitoslongitudBuffer;
+	int logitud = strlen(buffer);
+	if ((posicionComienzoMensaje + longitudBuffer) <= logitud) // Validamos me pasen la cantidad de bytes que piden que tengo que escribir
 	{
-		buffer = RespuestaClienteOk(buffer);
+		char * mensaje = string_substring(buffer, posicionComienzoMensaje, longitudBuffer);
+		ok = EscribirMemoria(idProg, base, desplazamiento, longitudBuffer, mensaje);
+
+		if (ok)
+		{
+			buffer = RespuestaClienteOk(buffer);
+		}
+		else
+		{
+			char* stringErrorAux = string_new();
+			string_append(&stringErrorAux, g_MensajeError);
+			SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d, buffer: %s", stringErrorAux, idProg, base, desplazamiento, longitudBuffer, mensaje);
+			buffer = RespuestaClienteError(buffer, g_MensajeError);
+		}
+
+		free(mensaje);
 	}
 	else
 	{
-		SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d, buffer: %s.", g_MensajeError, idProg, base, desplazamiento, longitudBuffer, mensaje);
+		SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. Se solicitó grabar una cantidad de bytes pero se pasaron menos. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", idProg, base, desplazamiento, longitudBuffer);
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
-
-	free(mensaje);
 	return buffer;
 }
 
@@ -1793,7 +1814,7 @@ char* ComandoCrearSegmento(char *buffer, int tipoCliente)
 		else
 		{
 			t_segmento* aux = ObtenerInfoSegmento(idPrograma, idSegmento);
-			int tamanio = (cantidadDigitos(aux->Inicio) + 3) * sizeof(char);
+			int tamanio = (cantidadDigitos(aux->Inicio) + 2) * sizeof(char);
 			buffer = realloc(buffer, tamanio * sizeof(char));
 			memset(buffer, 0, tamanio * sizeof(char));
 			sprintf(buffer, "%s%d%d", "1", cantidadDigitos(aux->Inicio), aux->Inicio);
@@ -1848,19 +1869,28 @@ char* ComandoDestruirSegmento(char *buffer, int tipoCliente)
 
 char* RespuestaClienteOk(char *buffer)
 {
-	int tamanio = sizeof(char) * 2;
+	/*int tamanio = sizeof(char) * 2;
 	buffer = realloc(buffer, tamanio * sizeof(char));
 	memset(buffer, 0, tamanio * sizeof(char));
-	sprintf(buffer, "%s", "1");
+	sprintf(buffer, "%s", "1");*/
+
+	buffer = string_new();
+	string_append(&buffer, "1");
+
 	return buffer;
 }
 
 char* RespuestaClienteError(char *buffer, char *msj)
 {
-	int tamanio = (strlen(msj) + 2) * sizeof(char);
+	//int cantidadBytesBuffer = strlen(buffer);
+	buffer = string_new();
+	string_append(&buffer, "0");
+	string_append(&buffer, msj);
+
+/*	int tamanio = (strlen(msj) + 1) * sizeof(char);
 	buffer = realloc(buffer, tamanio * sizeof(char));
 	memset(buffer, 0, tamanio * sizeof(char));
-	sprintf(buffer, "%s%s", "0", msj);
+	sprintf(buffer, "%s%s", "0", msj);*/
 	return buffer;
 }
 
