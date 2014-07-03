@@ -40,7 +40,6 @@
 #define tCPUU 2
 #define tCPUK 2
 #define BUFFERSIZE 10000
-#define TAM_INSTRUCCION 8
 #define VAR_STACK 5
 #define CAMBIO_PROCESO 4
 #define FIN_QUANTUM 4
@@ -59,6 +58,8 @@
 //Variables globales ------------------------------------------------------
 int aux_conec_umv = 0;
 int aux_conec_ker = 0;
+
+const int TAM_INSTRUCCION= sizeof(t_intructions);
 
 int socketUMV = 0;
 int socketKERNEL = 0;
@@ -899,7 +900,7 @@ destruirEstructuras()
 void
 RecuperarDicEtiquetas()
 {
-  if ((ab==0) && (f==0))// Solo buscarÃ¡ los datos si el programa no se abortÃ³
+  if ((ab==0) && (f==0) && ((programa->sizeIndiceEtiquetas)>0))// Solo buscarÃ¡ los datos si el programa no se abortÃ³
     {
       Traza("%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE ETIQUETAS");
 
@@ -911,8 +912,11 @@ RecuperarDicEtiquetas()
       char* nombre_etiqueta = "";
       int aux;
 
-      respuesta = getUMV(programa->indiceEtiquetas, 0,
-          programa->sizeIndiceEtiquetas);
+      respuesta = getUMV(programa->indiceEtiquetas, 0,programa->sizeIndiceEtiquetas);
+
+      Traza("TRAZA - RECIBI COMO INDICE DE ETIQUETAS: %s",respuesta);
+
+      //respuesta="1begin\nVariables a,b,c\n:inicio\n:hola\nfunction pepita\n:kuka\nend";
 
       if (string_starts_with(respuesta, "1"))
         {
@@ -1163,7 +1167,8 @@ main(void)
 
   //Ahora que se donde estan, me quiero conectar con los dos
   ConexionConSocket(&aux_conec_umv, socketUMV, dest_UMV);
-  ConexionConSocket(&aux_conec_ker, socketKERNEL, dest_KERNEL);
+
+ ConexionConSocket(&aux_conec_ker, socketKERNEL, dest_KERNEL);
 
   if (aux_conec_umv == saludar(HandU, tCPUU, socketUMV))
     {
@@ -1207,16 +1212,16 @@ main(void)
 
       while (quantum > 0) //mientras tengo quantum
         {
-          Traza("TRAZA - EL QUANTUM QUE RESTA ES: %d", quantum);
-          programa->programCounter++; //Incremento el PC
-          Traza("TRAZA - LA PROXIMA INSTRUCCION ES: %d",
-              programa->programCounter);
+          Traza("TRAZA - EL QUANTUM ES: %d", quantum);
           sent = PedirSentencia(&sentencia);
           if (sent == 1) //la sentencia es valida
             {
               parsearYejecutar(sentencia); //ejecuto sentencia
               esperarTiempoRetardo(); // espero X milisegundo para volver a ejecutar
               quantum--;
+              programa->programCounter++; //Incremento el PC
+                     Traza("TRAZA - LA PROXIMA INSTRUCCION ES: %d",
+                         programa->programCounter);
             }
           else
             {
