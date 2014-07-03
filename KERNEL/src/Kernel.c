@@ -169,7 +169,7 @@ void *IMPRIMIRConsola(void *arg) {
 			char* mensaje = string_new();
 			string_append(&mensaje, "I");
 			string_append(&mensaje, auxImp->mensaje);
-			EnviarDatos(auxImp->prog,  mensaje);
+			EnviarDatos(auxImp->prog, mensaje);
 			free(mensaje);
 			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
 		}
@@ -1021,17 +1021,15 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
 //							//Creacion segmento Indice codigo
-//							int tamaniodeindice = sizeof( t_intructions)*metadataprograma->instrucciones_size;
-							int tamaniodeindice = 8;
+							int tamaniodeindice = sizeof(t_intructions)
+									* metadataprograma->instrucciones_size;
 							char* codex = string_new();
-							int digitocode = cantidadDigitos(
-									tamaniodeindice);
+							int digitocode = cantidadDigitos(tamaniodeindice);
 							string_append(&codex, string_itoa(5));
 							string_append(&codex, string_itoa(digitosID));
 							string_append(&codex, string_itoa(id));
 							string_append(&codex, string_itoa(digitocode));
-							string_append(&codex,
-									string_itoa(tamaniodeindice));
+							string_append(&codex, string_itoa(tamaniodeindice));
 							EnviarDatos(socketumv, codex);
 							RecibirDatos(socketumv, respuestaumv7); //COD + DIGITO + BASE
 							if (analisarRespuestaUMV(respuestaumv7) != 0) {
@@ -1057,19 +1055,36 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 												cantidadDigitos(
 														tamaniodeindice)));
 
-								string_append(&escribirCodex, string_itoa(tamaniodeindice));
-								string_append(&escribirCodex, "000");
-								string_append(&escribirCodex, string_itoa(metadataprograma->instrucciones_serializado->start));
-								string_append(&escribirCodex,"00");
+								string_append(&escribirCodex,
+										string_itoa(tamaniodeindice));
 
-								string_append(&escribirCodex, string_itoa(metadataprograma->instrucciones_serializado->offset - 1));
-								string_append(&escribirCodex,"00160003");
+						          t_puntero_instruccion comienzo;
+						          t_size tamanio;
+						          t_intructions* aux;
+						          int j;
+						        		  int h;
+						        		  int i;
+						          for (i=0; i < metadataprograma->instrucciones_size;i++)
+						          {
 
-								//char* indicecodex= malloc(tamaniodeindice);
-//								memcpy(indicecodex,metadataprograma->instrucciones_serializado, tamaniodeindice);
-//								string_append(&escribirCodex, indicecodex);
-//								t_intructions* segundo = (metadataprograma->instrucciones_serializado)+8;
-//								printf("%d", segundo->offset);
+						        	  aux= (metadataprograma->instrucciones_serializado + i);
+
+						          comienzo=aux->start;
+						          tamanio= (aux->offset) -1;
+						          Traza("comienzo %d: %d",i,comienzo);
+						          Traza("offset %d: %d",i,tamanio);
+						          //LLenar de 0 el start
+						          for (j=1; j == (4 - cantidadDigitos (comienzo)); j++){
+						        	  string_append(&escribirCodex,"0");
+
+						          }
+						          string_append(&escribirCodex,string_itoa(comienzo));
+						          //Llenar de ceros el offset
+						          for(h=1; h == (4 -cantidadDigitos(tamanio)); h++){
+						        	  string_append(&escribirCodex,"0");
+						          }
+						          string_append(&escribirCodex,string_itoa(tamanio));
+						          }
 								EnviarDatos(socketumv, escribirCodex);
 								RecibirDatos(socketumv, respuestaumv8);
 								if (analisarRespuestaUMV(respuestaumv8) == 0) {
