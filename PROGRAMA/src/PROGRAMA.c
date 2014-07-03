@@ -38,7 +38,7 @@
 //Mensajes 	enviados
 #define HANDSHAKE "H"
 #define ENVIARPROGRAMA "E"
-#define CONFIRMACION "C"
+#define CONFIRMACION "S"
 
 //Mensajes aceptados
 //MSJ_IMPRIMI_ESTO comienza con "I" y termina con "\0"
@@ -126,19 +126,6 @@ int main(int argc, char* argv[]) {
 	}
 	free(sub);
 
-	//separator = "\n";
-
-	//linea = string_split(contents, separator); //separa el programa ansisop en lineas
-
-//	int i;
-
-//	for (i = 1; linea[i] != NULL ; i++) //elimino la primer linea del hashbang
-//			    string_append(&nuevo, linea[i]); //concatena todas las lineas del programa
-//
-//			free(contents);
-//			contents = NULL;
-//
-//			printf("\n");
 
 	char *programa;
 
@@ -234,7 +221,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 }
 int imprimirRespuesta(char *mensaje) {
 
-	if ((string_starts_with(mensaje, "I"))
+	if ((string_starts_with(mensaje, "2"))
 			&& (string_ends_with(mensaje, "\0"))) {
 		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
 		traza("%s\n", "Se imprime el mensaje enviado por el kernel");
