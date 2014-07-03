@@ -221,7 +221,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 }
 int imprimirRespuesta(char *mensaje) {
 
-	if ((string_starts_with(mensaje, "2"))
+	if ((string_starts_with(mensaje, "I"))
 			&& (string_ends_with(mensaje, "\0"))) {
 		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
 		traza("%s\n", "Se imprime el mensaje enviado por el kernel");
