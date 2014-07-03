@@ -1058,33 +1058,44 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 								string_append(&escribirCodex,
 										string_itoa(tamaniodeindice));
 
-						          t_puntero_instruccion comienzo;
-						          t_size tamanio;
-						          t_intructions* aux;
-						          int j;
-						        		  int h;
-						        		  int i;
-						          for (i=0; i < metadataprograma->instrucciones_size;i++)
-						          {
+								int comienzo;
+								int tamanio;
+								t_intructions* aux;
+								int j;
+								int h;
+								int i;
+								int ceros1;
+								int ceros2;
+								for (i = 0;
+										i < metadataprograma->instrucciones_size;
+										i++) {
 
-						        	  aux= (metadataprograma->instrucciones_serializado + i);
+									aux =
+											(metadataprograma->instrucciones_serializado
+													+ i);
 
-						          comienzo=aux->start;
-						          tamanio= (aux->offset) -1;
-						          Traza("comienzo %d: %d",i,comienzo);
-						          Traza("offset %d: %d",i,tamanio);
-						          //LLenar de 0 el start
-						          for (j=1; j == (4 - cantidadDigitos (comienzo)); j++){
-						        	  string_append(&escribirCodex,"0");
+									comienzo = aux->start;
+									tamanio = (aux->offset) - 1;
+									Traza("comienzo %d: %d", i, comienzo);
+									Traza("offset %d: %d", i, tamanio);
 
-						          }
-						          string_append(&escribirCodex,string_itoa(comienzo));
-						          //Llenar de ceros el offset
-						          for(h=1; h == (4 -cantidadDigitos(tamanio)); h++){
-						        	  string_append(&escribirCodex,"0");
-						          }
-						          string_append(&escribirCodex,string_itoa(tamanio));
-						          }
+									ceros1 = (4 - cantidadDigitos(comienzo));
+									ceros2 = (4 - cantidadDigitos(tamanio));
+									//LLenar de 0 el start
+									while (j != ceros1){
+										string_append(&escribirCodex, "0");
+										j++;
+									}
+									string_append(&escribirCodex,
+											string_itoa(comienzo));
+									//Llenar de ceros el offset
+									while (h != ceros2) {
+										string_append(&escribirCodex, "0");
+										h++;
+									}
+									string_append(&escribirCodex,
+											string_itoa(tamanio));
+								}
 								EnviarDatos(socketumv, escribirCodex);
 								RecibirDatos(socketumv, respuestaumv8);
 								if (analisarRespuestaUMV(respuestaumv8) == 0) {
