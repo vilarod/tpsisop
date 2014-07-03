@@ -68,8 +68,6 @@ int CONECTADO_UMV = 0;
 int CONECTADO_KERNEL = 0;
 
 t_dictionary* dicVariables;
-t_dictionary* dicEtiquetas;
-t_dictionary* dicValoresVariables;
 t_log* logger;
 
 PCB* programa;
@@ -84,6 +82,8 @@ int senial_SIGUSR1 = 0; //seÃ±al kill
 int tengoProg = 0;
 char* motivo;
 char* variable_ref; //guardara el nombre de la variable llamada por ObtenerDireccionVariable o ObtenerValorCompartida
+
+char* etiquetas;
 
 //Llamado a las funciones primitivas
 
@@ -419,11 +419,11 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
 
   if (string_starts_with(msj, "1")) //si el mensaje es valido -> busca despl y longi
     {
-      tamanio1 = atoi(string_substring(msj, 1, 1));
-      *despl = atoi(string_substring(msj, 2, tamanio1));
+      tamanio1 = 4;
+      *despl = atoi(string_substring(msj, 1, tamanio1));
       Traza("TRAZA - DESPLAZAMIENTO: %d", *despl);
-      tamanio2 = atoi(string_substring(msj, tamanio1 + 2, 1));
-      *longi = atoi(string_substring(msj, tamanio1 + 3, tamanio2));
+      tamanio2 = 4;
+      *longi = atoi(string_substring(msj, tamanio1 + 1, tamanio2));
       Traza("TRAZA - LONGITUD: %d", *longi);
     }
   else
@@ -618,8 +618,7 @@ PedirSentencia(char** sentencia)
           instruccion = getUMV(programa->segmentoCodigo, despl, longi);
           if (string_starts_with(instruccion, "1"))
             {
-              *sentencia = string_substring(instruccion, 1,
-                  (strlen(instruccion) - 1));
+              *sentencia = string_substring(instruccion, 1,longi);
               aux = 1;
             }
         }
@@ -882,78 +881,39 @@ esperarTiempoRetardo()
 void
 limpiarEstructuras()
 {
-  Traza("%s", "TRAZA - LIMPIO LOS DICCIONARIOS");
+  Traza("%s", "TRAZA - LIMPIO ESTRUCTURAS AUXILIARES");
   dictionary_clean(dicVariables);
-  dictionary_clean(dicValoresVariables);
-  dictionary_clean(dicEtiquetas);
 }
 
 void
 destruirEstructuras()
 {
-  Traza("%s", "TRAZA - DESTRUYO LOS DICCIONARIOS");
+  Traza("%s", "TRAZA - DESTRUYO ESTRUCTURAS AUXILIARES");
   dictionary_destroy(dicVariables);
-  dictionary_destroy(dicValoresVariables);
-  dictionary_destroy(dicEtiquetas);
 }
 
 void
-RecuperarDicEtiquetas()
+RecuperarEtiquetas()
 {
   if ((ab==0) && (f==0) && ((programa->sizeIndiceEtiquetas)>0))// Solo buscarÃ¡ los datos si el programa no se abortÃ³
     {
-      Traza("%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE ETIQUETAS");
+      Traza("%s", "TRAZA - VOY A RECUPERAR EL INDICE DE ETIQUETAS");
 
       char* respuesta = malloc(BUFFERSIZE * sizeof(char));
-      t_metadata_program* meta_etiquetas;
-
-      int i;
-      int pos_etiqueta = 0;
-      char* nombre_etiqueta = "";
-      int aux;
 
       respuesta = getUMV(programa->indiceEtiquetas, 0,programa->sizeIndiceEtiquetas);
 
-      Traza("TRAZA - RECIBI COMO INDICE DE ETIQUETAS: %s",respuesta);
-
-      //respuesta="1begin\nVariables a,b,c\n:inicio\n:hola\nfunction pepita\n:kuka\nend";
-
       if (string_starts_with(respuesta, "1"))
         {
-          meta_etiquetas = metadata_desde_literal(
-              string_substring(respuesta, 1, strlen(respuesta) - 1));
-          aux = meta_etiquetas->cantidad_de_etiquetas;
-          for (i = 0; i < aux; i++) //voy de 0 a cantidad de variables en contexto actual
-            {
-              //aca tengo que obtener nombre_etiqueta y pos_etiqueta
-              Traza("TRAZA - ETIQUETA: %s", nombre_etiqueta);
-              Traza("TRAZA - POSICION %d", pos_etiqueta);
-              dictionary_put(dicEtiquetas, nombre_etiqueta,
-                  (void*) pos_etiqueta);
-              Traza("TRAZA - VALOR GUARDADO: %d",
-                  dictionary_get(dicEtiquetas, nombre_etiqueta));
-            }
-          Traza("TRAZA - meta_etiquetas->etiquetas  %s",
-              meta_etiquetas->etiquetas);
-          Traza("TRAZA - meta_etiquetas->cantidad_de_etiquetas  %d",
-              meta_etiquetas->cantidad_de_etiquetas);
-          Traza("TRAZA - meta_etiquetas->cantidad_de_funciones  %d",
-              meta_etiquetas->cantidad_de_funciones);
-          Traza("TRAZA - meta_etiquetas->etiquetas_size  %d",
-              meta_etiquetas->etiquetas_size);
-          Traza("TRAZA - meta_etiquetas->inicio  %d",
-              meta_etiquetas->instruccion_inicio);
-          Traza("TRAZA - meta_etiquetas->instrcciones_size  %d",
-              meta_etiquetas->instrucciones_size);
+      etiquetas=string_substring(respuesta, 1, strlen(respuesta) - 1);
+      Traza("%s", "TRAZA - INDICE DE ETIQUETAS OBTENIDO: %s",etiquetas);
 
-          Traza("%s", "TRAZA - DICCIONARIO ETIQUETAS CREADO");
         }
       else
         {
           if (string_starts_with(respuesta, "0"))
             {
-              Error("%s",
-                  "ERROR - NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
+              Error("%s","ERROR - NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
               ab = 1;
               quantum = 0;
               motivo = "ERROR AL RECUPERAR LAS ETIQUETAS DEL PROCESO";
@@ -978,7 +938,6 @@ RecuperarDicVariables()
       int i;
       int aux = 0;
       int ptr_posicion = 0;
-      int valor = 0;
       int pos = 0;
 
       char* respuesta = malloc(BUFFERSIZE * sizeof(char));
@@ -999,9 +958,7 @@ RecuperarDicVariables()
               for (i = 0; i < aux; i++) //voy de 0 a cantidad de variables en contexto actual
                 {
                   var = string_substring(variables, pos, 1);
-                  valor = atoi(string_substring(variables, (pos + 1), 4));
                   dictionary_put(dicVariables, var, (void*) ptr_posicion);
-                  agregarDicValoresVariables(var, valor); // recupero diccionario de valores de variables
                   ptr_posicion = ptr_posicion + VAR_STACK;
                   pos = pos + VAR_STACK;
                 }
@@ -1031,17 +988,7 @@ RecuperarDicVariables()
     }
 }
 
-//Agrego las variables y los valores del contexto actual
 
-void
-agregarDicValoresVariables(char* var, int valor)
-{
-  dictionary_put(dicValoresVariables, var, (void*) valor);
-
-  Traza("Agregado: %s", var);
-  Traza("Agregado: %d", dictionary_get(dicValoresVariables, var));
-
-}
 
 void
 imprimirContextoActual()
@@ -1183,8 +1130,6 @@ main(void)
 
   //Creo los diccionarios
   dicVariables = dictionary_create();
-  dicEtiquetas = dictionary_create();
-  dicValoresVariables = dictionary_create();
 
   //voy a trabajar mientras este conectado tanto con kernel como umv
   while (estoyConectado() == 1)
@@ -1207,8 +1152,8 @@ main(void)
 
       //Si salio del ciclo anterior es que ya tengo un programa
       CambioProcesoActivo();
-      RecuperarDicEtiquetas();
-      RecuperarDicVariables(); //aca, si tengo variables que recuperar tambien voy a guardar los valores en dicValoresVariables
+      RecuperarEtiquetas();
+      RecuperarDicVariables();
 
       while (quantum > 0) //mientras tengo quantum
         {
@@ -1259,8 +1204,6 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
   if (validar == 1) //si es <=0 el set aborta el proceso
     {
       Traza("%s", "TRAZA - ASIGNACION EXITOSA");
-      //ver como obtener nombre variable y como modificar el valor
-      //agregarDicValoresVariables((void*)valor);
     }
 
 }
@@ -1300,7 +1243,7 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
           Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
               programa->sizeContextoActual);
           dictionary_clean(dicVariables); //limpio el dic de variables
-          dictionary_clean(dicValoresVariables);
+
         }
     }
 
@@ -1330,7 +1273,6 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
               Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
                   programa->sizeContextoActual);
               dictionary_clean(dicVariables); //limpio el dic de variables
-              dictionary_clean(dicValoresVariables);
               Traza("TRAZA - LA DIRECCION POR DONDE RETORNAR ES: %d",
                   donde_retornar);
             }
@@ -1367,7 +1309,6 @@ prim_finalizar(void)
           if (programa->sizeContextoActual > 0)
             {
               dictionary_clean(dicVariables); //limpio el dic de variables
-              dictionary_clean(dicValoresVariables);
               RecuperarDicVariables();
             }
           else
@@ -1444,7 +1385,6 @@ prim_retornar(t_valor_variable retorno)
                   if (programa->sizeContextoActual > 0)
                     {
                       dictionary_clean(dicVariables); //limpio el dic de variables
-                      dictionary_clean(dicValoresVariables);
                       RecuperarDicVariables();
                     }
                 }
@@ -1489,6 +1429,7 @@ prim_imprimir(t_valor_variable valor_mostrar)
   string_append(&mensaje,variable_ref);
   string_append(&mensaje,":");
   string_append(&mensaje, string_itoa(valor_mostrar)); //por el momento muestra valor
+  string_append(&mensaje,"-");
   Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION",
       valor_mostrar);
   Enviar(socketKERNEL, mensaje);
@@ -1516,22 +1457,9 @@ void
 prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA IrAlLabel");
-  int* posicion;
 
-  if (dictionary_has_key(dicEtiquetas, etiqueta))
-    {
-      posicion = dictionary_get(dicEtiquetas, etiqueta);
-      programa->programCounter = *posicion; //asigno la primer instruccion ejecutable de etiqueta al PC
-    }
-  else
-    {
-      programa->programCounter = -1;
-      Error(
-          "ERROR - NO SE HA ENCONTRADO LA ETIQUETA: %s EL PROGRAM COUNTER ES: %d",
-          etiqueta, programa->programCounter);
-      ab = 1;
-      quantum = 0;
-    }
+  programa->programCounter = metadata_buscar_etiqueta(etiqueta,etiquetas,programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
+
 }
 
 t_puntero
@@ -1590,7 +1518,7 @@ prim_definirVariable(t_nombre_variable identificador_variable)
       if ((setUMV(pos_var_stack, 0, 1, var)) > 0)
         {
           dictionary_put(dicVariables, var, (void*) pos_var_stack); //la registro en el dicc de variables
-          agregarDicValoresVariables(var, 0); //agrego una nueva variable
+
           programa->sizeContextoActual++;
           Traza("TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE");
         }
@@ -1617,8 +1545,8 @@ prim_imprimirTexto(char* texto)
 {
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA ImprimirTexto");
   char *mensaje = string_itoa(IMPRIMIR);
-
   string_append(&mensaje, texto);
+  string_append(&mensaje,"-");
   Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION",
       texto);
   Enviar(socketKERNEL, mensaje);
