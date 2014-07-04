@@ -99,11 +99,6 @@ prepararDestino(struct sockaddr_in dest, int puerto, char* ip);
 
 void
 inciarVariables();
-char*
-valoresVariablesContextoActual();
-
-void
-agregarDicValoresVariables(char* var, int valor);
 
 void
 umvDesconectada();
@@ -136,7 +131,7 @@ limpiarEstructuras();
 void
 RecuperarDicVariables();
 void
-RecuperarDicEtiquetas();
+RecuperarEtiquetas();
 void
 esperarTiempoRetardo();
 

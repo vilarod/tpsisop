@@ -426,3 +426,2538 @@ ERROR FATAL--> Error al hacer el Bind. El puerto está en uso
 [TRACE] 21:14:57:245 UMV/(23245:23789): RECIBO datos. socket: 8. buffer: 31
 [TRACE] 21:14:57:246 UMV/(23245:23789): ENVIO datos. socket: 8. buffer: 1
 [TRACE] 21:23:58:570 UMV/(23245:23253): Se ha conectado el cliente (192.168.43.117) por el puerto (33985). El número de socket del cliente es: 9
+[TRACE] 19:33:35:193 UMV/(24258:24258): Se reservó la memoria principal OK. Tamaño de la memoria (1024)
+[TRACE] 19:33:35:222 UMV/(24258:24264): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 19:55:09:288 UMV/(24321:24321): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 19:55:09:318 UMV/(24321:24327): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 19:55:34:3 UMV/(24321:24327): Se ha conectado el cliente (192.168.3.141) por el puerto (37775). El número de socket del cliente es: 8
+[TRACE] 19:55:38:366 UMV/(24321:24332): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 19:55:38:366 UMV/(24321:24332): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 19:56:31:517 UMV/(24321:24332): RECIBO datos. socket: 8. buffer: 
+[TRACE] 19:56:31:517 UMV/(24321:24332): Se cerró el socket (8).
+[TRACE] 19:57:24:355 UMV/(24321:24327): Se ha conectado el cliente (192.168.3.141) por el puerto (38031). El número de socket del cliente es: 8
+[TRACE] 19:57:26:830 UMV/(24321:24341): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 19:57:26:830 UMV/(24321:24341): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 19:59:40:545 UMV/(24321:24327): Se ha conectado el cliente (192.168.3.135) por el puerto (7873). El número de socket del cliente es: 9
+[TRACE] 20:01:27:656 UMV/(24321:24349): RECIBO datos. socket: 9. buffer: 
+[TRACE] 20:01:27:656 UMV/(24321:24349): Se cerró el socket (9).
+[TRACE] 20:01:54:482 UMV/(24321:24327): Se ha conectado el cliente (192.168.3.135) por el puerto (9921). El número de socket del cliente es: 9
+[TRACE] 20:02:25:601 UMV/(24321:24341): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:02:25:602 UMV/(24321:24341): Se cerró el socket (8).
+[TRACE] 20:02:33:273 UMV/(24321:24327): Se ha conectado el cliente (192.168.3.141) por el puerto (38287). El número de socket del cliente es: 8
+[TRACE] 20:02:36:386 UMV/(24321:24361): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:02:36:386 UMV/(24321:24361): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:02:40:762 UMV/(24321:24356): RECIBO datos. socket: 9. buffer: 
+[TRACE] 20:02:40:763 UMV/(24321:24356): Se cerró el socket (9).
+[TRACE] 20:02:44:861 UMV/(24321:24327): Se ha conectado el cliente (192.168.3.135) por el puerto (10433). El número de socket del cliente es: 9
+[TRACE] 20:03:45:891 UMV/(24321:24361): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:03:45:891 UMV/(24321:24361): Se cerró el socket (8).
+[TRACE] 20:03:51:859 UMV/(24321:24368): RECIBO datos. socket: 9. buffer: 
+[TRACE] 20:03:51:861 UMV/(24321:24368): Se cerró el socket (9).
+[TRACE] 20:04:04:797 UMV/(24321:24327): Se ha conectado el cliente (192.168.3.141) por el puerto (41615). El número de socket del cliente es: 8
+[TRACE] 20:04:06:771 UMV/(24321:24374): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:04:06:771 UMV/(24321:24374): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:04:44:871 UMV/(24321:24374): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:04:44:871 UMV/(24321:24374): Se cerró el socket (8).
+[TRACE] 20:08:50:368 UMV/(24415:24415): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 20:08:50:396 UMV/(24415:24420): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 20:09:24:642 UMV/(24415:24420): Se ha conectado el cliente (192.168.3.141) por el puerto (53914). El número de socket del cliente es: 8
+[TRACE] 20:09:26:295 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:09:26:295 UMV/(24415:24424): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:09:51:468 UMV/(24415:24420): Se ha conectado el cliente (192.168.3.135) por el puerto (15041). El número de socket del cliente es: 9
+[TRACE] 20:09:53:729 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 419
+[TRACE] 20:09:53:730 UMV/(24415:24437): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 20:09:53:730 UMV/(24415:24437): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 20:09:53:730 UMV/(24415:24424): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:09:57:930 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 519254
+[TRACE] 20:09:57:931 UMV/(24415:24424): Se creó un segmento nuevo. Id programa: 9, Tamaño solicitado segmento: 54
+[TRACE] 20:09:57:931 UMV/(24415:24424): ENVIO datos. socket: 8. buffer: 141682
+[TRACE] 20:09:59:387 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 24168210254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:09:59:387 UMV/(24415:24424): Se escribió en memoria. Id programa: 9, base logica: 1682, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:09:59:388 UMV/(24415:24424): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:10:00:390 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 5193512
+[TRACE] 20:10:00:390 UMV/(24415:24424): Se creó un segmento nuevo. Id programa: 9, Tamaño solicitado segmento: 512
+[TRACE] 20:10:00:391 UMV/(24415:24424): ENVIO datos. socket: 8. buffer: 143650
+[TRACE] 20:10:01:223 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 51911
+[TRACE] 20:10:01:223 UMV/(24415:24424): Se creó un segmento nuevo. Id programa: 9, Tamaño solicitado segmento: 1
+[TRACE] 20:10:01:223 UMV/(24415:24424): ENVIO datos. socket: 8. buffer: 145536
+[TRACE] 20:10:01:816 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 51915
+[TRACE] 20:10:01:817 UMV/(24415:24424): Se creó un segmento nuevo. Id programa: 9, Tamaño solicitado segmento: 5
+[TRACE] 20:10:01:817 UMV/(24415:24424): ENVIO datos. socket: 8. buffer: 146619
+[TRACE] 20:10:02:696 UMV/(24415:24424): RECIBO datos. socket: 8. buffer: 246619101616
+[TRACE] 20:10:02:696 UMV/(24415:24424): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (9) no puede acceder a la posicion de memoria 6625. (El segmento termina en la posicion 6624)
+[TRACE] 20:11:05:809 UMV/(24415:24437): RECIBO datos. socket: 9. buffer: 
+[TRACE] 20:11:05:809 UMV/(24415:24437): Se cerró el socket (9).
+[TRACE] 20:12:07:870 UMV/(24415:24420): Se ha conectado el cliente (192.168.3.141) por el puerto (54170). El número de socket del cliente es: 9
+[TRACE] 20:12:10:348 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 31
+[TRACE] 20:12:10:349 UMV/(24415:24459): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 20:13:25:573 UMV/(24415:24420): Se ha conectado el cliente (192.168.3.135) por el puerto (16065). El número de socket del cliente es: 10
+[TRACE] 20:15:19:554 UMV/(24415:24467): RECIBO datos. socket: 10. buffer: 
+[TRACE] 20:15:19:554 UMV/(24415:24467): Se cerró el socket (10).
+[TRACE] 20:16:23:83 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 418
+[TRACE] 20:16:23:83 UMV/(24415:24459): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 20:16:35:970 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 518254
+[TRACE] 20:16:35:971 UMV/(24415:24459): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 20:16:35:971 UMV/(24415:24459): ENVIO datos. socket: 9. buffer: 141948
+[TRACE] 20:17:01:729 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 24194810254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:17:01:729 UMV/(24415:24459): Se escribió en memoria. Id programa: 8, base logica: 1948, base real: 3083838020,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:17:01:730 UMV/(24415:24459): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 20:17:11:816 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 5183512
+[TRACE] 20:17:11:816 UMV/(24415:24459): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:17:11:817 UMV/(24415:24459): ENVIO datos. socket: 9. buffer: 143919
+[TRACE] 20:17:26:970 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 51811
+[TRACE] 20:17:26:970 UMV/(24415:24459): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 20:17:26:971 UMV/(24415:24459): ENVIO datos. socket: 9. buffer: 145650
+[TRACE] 20:17:57:475 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 51815
+[TRACE] 20:17:57:475 UMV/(24415:24459): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 5
+[TRACE] 20:17:57:476 UMV/(24415:24459): ENVIO datos. socket: 9. buffer: 147044
+[TRACE] 20:18:15:973 UMV/(24415:24459): RECIBO datos. socket: 9. buffer: 247044101616
+[TRACE] 20:20:51:503 UMV/(24534:24534): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 20:20:51:561 UMV/(24534:24540): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 20:23:33:644 UMV/(24534:24540): Se ha conectado el cliente (192.168.3.141) por el puerto (54426). El número de socket del cliente es: 8
+[TRACE] 20:23:36:582 UMV/(24534:24547): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:23:36:582 UMV/(24534:24547): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:25:33:625 UMV/(24534:24547): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:25:33:625 UMV/(24534:24547): Se cerró el socket (8).
+[TRACE] 20:28:02:135 UMV/(24534:24540): Se ha conectado el cliente (192.168.3.141) por el puerto (56730). El número de socket del cliente es: 8
+[TRACE] 20:28:02:851 UMV/(24534:24620): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:28:02:851 UMV/(24534:24620): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:31:50:665 UMV/(24534:24620): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:31:50:666 UMV/(24534:24620): Se cerró el socket (8).
+[TRACE] 20:32:14:396 UMV/(24534:24540): Se ha conectado el cliente (192.168.3.141) por el puerto (57242). El número de socket del cliente es: 8
+[TRACE] 20:32:20:409 UMV/(24534:24631): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:32:20:410 UMV/(24534:24631): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:35:05:434 UMV/(24534:24631): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:35:05:435 UMV/(24534:24631): Se cerró el socket (8).
+[TRACE] 20:42:33:155 UMV/(24534:24540): Se ha conectado el cliente (192.168.3.141) por el puerto (57754). El número de socket del cliente es: 8
+[TRACE] 20:42:35:882 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:42:35:882 UMV/(24534:24644): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:42:59:351 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:42:59:351 UMV/(24534:24644): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:43:05:57 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 20:43:05:57 UMV/(24534:24644): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 20:43:05:57 UMV/(24534:24644): ENVIO datos. socket: 8. buffer: 141021
+[TRACE] 20:43:11:12 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 24102110254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:43:11:12 UMV/(24534:24644): Se escribió en memoria. Id programa: 8, base logica: 1021, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:43:11:12 UMV/(24534:24644): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:43:15:506 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 20:43:15:507 UMV/(24534:24644): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:43:15:507 UMV/(24534:24644): ENVIO datos. socket: 8. buffer: 142110
+[TRACE] 20:43:23:905 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 20:43:23:905 UMV/(24534:24644): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 20:43:23:905 UMV/(24534:24644): ENVIO datos. socket: 8. buffer: 143978
+[TRACE] 20:43:51:364 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 51815
+[TRACE] 20:43:51:364 UMV/(24534:24644): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 5
+[TRACE] 20:43:51:364 UMV/(24534:24644): ENVIO datos. socket: 8. buffer: 145229
+[ERROR] 20:44:03:221 UMV/(24534:24644): Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: 8
+[TRACE] 20:44:03:222 UMV/(24534:24644): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:44:03:222 UMV/(24534:24644): Se cerró el socket (8).
+[TRACE] 20:45:43:578 UMV/(24534:24540): Se ha conectado el cliente (192.168.3.141) por el puerto (58266). El número de socket del cliente es: 8
+[TRACE] 20:45:45:29 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:45:45:29 UMV/(24534:24667): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:46:04:58 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:46:04:58 UMV/(24534:24667): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:46:06:715 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 20:46:06:715 UMV/(24534:24667): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 20:46:06:716 UMV/(24534:24667): ENVIO datos. socket: 8. buffer: 147153
+[TRACE] 20:46:10:606 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 24715310254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:46:10:607 UMV/(24534:24667): Se escribió en memoria. Id programa: 8, base logica: 7153, base real: 3083838020,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:46:10:607 UMV/(24534:24667): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:46:12:654 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 20:46:12:654 UMV/(24534:24667): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:46:12:655 UMV/(24534:24667): ENVIO datos. socket: 8. buffer: 149007
+[TRACE] 20:46:15:927 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 20:46:15:927 UMV/(24534:24667): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 20:46:15:927 UMV/(24534:24667): ENVIO datos. socket: 8. buffer: 1510711
+[TRACE] 20:46:24:712 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 518140
+[TRACE] 20:46:24:712 UMV/(24534:24667): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 4
+[TRACE] 20:46:24:713 UMV/(24534:24667): ENVIO datos. socket: 8. buffer: 1512679
+[TRACE] 20:46:44:421 UMV/(24534:24667): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:46:44:421 UMV/(24534:24667): Se cerró el socket (8).
+[TRACE] 20:48:10:941 UMV/(24791:24791): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 20:48:10:967 UMV/(24791:24796): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 20:49:56:512 UMV/(24869:24869): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 20:49:56:551 UMV/(24869:24875): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 20:50:06:131 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (59290). El número de socket del cliente es: 8
+[TRACE] 20:50:07:290 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:50:07:290 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:50:17:592 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:50:17:593 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:50:18:422 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 20:50:18:422 UMV/(24869:24878): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 20:50:18:422 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 141426
+[TRACE] 20:50:19:139 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 24142610254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:50:19:139 UMV/(24869:24878): Se escribió en memoria. Id programa: 8, base logica: 1426, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:50:19:139 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:50:19:992 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 20:50:19:993 UMV/(24869:24878): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:50:19:993 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 142841
+[TRACE] 20:50:21:39 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 20:50:21:39 UMV/(24869:24878): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 20:50:21:40 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 144818
+[TRACE] 20:50:38:895 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 518240
+[TRACE] 20:50:38:895 UMV/(24869:24878): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 40
+[TRACE] 20:50:38:895 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 146722
+[TRACE] 20:51:14:842 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 246722102
+[TRACE] 20:51:14:843 UMV/(24869:24878): Se escribió en memoria. Id programa: 8, base logica: 6722, base real: 3083838015,  desplazamiento: 0, cantidad de bytes: 0, buffer: 
+[TRACE] 20:51:14:843 UMV/(24869:24878): ENVIO datos. socket: 8. buffer: 1
+[ERROR] 20:52:35:434 UMV/(24869:24878): Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: 8
+[TRACE] 20:52:35:435 UMV/(24869:24878): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:52:35:435 UMV/(24869:24878): Se cerró el socket (8).
+[TRACE] 20:52:45:262 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (59802). El número de socket del cliente es: 8
+[TRACE] 20:52:46:804 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:52:46:806 UMV/(24869:24906): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:52:54:285 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:52:54:285 UMV/(24869:24906): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:52:55:177 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 20:52:55:177 UMV/(24869:24906): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 20:52:55:178 UMV/(24869:24906): ENVIO datos. socket: 8. buffer: 147942
+[TRACE] 20:52:55:838 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 24794210254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:52:55:838 UMV/(24869:24906): Se escribió en memoria. Id programa: 8, base logica: 7942, base real: 3083838055,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:52:55:838 UMV/(24869:24906): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:52:56:477 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 20:52:56:478 UMV/(24869:24906): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:52:56:478 UMV/(24869:24906): ENVIO datos. socket: 8. buffer: 149406
+[TRACE] 20:52:57:153 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 20:52:57:153 UMV/(24869:24906): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 20:52:57:154 UMV/(24869:24906): ENVIO datos. socket: 8. buffer: 1511509
+[TRACE] 20:52:59:387 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 518240
+[TRACE] 20:52:59:387 UMV/(24869:24906): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 40
+[TRACE] 20:52:59:388 UMV/(24869:24906): ENVIO datos. socket: 8. buffer: 1512659
+[TRACE] 20:54:01:239 UMV/(24869:24906): RECIBO datos. socket: 8. buffer: 
+[TRACE] 20:54:01:239 UMV/(24869:24906): Se cerró el socket (8).
+[TRACE] 20:54:32:0 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (60314). El número de socket del cliente es: 8
+[TRACE] 20:54:35:986 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 20:54:35:987 UMV/(24869:24927): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:54:45:67 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 20:54:45:67 UMV/(24869:24927): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:54:46:45 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 20:54:46:45 UMV/(24869:24927): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 20:54:46:47 UMV/(24869:24927): ENVIO datos. socket: 8. buffer: 1514319
+[TRACE] 20:54:46:544 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 251431910254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:54:46:544 UMV/(24869:24927): Se escribió en memoria. Id programa: 8, base logica: 14319, base real: 3083838662,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 20:54:46:545 UMV/(24869:24927): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 20:54:47:276 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 20:54:47:276 UMV/(24869:24927): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 20:54:47:277 UMV/(24869:24927): ENVIO datos. socket: 8. buffer: 1515975
+[TRACE] 20:54:47:948 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 20:54:47:948 UMV/(24869:24927): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 20:54:47:948 UMV/(24869:24927): ENVIO datos. socket: 8. buffer: 1518391
+[TRACE] 20:54:49:983 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 518240
+[TRACE] 20:54:49:984 UMV/(24869:24927): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 40
+[TRACE] 20:54:49:984 UMV/(24869:24927): ENVIO datos. socket: 8. buffer: 1520162
+[TRACE] 21:00:34:456 UMV/(24869:24927): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:00:34:457 UMV/(24869:24927): Se cerró el socket (8).
+[TRACE] 21:03:52:89 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (60826). El número de socket del cliente es: 8
+[TRACE] 21:03:53:443 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:03:53:443 UMV/(24869:24956): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:03:59:252 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:03:59:252 UMV/(24869:24956): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:03:59:858 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 21:03:59:858 UMV/(24869:24956): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 21:03:59:858 UMV/(24869:24956): ENVIO datos. socket: 8. buffer: 1521799
+[TRACE] 21:04:00:242 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 252179910254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:04:00:242 UMV/(24869:24956): Se escribió en memoria. Id programa: 8, base logica: 21799, base real: 3083839269,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:04:00:243 UMV/(24869:24956): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:04:00:980 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 21:04:00:981 UMV/(24869:24956): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:04:00:981 UMV/(24869:24956): ENVIO datos. socket: 8. buffer: 1523079
+[TRACE] 21:04:01:367 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 21:04:01:367 UMV/(24869:24956): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 21:04:01:367 UMV/(24869:24956): ENVIO datos. socket: 8. buffer: 1524740
+[TRACE] 21:04:03:960 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 518240
+[TRACE] 21:04:03:960 UMV/(24869:24956): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 40
+[TRACE] 21:04:03:961 UMV/(24869:24956): ENVIO datos. socket: 8. buffer: 1526591
+[TRACE] 21:05:04:375 UMV/(24869:24956): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:05:04:376 UMV/(24869:24956): Se cerró el socket (8).
+[TRACE] 21:09:00:818 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (61338). El número de socket del cliente es: 8
+[TRACE] 21:09:01:965 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:09:01:965 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:09:07:983 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:09:07:983 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:09:08:869 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 21:09:08:869 UMV/(24869:24982): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 21:09:08:870 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1528136
+[TRACE] 21:09:09:505 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 252813610254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:09:09:505 UMV/(24869:24982): Se escribió en memoria. Id programa: 8, base logica: 28136, base real: 3083839876,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:09:09:505 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:09:09:939 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 21:09:09:939 UMV/(24869:24982): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:09:09:940 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1529734
+[TRACE] 21:09:10:540 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 21:09:10:540 UMV/(24869:24982): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 21:09:10:540 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1531295
+[TRACE] 21:09:14:842 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 51818
+[TRACE] 21:09:14:842 UMV/(24869:24982): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 8
+[TRACE] 21:09:14:843 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1532845
+[TRACE] 21:09:36:336 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 2532845101800060016
+[TRACE] 21:09:36:336 UMV/(24869:24982): Se escribió en memoria. Id programa: 8, base logica: 32845, base real: 3083840443,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060016
+[TRACE] 21:09:36:337 UMV/(24869:24982): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:10:10:451 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.135) por el puerto (29121). El número de socket del cliente es: 9
+[TRACE] 21:11:15:597 UMV/(24869:25009): RECIBO datos. socket: 9. buffer: 
+[TRACE] 21:11:15:598 UMV/(24869:25009): Se cerró el socket (9).
+[TRACE] 21:11:50:602 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (61850). El número de socket del cliente es: 9
+[TRACE] 21:11:55:98 UMV/(24869:25014): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 21:11:55:98 UMV/(24869:25014): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:12:47:327 UMV/(24869:24982): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:12:47:327 UMV/(24869:25014): RECIBO datos. socket: 9. buffer: 
+[TRACE] 21:12:47:327 UMV/(24869:25014): Se cerró el socket (9).
+[TRACE] 21:12:47:331 UMV/(24869:24982): Se cerró el socket (8).
+[TRACE] 21:14:58:404 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (62362). El número de socket del cliente es: 8
+[TRACE] 21:15:02:610 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:15:02:610 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:15:12:522 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:15:12:522 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:15:13:218 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 518254
+[TRACE] 21:15:13:218 UMV/(24869:25020): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 54
+[TRACE] 21:15:13:219 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1534725
+[TRACE] 21:15:14:364 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 253472510254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:15:14:364 UMV/(24869:25020): Se escribió en memoria. Id programa: 8, base logica: 34725, base real: 3083840451,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:15:14:365 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:15:14:680 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 21:15:14:680 UMV/(24869:25020): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:15:14:680 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1535855
+[TRACE] 21:15:15:372 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 21:15:15:372 UMV/(24869:25020): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 21:15:15:372 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1537940
+[TRACE] 21:15:18:56 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 51818
+[TRACE] 21:15:18:56 UMV/(24869:25020): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 8
+[TRACE] 21:15:18:57 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1539186
+[TRACE] 21:15:19:264 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 2539186101800060016
+[TRACE] 21:15:19:264 UMV/(24869:25020): Se escribió en memoria. Id programa: 8, base logica: 39186, base real: 3083841018,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060016
+[TRACE] 21:15:19:265 UMV/(24869:25020): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:15:24:609 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (62874). El número de socket del cliente es: 9
+[TRACE] 21:15:27:375 UMV/(24869:25045): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 21:15:27:375 UMV/(24869:25045): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:15:43:868 UMV/(24869:25045): RECIBO datos. socket: 9. buffer: 418
+[TRACE] 21:15:43:868 UMV/(24869:25045): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:15:46:874 UMV/(24869:25045): RECIBO datos. socket: 9. buffer: 15379401010
+[TRACE] 21:15:46:874 UMV/(24869:25045): Se leyó  de memoria. Id programa: 8, base logica: 37940, base real: 3083841017,  desplazamiento: 0, cantidad de bytes: 0, buffer: 
+[TRACE] 21:15:46:875 UMV/(24869:25045): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:15:50:191 UMV/(24869:25045): RECIBO datos. socket: 9. buffer: 15391861818
+[TRACE] 21:15:50:191 UMV/(24869:25045): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (8) no puede acceder a la posicion de memoria 39202. (El segmento termina en la posicion 39194)
+[TRACE] 21:15:50:192 UMV/(24869:25045): ENVIO datos. socket: 9. buffer: 0ERROR LEER MEMORIA. SEGMENTATION FAULT. El programa (8) no puede acceder a la posicion de memoria 39202. (El segmento termina en la posicion 39194). Id programa: 8, base: 39186, desplazamiento: 8, longitud buffer: 8
+[INFO] 21:16:35:892 UMV/(24869:24876): BASE MEMORIA: 3083837448
+
+[INFO] 21:16:35:892 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:16:35:892 UMV/(24869:24876): |          8|          1|       1426|         54|            3083837448|
+
+[INFO] 21:16:35:893 UMV/(24869:24876): |          8|          2|       2841|        512|            3083837502|
+
+[INFO] 21:16:35:893 UMV/(24869:24876): |          8|          3|       4818|          1|            3083838014|
+
+[INFO] 21:16:35:893 UMV/(24869:24876): |          8|          4|       6722|         40|            3083838015|
+
+[INFO] 21:16:35:893 UMV/(24869:24876): |          8|          5|       7942|         54|            3083838055|
+
+[INFO] 21:16:35:893 UMV/(24869:24876): |          8|          6|       9406|        512|            3083838109|
+
+[INFO] 21:16:35:893 UMV/(24869:24876): |          8|          7|      11509|          1|            3083838621|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|          8|      12659|         40|            3083838622|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|          9|      14319|         54|            3083838662|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         10|      15975|        512|            3083838716|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         11|      18391|          1|            3083839228|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         12|      20162|         40|            3083839229|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         13|      21799|         54|            3083839269|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         14|      23079|        512|            3083839323|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         15|      24740|          1|            3083839835|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         16|      26591|         40|            3083839836|
+
+[INFO] 21:16:35:894 UMV/(24869:24876): |          8|         17|      28136|         54|            3083839876|
+
+[INFO] 21:16:35:895 UMV/(24869:24876): |          8|         18|      29734|        512|            3083839930|
+
+[INFO] 21:16:35:895 UMV/(24869:24876): |          8|         19|      31295|          1|            3083840442|
+
+[INFO] 21:16:35:895 UMV/(24869:24876): |          8|         20|      32845|          8|            3083840443|
+
+[INFO] 21:16:35:895 UMV/(24869:24876): |          8|         21|      34725|         54|            3083840451|
+
+[INFO] 21:16:35:895 UMV/(24869:24876): |          8|         22|      35855|        512|            3083840505|
+
+[INFO] 21:16:35:895 UMV/(24869:24876): |          8|         23|      37940|          1|            3083841017|
+
+[INFO] 21:16:35:895 UMV/(24869:24876): |          8|         24|      39186|          8|            3083841018|
+
+[INFO] 21:17:14:825 UMV/(24869:24876): BASE MEMORIA: 3083837448
+
+[INFO] 21:17:14:825 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:825 UMV/(24869:24876): |          8|          1|       1426|         54|            3083837448|
+
+[INFO] 21:17:14:825 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:825 UMV/(24869:24876): -         0-   begin
+	v
+
+[INFO] 21:17:14:825 UMV/(24869:24876): -         8-   ariables
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        16-    a, b
+	a
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        24-    = 3
+	b 
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        32-   = 5
+	a =
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        40-    b + 12
+
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        48-   end
+
+
+48
+
+[INFO] 21:17:14:826 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:826 UMV/(24869:24876): |          8|          2|       2841|        512|            3083837502|
+
+[INFO] 21:17:14:826 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:826 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        40-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        48-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        56-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        64-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        72-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        80-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        88-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -        96-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -       104-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -       112-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -       120-   00000000
+
+[INFO] 21:17:14:827 UMV/(24869:24876): -       128-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       136-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       144-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       152-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       160-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       168-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       176-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       184-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       192-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       200-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       208-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       216-   00000000
+
+[INFO] 21:17:14:828 UMV/(24869:24876): -       224-   00000000
+
+[INFO] 21:17:14:829 UMV/(24869:24876): -       232-   00000000
+
+[INFO] 21:17:14:829 UMV/(24869:24876): -       240-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       248-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       256-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       264-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       272-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       280-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       288-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       296-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       304-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       312-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       320-   00000000
+
+[INFO] 21:17:14:830 UMV/(24869:24876): -       328-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       336-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       344-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       352-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       360-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       368-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       376-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       384-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       392-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       400-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       408-   00000000
+
+[INFO] 21:17:14:831 UMV/(24869:24876): -       416-   00000000
+
+[INFO] 21:17:14:832 UMV/(24869:24876): -       424-   00000000
+
+[INFO] 21:17:14:832 UMV/(24869:24876): -       432-   00000000
+
+[INFO] 21:17:14:832 UMV/(24869:24876): -       440-   00000000
+
+[INFO] 21:17:14:832 UMV/(24869:24876): -       448-   00000000
+
+[INFO] 21:17:14:833 UMV/(24869:24876): -       456-   00000000
+
+[INFO] 21:17:14:834 UMV/(24869:24876): -       464-   00000000
+
+[INFO] 21:17:14:834 UMV/(24869:24876): -       472-   00000000
+
+[INFO] 21:17:14:834 UMV/(24869:24876): -       480-   00000000
+
+[INFO] 21:17:14:834 UMV/(24869:24876): -       488-   00000000
+
+[INFO] 21:17:14:834 UMV/(24869:24876): -       496-   00000000
+
+[INFO] 21:17:14:834 UMV/(24869:24876): -       504-   00000000
+
+[INFO] 21:17:14:834 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:835 UMV/(24869:24876): |          8|          3|       4818|          1|            3083838014|
+
+[INFO] 21:17:14:835 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:836 UMV/(24869:24876): -         0-   0$�� (
+
+[INFO] 21:17:14:836 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:837 UMV/(24869:24876): |          8|          4|       6722|         40|            3083838015|
+
+[INFO] 21:17:14:837 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:837 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:838 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:838 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:838 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:839 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:839 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:839 UMV/(24869:24876): |          8|          5|       7942|         54|            3083838055|
+
+[INFO] 21:17:14:840 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:840 UMV/(24869:24876): -         0-   begin
+	v
+
+[INFO] 21:17:14:841 UMV/(24869:24876): -         8-   ariables
+
+[INFO] 21:17:14:841 UMV/(24869:24876): -        16-    a, b
+	a
+
+[INFO] 21:17:14:841 UMV/(24869:24876): -        24-    = 3
+	b 
+
+[INFO] 21:17:14:841 UMV/(24869:24876): -        32-   = 5
+	a =
+
+[INFO] 21:17:14:841 UMV/(24869:24876): -        40-    b + 12
+
+
+[INFO] 21:17:14:841 UMV/(24869:24876): -        48-   end
+
+
+
+
+[INFO] 21:17:14:841 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:841 UMV/(24869:24876): |          8|          6|       9406|        512|            3083838109|
+
+[INFO] 21:17:14:842 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:842 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:842 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:842 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:842 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:842 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        40-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        48-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        56-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        64-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        72-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        80-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        88-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -        96-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -       104-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -       112-   00000000
+
+[INFO] 21:17:14:843 UMV/(24869:24876): -       120-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       128-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       136-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       144-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       152-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       160-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       168-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       176-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       184-   00000000
+
+[INFO] 21:17:14:844 UMV/(24869:24876): -       192-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       200-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       208-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       216-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       224-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       232-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       240-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       248-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       256-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       264-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       272-   00000000
+
+[INFO] 21:17:14:845 UMV/(24869:24876): -       280-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       288-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       296-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       304-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       312-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       320-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       328-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       336-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       344-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       352-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       360-   00000000
+
+[INFO] 21:17:14:846 UMV/(24869:24876): -       368-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       376-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       384-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       392-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       400-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       408-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       416-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       424-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       432-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       440-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       448-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       456-   00000000
+
+[INFO] 21:17:14:847 UMV/(24869:24876): -       464-   00000000
+
+[INFO] 21:17:14:848 UMV/(24869:24876): -       472-   00000000
+
+[INFO] 21:17:14:848 UMV/(24869:24876): -       480-   00000000
+
+[INFO] 21:17:14:848 UMV/(24869:24876): -       488-   00000000
+
+[INFO] 21:17:14:848 UMV/(24869:24876): -       496-   00000000
+
+[INFO] 21:17:14:848 UMV/(24869:24876): -       504-   00000000
+
+[INFO] 21:17:14:848 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:848 UMV/(24869:24876): |          8|          7|      11509|          1|            3083838621|
+
+[INFO] 21:17:14:848 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:848 UMV/(24869:24876): -         0-   0$�� (
+
+[INFO] 21:17:14:848 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:849 UMV/(24869:24876): |          8|          8|      12659|         40|            3083838622|
+
+[INFO] 21:17:14:849 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:849 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:849 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:849 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:849 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:849 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:849 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:849 UMV/(24869:24876): |          8|          9|      14319|         54|            3083838662|
+
+[INFO] 21:17:14:849 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -         0-   begin
+	v
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -         8-   ariables
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -        16-    a, b
+	a
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -        24-    = 3
+	b 
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -        32-   = 5
+	a =
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -        40-    b + 12
+
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -        48-   end
+
+
+
+
+[INFO] 21:17:14:850 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:850 UMV/(24869:24876): |          8|         10|      15975|        512|            3083838716|
+
+[INFO] 21:17:14:850 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:850 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        40-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        48-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        56-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        64-   00000000
+
+[INFO] 21:17:14:851 UMV/(24869:24876): -        72-   00000000
+
+[INFO] 21:17:14:852 UMV/(24869:24876): -        80-   00000000
+
+[INFO] 21:17:14:852 UMV/(24869:24876): -        88-   00000000
+
+[INFO] 21:17:14:852 UMV/(24869:24876): -        96-   00000000
+
+[INFO] 21:17:14:852 UMV/(24869:24876): -       104-   00000000
+
+[INFO] 21:17:14:852 UMV/(24869:24876): -       112-   00000000
+
+[INFO] 21:17:14:853 UMV/(24869:24876): -       120-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       128-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       136-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       144-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       152-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       160-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       168-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       176-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       184-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       192-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       200-   00000000
+
+[INFO] 21:17:14:854 UMV/(24869:24876): -       208-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       216-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       224-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       232-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       240-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       248-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       256-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       264-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       272-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       280-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       288-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       296-   00000000
+
+[INFO] 21:17:14:855 UMV/(24869:24876): -       304-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       312-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       320-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       328-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       336-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       344-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       352-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       360-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       368-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       376-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       384-   00000000
+
+[INFO] 21:17:14:856 UMV/(24869:24876): -       392-   00000000
+
+[INFO] 21:17:14:857 UMV/(24869:24876): -       400-   00000000
+
+[INFO] 21:17:14:857 UMV/(24869:24876): -       408-   00000000
+
+[INFO] 21:17:14:858 UMV/(24869:24876): -       416-   00000000
+
+[INFO] 21:17:14:858 UMV/(24869:24876): -       424-   00000000
+
+[INFO] 21:17:14:858 UMV/(24869:24876): -       432-   00000000
+
+[INFO] 21:17:14:859 UMV/(24869:24876): -       440-   00000000
+
+[INFO] 21:17:14:859 UMV/(24869:24876): -       448-   00000000
+
+[INFO] 21:17:14:859 UMV/(24869:24876): -       456-   00000000
+
+[INFO] 21:17:14:860 UMV/(24869:24876): -       464-   00000000
+
+[INFO] 21:17:14:860 UMV/(24869:24876): -       472-   00000000
+
+[INFO] 21:17:14:860 UMV/(24869:24876): -       480-   00000000
+
+[INFO] 21:17:14:861 UMV/(24869:24876): -       488-   00000000
+
+[INFO] 21:17:14:861 UMV/(24869:24876): -       496-   00000000
+
+[INFO] 21:17:14:862 UMV/(24869:24876): -       504-   00000000
+
+[INFO] 21:17:14:863 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:863 UMV/(24869:24876): |          8|         11|      18391|          1|            3083839228|
+
+[INFO] 21:17:14:863 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:864 UMV/(24869:24876): -         0-   0$�� (
+
+[INFO] 21:17:14:864 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:864 UMV/(24869:24876): |          8|         12|      20162|         40|            3083839229|
+
+[INFO] 21:17:14:865 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:865 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:865 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:866 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:866 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:867 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:867 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:867 UMV/(24869:24876): |          8|         13|      21799|         54|            3083839269|
+
+[INFO] 21:17:14:868 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:868 UMV/(24869:24876): -         0-   begin
+	v
+
+[INFO] 21:17:14:869 UMV/(24869:24876): -         8-   ariables
+
+[INFO] 21:17:14:869 UMV/(24869:24876): -        16-    a, b
+	a
+
+[INFO] 21:17:14:869 UMV/(24869:24876): -        24-    = 3
+	b 
+
+[INFO] 21:17:14:870 UMV/(24869:24876): -        32-   = 5
+	a =
+
+[INFO] 21:17:14:870 UMV/(24869:24876): -        40-    b + 12
+
+
+[INFO] 21:17:14:870 UMV/(24869:24876): -        48-   end
+
+
+
+
+[INFO] 21:17:14:870 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:870 UMV/(24869:24876): |          8|         14|      23079|        512|            3083839323|
+
+[INFO] 21:17:14:870 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:870 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:870 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:870 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        40-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        48-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        56-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        64-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        72-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        80-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        88-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -        96-   00000000
+
+[INFO] 21:17:14:871 UMV/(24869:24876): -       104-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       112-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       120-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       128-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       136-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       144-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       152-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       160-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       168-   00000000
+
+[INFO] 21:17:14:872 UMV/(24869:24876): -       176-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       184-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       192-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       200-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       208-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       216-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       224-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       232-   00000000
+
+[INFO] 21:17:14:873 UMV/(24869:24876): -       240-   00000000
+
+[INFO] 21:17:14:874 UMV/(24869:24876): -       248-   00000000
+
+[INFO] 21:17:14:874 UMV/(24869:24876): -       256-   00000000
+
+[INFO] 21:17:14:874 UMV/(24869:24876): -       264-   00000000
+
+[INFO] 21:17:14:874 UMV/(24869:24876): -       272-   00000000
+
+[INFO] 21:17:14:874 UMV/(24869:24876): -       280-   00000000
+
+[INFO] 21:17:14:874 UMV/(24869:24876): -       288-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       296-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       304-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       312-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       320-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       328-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       336-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       344-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       352-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       360-   00000000
+
+[INFO] 21:17:14:875 UMV/(24869:24876): -       368-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       376-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       384-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       392-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       400-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       408-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       416-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       424-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       432-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       440-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       448-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       456-   00000000
+
+[INFO] 21:17:14:876 UMV/(24869:24876): -       464-   00000000
+
+[INFO] 21:17:14:877 UMV/(24869:24876): -       472-   00000000
+
+[INFO] 21:17:14:877 UMV/(24869:24876): -       480-   00000000
+
+[INFO] 21:17:14:877 UMV/(24869:24876): -       488-   00000000
+
+[INFO] 21:17:14:877 UMV/(24869:24876): -       496-   00000000
+
+[INFO] 21:17:14:877 UMV/(24869:24876): -       504-   00000000
+
+[INFO] 21:17:14:877 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:877 UMV/(24869:24876): |          8|         15|      24740|          1|            3083839835|
+
+[INFO] 21:17:14:877 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:877 UMV/(24869:24876): -         0-   0$�� (
+
+[INFO] 21:17:14:877 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:878 UMV/(24869:24876): |          8|         16|      26591|         40|            3083839836|
+
+[INFO] 21:17:14:878 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:878 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:878 UMV/(24869:24876): |          8|         17|      28136|         54|            3083839876|
+
+[INFO] 21:17:14:878 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -         0-   begin
+	v
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -         8-   ariables
+
+[INFO] 21:17:14:878 UMV/(24869:24876): -        16-    a, b
+	a
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -        24-    = 3
+	b 
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -        32-   = 5
+	a =
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -        40-    b + 12
+
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -        48-   end
+
+
+
+
+[INFO] 21:17:14:879 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:879 UMV/(24869:24876): |          8|         18|      29734|        512|            3083839930|
+
+[INFO] 21:17:14:879 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:879 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        40-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        48-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        56-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        64-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        72-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        80-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        88-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -        96-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -       104-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -       112-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -       120-   00000000
+
+[INFO] 21:17:14:880 UMV/(24869:24876): -       128-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       136-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       144-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       152-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       160-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       168-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       176-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       184-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       192-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       200-   00000000
+
+[INFO] 21:17:14:881 UMV/(24869:24876): -       208-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       216-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       224-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       232-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       240-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       248-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       256-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       264-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       272-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       280-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       288-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       296-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       304-   00000000
+
+[INFO] 21:17:14:883 UMV/(24869:24876): -       312-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       320-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       328-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       336-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       344-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       352-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       360-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       368-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       376-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       384-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       392-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       400-   00000000
+
+[INFO] 21:17:14:884 UMV/(24869:24876): -       408-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       416-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       424-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       432-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       440-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       448-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       456-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       464-   00000000
+
+[INFO] 21:17:14:885 UMV/(24869:24876): -       472-   00000000
+
+[INFO] 21:17:14:886 UMV/(24869:24876): -       480-   00000000
+
+[INFO] 21:17:14:886 UMV/(24869:24876): -       488-   00000000
+
+[INFO] 21:17:14:886 UMV/(24869:24876): -       496-   00000000
+
+[INFO] 21:17:14:886 UMV/(24869:24876): -       504-   00000000
+
+[INFO] 21:17:14:886 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:886 UMV/(24869:24876): |          8|         19|      31295|          1|            3083840442|
+
+[INFO] 21:17:14:886 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:886 UMV/(24869:24876): -         0-   0$�� (
+
+[INFO] 21:17:14:886 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:887 UMV/(24869:24876): |          8|         20|      32845|          8|            3083840443|
+
+[INFO] 21:17:14:887 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:887 UMV/(24869:24876): -         0-   00060016
+
+[INFO] 21:17:14:887 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:887 UMV/(24869:24876): |          8|         21|      34725|         54|            3083840451|
+
+[INFO] 21:17:14:887 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:887 UMV/(24869:24876): -         0-   begin
+	v
+
+[INFO] 21:17:14:887 UMV/(24869:24876): -         8-   ariables
+
+[INFO] 21:17:14:887 UMV/(24869:24876): -        16-    a, b
+	a
+
+[INFO] 21:17:14:888 UMV/(24869:24876): -        24-    = 3
+	b 
+
+[INFO] 21:17:14:888 UMV/(24869:24876): -        32-   = 5
+	a =
+
+[INFO] 21:17:14:888 UMV/(24869:24876): -        40-    b + 12
+
+
+[INFO] 21:17:14:888 UMV/(24869:24876): -        48-   end
+
+
+ 
+
+
+[INFO] 21:17:14:888 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:888 UMV/(24869:24876): |          8|         22|      35855|        512|            3083840505|
+
+[INFO] 21:17:14:888 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:888 UMV/(24869:24876): -         0-   00000000
+
+[INFO] 21:17:14:888 UMV/(24869:24876): -         8-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        16-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        24-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        32-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        40-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        48-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        56-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        64-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        72-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        80-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        88-   00000000
+
+[INFO] 21:17:14:889 UMV/(24869:24876): -        96-   00000000
+
+[INFO] 21:17:14:890 UMV/(24869:24876): -       104-   00000000
+
+[INFO] 21:17:14:890 UMV/(24869:24876): -       112-   00000000
+
+[INFO] 21:17:14:891 UMV/(24869:24876): -       120-   00000000
+
+[INFO] 21:17:14:891 UMV/(24869:24876): -       128-   00000000
+
+[INFO] 21:17:14:891 UMV/(24869:24876): -       136-   00000000
+
+[INFO] 21:17:14:891 UMV/(24869:24876): -       144-   00000000
+
+[INFO] 21:17:14:891 UMV/(24869:24876): -       152-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       160-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       168-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       176-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       184-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       192-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       200-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       208-   00000000
+
+[INFO] 21:17:14:892 UMV/(24869:24876): -       216-   00000000
+
+[INFO] 21:17:14:893 UMV/(24869:24876): -       224-   00000000
+
+[INFO] 21:17:14:893 UMV/(24869:24876): -       232-   00000000
+
+[INFO] 21:17:14:893 UMV/(24869:24876): -       240-   00000000
+
+[INFO] 21:17:14:893 UMV/(24869:24876): -       248-   00000000
+
+[INFO] 21:17:14:893 UMV/(24869:24876): -       256-   00000000
+
+[INFO] 21:17:14:893 UMV/(24869:24876): -       264-   00000000
+
+[INFO] 21:17:14:894 UMV/(24869:24876): -       272-   00000000
+
+[INFO] 21:17:14:894 UMV/(24869:24876): -       280-   00000000
+
+[INFO] 21:17:14:894 UMV/(24869:24876): -       288-   00000000
+
+[INFO] 21:17:14:894 UMV/(24869:24876): -       296-   00000000
+
+[INFO] 21:17:14:894 UMV/(24869:24876): -       304-   00000000
+
+[INFO] 21:17:14:894 UMV/(24869:24876): -       312-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       320-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       328-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       336-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       344-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       352-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       360-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       368-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       376-   00000000
+
+[INFO] 21:17:14:895 UMV/(24869:24876): -       384-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       392-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       400-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       408-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       416-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       424-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       432-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       440-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       448-   00000000
+
+[INFO] 21:17:14:896 UMV/(24869:24876): -       456-   00000000
+
+[INFO] 21:17:14:897 UMV/(24869:24876): -       464-   00000000
+
+[INFO] 21:17:14:897 UMV/(24869:24876): -       472-   00000000
+
+[INFO] 21:17:14:897 UMV/(24869:24876): -       480-   00000000
+
+[INFO] 21:17:14:897 UMV/(24869:24876): -       488-   00000000
+
+[INFO] 21:17:14:897 UMV/(24869:24876): -       496-   00000000
+
+[INFO] 21:17:14:897 UMV/(24869:24876): -       504-   00000000
+
+[INFO] 21:17:14:897 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:897 UMV/(24869:24876): |          8|         23|      37940|          1|            3083841017|
+
+[INFO] 21:17:14:898 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:898 UMV/(24869:24876): -         0-   0$�� (
+
+[INFO] 21:17:14:898 UMV/(24869:24876): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:17:14:898 UMV/(24869:24876): |          8|         24|      39186|          8|            3083841018|
+
+[INFO] 21:17:14:898 UMV/(24869:24876): 
+ CONTENIDO DE MEMORIA 
+
+[INFO] 21:17:14:898 UMV/(24869:24876): -         0-   00060016
+
+[INFO] 21:17:14:898 UMV/(24869:24876): TOTAL Memoria usada por programa (Bytes): 3578
+[TRACE] 21:19:37:946 UMV/(24869:25045): RECIBO datos. socket: 9. buffer: 
+[TRACE] 21:19:37:947 UMV/(24869:25045): Se cerró el socket (9).
+[TRACE] 21:19:41:682 UMV/(24869:25020): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:19:41:683 UMV/(24869:25020): Se cerró el socket (8).
+[TRACE] 21:22:36:132 UMV/(24869:24875): Se ha conectado el cliente (192.168.3.141) por el puerto (63386). El número de socket del cliente es: 8
+[TRACE] 21:22:37:366 UMV/(24869:25069): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:22:37:366 UMV/(24869:25069): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:22:59:72 UMV/(24869:25069): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:22:59:73 UMV/(24869:25069): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:23:02:296 UMV/(24869:25069): RECIBO datos. socket: 8. buffer: 518224
+[TRACE] 21:23:02:296 UMV/(24869:25069): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 24
+[TRACE] 21:23:02:297 UMV/(24869:25069): ENVIO datos. socket: 8. buffer: 1540414
+[TRACE] 21:24:20:783 UMV/(25110:25110): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 21:24:20:814 UMV/(25110:25115): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 21:24:52:534 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.141) por el puerto (63898). El número de socket del cliente es: 8
+[TRACE] 21:24:53:453 UMV/(25110:25118): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:24:53:454 UMV/(25110:25118): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:25:27:136 UMV/(25110:25118): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:25:27:137 UMV/(25110:25118): Se cerró el socket (8).
+[TRACE] 21:26:06:46 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.141) por el puerto (64154). El número de socket del cliente es: 8
+[TRACE] 21:26:07:167 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:26:07:168 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:27:16:489 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:27:16:490 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:27:31:446 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 518224
+[TRACE] 21:27:31:446 UMV/(25110:25125): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 24
+[TRACE] 21:27:31:446 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 141952
+[TRACE] 21:27:42:710 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 24195210224begin
+textPrint hola
+end
+[TRACE] 21:27:42:710 UMV/(25110:25125): Se escribió en memoria. Id programa: 8, base logica: 1952, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 24, buffer: begin
+textPrint hola
+end
+[TRACE] 21:27:42:710 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:27:52:545 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 5183512
+[TRACE] 21:27:52:545 UMV/(25110:25125): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:27:52:545 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 143006
+[TRACE] 21:28:01:86 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 51811
+[TRACE] 21:28:01:86 UMV/(25110:25125): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 21:28:01:86 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 144610
+[TRACE] 21:30:02:0 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 51818
+[TRACE] 21:30:02:0 UMV/(25110:25125): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 8
+[TRACE] 21:30:02:1 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 145715
+[TRACE] 21:30:45:806 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 245715101800060015
+[TRACE] 21:30:45:806 UMV/(25110:25125): Se escribió en memoria. Id programa: 8, base logica: 5715, base real: 3083837985,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060015
+[TRACE] 21:30:45:807 UMV/(25110:25125): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:31:00:971 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.135) por el puerto (37569). El número de socket del cliente es: 9
+[TRACE] 21:31:06:490 UMV/(25110:25154): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 21:31:06:490 UMV/(25110:25154): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:31:20:690 UMV/(25110:25154): RECIBO datos. socket: 9. buffer: 418
+[TRACE] 21:31:20:691 UMV/(25110:25154): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:31:35:466 UMV/(25110:25154): RECIBO datos. socket: 9. buffer: 1457151018
+[TRACE] 21:31:35:466 UMV/(25110:25154): Se leyó  de memoria. Id programa: 8, base logica: 5715, base real: 3083837985,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060015
+[TRACE] 21:31:35:467 UMV/(25110:25154): ENVIO datos. socket: 9. buffer: 100060015
+[TRACE] 21:35:22:71 UMV/(25110:25125): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:35:22:71 UMV/(25110:25125): Se cerró el socket (8).
+[TRACE] 21:35:22:71 UMV/(25110:25154): RECIBO datos. socket: 9. buffer: 
+[TRACE] 21:35:22:72 UMV/(25110:25154): Se cerró el socket (9).
+[TRACE] 21:35:32:123 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.135) por el puerto (39361). El número de socket del cliente es: 8
+[TRACE] 21:35:43:632 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.141) por el puerto (64666). El número de socket del cliente es: 9
+[TRACE] 21:35:45:688 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 31
+[TRACE] 21:35:45:688 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:35:49:315 UMV/(25110:25169): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:35:49:316 UMV/(25110:25169): Se cerró el socket (8).
+[TRACE] 21:35:59:543 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 418
+[TRACE] 21:35:59:543 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:36:06:314 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.135) por el puerto (39873). El número de socket del cliente es: 8
+[TRACE] 21:36:08:882 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 518224
+[TRACE] 21:36:08:882 UMV/(25110:25172): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 24
+[TRACE] 21:36:08:882 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 146899
+[TRACE] 21:36:08:883 UMV/(25110:25183): RECIBO datos. socket: 8. buffer: 32
+[TRACE] 21:36:08:883 UMV/(25110:25183): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:36:09:968 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 24689910224begin
+textPrint hola
+end
+[TRACE] 21:36:09:968 UMV/(25110:25172): Se escribió en memoria. Id programa: 8, base logica: 6899, base real: 3083837993,  desplazamiento: 0, cantidad de bytes: 24, buffer: begin
+textPrint hola
+end
+[TRACE] 21:36:09:969 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:36:12:55 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 5183512
+[TRACE] 21:36:12:55 UMV/(25110:25172): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:36:12:56 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 148710
+[TRACE] 21:36:12:750 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 51811
+[TRACE] 21:36:12:750 UMV/(25110:25172): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 21:36:12:750 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 1510724
+[TRACE] 21:36:15:319 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 51818
+[TRACE] 21:36:15:319 UMV/(25110:25172): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 8
+[TRACE] 21:36:15:320 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 1512697
+[TRACE] 21:36:20:644 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 2512697101800060015
+[TRACE] 21:36:20:644 UMV/(25110:25172): Se escribió en memoria. Id programa: 8, base logica: 12697, base real: 3083838530,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060015
+[TRACE] 21:36:20:645 UMV/(25110:25172): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:36:22:480 UMV/(25110:25183): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:36:22:481 UMV/(25110:25183): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:36:23:110 UMV/(25110:25183): RECIBO datos. socket: 8. buffer: 15126971018
+[TRACE] 21:36:23:110 UMV/(25110:25183): Se leyó  de memoria. Id programa: 8, base logica: 12697, base real: 3083838530,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060015
+[TRACE] 21:36:23:110 UMV/(25110:25183): ENVIO datos. socket: 8. buffer: 100060015
+[TRACE] 21:36:23:784 UMV/(25110:25183): RECIBO datos. socket: 8. buffer: 14689916215
+[TRACE] 21:36:23:784 UMV/(25110:25183): Se leyó  de memoria. Id programa: 8, base logica: 6899, base real: 3083837993,  desplazamiento: 6, cantidad de bytes: 15, buffer: textPrint hola
+cket:�
+[TRACE] 21:36:23:785 UMV/(25110:25183): ENVIO datos. socket: 8. buffer: 1textPrint hola
+cket:1
+[TRACE] 21:36:24:85 UMV/(25110:25183): RECIBO datos. socket: 8. buffer: 15126971818
+[TRACE] 21:36:24:85 UMV/(25110:25183): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (8) no puede acceder a la posicion de memoria 12713. (El segmento termina en la posicion 12705)
+[TRACE] 21:36:24:86 UMV/(25110:25183): ENVIO datos. socket: 8. buffer: 0ERROR LEER MEMORIA. SEGMENTATIONY
+. Id programa: 8, base: 12697, desplazamiento: 8, longitud buffer: 8
+[TRACE] 21:40:04:459 UMV/(25110:25116): Se leyó  de memoria. Id programa: 8, base logica: 6899, base real: 3083837993,  desplazamiento: 6, cantidad de bytes: 15, buffer: textPrint hola
+A
+[INFO] 21:40:04:459 UMV/(25110:25116): Bytes Leidos: textPrint hola
+A
+[TRACE] 21:43:02:654 UMV/(25110:25172): RECIBO datos. socket: 9. buffer: 
+[TRACE] 21:43:02:654 UMV/(25110:25172): Se cerró el socket (9).
+[TRACE] 21:43:02:667 UMV/(25110:25183): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:43:02:667 UMV/(25110:25183): Se cerró el socket (8).
+[TRACE] 21:47:31:770 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.141) por el puerto (65178). El número de socket del cliente es: 8
+[TRACE] 21:47:33:386 UMV/(25110:25215): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 21:47:33:386 UMV/(25110:25215): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:47:50:202 UMV/(25110:25115): Se ha conectado el cliente (192.168.3.135) por el puerto (40641). El número de socket del cliente es: 9
+[TRACE] 21:47:51:171 UMV/(25110:25224): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 21:47:51:171 UMV/(25110:25224): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:47:54:86 UMV/(25110:25215): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:47:54:86 UMV/(25110:25215): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:48:11:488 UMV/(25110:25215): RECIBO datos. socket: 8. buffer: 518224
+[TRACE] 21:48:11:488 UMV/(25110:25215): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 24
+[TRACE] 21:48:11:489 UMV/(25110:25215): ENVIO datos. socket: 8. buffer: 1513717
+[TRACE] 21:48:39:195 UMV/(25257:25257): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 21:48:39:225 UMV/(25257:25262): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 21:48:48:784 UMV/(25257:25262): Se ha conectado el cliente (192.168.3.135) por el puerto (41153). El número de socket del cliente es: 8
+[TRACE] 21:48:53:887 UMV/(25257:25262): Se ha conectado el cliente (192.168.3.141) por el puerto (155). El número de socket del cliente es: 9
+[TRACE] 21:48:54:543 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 31
+[TRACE] 21:48:54:543 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:49:04:536 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 418
+[TRACE] 21:49:04:536 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:49:05:391 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 518224
+[TRACE] 21:49:05:391 UMV/(25257:25268): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 24
+[TRACE] 21:49:05:392 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 141530
+[TRACE] 21:49:05:931 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 24153010224begin
+textPrint hola
+end
+[TRACE] 21:49:05:932 UMV/(25257:25268): Se escribió en memoria. Id programa: 8, base logica: 1530, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 24, buffer: begin
+textPrint hola
+end
+[TRACE] 21:49:05:933 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:49:06:619 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 5183512
+[TRACE] 21:49:06:619 UMV/(25257:25268): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 512
+[TRACE] 21:49:06:620 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 142879
+[TRACE] 21:49:07:316 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 51811
+[TRACE] 21:49:07:316 UMV/(25257:25268): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 1
+[TRACE] 21:49:07:317 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 144958
+[TRACE] 21:49:12:523 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 51818
+[TRACE] 21:49:12:523 UMV/(25257:25268): Se creó un segmento nuevo. Id programa: 8, Tamaño solicitado segmento: 8
+[TRACE] 21:49:12:523 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 146165
+[TRACE] 21:49:13:378 UMV/(25257:25268): RECIBO datos. socket: 9. buffer: 24616510180006001400160003
+[TRACE] 21:49:13:378 UMV/(25257:25268): Se escribió en memoria. Id programa: 8, base logica: 6165, base real: 3083837985,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060014
+[TRACE] 21:49:13:378 UMV/(25257:25268): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 21:49:21:790 UMV/(25257:25265): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:49:21:791 UMV/(25257:25265): Se cerró el socket (8).
+[TRACE] 21:49:23:882 UMV/(25257:25262): Se ha conectado el cliente (192.168.3.135) por el puerto (41665). El número de socket del cliente es: 8
+[TRACE] 21:49:31:94 UMV/(25257:25292): RECIBO datos. socket: 8. buffer: 32
+[TRACE] 21:49:31:94 UMV/(25257:25292): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:49:43:764 UMV/(25257:25292): RECIBO datos. socket: 8. buffer: 418
+[TRACE] 21:49:43:764 UMV/(25257:25292): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 21:49:45:43 UMV/(25257:25292): RECIBO datos. socket: 8. buffer: 1461651018
+[TRACE] 21:49:45:43 UMV/(25257:25292): Se leyó  de memoria. Id programa: 8, base logica: 6165, base real: 3083837985,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060014
+[TRACE] 21:49:45:43 UMV/(25257:25292): ENVIO datos. socket: 8. buffer: 100060014
+[TRACE] 21:49:47:891 UMV/(25257:25292): RECIBO datos. socket: 8. buffer: 14153016214
+[TRACE] 21:49:47:892 UMV/(25257:25292): Se leyó  de memoria. Id programa: 8, base logica: 1530, base real: 3083837448,  desplazamiento: 6, cantidad de bytes: 14, buffer: textPrint holar: 141)
+[TRACE] 21:49:47:892 UMV/(25257:25292): ENVIO datos. socket: 8. buffer: 1textPrint holar: 141)
+[TRACE] 21:50:16:432 UMV/(25257:25292): RECIBO datos. socket: 8. buffer: 1461651818
+[TRACE] 21:50:16:432 UMV/(25257:25292): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (8) no puede acceder a la posicion de memoria 6181. (El segmento termina en la posicion 6173)
+[TRACE] 21:50:16:432 UMV/(25257:25292): ENVIO datos. socket: 8. buffer: 0ERROR LEER MEMORIA. SEGMENTATION FAULT. El programa (8) no puede acceder a la posicion de memoria 6181. �	. Id programa: 8, base: 6165, desplazamiento: 8, longitud buffer: 8
+[TRACE] 21:51:39:983 UMV/(25257:25292): RECIBO datos. socket: 8. buffer: 
+[TRACE] 21:51:39:984 UMV/(25257:25292): Se cerró el socket (8).
+[TRACE] 23:55:38:81 UMV/(25524:25524): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 23:55:38:86 UMV/(25524:25529): El socket está listo para recibir conexiones. Numero de socket: 5, puerto: 7000
+[TRACE] 23:58:36:884 UMV/(25668:25668): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 23:58:36:916 UMV/(25668:25673): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 00:02:08:834 UMV/(25668:25673): Se ha conectado el cliente (127.0.0.1) por el puerto (20133). El número de socket del cliente es: 8
+[TRACE] 00:02:13:622 UMV/(25668:25815): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 00:02:13:622 UMV/(25668:25815): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:13:58:617 UMV/(26662:26662): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 15:13:58:643 UMV/(26662:26667): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 15:15:00:837 UMV/(26662:26667): Se ha conectado el cliente (127.0.0.1) por el puerto (20389). El número de socket del cliente es: 8
+[TRACE] 15:15:03:369 UMV/(26662:26675): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 15:15:03:370 UMV/(26662:26675): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:15:49:122 UMV/(26662:26667): Se ha conectado el cliente (127.0.0.1) por el puerto (20645). El número de socket del cliente es: 9
+[TRACE] 15:15:51:555 UMV/(26662:26756): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 15:15:51:555 UMV/(26662:26756): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 15:21:18:310 UMV/(26662:26675): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 15:21:18:311 UMV/(26662:26675): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:21:25:858 UMV/(26662:26675): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 15:21:34:71 UMV/(26662:26675): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 15:21:34:72 UMV/(26662:26675): ENVIO datos. socket: 8. buffer: 141368
+[TRACE] 15:21:37:30 UMV/(26662:26675): RECIBO datos. socket: 8. buffer: 24136810228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:21:55:642 UMV/(26662:26675): Se escribió en memoria. Id programa: 7, base logica: 1368, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:21:55:642 UMV/(26662:26675): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:22:00:650 UMV/(26662:26675): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 15:22:05:121 UMV/(26662:26675): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 15:22:05:121 UMV/(26662:26675): ENVIO datos. socket: 8. buffer: 143307
+[TRACE] 15:22:06:437 UMV/(26662:26675): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 15:22:12:145 UMV/(26662:26675): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 15:22:12:145 UMV/(26662:26675): ENVIO datos. socket: 8. buffer: 145232
+[TRACE] 15:22:13:232 UMV/(26662:26675): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 15:22:23:685 UMV/(26662:26675): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 15:22:23:686 UMV/(26662:26675): ENVIO datos. socket: 8. buffer: 146233
+[TRACE] 15:24:31:91 UMV/(26962:26962): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 15:24:31:120 UMV/(26962:26968): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 15:25:14:801 UMV/(27003:27003): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[ERROR] 15:25:14:840 UMV/(27003:27011): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+
+[TRACE] 15:25:35:416 UMV/(26962:26968): Se ha conectado el cliente (127.0.0.1) por el puerto (21413). El número de socket del cliente es: 8
+[TRACE] 15:25:37:579 UMV/(26962:27080): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 15:25:37:579 UMV/(26962:27080): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:26:27:982 UMV/(26962:26968): Se ha conectado el cliente (127.0.0.1) por el puerto (21669). El número de socket del cliente es: 9
+[TRACE] 15:26:29:788 UMV/(26962:27161): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 15:26:29:790 UMV/(26962:27161): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 15:26:34:495 UMV/(26962:27080): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 15:26:34:495 UMV/(26962:27080): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:26:37:787 UMV/(26962:27080): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 15:26:37:787 UMV/(26962:27080): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 15:26:37:789 UMV/(26962:27080): ENVIO datos. socket: 8. buffer: 141766
+[TRACE] 15:26:39:973 UMV/(26962:27080): RECIBO datos. socket: 8. buffer: 24176610228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:26:39:974 UMV/(26962:27080): Se escribió en memoria. Id programa: 7, base logica: 1766, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:26:39:974 UMV/(26962:27080): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:26:46:748 UMV/(26962:27080): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 15:26:46:748 UMV/(26962:27080): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 15:26:46:749 UMV/(26962:27080): ENVIO datos. socket: 8. buffer: 142875
+[TRACE] 15:26:50:457 UMV/(26962:27080): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 15:27:08:187 UMV/(26962:27080): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 15:28:22:52 UMV/(26962:27080): ENVIO datos. socket: 8. buffer: 144773
+[TRACE] 15:28:25:937 UMV/(26962:27080): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 15:28:40:918 UMV/(26962:27080): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 15:28:48:855 UMV/(26962:27080): ENVIO datos. socket: 8. buffer: 146749
+[TRACE] 15:30:21:214 UMV/(27390:27390): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 15:30:21:241 UMV/(27390:27397): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 15:30:55:440 UMV/(27390:27397): Se ha conectado el cliente (127.0.0.1) por el puerto (22437). El número de socket del cliente es: 8
+[TRACE] 15:30:58:774 UMV/(27390:27470): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 15:30:58:775 UMV/(27390:27470): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:31:49:5 UMV/(27390:27397): Se ha conectado el cliente (127.0.0.1) por el puerto (22693). El número de socket del cliente es: 9
+[TRACE] 15:31:53:33 UMV/(27390:27557): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 15:31:53:33 UMV/(27390:27557): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 15:32:00:361 UMV/(27390:27470): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 15:32:00:361 UMV/(27390:27470): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:32:02:360 UMV/(27390:27470): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 15:32:02:361 UMV/(27390:27470): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 15:32:02:361 UMV/(27390:27470): ENVIO datos. socket: 8. buffer: 141349
+[TRACE] 15:32:03:501 UMV/(27390:27470): RECIBO datos. socket: 8. buffer: 24134910228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:32:03:501 UMV/(27390:27470): Se escribió en memoria. Id programa: 7, base logica: 1349, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:32:03:501 UMV/(27390:27470): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:32:04:557 UMV/(27390:27470): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 15:32:04:557 UMV/(27390:27470): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 15:32:04:557 UMV/(27390:27470): ENVIO datos. socket: 8. buffer: 143107
+[TRACE] 15:32:05:826 UMV/(27390:27470): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 15:32:05:827 UMV/(27390:27470): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 15:32:05:828 UMV/(27390:27470): ENVIO datos. socket: 8. buffer: 145139
+[TRACE] 15:32:09:36 UMV/(27390:27470): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 15:32:09:37 UMV/(27390:27470): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 15:32:09:37 UMV/(27390:27470): ENVIO datos. socket: 8. buffer: 146898
+[TRACE] 15:34:10:949 UMV/(27666:27666): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 15:34:10:974 UMV/(27666:27742): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 15:34:16:38 UMV/(27666:27742): Se ha conectado el cliente (127.0.0.1) por el puerto (23717). El número de socket del cliente es: 8
+[TRACE] 15:34:18:484 UMV/(27666:27747): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 15:34:18:484 UMV/(27666:27747): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:35:05:140 UMV/(27666:27742): Se ha conectado el cliente (127.0.0.1) por el puerto (23973). El número de socket del cliente es: 9
+[TRACE] 15:35:07:117 UMV/(27666:27836): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 15:35:07:118 UMV/(27666:27836): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 15:35:09:989 UMV/(27666:27747): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 15:35:09:990 UMV/(27666:27747): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:35:14:878 UMV/(27666:27747): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 15:35:14:878 UMV/(27666:27747): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 15:35:14:879 UMV/(27666:27747): ENVIO datos. socket: 8. buffer: 141709
+[TRACE] 15:35:15:931 UMV/(27666:27747): RECIBO datos. socket: 8. buffer: 24170910228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:35:15:931 UMV/(27666:27747): Se escribió en memoria. Id programa: 7, base logica: 1709, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:35:15:931 UMV/(27666:27747): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:35:16:871 UMV/(27666:27747): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 15:35:16:871 UMV/(27666:27747): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 15:35:16:871 UMV/(27666:27747): ENVIO datos. socket: 8. buffer: 142834
+[TRACE] 15:35:17:739 UMV/(27666:27747): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 15:35:17:740 UMV/(27666:27747): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 15:35:17:740 UMV/(27666:27747): ENVIO datos. socket: 8. buffer: 144622
+[TRACE] 15:35:19:13 UMV/(27666:27747): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 15:35:19:13 UMV/(27666:27747): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 15:35:19:13 UMV/(27666:27747): ENVIO datos. socket: 8. buffer: 146137
+[TRACE] 15:36:02:850 UMV/(27921:27921): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[ERROR] 15:36:02:895 UMV/(27921:27926): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+
+[TRACE] 15:36:13:403 UMV/(27666:27742): Se ha conectado el cliente (127.0.0.1) por el puerto (24741). El número de socket del cliente es: 11
+[TRACE] 15:36:15:177 UMV/(27666:27931): RECIBO datos. socket: 11. buffer: 31
+[TRACE] 15:36:15:179 UMV/(27666:27931): ENVIO datos. socket: 11. buffer: 1
+[TRACE] 15:36:21:636 UMV/(27666:27742): Se ha conectado el cliente (127.0.0.1) por el puerto (24997). El número de socket del cliente es: 13
+[TRACE] 15:36:23:322 UMV/(27666:27949): RECIBO datos. socket: 13. buffer: 32
+[TRACE] 15:36:23:322 UMV/(27666:27949): ENVIO datos. socket: 13. buffer: 1
+[TRACE] 15:37:07:502 UMV/(27984:27984): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 15:37:07:538 UMV/(27984:27990): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 15:37:22:59 UMV/(27984:27990): Se ha conectado el cliente (127.0.0.1) por el puerto (25765). El número de socket del cliente es: 8
+[TRACE] 15:37:23:989 UMV/(27984:28059): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 15:37:23:990 UMV/(27984:28059): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:37:37:9 UMV/(27984:27990): Se ha conectado el cliente (127.0.0.1) por el puerto (26021). El número de socket del cliente es: 9
+[TRACE] 15:37:39:66 UMV/(27984:28140): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 15:37:39:67 UMV/(27984:28140): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 15:37:42:321 UMV/(27984:28059): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 15:37:42:321 UMV/(27984:28059): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:37:44:554 UMV/(27984:28059): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 15:37:44:554 UMV/(27984:28059): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 15:37:44:554 UMV/(27984:28059): ENVIO datos. socket: 8. buffer: 141312
+[TRACE] 15:37:45:987 UMV/(27984:28059): RECIBO datos. socket: 8. buffer: 24131210228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:37:45:987 UMV/(27984:28059): Se escribió en memoria. Id programa: 7, base logica: 1312, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 15:37:45:988 UMV/(27984:28059): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 15:37:47:38 UMV/(27984:28059): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 15:37:47:39 UMV/(27984:28059): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 15:37:47:39 UMV/(27984:28059): ENVIO datos. socket: 8. buffer: 142742
+[TRACE] 15:37:48:187 UMV/(27984:28059): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 15:37:48:188 UMV/(27984:28059): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 15:37:48:188 UMV/(27984:28059): ENVIO datos. socket: 8. buffer: 145208
+[TRACE] 15:37:49:697 UMV/(27984:28059): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 15:37:49:697 UMV/(27984:28059): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 15:37:49:698 UMV/(27984:28059): ENVIO datos. socket: 8. buffer: 146472
+[TRACE] 15:42:23:919 UMV/(28348:28348): S�L$�D$�ĉ���	ЋT$�� ��
+[ERROR] 16:03:48:559 UMV/(29756:29761): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+
+[INFO] 16:11:28:2 UMV/(30720:30727): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 16:11:28:2 UMV/(30720:30727): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 16:11:28:2 UMV/(30720:30727): |          1|          1|       1890|        100|            3083837448|
+
+[INFO] 16:14:08:627 UMV/(30890:30898): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 16:14:08:628 UMV/(30890:30898): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 16:14:08:628 UMV/(30890:30898): |          1|          1|       1674|        100|            3083837448|
+
+[ERROR] 16:48:47:842 UMV/(32079:32087): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+
+[TRACE] 17:16:43:837 UMV/(395:395): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 17:16:43:866 UMV/(395:402): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 17:16:57:285 UMV/(395:402): Se ha conectado el cliente (127.0.0.1) por el puerto (39589). El número de socket del cliente es: 8
+[TRACE] 17:17:02:61 UMV/(395:406): RECIBO datos. socket: 8. buffer: 31
+
+[TRACE] 17:17:03:612 UMV/(395:406): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:17:07:422 UMV/(395:406): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 17:17:09:466 UMV/(395:406): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:17:15:157 UMV/(395:406): RECIBO datos. socket: 8. buffer: 5113100
+
+[TRACE] 17:17:16:768 UMV/(395:406): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[TRACE] 17:17:17:65 UMV/(395:406): ENVIO datos. socket: 8. buffer: 141435
+[TRACE] 17:17:31:270 UMV/(395:406): RECIBO datos. socket: 8. buffer: 241435101811
+
+[TRACE] 17:18:41:753 UMV/(554:554): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 17:18:41:779 UMV/(554:561): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 17:18:49:69 UMV/(554:561): Se ha conectado el cliente (127.0.0.1) por el puerto (39845). El número de socket del cliente es: 8
+[TRACE] 17:18:54:173 UMV/(554:565): RECIBO datos. socket: 8. buffer: 31
+
+[TRACE] 17:18:56:250 UMV/(554:565): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:19:00:126 UMV/(554:565): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 17:19:01:964 UMV/(554:565): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:19:09:270 UMV/(554:565): RECIBO datos. socket: 8. buffer: 5113100
+
+[TRACE] 17:19:10:753 UMV/(554:565): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[TRACE] 17:19:10:910 UMV/(554:565): ENVIO datos. socket: 8. buffer: 141480
+[TRACE] 17:19:41:365 UMV/(554:565): RECIBO datos. socket: 8. buffer: 214801016pppppp
+
+[TRACE] 17:19:44:31 UMV/(554:565): Ocurrio una violación en el acceso a segmentos. SEGMENTATION FAULT. El programa (1) no tiene asignado un segmento con base 4
+[TRACE] 17:19:45:393 UMV/(554:565): ENVIO datos. socket: 8. buffer: 0ERROR ESCRIBIR MEMORIA. SEGMENTATION FAULT. El programa (1) no tiene asignado un segmento con base 4. Id programa: 1, base: 4, desplazamiento: 1016, longitud buffer: 0
+[TRACE] 17:20:51:422 UMV/(554:565): RECIBO datos. socket: 8. buffer: 2414801016oooooo
+
+[TRACE] 17:20:53:619 UMV/(554:565): Se escribió en memoria. Id programa: 1, base logica: 1480, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 6, buffer: oooooo
+[TRACE] 17:20:54:793 UMV/(554:565): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:21:12:870 UMV/(554:565): RECIBO datos. socket: 8. buffer: 2414801016ll
+
+[TRACE] 17:22:46:946 UMV/(554:565): ENVIO datos. socket: 8. buffer: 0ERROR ESCRIBIR MEMORIA. ERROR ESCRIBIR MEMORIA. SEGMENTATION FAULT. El programa (1) no tiene asignado un segmento con base 4. Id programa: 1, base: 4, desplazamiento: 1016, longitud buffer: 0. Id programa: 1, base: 1480, desplazamiento: 0, longitud buffer: 6
+[TRACE] 17:26:03:101 UMV/(821:821): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 17:26:03:130 UMV/(821:828): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 17:26:12:449 UMV/(821:828): Se ha conectado el cliente (127.0.0.1) por el puerto (40101). El número de socket del cliente es: 8
+[TRACE] 17:26:14:224 UMV/(821:833): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 17:26:15:77 UMV/(821:833): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:26:25:589 UMV/(821:828): Se ha conectado el cliente (127.0.0.1) por el puerto (40357). El número de socket del cliente es: 9
+[TRACE] 17:26:27:147 UMV/(821:921): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 17:26:28:120 UMV/(821:921): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 17:26:31:643 UMV/(821:833): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 17:26:34:718 UMV/(821:833): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:26:35:179 UMV/(821:833): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 17:26:35:765 UMV/(821:833): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 17:26:36:153 UMV/(821:833): ENVIO datos. socket: 8. buffer: 141940
+[TRACE] 17:26:36:693 UMV/(821:833): RECIBO datos. socket: 8. buffer: 24194010228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:26:37:501 UMV/(821:833): Se escribió en memoria. Id programa: 7, base logica: 1940, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:26:38:819 UMV/(821:833): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:26:39:881 UMV/(821:833): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 17:26:55:349 UMV/(821:833): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 17:26:56:304 UMV/(821:833): ENVIO datos. socket: 8. buffer: 143440
+[TRACE] 17:26:58:272 UMV/(821:833): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 17:27:00:889 UMV/(821:833): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 17:27:01:517 UMV/(821:833): ENVIO datos. socket: 8. buffer: 145078
+[TRACE] 17:27:03:476 UMV/(821:833): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 17:27:06:350 UMV/(821:833): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 17:27:07:81 UMV/(821:833): ENVIO datos. socket: 8. buffer: 146818
+[TRACE] 17:47:53:980 UMV/(2840:2840): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 17:47:54:13 UMV/(2840:2850): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 17:48:06:297 UMV/(2840:2850): Se ha conectado el cliente (127.0.0.1) por el puerto (47525). El número de socket del cliente es: 8
+[TRACE] 17:48:07:531 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 17:48:08:279 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:48:12:210 UMV/(2840:2850): Se ha conectado el cliente (127.0.0.1) por el puerto (47781). El número de socket del cliente es: 9
+[TRACE] 17:48:13:500 UMV/(2840:2941): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 17:48:14:45 UMV/(2840:2941): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 17:48:20:36 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 17:48:22:67 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:48:22:647 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 17:48:23:141 UMV/(2840:2919): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 17:48:23:666 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 141466
+[TRACE] 17:48:24:273 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 24146610228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:48:24:749 UMV/(2840:2919): Se escribió en memoria. Id programa: 7, base logica: 1466, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:48:25:235 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:48:25:985 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 17:48:27:698 UMV/(2840:2919): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 17:48:28:690 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 143037
+[TRACE] 17:48:29:532 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 17:48:30:768 UMV/(2840:2919): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 17:48:31:511 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 144881
+[TRACE] 17:48:32:150 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 17:48:33:105 UMV/(2840:2919): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 17:48:34:27 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 146126
+[TRACE] 17:48:36:581 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 246126101616
+[TRACE] 17:49:08:747 UMV/(2840:2919): ENVIO datos. socket: 8. buffer: 0ERROR ESCRIBIR MEMORIA. Se solicitó grabar una cantidad de bytes pero se pasaron menos. Id programa: 7, base: 6126, desplazamiento: 0, longitud buffer: 6
+[TRACE] 17:49:41:570 UMV/(2840:2850): Se ha conectado el cliente (127.0.0.1) por el puerto (48549). El número de socket del cliente es: 10
+[TRACE] 17:49:49:275 UMV/(2840:3158): RECIBO datos. socket: 10. buffer: 32
+
+[TRACE] 17:49:51:615 UMV/(2840:3158): ENVIO datos. socket: 10. buffer: 1
+[TRACE] 17:50:03:355 UMV/(2840:3158): RECIBO datos. socket: 10. buffer: 417
+
+[TRACE] 17:50:05:433 UMV/(2840:3158): ENVIO datos. socket: 10. buffer: 1
+[TRACE] 17:50:44:491 UMV/(2840:3158): RECIBO datos. socket: 10. buffer: 14146616214
+
+[TRACE] 17:50:48:305 UMV/(2840:3158): Se leyó  de memoria. Id programa: 7, base logica: 1466, base real: 3083837448,  desplazamiento: 6, cantidad de bytes: 14, buffer: 	textPrint holZA
+[TRACE] 17:51:12:892 UMV/(2840:3158): ENVIO datos. socket: 10. buffer: 1	textPrint holZA
+[TRACE] 17:51:34:28 UMV/(2840:3158): RECIBO datos. socket: 10. buffer: 14146617214
+
+[TRACE] 17:51:36:256 UMV/(2840:3158): Se leyó  de memoria. Id programa: 7, base logica: 1466, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 14, buffer: textPrint hola12:892
+[TRACE] 17:51:37:255 UMV/(2840:3158): ENVIO datos. socket: 10. buffer: 1textPrint hola12:89
+[TRACE] 17:52:20:294 UMV/(3227:3227): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[ERROR] 17:52:20:331 UMV/(3227:3232): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+
+[TRACE] 17:52:28:650 UMV/(2840:2919): RECIBO datos. socket: 8. buffer: 
+[TRACE] 17:52:30:608 UMV/(2840:2941): RECIBO datos. socket: 9. buffer: 
+[TRACE] 17:52:30:612 UMV/(2840:2919): Se cerró el socket (8).
+[TRACE] 17:52:38:978 UMV/(2840:2850): Se ha conectado el cliente (127.0.0.1) por el puerto (48805). El número de socket del cliente es: 8
+[TRACE] 17:52:38:979 UMV/(2840:2941): Se cerró el socket (9).
+[TRACE] 17:52:39:663 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 17:52:40:860 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:53:01:155 UMV/(2840:2850): Se ha conectado el cliente (127.0.0.1) por el puerto (49061). El número de socket del cliente es: 9
+[TRACE] 17:53:02:811 UMV/(2840:3396): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 17:53:03:671 UMV/(2840:3396): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 17:53:06:22 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 17:53:08:18 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:53:08:567 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 17:53:09:234 UMV/(2840:3306): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 17:53:09:518 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 147295
+[TRACE] 17:53:10:181 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 24729510228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:53:10:402 UMV/(2840:3306): Se escribió en memoria. Id programa: 7, base logica: 7295, base real: 3083837991,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:53:11:17 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:53:11:465 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 17:53:12:144 UMV/(2840:3306): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 17:53:12:908 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 148759
+[TRACE] 17:53:13:345 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 17:53:13:774 UMV/(2840:3306): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 17:53:14:184 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 1511139
+[TRACE] 17:53:14:616 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 17:53:15:234 UMV/(2840:3306): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 17:53:15:747 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 1513055
+[TRACE] 17:53:17:418 UMV/(2840:3306): RECIBO datos. socket: 8. buffer: 2513055101616
+[TRACE] 17:53:19:427 UMV/(2840:3306): ENVIO datos. socket: 8. buffer: 0ERROR ESCRIBIR MEMORIA. Se solicitó grabar una cantidad de bytes pero se pasaron menos. Id programa: 7, base: 13055, desplazamiento: 0, longitud buffer: 6
+[TRACE] 17:53:24:611 UMV/(2840:2850): Se ha conectado el cliente (127.0.0.1) por el puerto (49829). El número de socket del cliente es: 11
+[TRACE] 17:53:36:684 UMV/(2840:3462): RECIBO datos. socket: 11. buffer: 32
+
+[TRACE] 17:53:38:281 UMV/(2840:3462): ENVIO datos. socket: 11. buffer: 1
+[TRACE] 17:53:47:684 UMV/(2840:3462): RECIBO datos. socket: 11. buffer: 417
+
+[TRACE] 17:53:49:479 UMV/(2840:3462): ENVIO datos. socket: 11. buffer: 1
+[TRACE] 17:54:25:268 UMV/(2840:3462): RECIBO datos. socket: 11. buffer: 14729517214
+
+[TRACE] 17:56:34:749 UMV/(2840:3462): Se leyó  de memoria. Id programa: 7, base logica: 7295, base real: 3083837991,  desplazamiento: 7, cantidad de bytes: 14, buffer: textPrint holar:
+[TRACE] 17:56:41:385 UMV/(2840:3462): ENVIO datos. socket: 11. buffer: 1textPrint holar:
+[TRACE] 17:56:54:861 UMV/(2840:3462): RECIBO datos. socket: 11. buffer: 14729517214
+
+[TRACE] 17:56:57:729 UMV/(2840:3462): Se leyó  de memoria. Id programa: 7, base logica: 7295, base real: 3083837991,  desplazamiento: 7, cantidad de bytes: 14, buffer: textPrint holap�: 417
+
+[TRACE] 17:57:01:29 UMV/(2840:3462): ENVIO datos. socket: 11. buffer: 1textPrint holap�: 417
+
+[TRACE] 17:59:00:619 UMV/(3668:3668): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 17:59:00:653 UMV/(3668:3675): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 17:59:12:152 UMV/(3668:3675): Se ha conectado el cliente (127.0.0.1) por el puerto (50085). El número de socket del cliente es: 8
+[TRACE] 17:59:13:949 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 31
+[TRACE] 17:59:15:597 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:59:23:807 UMV/(3668:3675): Se ha conectado el cliente (127.0.0.1) por el puerto (50341). El número de socket del cliente es: 9
+[TRACE] 17:59:25:343 UMV/(3668:3764): RECIBO datos. socket: 9. buffer: 32
+[TRACE] 17:59:25:981 UMV/(3668:3764): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 17:59:44:495 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 417
+[TRACE] 17:59:47:72 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:59:47:801 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 517228
+[TRACE] 17:59:49:4 UMV/(3668:3744): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 28
+[TRACE] 17:59:49:318 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 141610
+[TRACE] 17:59:49:979 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 24161010228begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:59:50:455 UMV/(3668:3744): Se escribió en memoria. Id programa: 7, base logica: 1610, base real: 3083837448,  desplazamiento: 0, cantidad de bytes: 28, buffer: begin
+	textPrint hola
+end
+
+
+
+[TRACE] 17:59:51:4 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 17:59:51:519 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 5173512
+[TRACE] 17:59:51:901 UMV/(3668:3744): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 512
+[TRACE] 17:59:52:855 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 142736
+[TRACE] 17:59:53:749 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 51711
+[TRACE] 17:59:54:433 UMV/(3668:3744): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 17:59:54:989 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 144406
+[TRACE] 17:59:55:394 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 51712
+[TRACE] 17:59:56:475 UMV/(3668:3744): Se creó un segmento nuevo. Id programa: 7, Tamaño solicitado segmento: 2
+[TRACE] 17:59:57:78 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 145556
+[TRACE] 17:59:58:666 UMV/(3668:3744): RECIBO datos. socket: 8. buffer: 245556101616
+[TRACE] 18:00:00:79 UMV/(3668:3744): ENVIO datos. socket: 8. buffer: 0ERROR ESCRIBIR MEMORIA. Se solicitó grabar una cantidad de bytes pero se pasaron menos. Id programa: 7, base: 5556, desplazamiento: 0, longitud buffer: 6
+[TRACE] 18:00:41:959 UMV/(3668:3675): Se ha conectado el cliente (127.0.0.1) por el puerto (51109). El número de socket del cliente es: 10
+[TRACE] 18:00:48:950 UMV/(3668:3829): RECIBO datos. socket: 10. buffer: 32
+
+[TRACE] 18:00:50:412 UMV/(3668:3829): ENVIO datos. socket: 10. buffer: 1
+[TRACE] 18:00:56:359 UMV/(3668:3829): RECIBO datos. socket: 10. buffer: 417
+
+[TRACE] 18:00:57:891 UMV/(3668:3829): ENVIO datos. socket: 10. buffer: 1
+[TRACE] 18:01:31:673 UMV/(3668:3829): RECIBO datos. socket: 10. buffer: 14161017214
+
+[TRACE] 18:01:36:834 UMV/(3668:3829): Se leyó  de memoria. Id programa: 7, base logica: 1610, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 14, buffer: textPrint hol
+[TRACE] 18:02:07:238 UMV/(3668:3829): ENVIO datos. socket: 10. buffer: 1textPrint hol
+[TRACE] 18:17:08:639 UMV/(4063:4063): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 18:17:08:670 UMV/(4063:4077): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 18:17:14:743 UMV/(4063:4077): Se ha conectado el cliente (127.0.0.1) por el puerto (51365). El número de socket del cliente es: 8
+[TRACE] 18:18:04:968 UMV/(4063:4081): RECIBO datos. socket: 8. buffer: 32
+
+[TRACE] 18:18:06:860 UMV/(4063:4081): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:18:13:792 UMV/(4063:4081): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 18:18:15:572 UMV/(4063:4081): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:18:26:299 UMV/(4063:4078): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[INFO] 18:18:26:300 UMV/(4063:4078): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 18:18:26:300 UMV/(4063:4078): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 18:18:26:300 UMV/(4063:4078): |          1|          1|       1901|        100|            3083837448|
+
+[TRACE] 18:19:14:322 UMV/(4063:4078): Se escribió en memoria. Id programa: 1, base logica: 1901, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[INFO] 18:19:14:323 UMV/(4063:4078): Se escribió en la memoria correctamente
+
+[TRACE] 18:19:52:149 UMV/(4063:4081): RECIBO datos. socket: 8. buffer: 1419011719
+
+[TRACE] 18:19:54:841 UMV/(4063:4081): Se leyó  de memoria. Id programa: 1, base logica: 1901, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[TRACE] 18:20:13:178 UMV/(4124:4124): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 18:20:13:217 UMV/(4124:4132): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 18:20:17:598 UMV/(4124:4132): Se ha conectado el cliente (127.0.0.1) por el puerto (51621). El número de socket del cliente es: 8
+[TRACE] 18:20:25:109 UMV/(4124:4136): RECIBO datos. socket: 8. buffer: 32
+
+[TRACE] 18:20:26:680 UMV/(4124:4136): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:20:32:692 UMV/(4124:4136): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 18:20:34:246 UMV/(4124:4136): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:20:41:220 UMV/(4124:4133): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[INFO] 18:20:41:221 UMV/(4124:4133): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 18:20:41:221 UMV/(4124:4133): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 18:20:41:221 UMV/(4124:4133): |          1|          1|       1839|        100|            3083837448|
+
+[TRACE] 18:20:56:560 UMV/(4124:4133): Se escribió en memoria. Id programa: 1, base logica: 1839, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[INFO] 18:20:56:560 UMV/(4124:4133): Se escribió en la memoria correctamente
+
+[TRACE] 18:21:46:220 UMV/(4124:4136): RECIBO datos. socket: 8. buffer: 1418391719
+
+[TRACE] 18:22:21:526 UMV/(4124:4136): Se leyó  de memoria. Id programa: 1, base logica: 1839, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[TRACE] 18:23:51:1 UMV/(4274:4274): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 18:23:52:25 UMV/(4274:4280): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 18:24:06:83 UMV/(4274:4281): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[INFO] 18:24:06:83 UMV/(4274:4281): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 18:24:06:83 UMV/(4274:4281): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 18:24:06:83 UMV/(4274:4281): |          1|          1|       1562|        100|            3083837448|
+
+[TRACE] 18:24:08:990 UMV/(4274:4280): Se ha conectado el cliente (127.0.0.1) por el puerto (51877). El número de socket del cliente es: 8
+[TRACE] 18:24:15:797 UMV/(4274:4284): RECIBO datos. socket: 8. buffer: 32
+
+[TRACE] 18:24:17:638 UMV/(4274:4284): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:24:20:949 UMV/(4274:4284): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 18:24:22:962 UMV/(4274:4284): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:24:52:314 UMV/(4274:4281): Se escribió en memoria. Id programa: 1, base logica: 1562, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[INFO] 18:24:52:315 UMV/(4274:4281): Se escribió en la memoria correctamente
+
+[TRACE] 18:24:55:791 UMV/(4274:4284): RECIBO datos. socket: 8. buffer: 1415621719
+
+[TRACE] 18:25:15:610 UMV/(4274:4284): Se leyó  de memoria. Id programa: 1, base logica: 1562, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[TRACE] 18:28:19:475 UMV/(4392:4392): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 18:28:19:510 UMV/(4392:4397): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 18:28:51:183 UMV/(4428:4428): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 18:28:51:219 UMV/(4428:4433): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 18:28:57:198 UMV/(4428:4434): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[INFO] 18:28:57:198 UMV/(4428:4434): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 18:28:57:198 UMV/(4428:4434): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 18:28:57:198 UMV/(4428:4434): |          1|          1|       1645|        100|            3083837448|
+
+[TRACE] 18:29:14:796 UMV/(4428:4434): Se escribió en memoria. Id programa: 1, base logica: 1645, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[INFO] 18:29:14:796 UMV/(4428:4434): Se escribió en la memoria correctamente
+
+[TRACE] 18:29:24:373 UMV/(4428:4433): Se ha conectado el cliente (127.0.0.1) por el puerto (52133). El número de socket del cliente es: 8
+[TRACE] 18:29:30:878 UMV/(4428:4437): RECIBO datos. socket: 8. buffer: 32
+
+[TRACE] 18:29:32:68 UMV/(4428:4437): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:29:37:6 UMV/(4428:4437): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 18:29:38:539 UMV/(4428:4437): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:30:04:278 UMV/(4428:4437): RECIBO datos. socket: 8. buffer: 14164517250
+
+[TRACE] 18:30:04:278 UMV/(4428:4437): Se leyó  de memoria. Id programa: 1, base logica: 1645, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 50, buffer: HOLAPUTOS00000000000000000000000000000000000000000:2�
+[TRACE] 18:30:44:558 UMV/(4483:4483): Se reservó la memoria principal OK. Tamaño de la memoria (1048576)
+[TRACE] 18:30:44:584 UMV/(4483:4488): El socket está listo para recibir conexiones. Numero de socket: 7, puerto: 7000
+[TRACE] 18:31:05:248 UMV/(4483:4490): Se creó un segmento nuevo. Id programa: 1, Tamaño solicitado segmento: 100
+[INFO] 18:31:05:248 UMV/(4483:4490): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 18:31:05:248 UMV/(4483:4490): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 18:31:05:248 UMV/(4483:4490): |          1|          1|       1248|        100|            3083837448|
+
+[TRACE] 18:31:35:482 UMV/(4483:4490): Se escribió en memoria. Id programa: 1, base logica: 1248, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 9, buffer: HOLAPUTOS
+[INFO] 18:31:35:482 UMV/(4483:4490): Se escribió en la memoria correctamente
+
+[TRACE] 18:31:45:214 UMV/(4483:4488): Se ha conectado el cliente (127.0.0.1) por el puerto (52389). El número de socket del cliente es: 8
+[TRACE] 18:31:52:207 UMV/(4483:4492): RECIBO datos. socket: 8. buffer: 32
+
+[TRACE] 18:31:54:34 UMV/(4483:4492): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:31:58:38 UMV/(4483:4492): RECIBO datos. socket: 8. buffer: 411
+
+[TRACE] 18:31:59:433 UMV/(4483:4492): ENVIO datos. socket: 8. buffer: 1
+[TRACE] 18:32:15:751 UMV/(4483:4492): RECIBO datos. socket: 8. buffer: 14124817250
+
+[TRACE] 18:32:15:751 UMV/(4483:4492): Se leyó  de memoria. Id programa: 1, base logica: 1248, base real: 3083837448,  desplazamiento: 7, cantidad de bytes: 50, buffer: HOLAPUTOS00000000000000000000000000000000000000000:3�
+[INFO] 18:33:44:150 UMV/(4599:4605): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 18:33:44:153 UMV/(4599:4605): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 18:33:44:153 UMV/(4599:4605): |          1|          1|       1137|        100|            3083837448|
+
+[INFO] 18:33:57:443 UMV/(4599:4605): Se escribió en la memoria correctamente
+
+[INFO] 18:37:26:478 UMV/(4805:4813): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 18:37:26:479 UMV/(4805:4813): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 18:37:26:479 UMV/(4805:4813): |          1|          1|       1569|        100|            3083837448|
+
+[INFO] 18:37:39:276 UMV/(4805:4813): Se escribió en la memoria correctamente
+
+[INFO] 20:52:54:1 UMV/(6714:6720): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 20:52:54:1 UMV/(6714:6720): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 20:52:54:2 UMV/(6714:6720): |  134545686|          1|       1304|          6|            3083837557|
+
+[ERROR] 20:52:54:2 UMV/(6714:6720): COMANDO INVALIDO
+[INFO] 20:53:11:134 UMV/(6714:6720): BASE MEMORIA: 3083837448
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          1|       1262|         28|            3083837448|
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          2|       2605|         64|            3083837476|
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          3|       3753|          1|            3083837540|
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          4|       5214|         16|            3083837541|
+
+[INFO] 20:53:11:135 UMV/(6714:6720): |  134545686|          1|       1304|          6|            3083837557|
+
+[INFO] 20:53:11:135 UMV/(6714:6720): MEMORIA TOTAL (Bytes): 1048576
+
+[INFO] 20:53:11:135 UMV/(6714:6720): MEMORIA USADA (Bytes): 115
+
+[INFO] 21:19:27:313 UMV/(7845:7856): BASE MEMORIA: 3083837448
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          1|       1663|         54|            3083837448|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          2|       3064|         64|            3083837502|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          3|       4415|          1|            3083837566|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          4|       5532|         40|            3083837567|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): MEMORIA TOTAL (Bytes): 1048576
+
+[INFO] 21:19:27:313 UMV/(7845:7856): MEMORIA USADA (Bytes): 159
+
+[INFO] 21:20:51:553 UMV/(7845:7856): Bytes Leidos: 9000000000000000000000000000000000000000000000000000000000000000H
+[TRACE] 21:35:10:563 UMV/(8349:8349): MEMORIA PRINCIPAL RESERVADA. Tamaño de la memoria (1048576)
+[TRACE] 21:35:10:581 UMV/(8349:8354): SOCKET LISTO PARA RECBIR CONEXIONES. Numero de socket: 7, puerto: 7000
+[TRACE] 21:35:38:708 UMV/(8349:8354): NUEVA CONEXION ENTRANTE. Se ha conectado el cliente (127.0.0.1) por el puerto (9382). El número de socket del cliente es: 8
+[TRACE] 21:35:40:249 UMV/(8349:8423): RECIBO DATOS. socket: 8. buffer: 31
+[TRACE] 21:35:41:496 UMV/(8349:8423): ENVIO DATOS. socket: 8. buffer: 1
+[TRACE] 21:42:11:553 UMV/(8597:8597): MEMORIA PRINCIPAL RESERVADA. Tamaño de la memoria (1048576)
+[TRACE] 21:42:11:553 UMV/(8597:8602): SOCKET LISTO PARA RECBIR CONEXIONES. Numero de socket: 5, puerto: 7000
+[TRACE] 21:42:35:264 UMV/(8597:8602): NUEVA CONEXION ENTRANTE. Se ha conectado el cliente (127.0.0.1) por el puerto (9638). El número de socket del cliente es: 6
+[TRACE] 21:42:35:266 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 31
+[TRACE] 21:42:35:267 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:39:832 UMV/(8597:8602): NUEVA CONEXION ENTRANTE. Se ha conectado el cliente (127.0.0.1) por el puerto (9894). El número de socket del cliente es: 7
+[TRACE] 21:42:39:833 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 32
+[TRACE] 21:42:39:833 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:42:42:240 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 417
+[TRACE] 21:42:42:240 UMV/(8597:8671): COMANDO CAMBIO PROCESO ACTIVO
+[TRACE] 21:42:42:241 UMV/(8597:8671): COMANDO CAMBIO PROCESO ACTIVO - ID PROG ANTERIOR: -1238371520 
+[TRACE] 21:42:42:241 UMV/(8597:8671): COMANDO CAMBIO PROCESO ACTIVO - ID PROG NUEVO: -1238371520 
+[TRACE] 21:42:42:241 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:42:241 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 517254
+[TRACE] 21:42:42:241 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:241 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 54
+[TRACE] 21:42:42:241 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 141771
+[TRACE] 21:42:42:242 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 24177110254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:42:42:242 UMV/(8597:8671): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:242 UMV/(8597:8671): ESCRITURA MEMORIA. Id programa: 7, base logica: 1771, base real: 3074932744,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:42:42:243 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:42:244 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 517264
+[TRACE] 21:42:42:244 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:244 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 64
+[TRACE] 21:42:42:244 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 143037
+[TRACE] 21:42:42:244 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 51711
+[TRACE] 21:42:42:245 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:245 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 21:42:42:246 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 144654
+[TRACE] 21:42:42:246 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 517240
+[TRACE] 21:42:42:246 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:246 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 40
+[TRACE] 21:42:42:246 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 145840
+[TRACE] 21:42:42:247 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 245840102400006001500220006002900060036001100480003
+[TRACE] 21:42:42:247 UMV/(8597:8671): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:247 UMV/(8597:8671): ESCRITURA MEMORIA. Id programa: 7, base logica: 5840, base real: 3074932863,  desplazamiento: 0, cantidad de bytes: 40, buffer: 0006001500220006002900060036001100480003
+[TRACE] 21:42:42:247 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:42:249 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 417
+[TRACE] 21:42:42:249 UMV/(8597:8684): COMANDO CAMBIO PROCESO ACTIVO
+[TRACE] 21:42:42:249 UMV/(8597:8684): COMANDO CAMBIO PROCESO ACTIVO - ID PROG ANTERIOR: -1248857280 
+[TRACE] 21:42:42:249 UMV/(8597:8684): COMANDO CAMBIO PROCESO ACTIVO - ID PROG NUEVO: -1248857280 
+[TRACE] 21:42:42:249 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:42:42:249 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 1458401018
+[TRACE] 21:42:42:250 UMV/(8597:8684): COMANDO GET BYTES. Id prog: 7
+[TRACE] 21:42:42:250 UMV/(8597:8684): LECTURA MEMORIA. Id programa: 7, base logica: 5840, base real: 3074932863,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060015
+[TRACE] 21:42:42:250 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 100060015
+[TRACE] 21:42:42:250 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 14177116215
+[TRACE] 21:42:42:250 UMV/(8597:8684): COMANDO GET BYTES. Id prog: 7
+[TRACE] 21:42:42:250 UMV/(8597:8684): LECTURA MEMORIA. Id programa: 7, base logica: 1771, base real: 3074932744,  desplazamiento: 6, cantidad de bytes: 15, buffer: 	variables a, bES. I�
+[TRACE] 21:42:42:251 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1	variables a, bES. I
+[TRACE] 21:42:42:251 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 24303710119adp���b
+[TRACE] 21:42:42:251 UMV/(8597:8684): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:251 UMV/(8597:8684): ESCRITURA MEMORIA. Id programa: 7, base logica: 3037, base real: 3074932798,  desplazamiento: 0, cantidad de bytes: 1, buffer: 9
+[TRACE] 21:42:42:252 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:42:42:252 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 24303710119bdp�xdp�
+[TRACE] 21:42:42:252 UMV/(8597:8684): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:252 UMV/(8597:8684): ESCRITURA MEMORIA. Id programa: 7, base logica: 3037, base real: 3074932798,  desplazamiento: 0, cantidad de bytes: 1, buffer: 9
+[TRACE] 21:42:42:252 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:44:14:504 UMV/(8730:8730): MEMORIA PRINCIPAL RESERVADA. Tamaño de la memoria (1048576)
+[ERROR] 21:44:14:506 UMV/(8730:8735): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+

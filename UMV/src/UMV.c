@@ -171,7 +171,7 @@ int main(int argv, char** argc)
 	g_ArchivoConsola = fopen(NOMBRE_ARCHIVO_CONSOLA, "wt");
 	g_MensajeError = malloc(1 * sizeof(char));
 	//char* temp_file = tmpnam(NULL);
-	logger = log_create(NOMBRE_ARCHIVO_LOG, "UMV", false, LOG_LEVEL_TRACE);
+	logger = log_create(NOMBRE_ARCHIVO_LOG, "UMV", true, LOG_LEVEL_TRACE);
 
 	// Definimos los hilos principales
 	pthread_t hOrquestadorConexiones, hConsola;
@@ -272,7 +272,8 @@ void HiloConsola()
 
 	}
 
-	Traza("Fin del programa");
+	//Traza("Fin del programa");
+	log_trace(logger, "FIN DEL PROGRAMA");
 }
 
 int ObtenerComandoConsola(char buffer[])
@@ -671,7 +672,7 @@ void ImprimirMemoriaSegmentosDeProgramaTSeg(int imprimirArchivo, t_segmento *seg
 	{
 		char* aux = malloc(bytesPorLinea * sizeof(char));
 		memset(aux, 0, bytesPorLinea * sizeof(char));
-		memcpy(aux, buffer + (id* sizeof(char)), bytesPorLinea * sizeof(char));
+		memcpy(aux, buffer + (id * sizeof(char)), bytesPorLinea * sizeof(char));
 		Imprimir(imprimirArchivo, "-%10d-   %s\n", id, aux);
 		free(aux);
 		id = id + bytesPorLinea;
@@ -803,21 +804,21 @@ void Error(const char* mensaje, ...)
 
 void Traza(const char* mensaje, ...)
 {
-	char* nuevo;
+	/*char* nuevo = string_new();
 
-	va_list arguments;
-	va_start(arguments, mensaje);
-	nuevo = string_from_vformat(mensaje, arguments);
+	 va_list arguments;
+	 va_start(arguments, mensaje);
+	 nuevo = string_from_vformat(mensaje, arguments);
 
-	if (g_ImprimirTrazaPorConsola)
-	{
-		printf("TRAZA--> %s \n", nuevo);
-	}
+	 if (g_ImprimirTrazaPorConsola)
+	 {
+	 printf("TRAZA--> %s \n", nuevo);
+	 }
 
-	log_trace(logger, "%s", nuevo);
+	 log_trace(logger, "%s", nuevo);
 
-	free(nuevo);
-	va_end(arguments);
+	 free(nuevo);
+	 va_end(arguments);*/
 }
 
 void ErrorFatal(const char* mensaje, ...)
@@ -878,7 +879,8 @@ void HiloOrquestadorDeConexiones()
 	if (listen(socket_host, 10) == -1) // el "10" es el tamaño de la cola de conexiones.
 		ErrorFatal("Error al hacer el Listen. No se pudo escuchar en el puerto especificado");
 
-	Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, g_Puerto);
+	//Traza("El socket está listo para recibir conexiones. Numero de socket: %d, puerto: %d", socket_host, g_Puerto);
+	log_trace(logger, "SOCKET LISTO PARA RECBIR CONEXIONES. Numero de socket: %d, puerto: %d", socket_host, g_Puerto);
 
 	while (g_Ejecutando)
 	{
@@ -888,8 +890,8 @@ void HiloOrquestadorDeConexiones()
 
 		if ((socket_client = accept(socket_host, (struct sockaddr *) &client_addr, &size_addr)) != -1)
 		{
-			Traza("Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d", inet_ntoa(client_addr.sin_addr), client_addr.sin_port, socket_client);
-
+			//Traza("Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d", inet_ntoa(client_addr.sin_addr), client_addr.sin_port, socket_client);
+			log_trace(logger, "NUEVA CONEXION ENTRANTE. Se ha conectado el cliente (%s) por el puerto (%d). El número de socket del cliente es: %d", inet_ntoa(client_addr.sin_addr), client_addr.sin_port, socket_client);
 			// Aca hay que crear un nuevo hilo, que será el encargado de atender al cliente
 			pthread_t hNuevoCliente;
 			pthread_create(&hNuevoCliente, NULL, (void*) AtiendeCliente, (void *) socket_client);
@@ -914,8 +916,10 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
 	// memset se usa para llenar el buffer con 0s
 	char bufferAux[BUFFERSIZE];
 
-	buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-	memset(buffer, 0, 1 * sizeof(char));
+	free(buffer);
+	buffer = string_new();
+	//buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
+	//memset(buffer, 0, 1 * sizeof(char));
 
 	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
 	{
@@ -946,7 +950,8 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
 		}
 	}
 
-	Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	//Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	log_trace(logger, "RECIBO DATOS. socket: %d. buffer: %s", socket, (char*) buffer);
 
 	return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
 }
@@ -962,7 +967,8 @@ int EnviarDatos(int socket, char *buffer)
 	if ((bytecount = send(socket, buffer, cantidadDeBytesAEnviar, 0)) == -1)
 		Error("No puedo enviar información a al clientes. Socket: %d", socket);
 
-	Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	//Traza("ENVIO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+	log_trace(logger, "ENVIO DATOS. socket: %d. buffer: %s", socket, (char*) buffer);
 
 	return bytecount;
 }
@@ -970,7 +976,8 @@ int EnviarDatos(int socket, char *buffer)
 void CerrarSocket(int socket)
 {
 	close(socket);
-	Traza("Se cerró el socket (%d).", socket);
+	//Traza("SOCKET SE CIERRA: (%d).", socket);
+	log_trace(logger, "SOCKET SE CIERRA: (%d).", socket);
 }
 
 #endif
@@ -1027,7 +1034,8 @@ void reservarMemoriaPrincipal()
 	}
 	else
 	{
-		Traza("Se reservó la memoria principal OK. Tamaño de la memoria (%d)", g_TamanioMemoria);
+		//Traza("Se reservó la memoria principal OK. Tamaño de la memoria (%d)", g_TamanioMemoria);
+		log_trace(logger, "MEMORIA PRINCIPAL RESERVADA. Tamaño de la memoria (%d)", g_TamanioMemoria);
 	}
 
 }
@@ -1064,13 +1072,16 @@ int CrearSegmento(int idPrograma, int tamanio)
 			// Agregar el nodo en la lista 	(La insersion siempre es ordenada por ubicacion en MP)
 			AgregarSegmentoALista(idPrograma, idSegmento, inicioSegmento, tamanio, ubicacionMP);
 
-			Traza("Se creó un segmento nuevo. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+			//Traza("Se creó un segmento nuevo. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+			log_trace(logger, "CREADO NUEVO SEGMENTO. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
 		}
 		else
-			Traza("No se pudo crear un segmento en la memoria. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+			//Traza("No se pudo crear un segmento en la memoria. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+			log_trace(logger, "NO SE PUDO CREAR SEGMENTO. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
 	}
 	else
-		Traza("No se pudo crear un segmento en la memoria. El tamaño debe ser mayor a 0. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+		//Traza("No se pudo crear un segmento en la memoria. El tamaño debe ser mayor a 0. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+		log_trace(logger,"NO SE PUDO CREAR SEGMENTO. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
 
 	return idSegmento;
 }
@@ -1086,10 +1097,11 @@ int DestruirSegmentos(int idPrograma)
 
 	while (list_remove_by_condition(g_ListaSegmentos, (void*) _is_program) != NULL )
 	{
-// borra el segmento
+		// borra el segmento
 	}
 
-	Traza("Se borraron los segmentos del programa. Id programa: %d.", idPrograma);
+	//Traza("Se borraron los segmentos del programa. Id programa: %d.", idPrograma);
+	log_trace(logger,"SEGMENTOS BORRADOS. Id programa: %d.", idPrograma);
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 
@@ -1138,7 +1150,8 @@ void CompactarMemoria()
 // Realizo la busqueda de un lugar para el segmento
 	list_iterate(g_ListaSegmentos, (void*) _list_elements);
 
-	Traza("Se compactó la memoria.");
+	//Traza("Se compactó la memoria.");
+	log_trace(logger,"MEMORIA COMPACTADA");
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 }
@@ -1420,8 +1433,9 @@ int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBy
 // Si se puede acceder escribo la memoria
 		char* baseSegmento;
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
-		memcpy((baseSegmento + (desplazamiento* sizeof(char))), buffer, cantidadBytes * sizeof(char));
-		Traza("Se escribió en memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
+		memcpy((baseSegmento + (desplazamiento * sizeof(char))), buffer, cantidadBytes * sizeof(char));
+		//Traza("Se escribió en memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
+		log_trace(logger,"ESCRITURA MEMORIA. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
@@ -1443,8 +1457,9 @@ int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes,
 // Si se puede acceder escribo la memoria
 		char* baseSegmento;
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
-		memcpy(buffer, (baseSegmento + (desplazamiento* sizeof(char))), cantidadBytes * sizeof(char));
-		Traza("Se leyó  de memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
+		memcpy(buffer, (baseSegmento + (desplazamiento * sizeof(char))), (cantidadBytes) * sizeof(char));
+		//Traza("Se leyó  de memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
+		log_trace(logger,"LECTURA MEMORIA. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
@@ -1495,7 +1510,8 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 	{
 
 		SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no tiene asignado un segmento con base %d", idPrograma, base);
-		Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
+		//Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
+		log_trace(logger,"SOLICITUD INVALIDA - %s", g_MensajeError);
 	}
 	else
 	{
@@ -1504,7 +1520,8 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 		if (posicionSolicitada > posicionMaximaDelSegmento)
 		{
 			SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", idPrograma, posicionSolicitada, posicionMaximaDelSegmento);
-			Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
+			//Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
+			log_trace(logger,"SOLICITUD INVALIDA - %s", g_MensajeError);
 		}
 		else
 			accesoOk = 1;
@@ -1544,8 +1561,9 @@ int AtiendeCliente(void * arg)
 
 	while ((!desconexionCliente) & g_Ejecutando)
 	{
-		buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-
+		//	buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
+		free(buffer);
+		buffer = string_new();
 		//Recibimos los datos del cliente
 		buffer = RecibirDatos(socket, buffer, &bytesRecibidos);
 
@@ -1606,6 +1624,8 @@ char* ComandoHandShake(char *buffer, int *tipoCliente)
 // C = codigo de mensaje ( = 3)
 // D = Tipo cliente (1  = KERNEL , 2 = CPU)
 
+	log_trace(logger, "COMANDO HANDSHAKE. Tipo cliente: %d", tipoCliente);
+
 	int tipoDeCliente = posicionDeBufferAInt(buffer, 1);
 
 	if (EsTipoClienteValido(tipoDeCliente))
@@ -1638,6 +1658,8 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 // Retorna: 1 + Bytes si se leyo ok
 //			0 + mensaje error si no se pudo leer
 
+	log_trace(logger, "COMANDO GET BYTES. Id prog: %d", idProg);
+
 	int ok = 0;
 
 	int base = 0;
@@ -1662,14 +1684,21 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 
 	if (ok)
 	{
-		int tamanio = (longitudBuffer + 3) * sizeof(char);
-		buffer = realloc(buffer, tamanio * sizeof(char));
-		memset(buffer, 0, tamanio * sizeof(char));
-		sprintf(buffer, "%s%s", "1", lectura);
+		free(buffer);
+		buffer = string_new();
+		string_append(&buffer, "1");
+		string_append(&buffer, lectura);
+
+		/*int tamanio = (longitudBuffer + 1) * sizeof(char);
+		 buffer = realloc(buffer, tamanio * sizeof(char));
+		 memset(buffer, 0, tamanio * sizeof(char));
+		 sprintf(buffer, "%s%s", "1", lectura);*/
 	}
 	else
 	{
-		SetearErrorGlobal("ERROR LEER MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", g_MensajeError, idProg, base, desplazamiento, longitudBuffer);
+		char* stringErrorAux = string_new();
+		string_append(&stringErrorAux, g_MensajeError);
+		SetearErrorGlobal("ERROR LEER MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", stringErrorAux, idProg, base, desplazamiento, longitudBuffer);
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
 
@@ -1691,6 +1720,8 @@ char* ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 // OOOOOOOOO = Cantidad de caracteres del mensaje (hasta 9 digitos)
 // MMMMMMMM... Mensaje, hasta OOOOOOOOO caraceteres
 
+	log_trace(logger, "COMANDO SET BYTES. Id prog: %d", idProg);
+
 	int ok = 0;
 
 	int base = 0;
@@ -1710,21 +1741,32 @@ char* ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 	cantidadDigitoslongitudBuffer = posicionDeBufferAInt(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento);
 	longitudBuffer = subCadenaAInt(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1, cantidadDigitoslongitudBuffer);
 
-	char* mensaje = string_substring(buffer, 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1 + cantidadDigitoslongitudBuffer, longitudBuffer);
-
-	ok = EscribirMemoria(idProg, base, desplazamiento, longitudBuffer, mensaje);
-
-	if (ok)
+	int posicionComienzoMensaje = 2 + cantidadDigitosBase + 1 + cantidadDigitosDesplazamiento + 1 + cantidadDigitoslongitudBuffer;
+	int logitud = strlen(buffer);
+	if ((posicionComienzoMensaje + longitudBuffer) <= logitud) // Validamos me pasen la cantidad de bytes que piden que tengo que escribir
 	{
-		buffer = RespuestaClienteOk(buffer);
+		char * mensaje = string_substring(buffer, posicionComienzoMensaje, longitudBuffer);
+		ok = EscribirMemoria(idProg, base, desplazamiento, longitudBuffer, mensaje);
+
+		if (ok)
+		{
+			buffer = RespuestaClienteOk(buffer);
+		}
+		else
+		{
+			char* stringErrorAux = string_new();
+			string_append(&stringErrorAux, g_MensajeError);
+			SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d, buffer: %s", stringErrorAux, idProg, base, desplazamiento, longitudBuffer, mensaje);
+			buffer = RespuestaClienteError(buffer, g_MensajeError);
+		}
+
+		free(mensaje);
 	}
 	else
 	{
-		SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d, buffer: %s.", g_MensajeError, idProg, base, desplazamiento, longitudBuffer, mensaje);
+		SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. Se solicitó grabar una cantidad de bytes pero se pasaron menos. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", idProg, base, desplazamiento, longitudBuffer);
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
-
-	free(mensaje);
 	return buffer;
 }
 
@@ -1736,8 +1778,15 @@ char* ComandoCambioProceso(char *buffer, int *idProg)
 // C = codigo de mensaje ( = 4)
 // D = Cantidad de digitos que tiene el Id del programa
 // PPPPPPPPP = ID del programa (hasta 9 digitos)
+
+	log_trace(logger, "COMANDO CAMBIO PROCESO ACTIVO");
+
+	log_trace(logger, "COMANDO CAMBIO PROCESO ACTIVO - ID PROG ANTERIOR: %d ", *idProg);
+
 	int cantidadDigitosCodProg = posicionDeBufferAInt(buffer, 1);
 	*idProg = subCadenaAInt(buffer, 2, cantidadDigitosCodProg);
+
+	log_trace(logger, "COMANDO CAMBIO PROCESO ACTIVO - ID PROG NUEVO: %d ", *idProg);
 
 	if (*idProg > 0)
 	{
@@ -1770,6 +1819,8 @@ char* ComandoCrearSegmento(char *buffer, int tipoCliente)
 // D = Digitos de la base
 // BBBBBBBBB = base (hasta 9 digitos)
 
+	log_trace(logger, "COMANDO CREAR SEGMENTO");
+
 	if (tipoCliente == TIPO_KERNEL)
 	{
 		int idPrograma = 0;
@@ -1793,7 +1844,7 @@ char* ComandoCrearSegmento(char *buffer, int tipoCliente)
 		else
 		{
 			t_segmento* aux = ObtenerInfoSegmento(idPrograma, idSegmento);
-			int tamanio = (cantidadDigitos(aux->Inicio) + 3) * sizeof(char);
+			int tamanio = (cantidadDigitos(aux->Inicio) + 2) * sizeof(char);
 			buffer = realloc(buffer, tamanio * sizeof(char));
 			memset(buffer, 0, tamanio * sizeof(char));
 			sprintf(buffer, "%s%d%d", "1", cantidadDigitos(aux->Inicio), aux->Inicio);
@@ -1815,6 +1866,8 @@ char* ComandoDestruirSegmento(char *buffer, int tipoCliente)
 // C = codigo de mensaje ( = 6)
 // D = Cantidad de digitos que tiene el Id del programa
 // PPPPPPPPP = ID del programa (hasta 9 digitos)
+
+	log_trace(logger, "COMANDO DESTRUIR SEGMENTO");
 
 	if (tipoCliente == TIPO_KERNEL)
 	{
@@ -1848,19 +1901,28 @@ char* ComandoDestruirSegmento(char *buffer, int tipoCliente)
 
 char* RespuestaClienteOk(char *buffer)
 {
-	int tamanio = sizeof(char) * 2;
-	buffer = realloc(buffer, tamanio * sizeof(char));
-	memset(buffer, 0, tamanio * sizeof(char));
-	sprintf(buffer, "%s", "1");
+	/*int tamanio = sizeof(char) * 2;
+	 buffer = realloc(buffer, tamanio * sizeof(char));
+	 memset(buffer, 0, tamanio * sizeof(char));
+	 sprintf(buffer, "%s", "1");*/
+
+	buffer = string_new();
+	string_append(&buffer, "1");
+
 	return buffer;
 }
 
 char* RespuestaClienteError(char *buffer, char *msj)
 {
-	int tamanio = (strlen(msj) + 2) * sizeof(char);
-	buffer = realloc(buffer, tamanio * sizeof(char));
-	memset(buffer, 0, tamanio * sizeof(char));
-	sprintf(buffer, "%s%s", "0", msj);
+	//int cantidadBytesBuffer = strlen(buffer);
+	buffer = string_new();
+	string_append(&buffer, "0");
+	string_append(&buffer, msj);
+
+	/*	int tamanio = (strlen(msj) + 1) * sizeof(char);
+	 buffer = realloc(buffer, tamanio * sizeof(char));
+	 memset(buffer, 0, tamanio * sizeof(char));
+	 sprintf(buffer, "%s%s", "0", msj);*/
 	return buffer;
 }
 
@@ -1870,8 +1932,10 @@ char* RespuestaClienteError(char *buffer, char *msj)
 int chartToInt(char x)
 {
 	int numero = 0;
-	char* aux = malloc(1 * sizeof(char));
-	sprintf(aux, "%c", x);
+	char * aux = string_new();
+	string_append_with_format(&aux, "%c", x);
+	//char* aux = malloc(1 * sizeof(char));
+	//sprintf(aux, "%c", x);
 	numero = strtol(aux, (char **) NULL, 10);
 
 	free(aux);
