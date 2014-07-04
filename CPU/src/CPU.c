@@ -1494,18 +1494,18 @@ prim_definirVariable(t_nombre_variable identificador_variable)
   char* var = malloc(5 * sizeof(char));
   var[0] = identificador_variable;
 
-  Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s", var);
+  Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s", string_substring(var,0,1));
   pos_var_stack = programa->cursorStack
       + (programa->sizeContextoActual * VAR_STACK);
 
   Traza("TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d",
       pos_var_stack);
 
-  if (!(dictionary_has_key(dicVariables, var)))
+  if ((dictionary_has_key(dicVariables, string_substring(var,0,1))) == false)
     {
-      if ((setUMV(pos_var_stack, 0, 1, var)) > 0)
+      if ((setUMV(pos_var_stack, 0, 1, string_substring(var,0,1))) > 0)
         {
-          dictionary_put(dicVariables, var, (void*) pos_var_stack); //la registro en el dicc de variables
+          dictionary_put(dicVariables, string_substring(var,0,1), (void*) pos_var_stack); //la registro en el dicc de variables
 
           programa->sizeContextoActual++;
           Traza("TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE");
