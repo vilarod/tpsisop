@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/config.h>
-#include<commons/txt.h>
-#include<commons/string.h>
-#include<commons/log.h>
+#include <commons/txt.h>
+#include <commons/string.h>
+#include <commons/log.h>
 #include <stdbool.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -48,8 +48,7 @@
 #define BUFFERSIZE 1024
 
 //Puerto
-//#define IP "127.0.0.1"
-//#define PORT "6000"
+#define PORT "6000"
 
 int main(int argc, char* argv[]) {
 	//log
@@ -109,12 +108,6 @@ int main(int argc, char* argv[]) {
 
 	txt_close_file(file); //cierro el archivo
 
-//	char **linea;
-//	char *separator = NULL;
-	char *nuevo = NULL;
-
-	nuevo = string_new();
-
 	char* sub;
 	sub = string_new();
 	int final = 0;
@@ -125,7 +118,6 @@ int main(int argc, char* argv[]) {
 		final++;
 	}
 	free(sub);
-
 
 	char *programa;
 
@@ -138,14 +130,10 @@ int main(int argc, char* argv[]) {
 	int largo;
 	largo = strlen(programa);
 	printf("el tamanio del programa es: %d\n", largo);
-	//string_append(&programa, "\0");//si tengo que agregar el "\0" agrego esta linea y sumo 2 en el malloc
 
 	conectarAKERNEL(programa);
 
-	free(nuevo);
 	free(programa);
-
-	nuevo = NULL;
 	programa = NULL;
 
 	return (EXIT_SUCCESS);
@@ -281,10 +269,11 @@ int conexionConSocket(int puerto, char* IP) { //crea el socket y me retorna el i
 
 int recibirDatos(int socket, char *buffer) {
 	int bytecount;
-// memset se usa para llenar el buffer con 0s
+	// memset se usa para llenar el buffer con 0s
 	memset(buffer, 0, BUFFERSIZE);
 
-//Nos ponemos a la escucha de las peticiones que nos envie el kernel //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+	//Nos ponemos a la escucha de las peticiones que nos envie el kernel
+	//aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
 		Error(
 				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",

@@ -1,0 +1,8 @@
+CFLAGS=-I PROGRAMA.h
+OBJETOS=/home/utnso/tp-2014-1c-garras/PROGRAMA/src/PROGRAMA.o
+FUENTES=/home/utnso/tp-2014-1c-garras/PROGRAMA/src/PROGRAMA.c
+
+Programa: $(OBJETOS)
+	cc $(OBJETOS)-o Programa
+depend:
+	makedepend $(CFLAGS) $(FUENTES)
