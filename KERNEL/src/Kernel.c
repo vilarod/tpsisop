@@ -1073,7 +1073,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 									aux =
 											(metadataprograma->instrucciones_serializado
 													+ i);
-
+									j=0;
+									h=0;
 									comienzo = aux->start;
 									tamanio = (aux->offset) - 1;
 									Traza("comienzo %d: %d", i, comienzo);
