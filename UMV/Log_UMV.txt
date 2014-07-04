@@ -2835,3 +2835,129 @@ Se creó el siguiente segmento en la memoria:
 
 [INFO] 18:37:39:276 UMV/(4805:4813): Se escribió en la memoria correctamente
 
+[INFO] 20:52:54:1 UMV/(6714:6720): 
+Se creó el siguiente segmento en la memoria: 
+
+[INFO] 20:52:54:1 UMV/(6714:6720): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 20:52:54:2 UMV/(6714:6720): |  134545686|          1|       1304|          6|            3083837557|
+
+[ERROR] 20:52:54:2 UMV/(6714:6720): COMANDO INVALIDO
+[INFO] 20:53:11:134 UMV/(6714:6720): BASE MEMORIA: 3083837448
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          1|       1262|         28|            3083837448|
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          2|       2605|         64|            3083837476|
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          3|       3753|          1|            3083837540|
+
+[INFO] 20:53:11:134 UMV/(6714:6720): |          7|          4|       5214|         16|            3083837541|
+
+[INFO] 20:53:11:135 UMV/(6714:6720): |  134545686|          1|       1304|          6|            3083837557|
+
+[INFO] 20:53:11:135 UMV/(6714:6720): MEMORIA TOTAL (Bytes): 1048576
+
+[INFO] 20:53:11:135 UMV/(6714:6720): MEMORIA USADA (Bytes): 115
+
+[INFO] 21:19:27:313 UMV/(7845:7856): BASE MEMORIA: 3083837448
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |  ID PROG  |  ID SEG   |  INICIO   |  TAMANIO  |     UBICACION MP     |
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          1|       1663|         54|            3083837448|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          2|       3064|         64|            3083837502|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          3|       4415|          1|            3083837566|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): |          7|          4|       5532|         40|            3083837567|
+
+[INFO] 21:19:27:313 UMV/(7845:7856): MEMORIA TOTAL (Bytes): 1048576
+
+[INFO] 21:19:27:313 UMV/(7845:7856): MEMORIA USADA (Bytes): 159
+
+[INFO] 21:20:51:553 UMV/(7845:7856): Bytes Leidos: 9000000000000000000000000000000000000000000000000000000000000000H
+[TRACE] 21:35:10:563 UMV/(8349:8349): MEMORIA PRINCIPAL RESERVADA. Tamaño de la memoria (1048576)
+[TRACE] 21:35:10:581 UMV/(8349:8354): SOCKET LISTO PARA RECBIR CONEXIONES. Numero de socket: 7, puerto: 7000
+[TRACE] 21:35:38:708 UMV/(8349:8354): NUEVA CONEXION ENTRANTE. Se ha conectado el cliente (127.0.0.1) por el puerto (9382). El número de socket del cliente es: 8
+[TRACE] 21:35:40:249 UMV/(8349:8423): RECIBO DATOS. socket: 8. buffer: 31
+[TRACE] 21:35:41:496 UMV/(8349:8423): ENVIO DATOS. socket: 8. buffer: 1
+[TRACE] 21:42:11:553 UMV/(8597:8597): MEMORIA PRINCIPAL RESERVADA. Tamaño de la memoria (1048576)
+[TRACE] 21:42:11:553 UMV/(8597:8602): SOCKET LISTO PARA RECBIR CONEXIONES. Numero de socket: 5, puerto: 7000
+[TRACE] 21:42:35:264 UMV/(8597:8602): NUEVA CONEXION ENTRANTE. Se ha conectado el cliente (127.0.0.1) por el puerto (9638). El número de socket del cliente es: 6
+[TRACE] 21:42:35:266 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 31
+[TRACE] 21:42:35:267 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:39:832 UMV/(8597:8602): NUEVA CONEXION ENTRANTE. Se ha conectado el cliente (127.0.0.1) por el puerto (9894). El número de socket del cliente es: 7
+[TRACE] 21:42:39:833 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 32
+[TRACE] 21:42:39:833 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:42:42:240 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 417
+[TRACE] 21:42:42:240 UMV/(8597:8671): COMANDO CAMBIO PROCESO ACTIVO
+[TRACE] 21:42:42:241 UMV/(8597:8671): COMANDO CAMBIO PROCESO ACTIVO - ID PROG ANTERIOR: -1238371520 
+[TRACE] 21:42:42:241 UMV/(8597:8671): COMANDO CAMBIO PROCESO ACTIVO - ID PROG NUEVO: -1238371520 
+[TRACE] 21:42:42:241 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:42:241 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 517254
+[TRACE] 21:42:42:241 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:241 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 54
+[TRACE] 21:42:42:241 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 141771
+[TRACE] 21:42:42:242 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 24177110254begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:42:42:242 UMV/(8597:8671): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:242 UMV/(8597:8671): ESCRITURA MEMORIA. Id programa: 7, base logica: 1771, base real: 3074932744,  desplazamiento: 0, cantidad de bytes: 54, buffer: begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+end
+
+
+
+[TRACE] 21:42:42:243 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:42:244 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 517264
+[TRACE] 21:42:42:244 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:244 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 64
+[TRACE] 21:42:42:244 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 143037
+[TRACE] 21:42:42:244 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 51711
+[TRACE] 21:42:42:245 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:245 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 1
+[TRACE] 21:42:42:246 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 144654
+[TRACE] 21:42:42:246 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 517240
+[TRACE] 21:42:42:246 UMV/(8597:8671): COMANDO CREAR SEGMENTO
+[TRACE] 21:42:42:246 UMV/(8597:8671): CREADO NUEVO SEGMENTO. Id programa: 7, Tamaño solicitado segmento: 40
+[TRACE] 21:42:42:246 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 145840
+[TRACE] 21:42:42:247 UMV/(8597:8671): RECIBO DATOS. socket: 6. buffer: 245840102400006001500220006002900060036001100480003
+[TRACE] 21:42:42:247 UMV/(8597:8671): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:247 UMV/(8597:8671): ESCRITURA MEMORIA. Id programa: 7, base logica: 5840, base real: 3074932863,  desplazamiento: 0, cantidad de bytes: 40, buffer: 0006001500220006002900060036001100480003
+[TRACE] 21:42:42:247 UMV/(8597:8671): ENVIO DATOS. socket: 6. buffer: 1
+[TRACE] 21:42:42:249 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 417
+[TRACE] 21:42:42:249 UMV/(8597:8684): COMANDO CAMBIO PROCESO ACTIVO
+[TRACE] 21:42:42:249 UMV/(8597:8684): COMANDO CAMBIO PROCESO ACTIVO - ID PROG ANTERIOR: -1248857280 
+[TRACE] 21:42:42:249 UMV/(8597:8684): COMANDO CAMBIO PROCESO ACTIVO - ID PROG NUEVO: -1248857280 
+[TRACE] 21:42:42:249 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:42:42:249 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 1458401018
+[TRACE] 21:42:42:250 UMV/(8597:8684): COMANDO GET BYTES. Id prog: 7
+[TRACE] 21:42:42:250 UMV/(8597:8684): LECTURA MEMORIA. Id programa: 7, base logica: 5840, base real: 3074932863,  desplazamiento: 0, cantidad de bytes: 8, buffer: 00060015
+[TRACE] 21:42:42:250 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 100060015
+[TRACE] 21:42:42:250 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 14177116215
+[TRACE] 21:42:42:250 UMV/(8597:8684): COMANDO GET BYTES. Id prog: 7
+[TRACE] 21:42:42:250 UMV/(8597:8684): LECTURA MEMORIA. Id programa: 7, base logica: 1771, base real: 3074932744,  desplazamiento: 6, cantidad de bytes: 15, buffer: 	variables a, bES. I�
+[TRACE] 21:42:42:251 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1	variables a, bES. I
+[TRACE] 21:42:42:251 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 24303710119adp���b
+[TRACE] 21:42:42:251 UMV/(8597:8684): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:251 UMV/(8597:8684): ESCRITURA MEMORIA. Id programa: 7, base logica: 3037, base real: 3074932798,  desplazamiento: 0, cantidad de bytes: 1, buffer: 9
+[TRACE] 21:42:42:252 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:42:42:252 UMV/(8597:8684): RECIBO DATOS. socket: 7. buffer: 24303710119bdp�xdp�
+[TRACE] 21:42:42:252 UMV/(8597:8684): COMANDO SET BYTES. Id prog: 7
+[TRACE] 21:42:42:252 UMV/(8597:8684): ESCRITURA MEMORIA. Id programa: 7, base logica: 3037, base real: 3074932798,  desplazamiento: 0, cantidad de bytes: 1, buffer: 9
+[TRACE] 21:42:42:252 UMV/(8597:8684): ENVIO DATOS. socket: 7. buffer: 1
+[TRACE] 21:44:14:504 UMV/(8730:8730): MEMORIA PRINCIPAL RESERVADA. Tamaño de la memoria (1048576)
+[ERROR] 21:44:14:506 UMV/(8730:8735): 
+ERROR FATAL--> Error al hacer el Bind. El puerto está en uso 
+
