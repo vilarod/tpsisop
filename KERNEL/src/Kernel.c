@@ -968,7 +968,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 							strlen(respuestaumv3) - 2);
 					//Valor Segmento Codigo Asignado
 					PCBAUX.cursorStack = atoi(stacksegment);
-
+					PCBAUX.segmentoStack = atoi(stacksegment);
 					//Creacion segmento Indice Etiquetas
 					char* etiqueta = string_new();
 
