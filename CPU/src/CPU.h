@@ -30,6 +30,8 @@ typedef struct PCBs
   int sizeIndiceEtiquetas;
 } PCB;
 
+void
+finalizarProceso();
 
 void
 AtenderSenial(int s);
