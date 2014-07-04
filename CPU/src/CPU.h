@@ -32,7 +32,8 @@ typedef struct PCBs
 
 void
 finalizarProceso();
-
+void
+mensajeAbortar(char* mensaje);
 void
 AtenderSenial(int s);
 

@@ -419,8 +419,9 @@ serCadena(char ** msj, char* agr)
 void
 deserializarDesplLong(char * msj, int* despl, int* longi)
 {
-  int tamanio1 = 0;
-  int tamanio2 = 0;
+  int tamanio1 = sizeof(t_puntero_instruccion);
+  int tamanio2 = sizeof(t_size);
+
   Traza("TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
 
   if (string_starts_with(msj, "1")) //si el mensaje es valido -> busca despl y longi
@@ -631,19 +632,13 @@ PedirSentencia(char** sentencia)
         }
       else
         {
-          Error("%s", "ERROR - DESPLAZAMIENTO/OFFSET INVALIDOS");
-          ab = 1; //seÃ±al para abortar el proceso
-          quantum = 0;
+          mensajeAbortar(string_substring(instruccion, 1, (strlen(instruccion)) - 1));
           instruccion = "1";
         }
     }
   if (string_starts_with(instruccion, "0"))
     {
-      Error("ERROR - UMV: %s",
-          string_substring(instruccion, 1, (strlen(instruccion)) - 1));
-      ab = 1;
-      motivo = string_substring(instruccion, 1, (strlen(instruccion)) - 1);
-      quantum = 0;
+      mensajeAbortar(string_substring(instruccion, 1, (strlen(instruccion)) - 1));
     }
   else
     {
@@ -652,8 +647,6 @@ PedirSentencia(char** sentencia)
           umvDesconectada();
         }
     }
-
-  //free(instruccion);
 
   return aux;
 }
@@ -704,10 +697,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
   if (string_starts_with(respuesta, "0"))
     {
       Error("%s", "ERROR - NO SE PUDO GUARDAR VALOR EN ESA DIRECCION");
-      Error("ERROR UMV: %s",
-          string_substring(respuesta, 1, (strlen(respuesta)) - 1));
-      ab = 1; //seÃ±al para abortar proceso
-      motivo = string_substring(respuesta, 1, (strlen(respuesta)) - 1);
+      mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       validar = 0;
     }
   else
@@ -741,11 +731,7 @@ CambioProcesoActivo()
             {
               Error("%s",
                   "ERROR - OCURRIO UN ERROR AL REALIZAR CAMBIO DE CONTEXTO");
-              Error("ERROR UMV: %s",
-                  string_substring(respuesta, 1, (strlen(respuesta)) - 1));
-              ab = 1;
-              quantum = 0;
-              motivo = string_substring(respuesta, 1, (strlen(respuesta)) - 1);
+              mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
             }
           else
             umvDesconectada();
@@ -802,11 +788,7 @@ obtener_valor(t_nombre_compartida variable)
     {
       if (string_starts_with(respuesta, "0"))
         {
-          Error("%s",
-              "ERROR - NO SE PUDO OBTENER EL VALOR DE LA VARIABLE COMPARTIDA");
-          ab = 1; //seÃ±al para abortar el proceso
-          quantum = 0;
-          motivo = string_substring(respuesta, 1, (strlen(respuesta) - 1));
+          mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
         }
       else
         kernelDesconectado();
@@ -837,11 +819,7 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
     {
       if (string_starts_with(respuesta, "0"))
         {
-
-          Error("%s", "ERROR - KERNEL NO HA PODIDO PROCESAR EL PEDIDO");
-          ab = 1; //seÃ±al para abortar el proceso
-          quantum = 0;
-          motivo = string_substring(respuesta, 1, (strlen(respuesta) - 1));
+        mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
         }
       else
         kernelDesconectado();
@@ -873,6 +851,30 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
     }
 }
 
+void
+finalizarProceso()
+{
+  Traza("%s", "TRAZA - EL PROGRAMA FINALIZO");
+  char *mensaje = malloc(BUFFERSIZE * sizeof(char));
+  string_append(&mensaje, FIN_PROCESO);
+  string_append(&mensaje, serializar_PCB(programa));
+  Traza("TRAZA - EL MENSAJE QUE LE ENVIO AL KERNEL ES: %s", mensaje);
+  Enviar(socketKERNEL, mensaje);
+  free(mensaje);
+  ab = 0;
+  f = 1;
+  quantum = 0;
+}
+
+void
+mensajeAbortar(char* mensaje)
+{
+  Error("ERROR: %s", mensaje);
+  ab = 1;
+  quantum = 0;
+  motivo=mensaje;
+}
+
 //Enviar a parser --------------------------------------------------------------
 
 void
@@ -888,21 +890,6 @@ esperarTiempoRetardo()
 {
   Traza("TRAZA - TENGO UN TIEMPO DE ESPERA DE: %d MILISEGUNDOS", retardo);
   usleep(retardo); //retardo en milisegundos
-}
-
-void
-finalizarProceso()
-{
-  Traza("%s", "TRAZA - EL PROGRAMA FINALIZO");
-  char *mensaje = malloc(BUFFERSIZE * sizeof(char));
-  string_append(&mensaje, FIN_PROCESO);
-  string_append(&mensaje, serializar_PCB(programa));
-  Traza("TRAZA - EL MENSAJE QUE LE ENVIO AL KERNEL ES: %s", mensaje);
-  Enviar(socketKERNEL, mensaje);
-  free(mensaje);
-  ab = 0;
-  f = 1;
-  quantum = 0;
 }
 
 //Manejo diccionarios ----------------------------------------------------------
@@ -943,11 +930,7 @@ RecuperarEtiquetas()
         {
           if (string_starts_with(respuesta, "0"))
             {
-              Error("%s",
-                  "ERROR - NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
-              ab = 1;
-              quantum = 0;
-              motivo = "ERROR AL RECUPERAR LAS ETIQUETAS DEL PROCESO";
+              mensajeAbortar("NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
             }
           else
             umvDesconectada();
@@ -998,12 +981,7 @@ RecuperarDicVariables()
             {
               if (string_starts_with(respuesta, "0"))
                 {
-                  Error("%s",
-                      "ERROR - NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
-                  ab = 1; //seÃ±al para abortar el proceso
-                  quantum = 0; //proceso no tendrÃ¡ quantum
-                  motivo =
-                      "ERROR AL RECUPERAR LAS VARIABLES DEL CONTEXTO ACTUAL";
+                mensajeAbortar("NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
                 }
               else
                 umvDesconectada();
@@ -1103,7 +1081,6 @@ SENIAL(void *arg)
 {
   Traza("%s", "TRAZA - HOT PLUG ACTIVO");
   signal(SIGUSR1, AtenderSenial);
-  signal(SIGSEGV, AtenderSenial);
 
   return NULL ;
 }
@@ -1350,18 +1327,12 @@ prim_finalizar(void)
             }
           else
             {
-              Error("ERROR UMV: %s",
-                  string_substring(pedido, 1, strlen(pedido) - 1));
-              ab = 1;
-              quantum = 0;
+              mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
             }
         }
       else
         {
-          Error("ERROR UMV: %s",
-              string_substring(pedido, 1, strlen(pedido) - 1));
-          ab = 1;
-          quantum = 0;
+          mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
         }
 
       free(pedido);
@@ -1418,27 +1389,17 @@ prim_retornar(t_valor_variable retorno)
                 }
               else
                 {
-                  Error("ERROR UMV: %s",
-                      string_substring(pedido, 1, strlen(pedido) - 1));
-                  ab = 1;
-                  quantum = 0;
+                 mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
                 }
             }
           else
             {
-              Error("ERROR UMV: %s",
-                  string_substring(pedido, 1, strlen(pedido) - 1));
-              ab = 1;
-              quantum = 0;
+              mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
             }
         }
       else
         {
-          Error("%s", "ERROR - NO SE PUDO GUARDAR EL VALOR DE RETORNO");
-          Error("ERROR UMV: %s",
-              string_substring(pedido, 1, strlen(pedido) - 1));
-          ab = 1;
-          quantum = 0;
+          mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
         }
     }
 
@@ -1515,10 +1476,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
     }
   else
     {
-      Error("ERROR - LA VARIABLE: %s NO EXISTE EN EL CONTEXTO DE EJECUCION",
-          var);
-      ab = 1;
-      quantum = 0;
+      mensajeAbortar("LA VARIABLE NO EXISTE EN EL CONTEXTO DE EJECUCION");
     }
   free(var);
 
@@ -1554,16 +1512,12 @@ prim_definirVariable(t_nombre_variable identificador_variable)
         }
       else
         {
-          Error("%s", "ERROR - NO SE PUDO INGRESAR LA VARIABLE EN EL STACK");
-          quantum = 0;
-          ab = 1;
+          mensajeAbortar("NO SE PUDO INGRESAR LA VARIABLE EN EL STACK");
         }
     }
   else
     {
-      Error("%s", "ERROR - LA VARIABLE YA SE ENCUENTRA EN EL CONTEXTO ACTUAL");
-      quantum = 0;
-      ab = 1;
+      mensajeAbortar("LA VARIABLE YA SE ENCUENTRA EN EL CONTEXTO ACTUAL");
     }
 
   free(var);
@@ -1608,11 +1562,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
 
   if (string_equals_ignore_case(senial, "A"))
     {
-      Traza("TRAZA - EL KERNEL NO ENCONTRO EL SEMAFORO %s",
-          string_substring(respuesta, 1, strlen(respuesta)));
-      motivo = string_substring(respuesta, 1, strlen(respuesta));
-      ab = 1;
-      quantum = 0;
+      mensajeAbortar(string_substring(respuesta, 1, strlen(respuesta)));
     }
   else
     {
@@ -1657,9 +1607,7 @@ prim_signal(t_nombre_semaforo identificador_semaforo)
     {
       if (string_equals_ignore_case(string_substring(respuesta, 0, 1), "0"))
         {
-          Error("%s", "NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO");
-          quantum = 0;
-          ab = 1;
+         mensajeAbortar("NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO");
         }
       else
         kernelDesconectado();
