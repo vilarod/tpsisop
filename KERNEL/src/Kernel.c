@@ -1422,7 +1422,12 @@ void *HiloOrquestadorDeCPU() {
 						switch (tipo_mensaje) {
 						case MSJ_CPU_IMPRIMI:
 							//manda a la lista de imprimir
-							comandoImprimir(buffer, i);
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
+								comandoImprimir(buffer, i);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_HANDSHAKE:
 							Traza("HandShake");
@@ -1439,13 +1444,28 @@ void *HiloOrquestadorDeCPU() {
 							break;
 
 						case MSJ_CPU_FINAlQUAMTUM:
-							comandoFinalQuamtum(buffer, i);
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 12)) {
+								comandoFinalQuamtum(buffer, i);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_OBTENERVALORGLOBAL:
-							comandoObtenerValorGlobar(buffer, i);
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
+								comandoObtenerValorGlobar(buffer, i);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_GRABARVALORGLOBAL:
-							comandoGrabarValorGlobar(buffer, i);
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 2)) {
+								comandoGrabarValorGlobar(buffer, i);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_ABANDONA:
 							//elimina cpu
@@ -1457,19 +1477,39 @@ void *HiloOrquestadorDeCPU() {
 							break;
 						case MSJ_CPU_WAIT:
 							//Resta la variable del semaforo
-							comandoWait(buffer, i);
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
+								comandoWait(buffer, i);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_SIGNAL:
 							//suma la varariable del semaforo
-							comandoSignal(buffer, i);
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
+								comandoSignal(buffer, i);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_ABORTAR:
-							//Aborta programa por erro
-							comandoAbortar(buffer, i);
+							//Aborta programa por error
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
+								comandoAbortar(buffer, i);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_FINAlIZAR:
 							//Termino programa y mandar a FIN
-							comandoFinalizar(i, buffer);
+							if (mensajeEstaOK(buffer, nbytesRecibidos, 9)) {
+								comandoFinalizar(i, buffer);
+							} else {
+								Error("mensaje Recivido incorrecto");
+								EnviarDatos(i, "A");
+							}
 							break;
 						case MSJ_CPU_LIBERAR:
 							//CPU pasa a libre
@@ -1945,14 +1985,32 @@ void mandarAFinProgramaPorBajaCPU(int socket) {
 	eliminarCpu(socket);
 }
 
-void borrarSocket(int socket){
+void borrarSocket(int socket) {
 	int _is_Socket(t_socket *p) {
 		return encontrarInt(p->socket, socket);
 	}
 	pthread_mutex_lock(&mutexSocketProgramas);
-	 t_socket* auxiliar= list_remove_by_condition(listaSocketProgramas, (void*)_is_Socket);
-	if (auxiliar!=NULL){
+	t_socket* auxiliar = list_remove_by_condition(listaSocketProgramas,
+			(void*) _is_Socket);
+	if (auxiliar != NULL ) {
 		socket_destroy(auxiliar);
 	}
 	pthread_mutex_unlock(&mutexSocketProgramas);
+}
+
+int mensajeEstaOK(char* buffer, int longitud, int cantidad) {
+	int cont = 0, i;
+	char* sub = string_new();
+	for (i = 0; i < longitud; i++) {
+		sub = string_substring(buffer, i, 1);
+		if (string_equals_ignore_case(sub, "-") != 0) {
+			cont++;
+		}
+	}
+	free(sub);
+	if (cont == cantidad) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
