@@ -216,7 +216,7 @@ static t_imp *imp_create(int socket, char* msj)
 }
 
 static void imp_destroy(t_imp *self)
-{
+{	free(self->mensaje);
 	free(self);
 }
 

@@ -1073,8 +1073,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 									aux =
 											(metadataprograma->instrucciones_serializado
 													+ i);
-									j=0;
-									h=0;
+									j = 0;
+									h = 0;
 									comienzo = aux->start;
 									tamanio = (aux->offset) - 1;
 									Traza("comienzo %d: %d", i, comienzo);
@@ -1083,7 +1083,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 									ceros1 = (4 - cantidadDigitos(comienzo));
 									ceros2 = (4 - cantidadDigitos(tamanio));
 									//LLenar de 0 el start
-									while (j != ceros1){
+									while (j != ceros1) {
 										string_append(&escribirCodex, "0");
 										j++;
 									}
@@ -1834,7 +1834,8 @@ t_HIO* encontrarDispositivo(char* nombre) {
 }
 
 void comandoImprimir(char* buffer, int socket) {
-	char* mensaje = obtenerNombreMensaje(buffer, 1);
+	char* mensaje = string_new();
+	string_append(&mensaje, obtenerNombreMensaje(buffer, 1));
 	pthread_mutex_lock(&mutexCPU);
 	t_CPU* auxCPU = encontrarCPU(socket);
 	if (auxCPU != NULL ) {
@@ -1845,9 +1846,14 @@ void comandoImprimir(char* buffer, int socket) {
 			semsig(&imprimirCont);
 			Traza("Mandar a imprimir datos. programa: %d. buffer: %s",
 					auxCPU->idPCB->id, (char*) mensaje);
+		} else {
+			free(mensaje);
 		}
+	} else {
+		free(mensaje);
 	}
 	pthread_mutex_unlock(&mutexCPU);
+
 }
 
 void comandoObtenerValorGlobar(char* buffer, int socket) {
