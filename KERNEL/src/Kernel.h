@@ -114,7 +114,10 @@ static t_CPU *cpu_create(int idCPU)
 }
 
 static void cpu_destroy(t_CPU *self)
-{	free(self->idPCB);
+{
+	if (self->idPCB != NULL){
+		free(self->idPCB);
+	}
 	free(self);
 }
 
@@ -274,6 +277,25 @@ static t_HIO *HIO_create(char* nombre, int valor)
 	pthread_mutex_init(&(new->mutexBloqueados), NULL );
 	return new;
 }
+
+//Lista de Socket Activos de programa
+typedef struct _t_socket {
+	int socket;
+} t_socket ;
+
+static t_socket *socket_create(int num)
+{
+	t_socket* new = malloc(sizeof(t_socket));
+	new->socket=num;
+	return new;
+}
+
+static void socket_destroy(t_socket *self)
+{
+	free(self);
+}
+
+
 //funciones de las listas de config
 void llenarSemaforoConfig();
 void llenarVarGlobConfig();
@@ -300,6 +322,7 @@ t_HIO* encontrarDispositivo(char* nombre);
 t_varGlobal* encontrarVarGlobal(char* nombre);
 void borrarPCBenCPU(int idCPU);
 void mandarAFinProgramaPorBajaCPU(int socket);
+void borrarSocket(int socket);
 
 //Globales
 int socketumv;
@@ -312,7 +335,7 @@ int Retardo;
 int Multi;
 char *UMV_IP;
 t_list *listCPU, *listaNew, *listaReady, *listaDispositivos,*listaFin, *listaSemaforos;
-t_list *listaImprimir, *listaVarGlobal;
+t_list *listaImprimir, *listaVarGlobal, *listaSocketProgramas;
 pthread_mutex_t mutexNew = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexReady = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexCPU = PTHREAD_MUTEX_INITIALIZER;
@@ -320,5 +343,6 @@ pthread_mutex_t mutexFIN = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexSemaforos = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexDispositivos = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexImprimir = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutexSocketProgramas = PTHREAD_MUTEX_INITIALIZER;
 
 int cantidadDigitos(int num);

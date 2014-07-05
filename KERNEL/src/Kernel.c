@@ -93,6 +93,7 @@ int main(int argv, char** argc) {
 	listaImprimir = list_create();
 	listaVarGlobal = list_create();
 	listaSemaforos = list_create();
+	listaSocketProgramas = list_create();
 
 	//Obtener las listas
 	llenarSemaforoConfig();
@@ -442,7 +443,7 @@ void crearEscucha() {
 						} else {
 							perror("recv");
 						}
-
+						borrarSocket(i); // Borra de la lista de socket de pogramas
 						FD_CLR(i, &master); // eliminar del conjunto maestro
 					} else {
 						tipo_mensaje = ObtenerComandoMSJ(buffer);
@@ -453,6 +454,9 @@ void crearEscucha() {
 //							ComandoHandShake(buffer, &id_Programa,
 //									&tipo_Conexion);
 							EnviarDatos(i, "C");
+							pthread_mutex_lock(&mutexSocketProgramas);
+							list_add(listaSocketProgramas, socket_create(i));
+							pthread_mutex_unlock(&mutexSocketProgramas);
 							break;
 						case MSJ_RECIBO_PROGRAMA:
 							if (ComandoRecibirPrograma(buffer, i) == 0) {
@@ -1939,4 +1943,16 @@ void mandarAFinProgramaPorBajaCPU(int socket) {
 		}
 	}
 	eliminarCpu(socket);
+}
+
+void borrarSocket(int socket){
+	int _is_Socket(t_socket *p) {
+		return encontrarInt(p->socket, socket);
+	}
+	pthread_mutex_lock(&mutexSocketProgramas);
+	 t_socket* auxiliar= list_remove_by_condition(listaSocketProgramas, (void*)_is_Socket);
+	if (auxiliar!=NULL){
+		socket_destroy(auxiliar);
+	}
+	pthread_mutex_unlock(&mutexSocketProgramas);
 }
