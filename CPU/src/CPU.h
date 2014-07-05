@@ -142,6 +142,7 @@ void
 grabar_valor(t_nombre_compartida variable, t_valor_variable valor);
 
 int cantidadDigitos(int num);
+void rellenarConCeros(int cuanto,char **mensaje);
 //Primitivas
 
 void

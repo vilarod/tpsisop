@@ -40,7 +40,6 @@
 #define tCPUU 2
 #define tCPUK 2
 #define BUFFERSIZE 10000
-#define VAR_STACK 5
 #define CAMBIO_PROCESO 4
 #define FIN_QUANTUM 4
 #define OBTENER_V_COMP 5
@@ -55,12 +54,18 @@
 #define S_WAIT 8
 #define IMPRIMIR 2
 #define separador "-"
+#define bien "1"
+#define mal "0"
 
 //Variables globales ------------------------------------------------------
 int aux_conec_umv = 0;
 int aux_conec_ker = 0;
 
 const int TAM_INSTRUCCION = sizeof(t_intructions);
+const int DIG_VAL_VAR = sizeof(t_valor_variable);
+const int DIG_NOM_VAR = sizeof(t_nombre_variable);
+const int VAR_STACK = (sizeof(t_valor_variable) + sizeof(t_nombre_variable));
+
 
 int socketUMV = 0;
 int socketKERNEL = 0;
@@ -84,6 +89,7 @@ int tengoProg = 0;
 char* motivo;
 char* variable_ref; //guardara el nombre de la variable llamada por ObtenerDireccionVariable o ObtenerValorCompartida
 char* etiquetas;
+
 
 //Llamado a las funciones primitivas
 
@@ -260,7 +266,7 @@ RecibirProceso()
 
   if (r > 0)
     {
-      if (string_starts_with(estructura, "1")) // ponele que dice que me esta enviando datos..
+      if (string_starts_with(estructura, bien)) // ponele que dice que me esta enviando datos..
         {
           for (aux = 1; aux < 4; aux++)
             {
@@ -301,7 +307,7 @@ RecibirProceso()
                 }
                 break;
                 }
-              sub = "";
+              sub = string_new();
               indice = inicio;
             }
         }
@@ -418,7 +424,7 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
 
   Traza("TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
 
-  if (string_starts_with(msj, "1")) //si el mensaje es valido -> busca despl y longi
+  if (string_starts_with(msj, bien)) //si el mensaje es valido -> busca despl y longi
     {
       *despl = atoi(string_substring(msj, 1, tamanio1));
       Traza("TRAZA - DESPLAZAMIENTO: %d", *despl);
@@ -609,7 +615,7 @@ PedirSentencia(char** sentencia)
   instruccion = getUMV(programa->indiceCodigo,
       programa->programCounter * TAM_INSTRUCCION, TAM_INSTRUCCION);
 
-  if (string_starts_with(instruccion, "1")
+  if (string_starts_with(instruccion, bien)
       && ((strlen(instruccion) - 1) == TAM_INSTRUCCION))
     {
       deserializarDesplLong(instruccion, &despl, &longi);
@@ -617,7 +623,7 @@ PedirSentencia(char** sentencia)
       if ((despl > (-1)) && (longi > 0))
         {
           instruccion = getUMV(programa->segmentoCodigo, despl, longi);
-          if (string_starts_with(instruccion, "1"))
+          if (string_starts_with(instruccion,bien))
             {
               *sentencia = string_substring(instruccion, 1, longi);
               aux = 1;
@@ -629,14 +635,14 @@ PedirSentencia(char** sentencia)
         {
           mensajeAbortar(
               string_substring(instruccion, 1, (strlen(instruccion)) - 1));
-          instruccion = "1";
+          instruccion = bien;
         }
     }
-  if (string_starts_with(instruccion, "0"))
+  if (string_starts_with(instruccion, mal))
     mensajeAbortar(string_substring(instruccion, 1, (strlen(instruccion)) - 1));
   else
     {
-      if (!(string_starts_with(instruccion, "1")))
+      if (!(string_starts_with(instruccion,bien)))
         umvDesconectada();
     }
 
@@ -657,12 +663,12 @@ getUMV(int base, int dsp, int tam)
       base, dsp, tam);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
-  if (string_starts_with(respuesta, "0"))
+  if (string_starts_with(respuesta, mal))
     Error("ERROR UMV: %s",
         string_substring(respuesta, 1, (strlen(respuesta)) - 1));
   else
     {
-      if (!(string_starts_with(respuesta, "1")))
+      if (!(string_starts_with(respuesta, bien)))
         umvDesconectada();
     }
 
@@ -697,7 +703,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
 
-  if (string_starts_with(respuesta, "0"))
+  if (string_starts_with(respuesta, mal))
     {
       Error("%s", "ERROR - NO SE PUDO GUARDAR VALOR EN ESA DIRECCION");
       mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
@@ -705,7 +711,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
     }
   else
     {
-      if (!(string_starts_with(respuesta, "1")))
+      if (!(string_starts_with(respuesta,bien)))
         {
           umvDesconectada();
           validar = 0;
@@ -727,12 +733,12 @@ CambioProcesoActivo()
       Traza("TRAZA - INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d", programa->id);
       Enviar(socketUMV, mensaje);
       Recibir(socketUMV, respuesta);
-      if (string_starts_with(respuesta, "1"))
+      if (string_starts_with(respuesta, bien))
         Traza("%s",
             "TRAZA - SE INFORMO CORRECTAMENTE EL CAMBIO DE PROCESO ACTIVO");
       else
         {
-          if (string_starts_with(respuesta, "0"))
+          if (string_starts_with(respuesta, mal))
             {
               Error("%s",
                   "ERROR - OCURRIO UN ERROR AL REALIZAR CAMBIO DE CONTEXTO");
@@ -782,7 +788,7 @@ obtener_valor(t_nombre_compartida variable)
 
   Recibir(socketKERNEL, respuesta);  //recibo EstadoValor
 
-  if (string_starts_with(respuesta, "1")) //si comienza con 1 -> recibi un mensj valido
+  if (string_starts_with(respuesta, bien)) //si comienza con 1 -> recibi un mensj valido
     {
       valor = atoi(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       Traza("TRAZA - EL VALOR DE LA VARIABLE ES: %d", valor);
@@ -791,11 +797,8 @@ obtener_valor(t_nombre_compartida variable)
     }
   else
     {
-      if (string_starts_with(respuesta, "0"))
-        {
-          mensajeAbortar(
-              string_substring(respuesta, 1, (strlen(respuesta) - 1)));
-        }
+      if (string_starts_with(respuesta, mal))
+        mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       else
         kernelDesconectado();
     }
@@ -819,15 +822,12 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
   Enviar(socketKERNEL, mensaje); //el mensaje que le mando es  PedidoVariableValor
 
   Recibir(socketKERNEL, respuesta);
-  if (string_starts_with(respuesta, "1"))
+  if (string_starts_with(respuesta, bien))
     Traza("%s", "TRAZA - KERNEL PROCESO OK EL PEDIDO");
   else
     {
-      if (string_starts_with(respuesta, "0"))
-        {
-          mensajeAbortar(
-              string_substring(respuesta, 1, (strlen(respuesta) - 1)));
-        }
+      if (string_starts_with(respuesta, mal))
+        mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       else
         kernelDesconectado();
     }
@@ -928,7 +928,7 @@ RecuperarEtiquetas()
       respuesta = getUMV(programa->indiceEtiquetas, 0,
           programa->sizeIndiceEtiquetas);
 
-      if (string_starts_with(respuesta, "1")
+      if (string_starts_with(respuesta, bien)
           && ((strlen(respuesta) - 1) == programa->sizeIndiceEtiquetas))
         {
           etiquetas = string_substring(respuesta, 1, strlen(respuesta) - 1);
@@ -936,7 +936,7 @@ RecuperarEtiquetas()
         }
       else
         {
-          if (string_starts_with(respuesta, "0"))
+          if (string_starts_with(respuesta, mal))
             mensajeAbortar("NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
           else
             umvDesconectada();
@@ -972,7 +972,7 @@ RecuperarDicVariables()
       if (aux > 0) //tengo variables a recuperar
         {
           respuesta = getUMV(ptr_posicion, 0, (VAR_STACK * aux));
-          if (string_starts_with(respuesta, "1"))
+          if (string_starts_with(respuesta, bien))
             {
               variables = string_substring(respuesta, 1, strlen(respuesta) - 1);
               for (i = 0; i < aux; i++) //voy de 0 a cantidad de variables en contexto actual
@@ -985,7 +985,7 @@ RecuperarDicVariables()
             }
           else
             {
-              if (string_starts_with(respuesta, "0"))
+              if (string_starts_with(respuesta, mal))
                 {
                   mensajeAbortar(
                       "NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
@@ -1023,13 +1023,13 @@ imprimirContextoActual()
   if (aux > 0) //tengo variables a recuperar
     {
       respuesta = getUMV(ptr_posicion, 0, (VAR_STACK * aux));
-      if (string_starts_with(respuesta, "1"))
+      if (string_starts_with(respuesta, bien))
         {
           variables = string_substring(respuesta, 1, strlen(respuesta) - 1);
           for (i = 0; i < aux; i++)
             {
 
-              string_append(&mensaje, "Variable ");
+              string_append(&mensaje, "VARIABLE ");
               string_append(&mensaje, string_substring(variables, pos, 1));
               string_append(&mensaje, ":");
               string_append(&mensaje,
@@ -1040,8 +1040,8 @@ imprimirContextoActual()
         }
       else
         {
-          string_append(&mensaje, "ERROR AL RECUPERAR VALORES VARIABLES-");
-          if (!(string_starts_with(respuesta, "0")))
+          string_append(&mensaje, "ERROR AL RECUPERAR VALORES VARIABLES");
+          if (!(string_starts_with(respuesta, mal)))
             {
               umvDesconectada();
               ab = 0;
@@ -1049,7 +1049,7 @@ imprimirContextoActual()
         }
     }
   else
-    string_append(&mensaje, "NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL-");
+    string_append(&mensaje, "NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL");
 
   Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION",
       mensaje);
@@ -1161,9 +1161,7 @@ main(void)
           if (tengoProg == (-2))
             AbortarProceso();
           if (tengoProg == (-3))
-            {
-              ab = 0;
-            }
+            ab = 0;
         }
 
       //Si salio del ciclo anterior es que ya tengo un programa
@@ -1209,6 +1207,16 @@ main(void)
   return EXIT_SUCCESS;
 }
 
+void rellenarConCeros(int cuanto,char **mensaje)
+{
+  int j=0;
+  while (j != cuanto)
+    {
+      string_append(mensaje, "0");
+      j++;
+    }
+}
+
 //Primitivas ---------------------------------------------------------------------
 
 void
@@ -1217,19 +1225,12 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA ASIGNAR");
   int validar;
   char* mensaje=string_new();
-  int j=0;
-  int ceros = (4 - cantidadDigitos(valor));
-  while (j != ceros)
-    {
-      string_append(&mensaje, "0");
-      j++;
-    }
+  int ceros = (DIG_VAL_VAR - cantidadDigitos(valor));
+  rellenarConCeros(ceros,&mensaje);
   string_append(&mensaje, string_itoa(valor));
-  validar = setUMV(direccion_variable, 1, 4, mensaje);
+  validar = setUMV(direccion_variable, (VAR_STACK - DIG_VAL_VAR), DIG_VAL_VAR, mensaje);
   if (validar == 1) //si es <=0 el set aborta el proceso
-    {
-      Traza("%s", "TRAZA - ASIGNACION EXITOSA");
-    }
+    Traza("%s", "TRAZA - ASIGNACION EXITOSA");
 
 }
 
@@ -1256,11 +1257,21 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
   int aux;
 
+  char* mensaje=string_new();
+  int ceros = (VAR_STACK - cantidadDigitos(programa->cursorStack));
+  rellenarConCeros(ceros,&mensaje);
+  string_append(&mensaje, string_itoa(programa->cursorStack));
+
   aux = programa->cursorStack + (VAR_STACK * programa->sizeContextoActual);
-  if (setUMV(aux, 0, VAR_STACK, string_itoa(programa->cursorStack)) == 1)
+
+  if (setUMV(aux, 0, VAR_STACK, mensaje) == 1)
     {
-      if (setUMV((aux + VAR_STACK), 0, VAR_STACK,
-          string_itoa(programa->programCounter)) == 1)
+      mensaje=string_new();
+      ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
+      rellenarConCeros(ceros,&mensaje);
+      string_append(&mensaje, string_itoa(programa->programCounter));
+
+      if (setUMV((aux + VAR_STACK), 0, VAR_STACK,mensaje) == 1)
         {
           programa->cursorStack = aux + (VAR_STACK * 2);
           Traza("TRAZA - EL CURSOR STACK APUNTA A: %d", programa->cursorStack);
@@ -1268,10 +1279,8 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
           Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
               programa->sizeContextoActual);
           dictionary_clean(dicVariables); //limpio el dic de variables
-
         }
     }
-
 }
 
 void
@@ -1282,24 +1291,35 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 
   int aux;
 
+  char* mensaje=string_new();
+  int ceros = (VAR_STACK - cantidadDigitos(programa->cursorStack));
+  rellenarConCeros(ceros,&mensaje);
+  string_append(&mensaje, string_itoa(programa->cursorStack));
+
   aux = programa->cursorStack + (VAR_STACK * programa->sizeContextoActual);
-  if (setUMV(aux, 0, VAR_STACK, string_itoa(programa->cursorStack)) == 1)
+
+  if (setUMV(aux, 0, VAR_STACK, mensaje) == 1)
     {
-      if (setUMV((aux + VAR_STACK), 0, VAR_STACK,
-          string_itoa(programa->programCounter)) == 1)
+      mensaje=string_new();
+      ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
+      rellenarConCeros(ceros,&mensaje);
+      string_append(&mensaje,string_itoa(programa->programCounter));
+
+      if (setUMV((aux + VAR_STACK), 0, VAR_STACK,mensaje) == 1)
         {
-          if (setUMV((aux + (VAR_STACK * 2)), 0, VAR_STACK,
-              string_itoa(donde_retornar)) == 1)
+          mensaje=string_new();
+          ceros = (VAR_STACK - cantidadDigitos(donde_retornar));
+          rellenarConCeros(ceros,&mensaje);
+          string_append(&mensaje,string_itoa(donde_retornar));
+
+          if (setUMV((aux + (VAR_STACK * 2)), 0, VAR_STACK,mensaje) == 1)
             {
+              Traza("TRAZA - LA DIRECCION POR DONDE RETORNAR ES: %d",donde_retornar);
               programa->cursorStack = aux + (VAR_STACK * 3);
-              Traza("TRAZA - EL CURSOR STACK APUNTA A: %d",
-                  programa->cursorStack);
+              Traza("TRAZA - EL CURSOR STACK APUNTA A: %d",programa->cursorStack);
               programa->sizeContextoActual = 0;
-              Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
-                  programa->sizeContextoActual);
+              Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
               dictionary_clean(dicVariables); //limpio el dic de variables
-              Traza("TRAZA - LA DIRECCION POR DONDE RETORNAR ES: %d",
-                  donde_retornar);
             }
         }
     }
@@ -1318,48 +1338,36 @@ prim_finalizar(void)
       char *pedido = malloc(BUFFERSIZE * sizeof(char));
       pedido = getUMV(aux, 0, VAR_STACK);
 
-      if (string_starts_with(pedido, "1"))
+      if (string_starts_with(pedido, bien))
         {
-          programa->programCounter = atoi(
-              string_substring(pedido, 1, strlen(pedido) - 1));
+          programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
           Traza("TRAZA - EL PROGRAM COUNTER ES: %d", programa->programCounter);
           aux = aux - (VAR_STACK * 2);
           pedido = getUMV(aux, 0, VAR_STACK);
-          if (string_starts_with(pedido, "1"))
+          if (string_starts_with(pedido, bien))
             {
-              programa->cursorStack = atoi(
-                  string_substring(pedido, 1, strlen(pedido) - 1));
+              programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
               Traza("TRAZA - EL CURSOR STACK ES: %d", programa->cursorStack);
-              programa->sizeContextoActual = ((aux - (programa->cursorStack))
-                  / VAR_STACK);
-              Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",
-                  programa->sizeContextoActual);
+              programa->sizeContextoActual = ((aux - (programa->cursorStack))/ VAR_STACK);
+              Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
               if (programa->sizeContextoActual > 0)
                 {
                   dictionary_clean(dicVariables); //limpio el dic de variables
                   RecuperarDicVariables();
                 }
               else
-                {
                   finalizarProceso();
-                }
             }
           else
-            {
               mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
-            }
         }
       else
-        {
           mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
-        }
 
       free(pedido);
     }
   else
-    {
-      finalizarProceso();
-    }
+    finalizarProceso();
 
 }
 
@@ -1374,32 +1382,30 @@ prim_retornar(t_valor_variable retorno)
   char *pedido = malloc(BUFFERSIZE * sizeof(char));
   pedido = getUMV(aux, 0, VAR_STACK);
 
-  if (string_starts_with(pedido, "1"))
+  if (string_starts_with(pedido,bien))
     {
       retor = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
       Traza("TRAZA - LA DIRECCION DONDE RETORNAR ES: %d", retor);
-      if (setUMV(retor, 0, (VAR_STACK - 1), string_itoa(retorno)) == 1)
+
+      if (setUMV(retor, 0, (VAR_STACK - DIG_NOM_VAR), string_itoa(retorno)) == 1)
         {
           aux = aux - (VAR_STACK * 2);
           pedido = getUMV(aux, 0, VAR_STACK);
-          if (string_starts_with(pedido, "1"))
+
+          if (string_starts_with(pedido, bien))
             {
-              programa->programCounter = atoi(
-                  string_substring(pedido, 1, strlen(pedido) - 1));
-              Traza("TRAZA - EL PROGRAM COUNTER ES: %d",
-                  programa->programCounter);
+              programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
+              Traza("TRAZA - EL PROGRAM COUNTER ES: %d",programa->programCounter);
               aux = aux - (VAR_STACK * 3);
               pedido = getUMV(aux, 0, VAR_STACK);
-              if (string_starts_with(pedido, "1"))
+
+              if (string_starts_with(pedido, bien))
                 {
-                  programa->cursorStack = atoi(
-                      string_substring(pedido, 1, strlen(pedido) - 1));
-                  Traza("TRAZA - EL CURSOR DEL STACK ES: %d",
-                      programa->cursorStack);
-                  programa->sizeContextoActual =
-                      ((aux - (programa->cursorStack)) / VAR_STACK);
-                  Traza("TRAZA - EL TAMAÃ‘O DEL CONTEXTO ACTUAL ES: %d",
-                      programa->sizeContextoActual);
+                  programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
+                  Traza("TRAZA - EL CURSOR DEL STACK ES: %d",programa->cursorStack);
+                  programa->sizeContextoActual =((aux - (programa->cursorStack)) / VAR_STACK);
+                  Traza("TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
+
                   if (programa->sizeContextoActual > 0)
                     {
                       dictionary_clean(dicVariables); //limpio el dic de variables
@@ -1407,20 +1413,13 @@ prim_retornar(t_valor_variable retorno)
                     }
                 }
               else
-                {
-                  mensajeAbortar(
-                      string_substring(pedido, 1, strlen(pedido) - 1));
-                }
+                mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
             }
           else
-            {
-              mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
-            }
+            mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
         }
       else
-        {
-          mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
-        }
+        mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
     }
 
   free(pedido);
@@ -1434,16 +1433,15 @@ prim_imprimir(t_valor_variable valor_mostrar)
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA Imprimir");
 
   char *mensaje = string_itoa(IMPRIMIR);
-  string_append(&mensaje, "Variable ");
+  string_append(&mensaje, "VARIABLE ");
   string_append(&mensaje, variable_ref);
   string_append(&mensaje, ":");
   string_append(&mensaje, string_itoa(valor_mostrar)); //por el momento muestra valor
-  string_append(&mensaje, "-");
-  Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION",
-      valor_mostrar);
+  string_append(&mensaje, separador);
+  Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION",valor_mostrar);
   Enviar(socketKERNEL, mensaje);
 
-  variable_ref = "";
+  variable_ref = string_new();
 }
 
 t_valor_variable
@@ -1453,11 +1451,14 @@ prim_dereferenciar(t_puntero direccion_variable)
   t_valor_variable valor = 0;
   char* mensaje = malloc(1 * sizeof(char));
 
-  mensaje = getUMV((direccion_variable + 1), 0, 4);
-  if (string_starts_with(mensaje, "1")) //si comienza con 1 -> recibi un mensj valido
+  mensaje = getUMV(direccion_variable, 1, DIG_VAL_VAR);
+  if (string_starts_with(mensaje, bien)) //si comienza con 1 -> recibi un mensj valido
+    {
     valor = atoi(string_substring(mensaje, 1, (strlen(mensaje) - 1)));
-//si el msj no es valido, el get aborta el proceso
-  Traza("TRAZA - EL VALOR EXISTENTE EN ESA POSICION ES: %d", valor);
+    Traza("TRAZA - EL VALOR EXISTENTE EN ESA POSICION ES: %d", valor);
+    }
+  else
+    mensajeAbortar("ERROR AL LEER DIRECCION MEMORIA");
 
   return valor;
 }
@@ -1467,11 +1468,8 @@ prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA IrAlLabel");
 
-  programa->programCounter = metadata_buscar_etiqueta(etiqueta, etiquetas,
-      programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
-  Traza("TRAZA - EL VALOR DEL PROGRAM COUNTER ES: %d",
-      programa->programCounter);
-
+  programa->programCounter = metadata_buscar_etiqueta(etiqueta, etiquetas,programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
+  Traza("TRAZA - EL VALOR DEL PROGRAM COUNTER ES: %d",programa->programCounter);
 }
 
 t_puntero
@@ -1480,9 +1478,9 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable");
   t_puntero posicion = 0;
 
-  variable_ref = "";
+  variable_ref = string_new();
 
-  char* var = malloc(5 * sizeof(char));
+  char* var = malloc(DIG_NOM_VAR);
   var[0] = identificador_variable;
 
   //busco la posicion de la variable
@@ -1495,11 +1493,9 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
       variable_ref = var;
     }
   else
-    {
-      mensajeAbortar("LA VARIABLE NO EXISTE EN EL CONTEXTO DE EJECUCION");
-    }
-  free(var);
+    mensajeAbortar("LA VARIABLE NO EXISTE EN EL CONTEXTO DE EJECUCION");
 
+  free(var);
   return posicion; //devuelvo la posicion
 }
 
@@ -1511,36 +1507,27 @@ prim_definirVariable(t_nombre_variable identificador_variable)
   //la registra en el stack
   t_puntero pos_var_stack;
 
-  char* var = malloc(5 * sizeof(char));
+  char* var = malloc(DIG_NOM_VAR);
   var[0] = identificador_variable;
 
-  Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s",
-      string_substring(var, 0, 1));
-  pos_var_stack = programa->cursorStack
-      + (programa->sizeContextoActual * VAR_STACK);
+  Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s",string_substring(var, 0, 1));
+  pos_var_stack = programa->cursorStack + (programa->sizeContextoActual * VAR_STACK);
 
-  Traza("TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d",
-      pos_var_stack);
+  Traza("TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d",pos_var_stack);
 
   if ((dictionary_has_key(dicVariables, string_substring(var, 0, 1))) == false)
     {
       if ((setUMV(pos_var_stack, 0, 1, string_substring(var, 0, 1))) > 0)
         {
-          dictionary_put(dicVariables, string_substring(var, 0, 1),
-              (void*) pos_var_stack); //la registro en el dicc de variables
-
+          dictionary_put(dicVariables, string_substring(var, 0, 1),(void*) pos_var_stack); //la registro en el dicc de variables
           programa->sizeContextoActual++;
-          Traza("TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE");
+          Traza("%s","TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE");
         }
       else
-        {
-          mensajeAbortar("NO SE PUDO INGRESAR LA VARIABLE EN EL STACK");
-        }
+        mensajeAbortar("NO SE PUDO INGRESAR LA VARIABLE EN EL STACK");
     }
   else
-    {
-      mensajeAbortar("LA VARIABLE YA SE ENCUENTRA EN EL CONTEXTO ACTUAL");
-    }
+   mensajeAbortar("LA VARIABLE YA SE ENCUENTRA EN EL CONTEXTO ACTUAL");
 
   free(var);
   return pos_var_stack; //devuelvo la pos en el stack
@@ -1552,9 +1539,8 @@ prim_imprimirTexto(char* texto)
   Traza("%s", "TRAZA - EJECUTO PRIMITIVA ImprimirTexto");
   char *mensaje = string_itoa(IMPRIMIR);
   string_append(&mensaje, texto);
-  string_append(&mensaje, "-");
-  Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION",
-      texto);
+  string_append(&mensaje, separador);
+  Traza("TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION",texto);
   Enviar(socketKERNEL, mensaje);
 }
 
@@ -1583,15 +1569,12 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
   senial = string_substring(respuesta, 0, 1);
 
   if (string_equals_ignore_case(senial, "A"))
-    {
-      mensajeAbortar(string_substring(respuesta, 1, strlen(respuesta)));
-    }
+   mensajeAbortar(string_substring(respuesta, 1, strlen(respuesta)));
   else
     {
-      if (string_equals_ignore_case(senial, "0")) //senial==1 -> consegui el sem, senial==0 -> proceso bloqueado por sem
+      if (string_equals_ignore_case(senial, mal)) //senial==1 -> consegui el sem, senial==0 -> proceso bloqueado por sem
         {
-          Traza("%s",
-              "TRAZA - EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO");
+          Traza("%s","TRAZA - EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO");
           down = 1;
           quantum = 0;
           tengoProg = 0;
@@ -1599,13 +1582,12 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
         }
       else
         {
-          if (!(string_equals_ignore_case(senial, "1")))
+          if (!(string_equals_ignore_case(senial, bien)))
             kernelDesconectado();
           else
             Traza("%s", "TRAZA - EL PROCESO OBTUVO EL SEMAFORO");
         }
     }
-
 }
 
 void
@@ -1617,20 +1599,15 @@ prim_signal(t_nombre_semaforo identificador_semaforo)
 
   //el mensaje que le mando es  PedidoSemaforo
   string_append(&mensaje, identificador_semaforo);
-  Traza("TRAZA - SOLICITO AL KERNEL LIBERAR UNA INSTANCIA DEL SEMAFORO: %s",
-      identificador_semaforo);
+  Traza("TRAZA - SOLICITO AL KERNEL LIBERAR UNA INSTANCIA DEL SEMAFORO: %s",identificador_semaforo);
   Enviar(socketKERNEL, mensaje);
   Recibir(socketKERNEL, respuesta);
-  if (string_equals_ignore_case(string_substring(respuesta, 0, 1), "1")) //si es -1 lo controla recibir
-    {
+  if (string_equals_ignore_case(string_substring(respuesta, 0, 1), bien)) //si es -1 lo controla recibir
       Traza("%s", "TRAZA - LA SOLICITUD INGRESO CORRECTAMENTE");
-    }
   else
     {
-      if (string_equals_ignore_case(string_substring(respuesta, 0, 1), "0"))
-        {
-          mensajeAbortar("NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO");
-        }
+      if (string_equals_ignore_case(string_substring(respuesta, 0, 1), mal))
+       mensajeAbortar("NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO");
       else
         kernelDesconectado();
     }
