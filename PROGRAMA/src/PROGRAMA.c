@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 	for (index = 0; index < argc; index++)    //parametros
 		printf("  Parametro %d: %s\n", index, argv[index]);
 
-	//argv[0] es el path: /home/utnso/tp-2014/1c-garras/PROGRAMA/Debug/PROGRAMA/
+	//argv[0] es el path: /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA/
 	//argv[1] es el nombre del programa
 
 	//se creo el directorio ansisop en /usr/bin con sudo mkdir ansisop
