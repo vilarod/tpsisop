@@ -45,10 +45,10 @@
 //MSJ_FIN_DE_EJECUCION "F"
 
 //Tamaño buffer
-#define BUFFERSIZE 1024
+#define BUFFERSIZE 40000
 
 //Puerto
-#define PORT "6000"
+#define PORT 6000
 
 int main(int argc, char* argv[]) {
 	//log
@@ -170,7 +170,10 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 
 	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE ES H
 	log_trace(logger,"%s\n", "Envio handshake");
-	recibirDatos(sockfd, respuestaKERNEL);
+	if (recibirDatos(sockfd, respuestaKERNEL)==0 ){
+			ErrorFatal("Se desconecto el Kernel");
+		}
+
 	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
@@ -182,7 +185,9 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	string_append(&msj, programa);
 	log_trace(logger,"%s\n", "Envio programa");
 	enviarDatos(sockfd, msj); //envio el programa
-	recibirDatos(sockfd, respuestaKERNEL);
+	if (recibirDatos(sockfd, respuestaKERNEL)==0 ){
+			ErrorFatal("Se desconecto el Kernel");
+		}
 	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
@@ -191,7 +196,9 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	int finDeEjecucion;
 	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestaKERNEL);
 	while (finDeEjecucion != 0) {
-		recibirDatos(sockfd, respuestaKERNEL);
+		if (recibirDatos(sockfd, respuestaKERNEL)==0 ){
+				ErrorFatal("Se desconecto el Kernel");
+			}
 
 		finDeEjecucion = analizarSiEsFinDeEjecucion(respuestaKERNEL);
 
@@ -211,8 +218,8 @@ int imprimirRespuesta(char *mensaje) {
 
 	if ((string_starts_with(mensaje, "I"))
 			&& (string_ends_with(mensaje, "\0"))) {
-		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
 		log_trace(logger,"%s\n", "Se imprime el mensaje enviado por el kernel");
+		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
 	}
 
 	return 0;
@@ -228,8 +235,8 @@ int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 int analizarSiEsFinDeEjecucion(char *mensaje) {
 	if ((string_starts_with(mensaje, "F"))
 				&& (string_ends_with(mensaje, "\0"))) {
+		    log_trace(logger,"%s\n", "Se imprime el mensaje enviado por el kernel");
 			printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
-			log_trace(logger,"%s\n", "Se imprime el mensaje enviado por el kernel");
 			return 0;
 		}
 	else
@@ -278,8 +285,7 @@ int recibirDatos(int socket, char *buffer) {
 	//Nos ponemos a la escucha de las peticiones que nos envie el kernel
 	//aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-		Error(
-				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
+		ErrorFatal("Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
 
 	log_trace(logger,"RECIBO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
@@ -326,8 +332,7 @@ void ErrorFatal(char mensaje[], ...) {
 
 	char fin;
 
-	printf(
-			"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
+	printf("El programa se cerrara. Presione ENTER para finalizar la ejecución.");
 	scanf("%c", &fin);
 
 	exit(EXIT_FAILURE);
