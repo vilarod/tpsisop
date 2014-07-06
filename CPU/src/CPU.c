@@ -579,6 +579,7 @@ AbortarProceso()
       Enviar(socketKERNEL, mensaje);
       free(mensaje);
       motivo = string_new();
+      quantum=0;
     }
 
 }
@@ -725,7 +726,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
 void
 CambioProcesoActivo()
 {
-  if ((ab == 0) && (f == 0))
+  if ((ab == 0) && (f == 0) && (quantum > 0))
     {
       char respuesta[BUFFERSIZE];
       char *mensaje = string_itoa(CAMBIO_PROCESO);
@@ -919,7 +920,7 @@ destruirEstructuras()
 void
 RecuperarEtiquetas()
 {
-  if ((ab == 0) && (f == 0) && ((programa->sizeIndiceEtiquetas) > 0)) // Solo buscarÃ¡ los datos si el programa no se abortÃ³
+  if ((ab == 0) && (f == 0) && (quantum > 0) && ((programa->sizeIndiceEtiquetas) > 0)) // Solo buscarÃ¡ los datos si el programa no se abortÃ³
     {
       Traza("%s", "TRAZA - VOY A RECUPERAR EL INDICE DE ETIQUETAS");
 
@@ -953,7 +954,7 @@ RecuperarDicVariables()
   //si es 0 -> programa nuevo
   //si es >0 -> cant de variables a leer desde seg stack en umv
 
-  if ((ab == 0) && (f == 0)) // si el programa no fue abortado antes de entrar aca
+  if ((ab == 0) && (f == 0) && (quantum > 0)) // si el programa no fue abortado antes de entrar aca
     {
       int i;
       int aux = 0;
@@ -1159,7 +1160,9 @@ main(void)
         {
           tengoProg = RecibirProceso();
           if (tengoProg == (-2))
-            AbortarProceso();
+            {ab=1;
+            quantum=0;}
+
           if (tengoProg == (-3))
             ab = 0;
         }
@@ -1178,9 +1181,12 @@ main(void)
               parsearYejecutar(sentencia); //ejecuto sentencia
               esperarTiempoRetardo(); // espero X milisegundo para volver a ejecutar
               quantum--;
+              if (f==0)
+                {
               programa->programCounter++; //Incremento el PC
               Traza("TRAZA - LA PROXIMA INSTRUCCION ES: %d",
                   programa->programCounter);
+                }
             }
           else
             {
