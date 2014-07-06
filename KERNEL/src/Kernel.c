@@ -299,7 +299,8 @@ void *bloqueados_fnc(void *arg) {
 			Traza("Termino HIO programa: %d", auxBloq->idPCB->id);
 			auxPCB = auxBloq->idPCB;
 			auxBloq->idPCB = NULL;
-			imprimirListaBloqueadosPorUnDispositivoxTraza(HIO->listaBloqueados, HIO->nombre);
+			imprimirListaBloqueadosPorUnDispositivoxTraza(HIO->listaBloqueados,
+					HIO->nombre);
 			pthread_mutex_lock(&mutexReady);
 			list_add(listaReady, auxPCB);
 			imprimirListaReadyxTraza();
@@ -1315,7 +1316,7 @@ void *HiloOrquestadorDeCPU() {
 	int nbytesRecibidos;
 	char* buffer;
 	buffer = malloc(1 * sizeof(char));
-//	int id_CPU = 0;
+	t_CPU* auxCPU;
 	int tipo_Cliente = 0;
 
 // Es el encabezado del mensaje. Nos dice que acción se le está solicitando al UMV
@@ -1431,7 +1432,19 @@ void *HiloOrquestadorDeCPU() {
 						case MSJ_CPU_IMPRIMI:
 							//manda a la lista de imprimir
 							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
-								comandoImprimir(buffer, i);
+								pthread_mutex_lock(&mutexCPU);
+								auxCPU = encontrarCPU(i);
+								if (auxCPU != NULL ) {
+									if (estaProgActivo(auxCPU->idPCB->id)) {
+										pthread_mutex_unlock(&mutexCPU);
+										comandoImprimir(buffer, i);
+									} else {
+										EnviarDatos(i, "A");
+										pthread_mutex_unlock(&mutexCPU);
+									}
+								}else{
+									pthread_mutex_unlock(&mutexCPU);
+								}
 							} else {
 								Error("mensaje Recivido incorrecto");
 								EnviarDatos(i, "A");
@@ -1461,7 +1474,19 @@ void *HiloOrquestadorDeCPU() {
 							break;
 						case MSJ_CPU_OBTENERVALORGLOBAL:
 							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
-								comandoObtenerValorGlobar(buffer, i);
+								pthread_mutex_lock(&mutexCPU);
+								auxCPU = encontrarCPU(i);
+								if (auxCPU != NULL ) {
+									if (estaProgActivo(auxCPU->idPCB->id)) {
+										pthread_mutex_unlock(&mutexCPU);
+										comandoObtenerValorGlobar(buffer, i);
+									} else {
+										EnviarDatos(i, "A");
+										pthread_mutex_unlock(&mutexCPU);
+									}
+								}else{
+									pthread_mutex_unlock(&mutexCPU);
+								}
 							} else {
 								Error("mensaje Recivido incorrecto");
 								EnviarDatos(i, "A");
@@ -1469,7 +1494,19 @@ void *HiloOrquestadorDeCPU() {
 							break;
 						case MSJ_CPU_GRABARVALORGLOBAL:
 							if (mensajeEstaOK(buffer, nbytesRecibidos, 2)) {
-								comandoGrabarValorGlobar(buffer, i);
+								pthread_mutex_lock(&mutexCPU);
+								auxCPU = encontrarCPU(i);
+								if (auxCPU != NULL ) {
+									if (estaProgActivo(auxCPU->idPCB->id)) {
+										pthread_mutex_unlock(&mutexCPU);
+										comandoGrabarValorGlobar(buffer, i);
+									} else {
+										EnviarDatos(i, "A");
+										pthread_mutex_unlock(&mutexCPU);
+									}
+								}else{
+									pthread_mutex_unlock(&mutexCPU);
+								}
 							} else {
 								Error("mensaje Recivido incorrecto");
 								EnviarDatos(i, "A");
@@ -1487,7 +1524,19 @@ void *HiloOrquestadorDeCPU() {
 						case MSJ_CPU_WAIT:
 							//Resta la variable del semaforo
 							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
-								comandoWait(buffer, i);
+								pthread_mutex_lock(&mutexCPU);
+								auxCPU = encontrarCPU(i);
+								if (auxCPU != NULL ) {
+									if (estaProgActivo(auxCPU->idPCB->id)) {
+										pthread_mutex_unlock(&mutexCPU);
+										comandoWait(buffer, i);
+									} else {
+										EnviarDatos(i, "A");
+										pthread_mutex_unlock(&mutexCPU);
+									}
+								}else{
+									pthread_mutex_unlock(&mutexCPU);
+								}
 							} else {
 								Error("mensaje Recivido incorrecto");
 								EnviarDatos(i, "A");
@@ -1496,7 +1545,19 @@ void *HiloOrquestadorDeCPU() {
 						case MSJ_CPU_SIGNAL:
 							//suma la varariable del semaforo
 							if (mensajeEstaOK(buffer, nbytesRecibidos, 1)) {
-								comandoSignal(buffer, i);
+								pthread_mutex_lock(&mutexCPU);
+								auxCPU = encontrarCPU(i);
+								if (auxCPU != NULL ) {
+									if (estaProgActivo(auxCPU->idPCB->id)) {
+										pthread_mutex_unlock(&mutexCPU);
+										comandoSignal(buffer, i);
+									} else {
+										EnviarDatos(i, "A");
+										pthread_mutex_unlock(&mutexCPU);
+									}
+								}else{
+									pthread_mutex_unlock(&mutexCPU);
+								}
 							} else {
 								Error("mensaje Recivido incorrecto");
 								EnviarDatos(i, "A");
@@ -1685,7 +1746,8 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		if (auxHIO != NULL ) {
 			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
 			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
-			imprimirListaBloqueadosPorUnDispositivoxTraza(auxHIO->listaBloqueados, auxHIO->nombre);
+			imprimirListaBloqueadosPorUnDispositivoxTraza(
+					auxHIO->listaBloqueados, auxHIO->nombre);
 			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
 			semsig(&(auxHIO->bloqueadosCont));
 			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
@@ -2142,7 +2204,7 @@ void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre) 
 	free(cadena);
 }
 
-int estaProgActivo(int idprog){
+int estaProgActivo(int idprog) {
 	int _is_Prog_Act(t_socket *p) {
 		return encontrarInt(p->socket, idprog);
 	}
