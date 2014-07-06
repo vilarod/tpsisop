@@ -1097,14 +1097,14 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 									ceros1 = (4 - cantidadDigitos(comienzo));
 									ceros2 = (4 - cantidadDigitos(tamanio));
 									//LLenar de 0 el start
-									while (j != ceros1) {
+									while (j < ceros1) {
 										string_append(&escribirCodex, "0");
 										j++;
 									}
 									string_append(&escribirCodex,
 											string_itoa(comienzo));
 									//Llenar de ceros el offset
-									while (h != ceros2) {
+									while (h < ceros2) {
 										string_append(&escribirCodex, "0");
 										h++;
 									}
