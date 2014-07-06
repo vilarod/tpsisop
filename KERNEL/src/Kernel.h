@@ -325,6 +325,15 @@ void borrarPCBenCPU(int idCPU);
 void mandarAFinProgramaPorBajaCPU(int socket);
 void borrarSocket(int socket);
 
+//imprimir Listas
+void imprimirListaVarGlobalesxTraza();
+void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista,char* nombre );
+void imprimirListaReadyxTraza();
+void imprimirListaFinxTraza();
+void imprimirListaNewxTraza();
+void imprimirListaCPUxTraza();
+void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre);
+
 //Globales
 int socketumv;
 int ImprimirTrazaPorConsola = 1;

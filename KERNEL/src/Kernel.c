@@ -143,13 +143,16 @@ void *FinEjecucion(void *arg) {
 	//free de toodo
 	while (1) {
 		semwait(&finalizarCont);
+		pthread_mutex_lock(&mutexFIN);
 		if (list_size(listaFin) > 0) {
-			auxList = list_take(listaFin, 1);
+			auxList = list_take_and_remove(listaFin, 1);
 //		auxFinal = list_get(auxList, 0);
 			//Mensajes de destruir Segmento aqui,
 			//Enviar mensaje a programa que finalizo
 //		final_destroy(auxFinal); para mi esta mal
 			list_clean_and_destroy_elements(auxList, (void*) final_destroy);
+			imprimirListaFinxTraza();
+			pthread_mutex_unlock(&mutexFIN);
 		}
 
 		semsig(&multiCont);
@@ -164,7 +167,7 @@ void *IMPRIMIRConsola(void *arg) {
 		semwait(&imprimirCont);
 		if (list_size(listaImprimir) > 0) {
 			pthread_mutex_lock(&mutexImprimir);
-			auxList = list_take(listaImprimir, 1);
+			auxList = list_take_and_remove(listaImprimir, 1);
 			pthread_mutex_unlock(&mutexImprimir);
 			auxImp = list_get(auxList, 0);
 			char* mensaje = string_new();
@@ -183,7 +186,6 @@ void *PCP(void *arg) {
 
 	/// MAGIA DE DANI ///
 
-	listCPU = list_create();
 	//crear hilo de escucha CPU
 	pthread_t plpCPU, plpReady, plpBloqueado;
 	pthread_create(&plpCPU, NULL, HiloOrquestadorDeCPU, NULL );
@@ -232,6 +234,10 @@ void *moverEjecutar(void *arg) {
 				auxcpu->libre = 1;
 				if (edatos > 0) {
 					list_remove(listaReady, 0);
+					imprimirListaReadyxTraza();
+					imprimirListaCPUxTraza();
+				} else {
+					auxcpu->idPCB = NULL;
 				}
 				list_clean(auxList);
 			}
@@ -293,8 +299,10 @@ void *bloqueados_fnc(void *arg) {
 			Traza("Termino HIO programa: %d", auxBloq->idPCB->id);
 			auxPCB = auxBloq->idPCB;
 			auxBloq->idPCB = NULL;
+			imprimirListaBloqueadosPorUnDispositivoxTraza(HIO->listaBloqueados, HIO->nombre);
 			pthread_mutex_lock(&mutexReady);
 			list_add(listaReady, auxPCB);
+			imprimirListaReadyxTraza();
 			pthread_mutex_unlock(&mutexReady);
 			semsig(&readyCont);
 			list_clean_and_destroy_elements(auxLista,
@@ -322,11 +330,13 @@ void *moverReadyDeNew(void *arg) {
 			auxNew = list_get(auxList, 0);
 			auxPCB = auxNew->idPCB;
 			auxNew->idPCB = NULL;
+			Traza("Moviendo a ready programa: %d", auxPCB->id);
 			pthread_mutex_lock(&mutexReady);
 			list_add(listaReady, auxPCB);
+			imprimirListaReadyxTraza();
 			pthread_mutex_unlock(&mutexReady);
-			Traza("Moviendo a ready programa: %d", auxPCB->id);
 			list_clean_and_destroy_elements(auxList, (void*) new_destroy);
+			imprimirListaNewxTraza();
 			semsig(&readyCont);
 		} else {
 			pthread_mutex_unlock(&mutexNew);
@@ -715,12 +725,7 @@ void llenarVarGlobConfig() {
 	}
 	free(sub1);
 	free(sub2);
-	t_varGlobal *auxG;
-	for (sfin = 0; sfin < list_size(listaVarGlobal); sfin++) {
-		auxG = list_get(listaVarGlobal, sfin);
-		Traza("Variable Global: %s valor: %d", (char *) auxG->nombre,
-				auxG->valor);
-	}
+	imprimirListaVarGlobalesxTraza();
 }
 
 void conectarAUMV() {
@@ -1125,8 +1130,10 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
-
+	pthread_mutex_lock(&mutexNew);
 	list_add(listaNew, new_create(&(PCBAUX), pesito));
+	imprimirListaNewxTraza();
+	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
 	return 1;
 }
@@ -1411,6 +1418,7 @@ void *HiloOrquestadorDeCPU() {
 						}
 						pthread_mutex_lock(&mutexCPU);
 						mandarAFinProgramaPorBajaCPU(i);
+						imprimirListaCPUxTraza();
 						pthread_mutex_unlock(&mutexCPU);
 						close(i); // bye!
 						FD_CLR(i, &master); // eliminar del conjunto maestro
@@ -1471,6 +1479,7 @@ void *HiloOrquestadorDeCPU() {
 							//elimina cpu
 							pthread_mutex_lock(&mutexCPU);
 							eliminarCpu(i);
+							imprimirListaCPUxTraza();
 							pthread_mutex_lock(&mutexCPU);
 							close(i); // bye!
 							FD_CLR(i, &master); // eliminar del conjunto maestro
@@ -1634,11 +1643,12 @@ void comandoLiberar(int socket) {
 	pthread_mutex_lock(&mutexCPU);
 	t_CPU* aux = encontrarCPU(socket);
 	if (aux != NULL ) {
+		Traza("Se librera CPU: %d", aux->idCPU);
 		aux->libre = 0;
+		imprimirListaCPUxTraza();
 	}
 	pthread_mutex_unlock(&mutexCPU);
 	semsig(&CPUCont);
-	Traza("Se librera CPU: %d", aux->idCPU);
 }
 
 void eliminarCpu(int idcpu) {
@@ -1663,6 +1673,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		Traza("lo deseareliza %d", pos);
 		pthread_mutex_lock(&mutexReady);
 		list_add(listaReady, auxPCB);
+		imprimirListaReadyxTraza();
 		pthread_mutex_unlock(&mutexReady);
 		semsig(&readyCont);
 		Traza("Final Quamtum mover a ready. Programa: %d", auxPCB->id);
@@ -1674,6 +1685,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		if (auxHIO != NULL ) {
 			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
 			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
+			imprimirListaBloqueadosPorUnDispositivoxTraza(auxHIO->listaBloqueados, auxHIO->nombre);
 			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
 			semsig(&(auxHIO->bloqueadosCont));
 			Traza("Final Quamtum programa: %d. Pide Dispositivo: %s",
@@ -1683,6 +1695,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin,
 					final_create(auxPCB, 1, "Dispositivo no encontrado"));
+			imprimirListaFinxTraza();
 			pthread_mutex_unlock(&mutexFIN);
 			semsig(&finalizarCont);
 			semsig(&multiCont);
@@ -1695,13 +1708,16 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		if (auxSem != NULL ) {
 			if (auxSem->valor < 0) {
 				//Bloquear Programa por semaforo
-				list_add(auxSem->listaSem, auxPCB);
 				Traza("Final Quamtum programa: %d. bloqueado por semaforo: %s",
 						auxPCB->id, (char*) auxSem->nombre);
+				list_add(auxSem->listaSem, auxPCB);
+				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
+						auxSem->nombre);
 			} else {
 				//Desbloquar Programa
 				pthread_mutex_lock(&mutexReady);
 				list_add(listaReady, auxPCB);
+				imprimirListaReadyxTraza();
 				pthread_mutex_unlock(&mutexReady);
 				semsig(&readyCont);
 			}
@@ -1709,6 +1725,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin,
 					final_create(auxPCB, 1, "semaforo no encontrado"));
+			imprimirListaFinxTraza();
 			pthread_mutex_unlock(&mutexFIN);
 			semsig(&finalizarCont);
 			semsig(&multiCont);
@@ -1738,7 +1755,7 @@ void comandoWait(char* buffer, int socket) {
 		n = EnviarDatos(socket, "A");
 	}
 	if (n < 0) {
-		//TODO error enviar datos
+		//error enviar datos
 	}
 	pthread_mutex_unlock(&mutexSemaforos);
 }
@@ -1780,11 +1797,14 @@ void comandoSignal(char* buffer, int socket) {
 		if (auxSem->valor == 0) {
 			cant = list_size(auxSem->listaSem);
 			if (cant > 0) {
-				pthread_mutex_lock(&mutexReady);
-				list_add_all(listaReady, auxSem->listaSem);
-				pthread_mutex_unlock(&mutexReady);
 				Traza("Desbloquea programas por semaforo: %s",
 						(char*) auxSem->nombre);
+				pthread_mutex_lock(&mutexReady);
+				list_add_all(listaReady, auxSem->listaSem);
+				imprimirListaReadyxTraza();
+				pthread_mutex_unlock(&mutexReady);
+				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
+						auxSem->nombre);
 			}
 			for (i = 0; i < cant; i++) {
 				semsig(&readyCont);
@@ -1794,7 +1814,7 @@ void comandoSignal(char* buffer, int socket) {
 		n = EnviarDatos(socket, "0");
 	}
 	if (n < 0) {
-		//TODO error enviar datos
+		//error enviar datos
 	}
 	pthread_mutex_unlock(&mutexSemaforos);
 }
@@ -1804,10 +1824,11 @@ void comandoFinalizar(int socket, char* buffer) {
 	int pos = 1;
 	auxPCB = desearilizar_PCB(buffer, &pos);
 //Pasa a estado fin
+	Traza("Mandar a estado fin. programa: %d. buffer: ", auxPCB->id);
 	pthread_mutex_lock(&mutexFIN);
 	list_add(listaFin, final_create(auxPCB, 0, "Finalizado OK"));
+	imprimirListaFinxTraza();
 	pthread_mutex_unlock(&mutexFIN);
-	Traza("Mandar a estado fin. programa: %d. buffer: ", auxPCB->id);
 	semsig(&finalizarCont);
 	semsig(&multiCont);
 //Borra el viejo PCB en la lista de CPU
@@ -1914,7 +1935,7 @@ void comandoObtenerValorGlobar(char* buffer, int socket) {
 		if (ndatos > 0) {
 			Traza("Envio CPU: %d, Respuesta: %s", socket, (char *) respuesta);
 		} else {
-			//TODO falla al enviar
+			//falla al enviar
 		}
 	} else {
 		ndatos = EnviarDatos(socket, "0");
@@ -1943,8 +1964,9 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 		auxVar->valor = valor;
 		ndatos = EnviarDatos(socket, "1");
 		Traza("Se guardo %d en variable: %s", valor, (char *) variable);
+		imprimirListaVarGlobalesxTraza();
 		if (ndatos < 0) {
-			//TODO error al enviar
+			// error al enviar
 		}
 	} else {
 		Traza("Variable: %s no encontrada", (char*) variable);
@@ -1963,6 +1985,7 @@ void comandoAbortar(char* buffer, int socket) {
 		auxCPU->idPCB = NULL;
 		pthread_mutex_lock(&mutexFIN);
 		list_add(listaFin, final_create(auxPCB, 1, msj));
+		imprimirListaFinxTraza();
 		pthread_mutex_unlock(&mutexFIN);
 		semsig(&finalizarCont);
 		semsig(&multiCont);
@@ -1977,6 +2000,7 @@ void mandarAFinProgramaPorBajaCPU(int socket) {
 		if (auxPCB != NULL ) {
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin, final_create(auxPCB, 1, "Se cayo CPU"));
+			imprimirListaFinxTraza();
 			pthread_mutex_unlock(&mutexFIN);
 			semsig(&finalizarCont);
 			semsig(&multiCont);
@@ -2013,4 +2037,107 @@ int mensajeEstaOK(char* buffer, int longitud, int cantidad) {
 	} else {
 		return 0;
 	}
+}
+
+void imprimirListaVarGlobalesxTraza() {
+	char* cadena = string_new();
+	int cant = list_size(listaVarGlobal), i;
+	t_varGlobal* auxGlo;
+	for (i = 0; i < cant; i++) {
+		auxGlo = list_get(listaVarGlobal, i);
+		string_append(&cadena, " ");
+		string_append(&cadena, auxGlo->nombre);
+		string_append(&cadena, ",");
+		string_append(&cadena, string_itoa(auxGlo->valor));
+	}
+	Traza("Lista var Globales(cant %d):%s", cant, cadena);
+	free(cadena);
+}
+
+void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre) {
+	char* cadena = string_new();
+	int cant = list_size(lista), i;
+	PCB* auxPCB;
+	for (i = 0; i < cant; i++) {
+		auxPCB = list_get(lista, i);
+		string_append(&cadena, " ");
+		string_append(&cadena, string_itoa(auxPCB->id));
+	}
+	Traza("Lista bloq por sem %s(cant %d):%s", (char*) nombre, cant,
+			(char*) cadena);
+	free(cadena);
+}
+
+void imprimirListaReadyxTraza() {
+	char* cadena = string_new();
+	int cant = list_size(listaReady), i;
+	PCB* auxPCB;
+	for (i = 0; i < cant; i++) {
+		auxPCB = list_get(listaReady, i);
+		string_append(&cadena, " ");
+		string_append(&cadena, string_itoa(auxPCB->id));
+	}
+	Traza("Lista Ready(cant %d):%s", cant, (char*) cadena);
+	free(cadena);
+}
+
+void imprimirListaFinxTraza() {
+	char* cadena = string_new();
+	int cant = list_size(listaFin), i;
+	t_Final* auxFin;
+	for (i = 0; i < cant; i++) {
+		auxFin = list_get(listaFin, i);
+		string_append(&cadena, " ");
+		string_append(&cadena, string_itoa(auxFin->idPCB->id));
+		string_append(&cadena, ",");
+		string_append(&cadena, string_itoa(auxFin->finalizo));
+	}
+	Traza("Lista Fin(cant %d):%s", cant, (char*) cadena);
+	free(cadena);
+}
+
+void imprimirListaNewxTraza() {
+	char* cadena = string_new();
+	int cant = list_size(listaNew), i;
+	t_New* auxNew;
+	for (i = 0; i < cant; i++) {
+		auxNew = list_get(listaNew, i);
+		string_append(&cadena, " ");
+		string_append(&cadena, string_itoa(auxNew->idPCB->id));
+		string_append(&cadena, ",");
+		string_append(&cadena, string_itoa(auxNew->peso));
+	}
+	Traza("Lista New(cant %d):%s", cant, (char*) cadena);
+	free(cadena);
+}
+
+void imprimirListaCPUxTraza() {
+	char* cadena = string_new();
+	int cant = list_size(listCPU), i;
+	t_CPU* auxCPU;
+	for (i = 0; i < cant; i++) {
+		auxCPU = list_get(listCPU, i);
+		string_append(&cadena, " ");
+		string_append(&cadena, string_itoa(auxCPU->idCPU));
+		string_append(&cadena, ",");
+		string_append(&cadena, string_itoa(auxCPU->libre));
+	}
+	Traza("Lista CPU(cant %d):%s", cant, (char*) cadena);
+	free(cadena);
+}
+
+void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre) {
+	char* cadena = string_new();
+	int cant = list_size(lista), i;
+	t_bloqueado* auxBloq;
+	for (i = 0; i < cant; i++) {
+		auxBloq = list_get(lista, i);
+		string_append(&cadena, " ");
+		string_append(&cadena, string_itoa(auxBloq->idPCB->id));
+		string_append(&cadena, ",");
+		string_append(&cadena, string_itoa(auxBloq->tiempo));
+	}
+	Traza("Lista bloq por disp %s(cant %d):%s", (char*) nombre, cant,
+			(char*) cadena);
+	free(cadena);
 }
