@@ -68,10 +68,10 @@ t_log* logger;
 
 int main(int argv, char** argc) {
 	//log
-		char* temp_file = tmpnam(NULL );
+	char* temp_file = tmpnam(NULL );
 
-		logger = log_create(temp_file, "KERNEL", ImprimirTrazaPorConsola,
-				LOG_LEVEL_TRACE);
+	logger = log_create(temp_file, "KERNEL", ImprimirTrazaPorConsola,
+			LOG_LEVEL_TRACE);
 
 	//Obtener puertos e ip de la umv
 
@@ -147,7 +147,7 @@ void *PLP(void *arg) {
 	return NULL ;
 }
 void *FinEjecucion(void *arg) {
-//	t_Final* auxFinal;
+	t_Final* auxFinal;
 	t_list* auxList;
 	//free de toodo
 	while (1) {
@@ -155,10 +155,32 @@ void *FinEjecucion(void *arg) {
 		pthread_mutex_lock(&mutexFIN);
 		if (list_size(listaFin) > 0) {
 			auxList = list_take_and_remove(listaFin, 1);
-//		auxFinal = list_get(auxList, 0);
+
+			auxFinal = list_get(auxList, 0);
+			int digitosID = cantidadDigitos(auxFinal->idPCB->id);
+
+			char respuestaumv[BUFFERSIZE];
+
+			char* mensaje2 = string_new();
+			string_append(&mensaje2, string_itoa(6));
+			string_append(&mensaje2, string_itoa(digitosID));
+			string_append(&mensaje2, string_itoa(auxFinal->idPCB->id));
+			EnviarDatos(socketumv, mensaje2); // 6 + digitosID + id
+			if (RecibirDatos(socketumv, respuestaumv) <= 0) {
+				ErrorFatal("Error en la comunicacion con la umv");
+			}
+			if (analisarRespuestaUMV(respuestaumv)) {
+				char* mensaje1 = string_new();
+				string_append(&mensaje1, "F");
+				string_append(&mensaje1, "I");
+				string_append(&mensaje1, auxFinal->mensaje);
+				string_append(&mensaje1, "\0");
+				EnviarDatos(auxFinal->idPCB->id, mensaje1);
+			}
 			//Mensajes de destruir Segmento aqui,
 			//Enviar mensaje a programa que finalizo
 //		final_destroy(auxFinal); para mi esta mal
+
 			list_clean_and_destroy_elements(auxList, (void*) final_destroy);
 			imprimirListaFinxTraza();
 			pthread_mutex_unlock(&mutexFIN);
