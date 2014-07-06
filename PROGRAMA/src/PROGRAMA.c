@@ -166,45 +166,45 @@ void conectarAKERNEL(char *archivo) { //el parametro es el programa
 	}
 }
 int hacerhandshakeKERNEL(int sockfd, char *programa) {
-	char respuestahandshake[BUFFERSIZE];
+	char respuestaKERNEL[BUFFERSIZE];
 
 	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE ES H
 	traza("%s\n", "Envio handshake");
-	recibirDatos(sockfd, respuestahandshake);
-	if (respuestahandshake[0] == 'N') {
+	recibirDatos(sockfd, respuestaKERNEL);
+	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
 	} else
 		traza("%s\n", "Kernel recibio hanshake");
-	analizarRespuestaKERNEL(respuestahandshake);
+	analizarRespuestaKERNEL(respuestaKERNEL);
 	char* msj = string_new();
 	string_append(&msj, "E");
 	string_append(&msj, programa);
 	traza("%s\n", "Envio programa");
 	enviarDatos(sockfd, msj); //envio el programa
-	recibirDatos(sockfd, respuestahandshake);
-	if (respuestahandshake[0] == 'N') {
+	recibirDatos(sockfd, respuestaKERNEL);
+	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
 	}
 	traza("%s", "Kernel recibio el programa");
 	int finDeEjecucion;
-	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestahandshake);
+	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestaKERNEL);
 	while (finDeEjecucion != 0) {
-		recibirDatos(sockfd, respuestahandshake);
+		recibirDatos(sockfd, respuestaKERNEL);
 
-		finDeEjecucion = analizarSiEsFinDeEjecucion(respuestahandshake);
+		finDeEjecucion = analizarSiEsFinDeEjecucion(respuestaKERNEL);
 
 		if (finDeEjecucion != 0) {
-			analizarRespuestaKERNEL(respuestahandshake);
-			imprimirRespuesta(respuestahandshake);
+			analizarRespuestaKERNEL(respuestaKERNEL);
+			imprimirRespuesta(respuestaKERNEL);
 			enviarConfirmacionDeRecepcionDeDatos(sockfd);
 		}
 
 	}
 	txt_write_in_stdout("Fin de ejecucion\n");
 
-	return analizarRespuestaKERNEL(respuestahandshake);
+	return analizarRespuestaKERNEL(respuestaKERNEL);
 
 }
 int imprimirRespuesta(char *mensaje) {
@@ -228,7 +228,7 @@ int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 int analizarSiEsFinDeEjecucion(char *mensaje) {
 	if ((string_starts_with(mensaje, "F"))
 				&& (string_ends_with(mensaje, "\0"))) {
-			printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
+			printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 2)));
 			traza("%s\n", "Se imprime el mensaje enviado por el kernel");
 			return 0;
 		}

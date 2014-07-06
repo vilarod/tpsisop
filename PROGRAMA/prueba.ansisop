@@ -1,0 +1,7 @@
+#!/usr/bin/ansisop
+	:inicio
+	a=8
+       print !variable
+	!variable = 10
+	!variable = a
+	goto inicio
