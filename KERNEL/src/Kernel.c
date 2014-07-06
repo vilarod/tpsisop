@@ -177,6 +177,7 @@ void *FinEjecucion(void *arg) {
 				string_append(&mensaje1, "\0");
 				EnviarDatos(auxFinal->idPCB->id, mensaje1);
 			}
+			Traza("%s%d , MSJ= %s\n","Finalizo el programa:",auxFinal->idPCB->id, auxFinal->mensaje);
 			//Mensajes de destruir Segmento aqui,
 			//Enviar mensaje a programa que finalizo
 //		final_destroy(auxFinal); para mi esta mal
