@@ -1,7 +1,8 @@
 #!/usr/bin/ansisop
-	:inicio
-	a=8
-       print !variable
-	!variable = 10
-	!variable = a
-	goto inicio
+begin
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
+        print a
+end

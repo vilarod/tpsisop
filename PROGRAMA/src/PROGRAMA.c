@@ -52,9 +52,9 @@
 
 int main(int argc, char* argv[]) {
 	//log
-	char* temp_file = tmpnam(NULL );
+	//char* temp_file = tmpnam(NULL );
 
-	logger = log_create(temp_file, "PROGRAMA", ImprimirTrazaPorConsola,
+	logger = log_create("Log_PROGRAMA.txt", "PROGRAMA", ImprimirTrazaPorConsola,
 			LOG_LEVEL_TRACE);
 
 	int index;    //para parametros
@@ -80,14 +80,14 @@ int main(int argc, char* argv[]) {
 	if (string_starts_with(argv[1], begin))
 		nombreArchivo = string_substring_from(argv[1], 2); //nombre del archivo sin ./ adelante
 	else
-		traza("%s\n", "Error al ingresar el archivo");
+		log_trace(logger, "Error al ingresar el archivo");
 	printf("nombre archivo: %s\n", nombreArchivo);
 	file = fopen(nombreArchivo, "r");    //abre el archivo en modo read
 	if (file == NULL ) {
-		traza("No existe el archivo %s\n", argv[1]); //No existe el archivo
+		log_trace(logger,"No existe el archivo %s\n", argv[1]); //No existe el archivo
 		exit(1);
 	}
-	traza("Abre el archivo:%s\n", argv[1]);
+	log_trace(logger,"Abre el archivo:%s\n", argv[1]);
 	free(nombreArchivo);
 	nombreArchivo = NULL;
 
@@ -98,13 +98,13 @@ int main(int argc, char* argv[]) {
 	contents = (char*) malloc(sizeof(char) * len + 1); //para guardar lo que lee
 	contents[len] = '\0'; // para indicar que termina el texto
 	if (contents == NULL ) {
-		traza("%s\n", "Error no hay memoria disponible");
+		log_trace(logger,"%s\n", "Error no hay memoria disponible");
 		exit(1);
 	}
 
 	bytesRead = fread(contents, sizeof(char), len, file); //bytes leidos
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
-	traza("El programa en el script es:\n %s\n", contents);
+	log_trace(logger,"El programa en el script es:\n %s\n", contents);
 
 	txt_close_file(file); //cierro el archivo
 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 
 	programa = string_new(); //aca guardo el programa que envio al kernel
 	programa = string_substring(contents, final, strlen(contents) - final);
-	traza("El programa sin la primer linea:\n %s\n", programa);
+	log_trace(logger,"El programa sin la primer linea:\n %s\n", programa);
 	printf("%s", programa); //verifico que tengo el programa sin la primer linea
 	printf("\n");
 
@@ -155,7 +155,7 @@ char* obtenerIpKERNEL() {
 }
 
 void conectarAKERNEL(char *archivo) { //el parametro es el programa
-	traza("%s\n", "Intentando conectar a kernel");
+	log_trace(logger,"%s\n", "Intentando conectar a kernel");
 	int puerto = obtenerPuertoKERNEL(); //descomentar para la prueba en laboratorio
 	char *IP = obtenerIpKERNEL(); //idem anterior
 	int soquete = conexionConSocket(puerto, IP); // para la prueba en laboratorio
@@ -169,25 +169,25 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	char respuestaKERNEL[BUFFERSIZE];
 
 	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE ES H
-	traza("%s\n", "Envio handshake");
+	log_trace(logger,"%s\n", "Envio handshake");
 	recibirDatos(sockfd, respuestaKERNEL);
 	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
 	} else
-		traza("%s\n", "Kernel recibio hanshake");
+		log_trace(logger,"%s\n", "Kernel recibio hanshake");
 	analizarRespuestaKERNEL(respuestaKERNEL);
 	char* msj = string_new();
 	string_append(&msj, "E");
 	string_append(&msj, programa);
-	traza("%s\n", "Envio programa");
+	log_trace(logger,"%s\n", "Envio programa");
 	enviarDatos(sockfd, msj); //envio el programa
 	recibirDatos(sockfd, respuestaKERNEL);
 	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
 	}
-	traza("%s", "Kernel recibio el programa");
+	log_trace(logger,"%s", "Kernel recibio el programa");
 	int finDeEjecucion;
 	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestaKERNEL);
 	while (finDeEjecucion != 0) {
@@ -212,7 +212,7 @@ int imprimirRespuesta(char *mensaje) {
 	if ((string_starts_with(mensaje, "I"))
 			&& (string_ends_with(mensaje, "\0"))) {
 		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
-		traza("%s\n", "Se imprime el mensaje enviado por el kernel");
+		log_trace(logger,"%s\n", "Se imprime el mensaje enviado por el kernel");
 	}
 
 	return 0;
@@ -221,15 +221,15 @@ int imprimirRespuesta(char *mensaje) {
 int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 
 	enviarDatos(sockfd, CONFIRMACION);
-	traza("%s\n", "Envio confirmacion de recepcion de datos");
+	log_trace(logger,"%s\n", "Envio confirmacion de recepcion de datos");
 	return 0;
 }
 
 int analizarSiEsFinDeEjecucion(char *mensaje) {
 	if ((string_starts_with(mensaje, "F"))
 				&& (string_ends_with(mensaje, "\0"))) {
-			printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 2)));
-			traza("%s\n", "Se imprime el mensaje enviado por el kernel");
+			printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
+			log_trace(logger,"%s\n", "Se imprime el mensaje enviado por el kernel");
 			return 0;
 		}
 	else
@@ -282,7 +282,7 @@ int recibirDatos(int socket, char *buffer) {
 				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
 
-	traza("RECIBO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
+	log_trace(logger,"RECIBO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
 	return bytecount;
 }
 
@@ -292,7 +292,7 @@ int enviarDatos(int socket, void *buffer) {
 	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
 		Error("No puedo enviar información al kernel. Socket: %d\n", socket);
 
-	traza("ENVIO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
+	log_trace(logger,"ENVIO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
 
 	return bytecount;
 }
@@ -343,17 +343,17 @@ void Error(const char* mensaje, ...) {
 	va_end(arguments);
 
 }
-void traza(const char* mensaje, ...) {
-	if (ImprimirTrazaPorConsola) {
-		char* nuevo;
-		va_list arguments;
-		va_start(arguments, mensaje);
-		nuevo = string_from_vformat(mensaje, arguments);
-
-		//printf("TRAZA--> %s \n", nuevo);
-		log_trace(logger, "%s", nuevo);
-
-		va_end(arguments);
-
-	}
-}
+//void traza(const char* mensaje, ...) {
+//	if (ImprimirTrazaPorConsola) {
+//		char* nuevo;
+//		va_list arguments;
+//		va_start(arguments, mensaje);
+//		nuevo = string_from_vformat(mensaje, arguments);
+//
+//		//printf("TRAZA--> %s \n", nuevo);
+//		log_trace(logger, "%s", nuevo);
+//
+//		va_end(arguments);
+//
+//	}
+//}
