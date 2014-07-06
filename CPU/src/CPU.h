@@ -111,8 +111,6 @@ kernelDesconectado();
 void
 ErrorFatal(const char* mensaje, ...);
 void
-Traza(const char* mensaje, ...);
-void
 Error(const char* mensaje, ...);
 char*
 RecibirDatos(int socket, char *buffer, int *bytesRecibidos);
