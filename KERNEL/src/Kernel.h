@@ -357,3 +357,4 @@ pthread_mutex_t mutexImprimir = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutexSocketProgramas = PTHREAD_MUTEX_INITIALIZER;
 
 int cantidadDigitos(int num);
+//char *crearSegmento(int digitosID, int id, int digitosSize, int size);

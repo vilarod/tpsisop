@@ -963,6 +963,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 				//Preparamos mensaje para Tamaño Stack
 				char* stack = string_new();
 				int digitosStack = cantidadDigitos(ObtenerTamanioStack());
+//				crearSegmento(digitosID,id,digitosStack, ObtenerTamanioStack());
 				string_append(&stack, string_itoa(5));
 				string_append(&stack, string_itoa(digitosID));
 				string_append(&stack, string_itoa(id));
@@ -1025,7 +1026,10 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 							string_append(&escribirEtiq,
 									metadataprograma->etiquetas);
 							EnviarDatos(socketumv, escribirEtiq);
-							RecibirDatos(socketumv, respuestaumv6);
+							if (RecibirDatos(socketumv, respuestaumv6) <= 0) {
+								ErrorFatal(
+										"Error en la comunicacion con la umv");
+							}
 						} else
 							respuestaumv6[0] = '1';
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
@@ -1108,7 +1112,11 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 											string_itoa(tamanio));
 								}
 								EnviarDatos(socketumv, escribirCodex);
-								RecibirDatos(socketumv, respuestaumv8);
+								if (RecibirDatos(socketumv, respuestaumv8)
+										<= 0) {
+									ErrorFatal(
+											"Error en la comunicacion con la umv");
+								}
 								if (analisarRespuestaUMV(respuestaumv8) == 0) {
 									return 0;
 								}
@@ -1139,6 +1147,20 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	return 1;
 }
 
+//char* crearSegmento(int digitosID, int id, int digitosSize, int size) {
+//	char* mensaje = string_new();
+//	char respuestaumv[BUFFERSIZE];
+//	string_append(&mensaje, string_itoa(5));
+//	string_append(&mensaje, string_itoa(digitosID));
+//	string_append(&mensaje, string_itoa(id));
+//	string_append(&mensaje, string_itoa(digitosSize));
+//	string_append(&mensaje, string_itoa(size));
+//	EnviarDatos(socketumv, mensaje);
+//	if (RecibirDatos(socketumv, respuestaumv) <= 0) {
+//		ErrorFatal("Error en la comunicacion con la umv");
+//	}
+//	return respuestaumv;
+//}
 int cantidadDigitos(int num) {
 	int contador = 1;
 
@@ -1442,7 +1464,7 @@ void *HiloOrquestadorDeCPU() {
 										EnviarDatos(i, "A");
 										pthread_mutex_unlock(&mutexCPU);
 									}
-								}else{
+								} else {
 									pthread_mutex_unlock(&mutexCPU);
 								}
 							} else {
@@ -1484,7 +1506,7 @@ void *HiloOrquestadorDeCPU() {
 										EnviarDatos(i, "A");
 										pthread_mutex_unlock(&mutexCPU);
 									}
-								}else{
+								} else {
 									pthread_mutex_unlock(&mutexCPU);
 								}
 							} else {
@@ -1504,7 +1526,7 @@ void *HiloOrquestadorDeCPU() {
 										EnviarDatos(i, "A");
 										pthread_mutex_unlock(&mutexCPU);
 									}
-								}else{
+								} else {
 									pthread_mutex_unlock(&mutexCPU);
 								}
 							} else {
@@ -1534,7 +1556,7 @@ void *HiloOrquestadorDeCPU() {
 										EnviarDatos(i, "A");
 										pthread_mutex_unlock(&mutexCPU);
 									}
-								}else{
+								} else {
 									pthread_mutex_unlock(&mutexCPU);
 								}
 							} else {
@@ -1555,7 +1577,7 @@ void *HiloOrquestadorDeCPU() {
 										EnviarDatos(i, "A");
 										pthread_mutex_unlock(&mutexCPU);
 									}
-								}else{
+								} else {
 									pthread_mutex_unlock(&mutexCPU);
 								}
 							} else {
