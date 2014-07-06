@@ -29,9 +29,13 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
+#include <commons/log.h>
 
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
+
+//log
+t_log* logger;
 
 //Tipo de cliente conectado
 #define TIPO_CPU       	  2
@@ -63,6 +67,11 @@
 #define DIRECCION INADDR_ANY
 
 int main(int argv, char** argc) {
+	//log
+	char* temp_file = tmpnam(NULL );
+
+	logger = log_create(temp_file, "KERNEL", ImprimirTrazaPorConsola,
+			LOG_LEVEL_TRACE);
 
 	//Obtener puertos e ip de la umv
 
@@ -118,7 +127,7 @@ void *PLP(void *arg) {
 
 	//Me conecto a la UMV
 	conectarAUMV();
-
+	Traza("%s\n", "Conectado a la UMV");
 	pthread_t pcp, Imprimir, Fin, plpNew;
 	//Creo el hilo de pcp
 	pthread_create(&pcp, NULL, PCP, NULL );
@@ -138,7 +147,7 @@ void *PLP(void *arg) {
 	return NULL ;
 }
 void *FinEjecucion(void *arg) {
-//	t_Final* auxFinal;
+	t_Final* auxFinal;
 	t_list* auxList;
 	//free de toodo
 	while (1) {
@@ -146,10 +155,32 @@ void *FinEjecucion(void *arg) {
 		pthread_mutex_lock(&mutexFIN);
 		if (list_size(listaFin) > 0) {
 			auxList = list_take_and_remove(listaFin, 1);
-//		auxFinal = list_get(auxList, 0);
+
+			auxFinal = list_get(auxList, 0);
+			int digitosID = cantidadDigitos(auxFinal->idPCB->id);
+
+			char respuestaumv[BUFFERSIZE];
+
+			char* mensaje2 = string_new();
+			string_append(&mensaje2, string_itoa(6));
+			string_append(&mensaje2, string_itoa(digitosID));
+			string_append(&mensaje2, string_itoa(auxFinal->idPCB->id));
+			EnviarDatos(socketumv, mensaje2); // 6 + digitosID + id
+			if (RecibirDatos(socketumv, respuestaumv) <= 0) {
+				ErrorFatal("Error en la comunicacion con la umv");
+			}
+			if (analisarRespuestaUMV(respuestaumv)) {
+				char* mensaje1 = string_new();
+				string_append(&mensaje1, "F");
+				string_append(&mensaje1, auxFinal->mensaje);
+				string_append(&mensaje1, "\0");
+				EnviarDatos(auxFinal->idPCB->id, mensaje1);
+			}
+			Traza("%s%d , MSJ= %s\n","Finalizo el programa:",auxFinal->idPCB->id, auxFinal->mensaje);
 			//Mensajes de destruir Segmento aqui,
 			//Enviar mensaje a programa que finalizo
 //		final_destroy(auxFinal); para mi esta mal
+
 			list_clean_and_destroy_elements(auxList, (void*) final_destroy);
 			imprimirListaFinxTraza();
 			pthread_mutex_unlock(&mutexFIN);
@@ -174,6 +205,7 @@ void *IMPRIMIRConsola(void *arg) {
 			string_append(&mensaje, "I");
 			string_append(&mensaje, auxImp->mensaje);
 			EnviarDatos(auxImp->prog, mensaje);
+			Traza("%s%s\n","Envie a imprimir: ",mensaje);
 			free(mensaje);
 			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
 		}
@@ -860,8 +892,8 @@ void Traza(const char* mensaje, ...) {
 		va_start(arguments, mensaje);
 		nuevo = string_from_vformat(mensaje, arguments);
 
-		printf("TRAZA--> %s \n", nuevo);
-
+		//printf("TRAZA--> %s \n", nuevo);
+		log_trace(logger, "%s", nuevo);
 		va_end(arguments);
 
 	}
@@ -1035,8 +1067,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
 //							//Creacion segmento Indice codigo
-							int tamaniodeindice = sizeof(t_intructions)
-									* metadataprograma->instrucciones_size;
+							int tamaniodeindice = (sizeof(t_intructions))
+									* (metadataprograma->instrucciones_size);
 							char* codex = string_new();
 							int digitocode = cantidadDigitos(tamaniodeindice);
 							string_append(&codex, string_itoa(5));
@@ -1139,6 +1171,9 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
+	Traza("%s%d%d%d%d%d%d%d%d%d","Se creo un PCB con: ",PCBAUX.id,PCBAUX.indiceCodigo,PCBAUX.cursorStack,PCBAUX.indiceEtiquetas,
+			PCBAUX.programCounter,PCBAUX.segmentoCodigo,PCBAUX.segmentoStack,PCBAUX.sizeContextoActual,PCBAUX.sizeIndiceEtiquetas);
+	Traza("%s%d","El PCB tiene peso: ",pesito);
 	pthread_mutex_lock(&mutexNew);
 	list_add(listaNew, new_create(&(PCBAUX), pesito));
 	imprimirListaNewxTraza();

@@ -1,0 +1,16 @@
+CC :=gcc
+CFLAGS=-Wall -ansi -D_XOPEN_SOURCE=500
+OBJS:=/home/utnso/tp-2014-1c-garras/KERNEL/src/KERNEL.o
+HDRS:=KERNEL.h
+
+#ALL
+all: kernel
+
+#Kernel
+kernel: $(OBJS)
+	$CC $(CFLAGS) -o kernel $(OBJS)
+kernel.o: KERNEL.c $(HDRS)
+	$(CC) -c $(CFLAGS) KERNEL.c
+#Clean
+clean:
+	rm kernel $(OBJS)
