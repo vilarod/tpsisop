@@ -1234,7 +1234,9 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
   int ceros = (DIG_VAL_VAR - cantidadDigitos(valor));
   rellenarConCeros(ceros,&mensaje);
   string_append(&mensaje, string_itoa(valor));
-  validar = setUMV(direccion_variable, (VAR_STACK - DIG_VAL_VAR), DIG_VAL_VAR, mensaje);
+
+  int despl=((programa->segmentoStack - programa->cursorStack)/VAR_STACK) + direccion_variable + DIG_NOM_VAR;
+  validar = setUMV(programa->segmentoStack, despl, DIG_VAL_VAR, mensaje);
   if (validar == 1) //si es <=0 el set aborta el proceso
     Traza("%s", "TRAZA - ASIGNACION EXITOSA");
 
@@ -1517,13 +1519,13 @@ prim_definirVariable(t_nombre_variable identificador_variable)
   var[0] = identificador_variable;
 
   Traza("TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s",string_substring(var, 0, 1));
-  pos_var_stack = programa->cursorStack + (programa->sizeContextoActual * VAR_STACK);
+  pos_var_stack = programa->sizeContextoActual * VAR_STACK;
 
   Traza("TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d",pos_var_stack);
 
   if ((dictionary_has_key(dicVariables, string_substring(var, 0, 1))) == false)
     {
-      if ((setUMV(pos_var_stack, 0, 1, string_substring(var, 0, 1))) > 0)
+      if ((setUMV(programa->cursorStack, pos_var_stack, 1, string_substring(var, 0, 1))) > 0)
         {
           dictionary_put(dicVariables, string_substring(var, 0, 1),(void*) pos_var_stack); //la registro en el dicc de variables
           programa->sizeContextoActual++;
