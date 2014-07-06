@@ -39,7 +39,7 @@
 #define HandK 3
 #define tCPUU 2
 #define tCPUK 2
-#define BUFFERSIZE 10000
+#define BUFFERSIZE 40000
 #define CAMBIO_PROCESO 4
 #define FIN_QUANTUM 4
 #define OBTENER_V_COMP 5
@@ -231,9 +231,8 @@ Enviar(int sRemoto, char * buffer)
   if (cantBytes == -1)
     Error("ERROR ENVIO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
   else
-    //log_trace(logger, "ENVIO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
+   log_trace(logger, "ENVIO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
 
-  printf("ENVIO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
   return cantBytes;
 }
 
@@ -245,8 +244,7 @@ Recibir(int sRemoto, char * buffer)
   if ((bytecount = recv(sRemoto, buffer, BUFFERSIZE, 0)) == -1)
     Error("ERROR RECIBO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
   else
- //   log_trace(logger, "RECIBO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
-
+  log_trace(logger, "RECIBO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
 
   printf("RECIBO DATOS. SOCKET %d, Buffer: %s", sRemoto, buffer);
   return bytecount;
@@ -256,6 +254,7 @@ int
 RecibirProceso()
 {
   char* estructura = malloc(BUFFERSIZE * sizeof(char));
+  memset(estructura,0,BUFFERSIZE);
   char* sub = string_new();
   int i, aux;
   int guiones = 0;
@@ -350,8 +349,6 @@ Error(const char* mensaje, ...)
   va_end(arguments);
   free(nuevo);
 }
-
-
 
 void
 ErrorFatal(const char* mensaje, ...)
@@ -570,7 +567,7 @@ AbortarProceso()
     {
       //enviar "A" al kernel
       char *mensaje = string_new();
-      char* respuesta=string_new();
+      char respuesta[BUFFERSIZE];
       string_append(&mensaje, AB_PROCESO);
       string_append(&mensaje, motivo);
       string_append(&mensaje, separador);
@@ -620,6 +617,7 @@ PedirSentencia(char** sentencia)
 
   log_trace(logger, "%s", "TRAZA - SOLICITO SENTENCIA A LA UMV");
   char* instruccion = malloc(BUFFERSIZE * sizeof(char));
+  memset(instruccion,0,BUFFERSIZE);
 
   instruccion = getUMV(programa->indiceCodigo,
       programa->programCounter * TAM_INSTRUCCION, TAM_INSTRUCCION);
@@ -662,6 +660,7 @@ char*
 getUMV(int base, int dsp, int tam)
 {
   char* respuesta = malloc(BUFFERSIZE * sizeof(char));
+  memset(respuesta,0,BUFFERSIZE);
   char *mensaje = string_itoa(GET_UMV);
 
   serCadena(&mensaje, string_itoa(base)); //base
@@ -766,23 +765,7 @@ CambioProcesoActivo()
 void
 CPULibre()
 {
-  char* respuesta=string_new();
   Enviar(socketKERNEL, LIBRE);
-  Recibir(socketKERNEL,respuesta);
-  if ((string_starts_with(respuesta, bien)))
-
-      printf("bien!!! %s",respuesta);
-  else
-    {
-
-        if  (string_starts_with(respuesta, mal))
-            Error("ERROR - KERNEL NO RECIBIO MENSAJE");
-        else
-
-              kernelDesconectado();
-
-    }
-
 }
 
 void
@@ -866,7 +849,7 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
     {
       imprimirContextoActual();
       char *mensaje = string_itoa(FIN_QUANTUM);
-      char *respuesta=string_new();
+      char respuesta[BUFFERSIZE];
 
       string_append(&mensaje, serializar_PCB(programa));
       string_append(&mensaje, string_itoa(que));
@@ -897,8 +880,9 @@ finalizarProceso()
 {
   log_trace(logger, "%s", "TRAZA - EL PROGRAMA FINALIZO");
   imprimirContextoActual();
-  char* respuesta=string_new();
+  char respuesta[BUFFERSIZE];
   char *mensaje = malloc(BUFFERSIZE * sizeof(char));
+  memset(mensaje,0,BUFFERSIZE);
   string_append(&mensaje, FIN_PROCESO);
   string_append(&mensaje, serializar_PCB(programa));
   log_trace(logger, "TRAZA - EL MENSAJE QUE LE ENVIO AL KERNEL ES: %s", mensaje);
@@ -968,7 +952,7 @@ RecuperarEtiquetas()
       log_trace(logger, "%s", "TRAZA - VOY A RECUPERAR EL INDICE DE ETIQUETAS");
 
       char* respuesta = malloc(BUFFERSIZE * sizeof(char));
-
+      memset(respuesta,0,BUFFERSIZE);
       respuesta = getUMV(programa->indiceEtiquetas, 0,
           programa->sizeIndiceEtiquetas);
 
@@ -1005,17 +989,19 @@ RecuperarDicVariables()
       int pos = 0;
 
       char* respuesta = malloc(BUFFERSIZE * sizeof(char));
+      memset(respuesta,0,BUFFERSIZE);
       char* var = string_new();
       char* variables = malloc(BUFFERSIZE * sizeof(char));
+      memset(variables,0,BUFFERSIZE);
 
       log_trace(logger, "%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE VARIABLES");
       aux = programa->sizeContextoActual;
       log_trace(logger, "TRAZA - CANTIDAD DE VARIABLES A RECUPERAR: %d", aux);
-      ptr_posicion = programa->cursorStack;
+      ptr_posicion = programa->cursorStack - programa->segmentoStack;
 
       if (aux > 0) //tengo variables a recuperar
         {
-          respuesta = getUMV(ptr_posicion, 0, (VAR_STACK * aux));
+          respuesta = getUMV(programa->segmentoStack, 0, (VAR_STACK * aux));
           if (string_starts_with(respuesta, bien))
             {
               variables = string_substring(respuesta, 1, strlen(respuesta) - 1);
@@ -1051,7 +1037,10 @@ RecuperarDicVariables()
 void
 imprimirContextoActual()
 {
-  char *mensaje = string_itoa(IMPRIMIR);
+  char *mensaje =  malloc(BUFFERSIZE * sizeof(char));
+  memset(mensaje,0,BUFFERSIZE);
+  mensaje = string_itoa(IMPRIMIR);
+  char rtaKERNEL[BUFFERSIZE];
 
   int i;
   int aux = 0;
@@ -1059,14 +1048,15 @@ imprimirContextoActual()
   int pos = 0;
 
   char* respuesta = malloc(BUFFERSIZE * sizeof(char));
+  memset(respuesta,0,BUFFERSIZE);
   char* variables = malloc(BUFFERSIZE * sizeof(char));
-
+  memset(variables,0,BUFFERSIZE);
   aux = programa->sizeContextoActual;
-  ptr_posicion = programa->cursorStack;
+  ptr_posicion = (programa->cursorStack - programa->segmentoStack);
 
   if (aux > 0) //tengo variables a recuperar
     {
-      respuesta = getUMV(ptr_posicion, 0, (VAR_STACK * aux));
+      respuesta = getUMV(programa->segmentoStack, ptr_posicion, (VAR_STACK * aux));
       if (string_starts_with(respuesta, bien))
         {
           variables = string_substring(respuesta, 1, strlen(respuesta) - 1);
@@ -1099,6 +1089,24 @@ imprimirContextoActual()
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION",
       mensaje);
   Enviar(socketKERNEL, mensaje);
+
+
+
+  Recibir(socketKERNEL,rtaKERNEL);
+
+  if  (string_starts_with(rtaKERNEL, bien))
+    log_trace(logger, "%s","KERNEL RECIBIO");
+      else{
+
+      if  (string_starts_with(rtaKERNEL, mal))
+          Error("ERROR - KERNEL NO RECIBIO MENSAJE");
+      else
+        {
+          if ((string_starts_with(rtaKERNEL, bien)) == false)
+            kernelDesconectado();
+        }
+    }
+
 
   free(respuesta);
   free(variables);
@@ -1220,6 +1228,7 @@ main(void)
       while (quantum > 0) //mientras tengo quantum
         {
           log_trace(logger, "TRAZA - EL QUANTUM ES: %d", quantum);
+          log_trace(logger, "TRAZA - LA INSTRUCCION A EJECUTAR ES: %d",programa->programCounter);
           sent = PedirSentencia(&sentencia);
           if (sent == 1) //la sentencia es valida
             {
@@ -1280,8 +1289,9 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
   rellenarConCeros(ceros,&mensaje);
   string_append(&mensaje, string_itoa(valor));
 
-  int despl=((programa->segmentoStack - programa->cursorStack)/VAR_STACK) + direccion_variable + DIG_NOM_VAR;
-  validar = setUMV(programa->segmentoStack, despl, DIG_VAL_VAR, mensaje);
+  //int despl=(direccion_variable - programa->segmentoStack)+ DIG_NOM_VAR;
+
+  validar = setUMV(programa->segmentoStack, direccion_variable + 1, DIG_VAL_VAR, mensaje);
   if (validar == 1) //si es <=0 el set aborta el proceso
     log_trace(logger, "%s", "TRAZA - ASIGNACION EXITOSA");
 
@@ -1315,16 +1325,18 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
   rellenarConCeros(ceros,&mensaje);
   string_append(&mensaje, string_itoa(programa->cursorStack));
 
-  aux = programa->cursorStack + (VAR_STACK * programa->sizeContextoActual);
+  aux = (VAR_STACK * programa->sizeContextoActual);
+  int despl=(programa->segmentoStack - programa->cursorStack) + aux +1;
 
-  if (setUMV(aux, 0, VAR_STACK, mensaje) == 1)
+
+  if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
     {
       mensaje=string_new();
-      ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
+      ceros = (VAR_STACK - cantidadDigitos(programa->programCounter + 1));
       rellenarConCeros(ceros,&mensaje);
-      string_append(&mensaje, string_itoa(programa->programCounter));
-
-      if (setUMV((aux + VAR_STACK), 0, VAR_STACK,mensaje) == 1)
+      string_append(&mensaje, string_itoa(programa->programCounter + 1));
+      despl=despl + VAR_STACK;
+      if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
         {
           programa->cursorStack = aux + (VAR_STACK * 2);
           log_trace(logger, "TRAZA - EL CURSOR STACK APUNTA A: %d", programa->cursorStack);
@@ -1350,23 +1362,28 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   rellenarConCeros(ceros,&mensaje);
   string_append(&mensaje, string_itoa(programa->cursorStack));
 
-  aux = programa->cursorStack + (VAR_STACK * programa->sizeContextoActual);
+  aux = (VAR_STACK * programa->sizeContextoActual);
+  int despl=(programa->segmentoStack - programa->cursorStack) + aux +1;
 
-  if (setUMV(aux, 0, VAR_STACK, mensaje) == 1)
+  if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
     {
       mensaje=string_new();
-      ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
+      ceros = (VAR_STACK - cantidadDigitos(programa->programCounter + 1));
       rellenarConCeros(ceros,&mensaje);
-      string_append(&mensaje,string_itoa(programa->programCounter));
+      string_append(&mensaje,string_itoa(programa->programCounter + 1));
 
-      if (setUMV((aux + VAR_STACK), 0, VAR_STACK,mensaje) == 1)
+      despl=despl + VAR_STACK;
+
+      if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
         {
           mensaje=string_new();
           ceros = (VAR_STACK - cantidadDigitos(donde_retornar));
           rellenarConCeros(ceros,&mensaje);
           string_append(&mensaje,string_itoa(donde_retornar));
 
-          if (setUMV((aux + (VAR_STACK * 2)), 0, VAR_STACK,mensaje) == 1)
+          despl=despl + VAR_STACK;
+
+          if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
             {
               log_trace(logger, "TRAZA - LA DIRECCION POR DONDE RETORNAR ES: %d",donde_retornar);
               programa->cursorStack = aux + (VAR_STACK * 3);
@@ -1391,6 +1408,7 @@ prim_finalizar(void)
     {
       aux = aux - VAR_STACK;
       char *pedido = malloc(BUFFERSIZE * sizeof(char));
+      memset(pedido,0,BUFFERSIZE);
       pedido = getUMV(aux, 0, VAR_STACK);
 
       if (string_starts_with(pedido, bien))
@@ -1435,6 +1453,7 @@ prim_retornar(t_valor_variable retorno)
   int aux = programa->cursorStack; //tengo que leer desde la base del stack anterior hacia abajo
   aux = aux - VAR_STACK;
   char *pedido = malloc(BUFFERSIZE * sizeof(char));
+  memset(pedido,0,BUFFERSIZE);
   pedido = getUMV(aux, 0, VAR_STACK);
 
   if (string_starts_with(pedido,bien))
@@ -1442,10 +1461,12 @@ prim_retornar(t_valor_variable retorno)
       retor = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
       log_trace(logger, "TRAZA - LA DIRECCION DONDE RETORNAR ES: %d", retor);
 
-      if (setUMV(retor, 0, (VAR_STACK - DIG_NOM_VAR), string_itoa(retorno)) == 1)
+     //int despl=(programa->segmentoStack - retor) + 1;
+
+      if (setUMV(programa->segmentoStack, retor + 1, DIG_VAL_VAR, string_itoa(retorno)) == 1)
         {
           aux = aux - (VAR_STACK * 2);
-          pedido = getUMV(aux, 0, VAR_STACK);
+          pedido = getUMV(programa->segmentoStack, 0, VAR_STACK);
 
           if (string_starts_with(pedido, bien))
             {
@@ -1487,7 +1508,9 @@ prim_imprimir(t_valor_variable valor_mostrar)
   //acÃ¡ me conecto con el kernel y le paso el mensaje
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Imprimir");
 
-  char *mensaje = string_itoa(IMPRIMIR);
+  char *mensaje = malloc(BUFFERSIZE*sizeof(char));
+  memset(mensaje,0,BUFFERSIZE);
+  mensaje=string_itoa(IMPRIMIR);
   string_append(&mensaje, "VARIABLE ");
   string_append(&mensaje, variable_ref);
   string_append(&mensaje, ":");
@@ -1495,6 +1518,28 @@ prim_imprimir(t_valor_variable valor_mostrar)
   string_append(&mensaje, separador);
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION",valor_mostrar);
   Enviar(socketKERNEL, mensaje);
+free(mensaje);
+
+char *rtaKERNEL = malloc(BUFFERSIZE*sizeof(char));
+  memset(rtaKERNEL,0,BUFFERSIZE);
+
+Recibir(socketKERNEL,rtaKERNEL);
+
+if  (string_starts_with(rtaKERNEL, bien))
+  log_trace(logger, "%s","KERNEL RECIBIO");
+    else{
+
+    if  (string_starts_with(rtaKERNEL, mal))
+        Error("ERROR - KERNEL NO RECIBIO MENSAJE");
+    else
+      {
+        if (string_starts_with(rtaKERNEL, AB_PROCESO))
+          mensajeAbortar(string_substring(rtaKERNEL, 0, strlen(rtaKERNEL)));
+      }
+  }
+
+  free(rtaKERNEL);
+  free(variable_ref);
 
   variable_ref = string_new();
 }
@@ -1506,7 +1551,7 @@ prim_dereferenciar(t_puntero direccion_variable)
   t_valor_variable valor = 0;
   char* mensaje = malloc(1 * sizeof(char));
 
-  mensaje = getUMV(direccion_variable, 1, DIG_VAL_VAR);
+  mensaje = getUMV(programa->segmentoStack,direccion_variable + 1, DIG_VAL_VAR);
   if (string_starts_with(mensaje, bien)) //si comienza con 1 -> recibi un mensj valido
     {
     valor = atoi(string_substring(mensaje, 1, (strlen(mensaje) - 1)));
@@ -1533,7 +1578,6 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable");
   t_puntero posicion = 0;
 
-  variable_ref = string_new();
 
   char* var = string_new();
   sprintf(var,"%c",identificador_variable);
@@ -1600,11 +1644,36 @@ void
 prim_imprimirTexto(char* texto)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ImprimirTexto");
-  char *mensaje = string_itoa(IMPRIMIR);
+
+  char *mensaje = malloc(BUFFERSIZE*sizeof(char));
+  memset(mensaje,0,BUFFERSIZE);
+  mensaje=string_itoa(IMPRIMIR);
   string_append(&mensaje, texto);
   string_append(&mensaje, separador);
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION",texto);
   Enviar(socketKERNEL, mensaje);
+  free(mensaje);
+
+
+  char *rtaKERNEL = malloc(BUFFERSIZE*sizeof(char));
+    memset(rtaKERNEL,0,BUFFERSIZE);
+
+  Recibir(socketKERNEL,rtaKERNEL);
+
+  if  (string_starts_with(rtaKERNEL, bien))
+    log_trace(logger, "%s","KERNEL RECIBIO");
+      else{
+
+      if  (string_starts_with(rtaKERNEL, mal))
+          Error("ERROR - KERNEL NO RECIBIO MENSAJE");
+      else
+        {
+          if (string_starts_with(rtaKERNEL, AB_PROCESO))
+            mensajeAbortar(string_substring(rtaKERNEL, 0, strlen(rtaKERNEL)));
+        }
+    }
+
+    free(rtaKERNEL);
 }
 
 void
