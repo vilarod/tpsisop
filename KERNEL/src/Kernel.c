@@ -127,7 +127,7 @@ void *PLP(void *arg) {
 
 	//Me conecto a la UMV
 	conectarAUMV();
-
+	Traza("%s\n", "Conectado a la UMV");
 	pthread_t pcp, Imprimir, Fin, plpNew;
 	//Creo el hilo de pcp
 	pthread_create(&pcp, NULL, PCP, NULL );
@@ -206,6 +206,7 @@ void *IMPRIMIRConsola(void *arg) {
 			string_append(&mensaje, "I");
 			string_append(&mensaje, auxImp->mensaje);
 			EnviarDatos(auxImp->prog, mensaje);
+			Traza("%s%s\n","Envie a imprimir: ",mensaje);
 			free(mensaje);
 			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
 		}
@@ -1171,6 +1172,9 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
+	Traza("%s%d%d%d%d%d%d%d%d%d","Se creo un PCB con: ",PCBAUX.id,PCBAUX.indiceCodigo,PCBAUX.cursorStack,PCBAUX.indiceEtiquetas,
+			PCBAUX.programCounter,PCBAUX.segmentoCodigo,PCBAUX.segmentoStack,PCBAUX.sizeContextoActual,PCBAUX.sizeIndiceEtiquetas);
+	Traza("%s%d","El PCB tiene peso: ",pesito);
 	pthread_mutex_lock(&mutexNew);
 	list_add(listaNew, new_create(&(PCBAUX), pesito));
 	imprimirListaNewxTraza();
