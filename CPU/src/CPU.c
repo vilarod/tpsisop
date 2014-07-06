@@ -696,7 +696,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
   serCadena(&mensaje, string_itoa(ptro));
   serCadena(&mensaje, string_itoa(dsp));
   serCadena(&mensaje, string_itoa(tam));
-  serCadena(&mensaje, valor);
+  string_append(&mensaje, valor);
   Traza(
       "TRAZA - SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMANIO: %d VALOR: %s",
       ptro, dsp, tam, valor);
