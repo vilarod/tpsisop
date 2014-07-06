@@ -225,10 +225,13 @@ int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 	return 0;
 }
 
-int analizarSiEsFinDeEjecucion(char *respuestahandshake) {
-
-	if (respuestahandshake[0] == 'F')
-		return 0;
+int analizarSiEsFinDeEjecucion(char *mensaje) {
+	if ((string_starts_with(mensaje, "F"))
+				&& (string_ends_with(mensaje, "\0"))) {
+			printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 4)));
+			traza("%s\n", "Se imprime el mensaje enviado por el kernel");
+			return 0;
+		}
 	else
 		return 1;
 }
