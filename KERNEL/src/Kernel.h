@@ -324,6 +324,7 @@ t_varGlobal* encontrarVarGlobal(char* nombre);
 void borrarPCBenCPU(int idCPU);
 void mandarAFinProgramaPorBajaCPU(int socket);
 void borrarSocket(int socket);
+int estaProgActivo(int idprog);
 
 //imprimir Listas
 void imprimirListaVarGlobalesxTraza();

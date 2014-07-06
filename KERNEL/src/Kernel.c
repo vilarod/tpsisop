@@ -2141,3 +2141,13 @@ void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre) 
 			(char*) cadena);
 	free(cadena);
 }
+
+int estaProgActivo(int idprog){
+	int _is_Prog_Act(t_socket *p) {
+		return encontrarInt(p->socket, idprog);
+	}
+	if (list_any_satisfy(listaSocketProgramas, (void*) _is_Prog_Act)) {
+		return 1;
+	}
+	return 0;
+}
