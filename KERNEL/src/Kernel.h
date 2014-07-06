@@ -1,5 +1,6 @@
 
 
+
 //Sockets
 int ConexionConSocket(int puerto, char* IP );
 int EnviarDatos(int sRemoto, void *buffer);

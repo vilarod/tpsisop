@@ -29,9 +29,13 @@
 #include <pthread.h>
 #include <stdio.h>
 #include "Kernel.h"
+#include <commons/log.h>
 
 //Ruta del config
 #define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
+
+//log
+t_log* logger;
 
 //Tipo de cliente conectado
 #define TIPO_CPU       	  2
@@ -63,6 +67,11 @@
 #define DIRECCION INADDR_ANY
 
 int main(int argv, char** argc) {
+	//log
+		char* temp_file = tmpnam(NULL );
+
+		logger = log_create(temp_file, "KERNEL", ImprimirTrazaPorConsola,
+				LOG_LEVEL_TRACE);
 
 	//Obtener puertos e ip de la umv
 
@@ -860,8 +869,8 @@ void Traza(const char* mensaje, ...) {
 		va_start(arguments, mensaje);
 		nuevo = string_from_vformat(mensaje, arguments);
 
-		printf("TRAZA--> %s \n", nuevo);
-
+		//printf("TRAZA--> %s \n", nuevo);
+		log_trace(logger, "%s", nuevo);
 		va_end(arguments);
 
 	}
