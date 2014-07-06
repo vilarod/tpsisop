@@ -172,7 +172,6 @@ void *FinEjecucion(void *arg) {
 			if (analisarRespuestaUMV(respuestaumv)) {
 				char* mensaje1 = string_new();
 				string_append(&mensaje1, "F");
-				string_append(&mensaje1, "I");
 				string_append(&mensaje1, auxFinal->mensaje);
 				string_append(&mensaje1, "\0");
 				EnviarDatos(auxFinal->idPCB->id, mensaje1);
@@ -1068,8 +1067,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
 //							//Creacion segmento Indice codigo
-							int tamaniodeindice = sizeof(t_intructions)
-									* metadataprograma->instrucciones_size;
+							int tamaniodeindice = (sizeof(t_intructions))
+									* (metadataprograma->instrucciones_size);
 							char* codex = string_new();
 							int digitocode = cantidadDigitos(tamaniodeindice);
 							string_append(&codex, string_itoa(5));
