@@ -2250,10 +2250,11 @@ void imprimirListaVarGlobalesxTraza() {
 	t_varGlobal* auxGlo;
 	for (i = 0; i < cant; i++) {
 		auxGlo = list_get(listaVarGlobal, i);
-		string_append(&cadena, " ");
+		string_append(&cadena, "\n[variable: ");
 		string_append(&cadena, auxGlo->nombre);
-		string_append(&cadena, ",");
+		string_append(&cadena, ", valor: ");
 		string_append(&cadena, string_itoa(auxGlo->valor));
+		string_append(&cadena, "]");
 	}
 	log_trace(logger, "Lista var Globales(cant %d):%s", cant, cadena);
 	free(cadena);
@@ -2265,8 +2266,9 @@ void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre) {
 	PCB* auxPCB;
 	for (i = 0; i < cant; i++) {
 		auxPCB = list_get(lista, i);
-		string_append(&cadena, " ");
+		string_append(&cadena, "\n[id: ");
 		string_append(&cadena, string_itoa(auxPCB->id));
+		string_append(&cadena, "]");
 	}
 	log_trace(logger, "Lista bloq por sem %s(cant %d):%s", (char*) nombre, cant,
 			(char*) cadena);
@@ -2295,10 +2297,11 @@ void imprimirListaFinxTraza() {
 	t_Final* auxFin;
 	for (i = 0; i < cant; i++) {
 		auxFin = list_get(listaFin, i);
-		string_append(&cadena, " ");
+		string_append(&cadena, "\n[id: ");
 		string_append(&cadena, string_itoa(auxFin->idPCB->id));
-		string_append(&cadena, ",");
+		string_append(&cadena, ", estado: ");
 		string_append(&cadena, string_itoa(auxFin->finalizo));
+		string_append(&cadena, "]");
 	}
 	log_trace(logger, "Lista Fin(cant %d):%s", cant, (char*) cadena);
 	free(cadena);
@@ -2328,7 +2331,7 @@ void imprimirListaCPUxTraza() {
 	t_CPU* auxCPU;
 	for (i = 0; i < cant; i++) {
 		auxCPU = list_get(listCPU, i);
-		string_append(&cadena, " \n[CPU: ");
+		string_append(&cadena, "\n[CPU: ");
 		string_append(&cadena, string_itoa(auxCPU->idCPU));
 		string_append(&cadena, ",Estado: ");
 		string_append(&cadena, string_itoa(auxCPU->libre));
@@ -2344,10 +2347,11 @@ void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre) 
 	t_bloqueado* auxBloq;
 	for (i = 0; i < cant; i++) {
 		auxBloq = list_get(lista, i);
-		string_append(&cadena, " ");
+		string_append(&cadena, "\n[id: ");
 		string_append(&cadena, string_itoa(auxBloq->idPCB->id));
-		string_append(&cadena, ",");
+		string_append(&cadena, ", tiempo: ");
 		string_append(&cadena, string_itoa(auxBloq->tiempo));
+		string_append(&cadena, "]");
 	}
 	log_trace(logger, "Lista bloq por disp %s(cant %d):%s", (char*) nombre,
 			cant, (char*) cadena);
