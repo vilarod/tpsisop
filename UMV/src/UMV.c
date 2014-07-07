@@ -194,9 +194,11 @@ int main(int argv, char** argc)
 	// pthread_join(hOrquestadorConexiones, (void **) NULL );
 
 	// Liberamos recursos
-	free(g_BaseMemoria);
+	if (g_BaseMemoria != NULL )
+		free(g_BaseMemoria);
 	list_clean_and_destroy_elements(g_ListaSegmentos, (void*) segmento_destroy);
-	free(g_MensajeError);
+	if (g_MensajeError != NULL )
+		free(g_MensajeError);
 
 	// Cerramos el archivo.
 	fclose(g_ArchivoConsola);
@@ -374,7 +376,8 @@ void ConsolaComandoLeerMemoria()
 	buffer = malloc(longitudBuffer * sizeof(char));
 	ok = LeerMemoria(idPrograma, base, desplazamiento, longitudBuffer, buffer);
 	ImprimirResuladoDeLeerMemoria(ok, idPrograma, base, desplazamiento, longitudBuffer, buffer, TraducirSiNo(grabarArchivo[0]));
-	free(buffer);
+	if (buffer != NULL )
+		free(buffer);
 }
 
 void ConsolaComandoEscribirMemoria()
@@ -674,11 +677,13 @@ void ImprimirMemoriaSegmentosDeProgramaTSeg(int imprimirArchivo, t_segmento *seg
 		memset(aux, 0, bytesPorLinea * sizeof(char));
 		memcpy(aux, buffer + (id * sizeof(char)), bytesPorLinea * sizeof(char));
 		Imprimir(imprimirArchivo, "-%10d-   %s\n", id, aux);
-		free(aux);
+		if (aux != NULL )
+			free(aux);
 		id = id + bytesPorLinea;
 	}
 
-	free(buffer);
+	if (buffer != NULL )
+		free(buffer);
 
 }
 
@@ -783,7 +788,8 @@ void Imprimir(int ImprimirArchivo, const char* mensaje, ...)
 	}
 
 	va_end(arguments);
-	free(nuevo);
+	if (nuevo != NULL )
+		free(nuevo);
 }
 #endif
 
@@ -799,7 +805,8 @@ void Error(const char* mensaje, ...)
 	log_error(logger, "%s", nuevo);
 
 	va_end(arguments);
-	free(nuevo);
+	if (nuevo != NULL )
+		free(nuevo);
 }
 
 void Traza(const char* mensaje, ...)
@@ -835,7 +842,8 @@ void ErrorFatal(const char* mensaje, ...)
 	scanf("%c", &fin);
 
 	va_end(arguments);
-	free(nuevo);
+	if (nuevo != NULL )
+		free(nuevo);
 	exit(EXIT_FAILURE);
 }
 
@@ -843,7 +851,8 @@ void SetearErrorGlobal(const char* mensaje, ...)
 {
 	va_list arguments;
 	va_start(arguments, mensaje);
-	free(g_MensajeError);
+	if (g_MensajeError != NULL )
+		free(g_MensajeError);
 	g_MensajeError = string_from_vformat(mensaje, arguments);
 	va_end(arguments);
 }
@@ -905,55 +914,79 @@ void HiloOrquestadorDeConexiones()
 	CerrarSocket(socket_host);
 }
 
+/*char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
+ {
+ *bytesRecibidos = 0;
+ int tamanioNuevoBuffer = 0;
+ int mensajeCompleto = 0;
+ int cantidadBytesRecibidos = 0;
+ int cantidadBytesAcumulados = 0;
+
+ // memset se usa para llenar el buffer con 0s
+ char bufferAux[BUFFERSIZE];
+ if (buffer != NULL )
+ free(buffer);
+ buffer = string_new();
+ //buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
+ //memset(buffer, 0, 1 * sizeof(char));
+
+ while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
+ {
+ memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
+
+ //Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
+ if ((*bytesRecibidos = *bytesRecibidos + recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
+ {
+ Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
+ mensajeCompleto = 1;
+ }
+ else
+ {
+ cantidadBytesRecibidos = strlen(bufferAux);
+ cantidadBytesAcumulados = strlen(buffer);
+ tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
+
+ if (tamanioNuevoBuffer > 0)
+ {
+ buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
+
+ sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
+ }
+
+ //Verificamos si terminó el mensaje
+ if (cantidadBytesRecibidos < BUFFERSIZE)
+ mensajeCompleto = 1;
+ }
+ }
+
+ //Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
+ log_trace(logger, "RECIBO DATOS. socket: %d. buffer: %s", socket, (char*) buffer);
+
+ return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+ }*/
+
 char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
 {
 	*bytesRecibidos = 0;
-	int tamanioNuevoBuffer = 0;
-	int mensajeCompleto = 0;
-	int cantidadBytesRecibidos = 0;
-	int cantidadBytesAcumulados = 0;
-
-	// memset se usa para llenar el buffer con 0s
-	char bufferAux[BUFFERSIZE];
-
-	free(buffer);
-	buffer = string_new();
-	//buffer = realloc(buffer, 1 * sizeof(char)); //--> el buffer ocupa 0 lugares (todavia no sabemos que tamaño tendra)
-	//memset(buffer, 0, 1 * sizeof(char));
-
-	while (!mensajeCompleto) // Mientras que no se haya recibido el mensaje completo
+	if (buffer != NULL )
 	{
-		memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
-
-		//Nos ponemos a la escucha de las peticiones que nos envie el cliente. //aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
-		if ((*bytesRecibidos = *bytesRecibidos + recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
-		{
-			Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
-			mensajeCompleto = 1;
-		}
-		else
-		{
-			cantidadBytesRecibidos = strlen(bufferAux);
-			cantidadBytesAcumulados = strlen(buffer);
-			tamanioNuevoBuffer = cantidadBytesRecibidos + cantidadBytesAcumulados;
-
-			if (tamanioNuevoBuffer > 0)
-			{
-				buffer = realloc(buffer, tamanioNuevoBuffer * sizeof(char)); //--> el tamaño del buffer sera el que ya tenia mas los caraceteres nuevos que recibimos
-
-				sprintf(buffer, "%s%s", (char*) buffer, bufferAux); //--> el buffer sera buffer + nuevo recepcio
-			}
-
-			//Verificamos si terminó el mensaje
-			if (cantidadBytesRecibidos < BUFFERSIZE)
-				mensajeCompleto = 1;
-		}
+		free(buffer);
 	}
 
-	//Traza("RECIBO datos. socket: %d. buffer: %s", socket, (char*) buffer);
-	log_trace(logger, "RECIBO DATOS. socket: %d. buffer: %s", socket, (char*) buffer);
+	char* bufferAux = malloc(BUFFERSIZE * sizeof(char));
+	memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
 
-	return buffer; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+	if ((*bytesRecibidos = *bytesRecibidos + recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
+	{
+		Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
+	}
+	else
+	{
+
+	}
+
+	log_trace(logger, "RECIBO DATOS. socket: %d. buffer: %s", socket, (char*) bufferAux);
+	return bufferAux; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
 }
 
 int EnviarDatos(int socket, char *buffer)
@@ -996,7 +1029,8 @@ void LevantarConfig()
 	// Obtenemos el algoritmo por defecto
 	char* algoritmo = config_get_string_value(config, "ALGORITMO");
 	g_AlgoritmoAsignacion = algoritmo[0];
-	free(algoritmo);
+	if (algoritmo != NULL )
+		free(algoritmo);
 
 	// Obtenemos el retardo por defecto
 	g_Retardo = config_get_int_value(config, "RETARDO");
@@ -1007,7 +1041,8 @@ void LevantarConfig()
 	// Obtenemos si por defecto se imprime la traza de ejecución por consola
 	g_ImprimirTrazaPorConsola = config_get_int_value(config, "IMPRIME_TRAZA");
 
-	free(config);
+	if (config != NULL )
+		free(config);
 }
 
 #endif
@@ -1081,7 +1116,7 @@ int CrearSegmento(int idPrograma, int tamanio)
 	}
 	else
 		//Traza("No se pudo crear un segmento en la memoria. El tamaño debe ser mayor a 0. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
-		log_trace(logger,"NO SE PUDO CREAR SEGMENTO. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
+		log_trace(logger, "NO SE PUDO CREAR SEGMENTO. Id programa: %d, Tamaño solicitado segmento: %d", idPrograma, tamanio);
 
 	return idSegmento;
 }
@@ -1101,7 +1136,7 @@ int DestruirSegmentos(int idPrograma)
 	}
 
 	//Traza("Se borraron los segmentos del programa. Id programa: %d.", idPrograma);
-	log_trace(logger,"SEGMENTOS BORRADOS. Id programa: %d.", idPrograma);
+	log_trace(logger, "SEGMENTOS BORRADOS. Id programa: %d.", idPrograma);
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 
@@ -1151,7 +1186,7 @@ void CompactarMemoria()
 	list_iterate(g_ListaSegmentos, (void*) _list_elements);
 
 	//Traza("Se compactó la memoria.");
-	log_trace(logger,"MEMORIA COMPACTADA");
+	log_trace(logger, "MEMORIA COMPACTADA");
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
 }
@@ -1435,7 +1470,7 @@ int EscribirMemoria(int idPrograma, int base, int desplazamiento, int cantidadBy
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
 		memcpy((baseSegmento + (desplazamiento * sizeof(char))), buffer, cantidadBytes * sizeof(char));
 		//Traza("Se escribió en memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
-		log_trace(logger,"ESCRITURA MEMORIA. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
+		log_trace(logger, "ESCRITURA MEMORIA. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
@@ -1459,7 +1494,7 @@ int LeerMemoria(int idPrograma, int base, int desplazamiento, int cantidadBytes,
 		baseSegmento = ObtenerUbicacionMPEnBaseAUbicacionVirtual(idPrograma, base);
 		memcpy(buffer, (baseSegmento + (desplazamiento * sizeof(char))), (cantidadBytes) * sizeof(char));
 		//Traza("Se leyó  de memoria. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
-		log_trace(logger,"LECTURA MEMORIA. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
+		log_trace(logger, "LECTURA MEMORIA. Id programa: %d, base logica: %d, base real: %u,  desplazamiento: %d, cantidad de bytes: %d, buffer: %s", idPrograma, base, (unsigned int) baseSegmento, desplazamiento, cantidadBytes, buffer);
 	}
 
 	pthread_rwlock_unlock(&s_AccesoAListadoSegmentos);
@@ -1511,7 +1546,7 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 
 		SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no tiene asignado un segmento con base %d", idPrograma, base);
 		//Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
-		log_trace(logger,"SOLICITUD INVALIDA - %s", g_MensajeError);
+		log_trace(logger, "SOLICITUD INVALIDA - %s", g_MensajeError);
 	}
 	else
 	{
@@ -1521,7 +1556,7 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 		{
 			SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", idPrograma, posicionSolicitada, posicionMaximaDelSegmento);
 			//Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
-			log_trace(logger,"SOLICITUD INVALIDA - %s", g_MensajeError);
+			log_trace(logger, "SOLICITUD INVALIDA - %s", g_MensajeError);
 		}
 		else
 			accesoOk = 1;
@@ -1562,7 +1597,8 @@ int AtiendeCliente(void * arg)
 	while ((!desconexionCliente) & g_Ejecutando)
 	{
 		//	buffer = realloc(buffer, 1 * sizeof(char)); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
-		free(buffer);
+		if (buffer != NULL )
+			free(buffer);
 		buffer = string_new();
 		//Recibimos los datos del cliente
 		buffer = RecibirDatos(socket, buffer, &bytesRecibidos);
@@ -1684,7 +1720,8 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 
 	if (ok)
 	{
-		free(buffer);
+		if (buffer != NULL )
+			free(buffer);
 		buffer = string_new();
 		string_append(&buffer, "1");
 		string_append(&buffer, lectura);
@@ -1702,7 +1739,8 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
 	}
 
-	free(lectura);
+	if (lectura != NULL )
+		free(lectura);
 	return buffer;
 }
 
@@ -1760,7 +1798,8 @@ char* ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 			buffer = RespuestaClienteError(buffer, g_MensajeError);
 		}
 
-		free(mensaje);
+		if (mensaje != NULL )
+			free(mensaje);
 	}
 	else
 	{
@@ -1938,7 +1977,8 @@ int chartToInt(char x)
 	//sprintf(aux, "%c", x);
 	numero = strtol(aux, (char **) NULL, 10);
 
-	free(aux);
+	if (aux != NULL )
+		free(aux);
 	return numero;
 }
 
@@ -2024,7 +2064,8 @@ int cantidadCaracteres(char* buffer)
 	char* bufferAux = NULL;
 	sprintf(bufferAux, "%s/0", buffer);
 	cantidad = strlen(bufferAux);
-	free(bufferAux);
+	if (bufferAux != NULL )
+		free(bufferAux);
 	return cantidad;
 }
 
@@ -2052,7 +2093,8 @@ int subCadenaAInt(char* text, int start, int length)
 		char* aux;
 		aux = string_substring(text, start, length);
 		retorno = atoi(aux);
-		free(aux);
+		if (aux != NULL )
+			free(aux);
 	}
 	return retorno;
 }

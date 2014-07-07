@@ -1,0 +1,1 @@
+--> Seteo OK. Retardo actual (milisegundos): 1000
