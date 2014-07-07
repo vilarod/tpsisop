@@ -33,10 +33,10 @@ void *moverReadyDeNew(void *arg);
 void *bloqueados_fnc(void *arg);
 
 //Manejo de errores
-void error(int code, char *err);
+//void error(int code, char *err);
 void ErrorFatal(char mensaje[], ...);
 void Error(const char* mensaje, ...);
-void Traza(const char* mensaje, ...);
+//void Traza(const char* mensaje, ...);
 
 /* Definición del pcb */
 typedef struct PCBs {
@@ -109,7 +109,7 @@ typedef struct _t_CPU {
 static t_CPU *cpu_create(int idCPU)
 {
 	t_CPU *new = malloc(sizeof(t_CPU));
-	new->idPCB = malloc(sizeof(PCB));
+	new->idPCB = NULL;
 	new->idCPU = idCPU;
 	new->libre = 1;
 	return new;
@@ -283,6 +283,7 @@ static t_HIO *HIO_create(char* nombre, int valor)
 //Lista de Socket Activos de programa
 typedef struct _t_socket {
 	int socket;
+	int id;
 } t_socket ;
 
 static t_socket *socket_create(int num)
@@ -322,6 +323,8 @@ void eliminarCpu(int idcpu);
 t_sem*  encontrarSemaforo(char *nombre);
 t_HIO* encontrarDispositivo(char* nombre);
 t_varGlobal* encontrarVarGlobal(char* nombre);
+t_socket* encontrarSocket(int socket);
+t_socket* encontrarSocketPCB(int pcb);
 void borrarPCBenCPU(int idCPU);
 void mandarAFinProgramaPorBajaCPU(int socket);
 void borrarSocket(int socket);
@@ -345,6 +348,7 @@ int UMV_PUERTO;
 int Quamtum;
 int Retardo;
 int Multi;
+int IDcontador = 1;
 char *UMV_IP;
 t_list *listCPU, *listaNew, *listaReady, *listaDispositivos,*listaFin, *listaSemaforos;
 t_list *listaImprimir, *listaVarGlobal, *listaSocketProgramas;
