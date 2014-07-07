@@ -176,8 +176,9 @@ void *FinEjecucion(void *arg) {
 				string_append(&mensaje1, "F");
 				string_append(&mensaje1, auxFinal->mensaje);
 				string_append(&mensaje1, "\0");
-				auxSocket=encontrarSocketPCB(auxFinal->idPCB->id);
-				if (auxSocket!=NULL) EnviarDatos(auxSocket->socket, mensaje1);
+				auxSocket = encontrarSocketPCB(auxFinal->idPCB->id);
+				if (auxSocket != NULL )
+					EnviarDatos(auxSocket->socket, mensaje1);
 			}
 			log_trace(logger, "%s%d , MSJ= %s\n", "Finalizo el programa:",
 					auxFinal->idPCB->id, auxFinal->mensaje);
@@ -210,15 +211,15 @@ void *IMPRIMIRConsola(void *arg) {
 			string_append(&mensaje, "I");
 			string_append(&mensaje, auxImp->mensaje);
 			pthread_mutex_lock(&mutexSocketProgramas);
-			auxSocket=encontrarSocketPCB(auxImp->prog);
-			if (auxSocket!=NULL){
+			auxSocket = encontrarSocketPCB(auxImp->prog);
+			if (auxSocket != NULL ) {
 				EnviarDatos(auxSocket->socket, mensaje);
 				log_trace(logger, "%s%s\n", "Envie a imprimir: ", mensaje);
 			}
 			pthread_mutex_unlock(&mutexSocketProgramas);
 			free(mensaje);
 			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
-		}else{
+		} else {
 			pthread_mutex_unlock(&mutexImprimir);
 		}
 	}
@@ -265,9 +266,9 @@ void *moverEjecutar(void *arg) {
 		auxcpu = encontrarCPULibre();
 		if (auxcpu != NULL ) {
 			if (list_size(listaReady) > 0) {
-				auxList = list_take(listaReady, 1);
+				auxList = list_take_and_remove(listaReady, 1);
 				auxPCB = list_get(auxList, 0);
-				auxcpu->idPCB = auxPCB;
+				pasarDatosPCB(auxcpu->idPCB, auxPCB);
 				string_append(&buffer, string_itoa(Quamtum));
 				string_append(&buffer, "-");
 				string_append(&buffer, string_itoa(Retardo));
@@ -277,11 +278,12 @@ void *moverEjecutar(void *arg) {
 				edatos = EnviarDatos(auxcpu->idCPU, buffer);
 				auxcpu->libre = 1;
 				if (edatos > 0) {
-					list_remove(listaReady, 0);
 					imprimirListaReadyxTraza();
 					imprimirListaCPUxTraza();
+					free(auxPCB);
 				} else {
-					auxcpu->idPCB = NULL;
+					list_add_in_index(listaReady, 0, auxPCB);
+					llenarPCBconCeros(auxcpu->idPCB);
 				}
 				list_clean(auxList);
 			}
@@ -486,10 +488,10 @@ void crearEscucha() {
 					// gestionar datos de un cliente
 					// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
 
-					if (buffer!=NULL){
-							free(buffer);
-						}
-						buffer = string_new();
+					if (buffer != NULL ) {
+						free(buffer);
+					}
+					buffer = string_new();
 					//Recibimos los datos del cliente
 					buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
 					log_trace(logger, "nos ponemos a recibir %d",
@@ -945,13 +947,13 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 	int digitosID;
 	char* cadenaCambioContexto;
-	PCB* PCBAUX= malloc(sizeof (PCB));
+	PCB* PCBAUX = malloc(sizeof(PCB));
 	PCBAUX->id = IDcontador;
 	digitosID = cantidadDigitos(PCBAUX->id);
 	IDcontador++;
-	t_socket* auxSocket=encontrarSocket(id);
-	if (auxSocket!=NULL){
-		auxSocket->id=PCBAUX->id;
+	t_socket* auxSocket = encontrarSocket(id);
+	if (auxSocket != NULL ) {
+		auxSocket->id = PCBAUX->id;
 	}
 	cadenaCambioContexto = string_new();
 	string_append(&cadenaCambioContexto, string_itoa(4));
@@ -1199,9 +1201,10 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
-	log_trace(logger, "%s %d-%d-%d-%d-%d-%d-%d-%d-%d", "Se creo un PCB con: ", PCBAUX->id,
-			PCBAUX->indiceCodigo, PCBAUX->cursorStack, PCBAUX->indiceEtiquetas,
-			PCBAUX->programCounter, PCBAUX->segmentoCodigo, PCBAUX->segmentoStack,
+	log_trace(logger, "%s %d-%d-%d-%d-%d-%d-%d-%d-%d", "Se creo un PCB con: ",
+			PCBAUX->id, PCBAUX->indiceCodigo, PCBAUX->cursorStack,
+			PCBAUX->indiceEtiquetas, PCBAUX->programCounter,
+			PCBAUX->segmentoCodigo, PCBAUX->segmentoStack,
 			PCBAUX->sizeContextoActual, PCBAUX->sizeIndiceEtiquetas);
 	log_trace(logger, "%s%d", "El PCB tiene peso: ", pesito);
 	pthread_mutex_lock(&mutexNew);
@@ -1236,28 +1239,27 @@ int cantidadDigitos(int num) {
 
 	return contador;
 }
-char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos)
-{
-*bytesRecibidos = 0;
-if (buffer != NULL )
-{
-free(buffer);
-}
+char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
+	*bytesRecibidos = 0;
+	if (buffer != NULL ) {
+		free(buffer);
+	}
 
-char* bufferAux = malloc(BUFFERSIZE * sizeof(char));
-memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
+	char* bufferAux = malloc(BUFFERSIZE * sizeof(char));
+	memset(bufferAux, 0, BUFFERSIZE * sizeof(char)); //-> llenamos el bufferAux con barras ceros.
 
-if ((*bytesRecibidos = *bytesRecibidos + recv(socket, bufferAux, BUFFERSIZE, 0)) == -1)
-{
-Error("Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d", socket);
-}
-else
-{
+	if ((*bytesRecibidos = *bytesRecibidos
+			+ recv(socket, bufferAux, BUFFERSIZE, 0)) == -1) {
+		Error(
+				"Ocurrio un error al intentar recibir datos desde uno de los clientes. Socket: %d",
+				socket);
+	} else {
 
-}
+	}
 
-log_trace(logger, "RECIBO DATOS. socket: %d. buffer: %s", socket, (char*) bufferAux);
-return bufferAux; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
+	log_trace(logger, "RECIBO DATOS. socket: %d. buffer: %s", socket,
+			(char*) bufferAux);
+	return bufferAux; //--> buffer apunta al lugar de memoria que tiene el mensaje completo completo.
 }
 //char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos) {
 //	*bytesRecibidos = 0;
@@ -1521,7 +1523,7 @@ void *HiloOrquestadorDeCPU() {
 
 					// gestionar datos de un cliente
 					// Recibir hasta BUFF_SIZE datos y almacenarlos en 'buffer'.
-					if (buffer!=NULL){
+					if (buffer != NULL ) {
 						free(buffer);
 					}
 					buffer = string_new(); //-> de entrada lo instanciamos en 1 byte, el tamaño será dinamico y dependerá del tamaño del mensaje.
@@ -2035,10 +2037,7 @@ void borrarPCBenCPU(int idCPU) {
 	pthread_mutex_lock(&mutexCPU);
 	t_CPU *aux = encontrarCPU(idCPU);
 	if (aux != NULL ) {
-		if (aux->idPCB != NULL ) {
-//			free(aux->idPCB); TODO buscar como liberar memoria
-			aux->idPCB = NULL;
-		}
+		llenarPCBconCeros(aux->idPCB);
 	}
 	pthread_mutex_unlock(&mutexCPU);
 }
@@ -2118,10 +2117,10 @@ void comandoImprimir(char* buffer, int socket) {
 
 void comandoObtenerValorGlobar(char* buffer, int socket) {
 //OBtener valor variable compartida y mandarlo a CPU
-	char* variable=string_new();
-	string_append(&variable,"!");
+	char* variable = string_new();
+	string_append(&variable, "!");
 	char* variable2 = obtenerNombreMensaje(buffer, 1);
-	string_append(&variable,variable2);
+	string_append(&variable, variable2);
 	char* respuesta = string_new();
 	int ndatos;
 	t_varGlobal* auxVar = encontrarVarGlobal(variable);
@@ -2155,10 +2154,10 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 	char* variable2;
 	int valor;
 	int ndatos;
-	char* variable=string_new();
-	string_append(&variable,"!");
+	char* variable = string_new();
+	string_append(&variable, "!");
 	variable2 = obtenerParteDelMensaje(buffer, &pos);
-	string_append(&variable,variable2);
+	string_append(&variable, variable2);
 	valor = obtenerValorDelMensaje(buffer, pos);
 	log_trace(logger, "Actualizar variable: %s valor: %d", (char*) variable,
 			valor);
@@ -2183,10 +2182,10 @@ void comandoAbortar(char* buffer, int socket) {
 	msj = obtenerNombreMensaje(buffer, 1);
 	pthread_mutex_lock(&mutexCPU);
 	t_CPU *auxCPU = encontrarCPU(socket);
-	PCB* auxPCB;
+	PCB* auxPCB= malloc(sizeof(PCB));
 	if (auxCPU != NULL ) {
-		auxPCB = auxCPU->idPCB;
-		auxCPU->idPCB = NULL;
+		pasarDatosPCB(auxPCB,auxCPU->idPCB);
+		llenarPCBconCeros(auxCPU->idPCB);
 		pthread_mutex_lock(&mutexFIN);
 		list_add(listaFin, final_create(auxPCB, 1, msj));
 		imprimirListaFinxTraza();
@@ -2200,10 +2199,10 @@ void comandoAbortar(char* buffer, int socket) {
 
 void mandarAFinProgramaPorBajaCPU(int socket) {
 	t_CPU* auxCPU = encontrarCPU(socket);
-	PCB* auxPCB;
-	if (auxCPU != NULL ) {
-		auxPCB = auxCPU->idPCB;
+	PCB* auxPCB = malloc(sizeof(PCB));
+	if (auxCPU->idPCB->id != 0) {
 		if (auxPCB != NULL ) {
+			pasarDatosPCB(auxPCB, auxCPU->idPCB);
 			pthread_mutex_lock(&mutexFIN);
 			list_add(listaFin, final_create(auxPCB, 1, "Se cayo CPU"));
 			imprimirListaFinxTraza();
@@ -2365,7 +2364,7 @@ int estaProgActivo(int idprog) {
 	return 0;
 }
 
-t_socket* encontrarSocket(int socket){
+t_socket* encontrarSocket(int socket) {
 	int _is_socket(t_socket *p) {
 		return encontrarInt(p->socket, socket);
 	}
@@ -2376,7 +2375,7 @@ t_socket* encontrarSocket(int socket){
 	return NULL ;
 
 }
-t_socket* encontrarSocketPCB(int pcb){
+t_socket* encontrarSocketPCB(int pcb) {
 	int _is_socket(t_socket *p) {
 		return encontrarInt(p->id, pcb);
 	}
@@ -2386,4 +2385,28 @@ t_socket* encontrarSocketPCB(int pcb){
 	}
 	return NULL ;
 
+}
+
+void llenarPCBconCeros(PCB* auxPCB) {
+	auxPCB->id = 0;
+	auxPCB->cursorStack = 0;
+	auxPCB->indiceCodigo = 0;
+	auxPCB->indiceEtiquetas = 0;
+	auxPCB->programCounter = 0;
+	auxPCB->segmentoCodigo = 0;
+	auxPCB->segmentoStack = 0;
+	auxPCB->sizeContextoActual = 0;
+	auxPCB->sizeIndiceEtiquetas = 0;
+}
+
+void pasarDatosPCB(PCB* aPCB, PCB* dPCB) {
+	aPCB->id = dPCB->id;
+	aPCB->cursorStack = dPCB->cursorStack;
+	aPCB->indiceCodigo = dPCB->indiceCodigo;
+	aPCB->indiceEtiquetas = dPCB->indiceEtiquetas;
+	aPCB->programCounter = dPCB->programCounter;
+	aPCB->segmentoCodigo = dPCB->segmentoCodigo;
+	aPCB->segmentoStack = dPCB->segmentoStack;
+	aPCB->sizeContextoActual = dPCB->sizeContextoActual;
+	aPCB->sizeIndiceEtiquetas = dPCB->sizeIndiceEtiquetas;
 }

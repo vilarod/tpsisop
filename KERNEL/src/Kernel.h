@@ -61,6 +61,11 @@ int obtenerValorDelMensaje(char* buffer, int pos);
 char* serializar_PCB (PCB* prog);
 void iniciarPCB(PCB* prog);
 
+//manejo PCB
+void llenarPCBconCeros(PCB* auxPCB);
+void pasarDatosPCB(PCB* aPCB, PCB* dPCB);
+
+
 //Comando de mensajes
 void comandoLiberar(int socket);
 char ObtenerComandoCPU(char buffer[]);
@@ -109,7 +114,8 @@ typedef struct _t_CPU {
 static t_CPU *cpu_create(int idCPU)
 {
 	t_CPU *new = malloc(sizeof(t_CPU));
-	new->idPCB = NULL;
+	new->idPCB = malloc(sizeof(PCB));
+	llenarPCBconCeros(new->idPCB);
 	new->idCPU = idCPU;
 	new->libre = 1;
 	return new;
