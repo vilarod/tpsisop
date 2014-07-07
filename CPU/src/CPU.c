@@ -808,7 +808,14 @@ obtener_valor(t_nombre_compartida variable)
       if (string_starts_with(respuesta, mal))
         mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       else
+        {
+          if (string_starts_with(respuesta, AB_PROCESO))
+                mensajeAbortar(string_substring(respuesta, 0, strlen(respuesta)));
+
+
+      else
         kernelDesconectado();
+        }
     }
 
   free(mensaje);
@@ -1695,6 +1702,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
 
   //el mensaje que le mando es  PedidoSemaforo
   string_append(&mensaje, identificador_semaforo);
+  string_append(&mensaje,separador);
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL EL SEMAFORO: %s", identificador_semaforo);
   Enviar(socketKERNEL, mensaje);
   Recibir(socketKERNEL, respuesta);
@@ -1710,6 +1718,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
           down = 1;
           quantum = 0;
           tengoProg = 0;
+          programa->programCounter ++;
           procesoTerminoQuantum(2, identificador_semaforo, 0);
         }
       else
@@ -1731,6 +1740,7 @@ prim_signal(t_nombre_semaforo identificador_semaforo)
 
   //el mensaje que le mando es  PedidoSemaforo
   string_append(&mensaje, identificador_semaforo);
+  string_append(&mensaje,separador);
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL LIBERAR UNA INSTANCIA DEL SEMAFORO: %s",identificador_semaforo);
   Enviar(socketKERNEL, mensaje);
   Recibir(socketKERNEL, respuesta);
