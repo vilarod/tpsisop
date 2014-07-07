@@ -1846,8 +1846,12 @@ void eliminarCpu(int idcpu) {
 		return encontrarInt(p->idCPU, idcpu);
 	}
 	if (list_any_satisfy(listCPU, (void*) _is_CPU_ID)) {
-		list_remove_by_condition(listCPU, (void*) _is_CPU_ID);
+		t_CPU *auxCPU = list_remove_by_condition(listCPU, (void*) _is_CPU_ID);
+		if (auxCPU != NULL ) {
+			cpu_destroy(auxCPU);
+		}
 	}
+
 }
 
 void comandoFinalQuamtum(char *buffer, int socket) {
@@ -2182,9 +2186,9 @@ void comandoAbortar(char* buffer, int socket) {
 	msj = obtenerNombreMensaje(buffer, 1);
 	pthread_mutex_lock(&mutexCPU);
 	t_CPU *auxCPU = encontrarCPU(socket);
-	PCB* auxPCB= malloc(sizeof(PCB));
+	PCB* auxPCB = malloc(sizeof(PCB));
 	if (auxCPU != NULL ) {
-		pasarDatosPCB(auxPCB,auxCPU->idPCB);
+		pasarDatosPCB(auxPCB, auxCPU->idPCB);
 		llenarPCBconCeros(auxCPU->idPCB);
 		pthread_mutex_lock(&mutexFIN);
 		list_add(listaFin, final_create(auxPCB, 1, msj));

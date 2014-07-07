@@ -9406,3 +9406,92 @@ end
 
 [TRACE] 17:04:17:760 KERNEL/(3148:3163): Levanto hilo dispositivo: Impresora
 [TRACE] 17:04:17:760 KERNEL/(3148:3162): Levanto hilo dispositivo: Disco
+[TRACE] 17:21:14:670 KERNEL/(3983:3983): Obteniendo cadenas: [sem1,sem2] [2,0]
+[TRACE] 17:21:14:674 KERNEL/(3983:3983): valores obtenidos: sem1, 2
+[TRACE] 17:21:14:674 KERNEL/(3983:3983): valores obtenidos: sem2, 0
+[TRACE] 17:21:14:674 KERNEL/(3983:3983): semaforo: sem1 valor: 2
+[TRACE] 17:21:14:674 KERNEL/(3983:3983): semaforo: sem2 valor: 0
+[TRACE] 17:21:14:675 KERNEL/(3983:3983): Obteniendo cadenas: [!o,!a] [3,5]
+[TRACE] 17:21:14:675 KERNEL/(3983:3983): valores obtenidos: !o, 3
+[TRACE] 17:21:14:675 KERNEL/(3983:3983): valores obtenidos: !a, 5
+[TRACE] 17:21:14:676 KERNEL/(3983:3983): Lista var Globales(cant 2):
+[variable: !o, valor: 3]
+[variable: !a, valor: 5]
+[TRACE] 17:21:14:676 KERNEL/(3983:3983): Obteniendo cadenas: [Disco,Impresora] [10,20]
+[TRACE] 17:21:14:677 KERNEL/(3983:3983): valores obtenidos: Disco, 10
+[TRACE] 17:21:14:677 KERNEL/(3983:3983): valores obtenidos: Impresora, 20
+[TRACE] 17:21:14:681 KERNEL/(3983:3983): Dispositivo: Disco valor: 10
+[TRACE] 17:21:14:681 KERNEL/(3983:3983): Dispositivo: Impresora valor: 20
+[TRACE] 17:21:14:700 KERNEL/(3983:3988): Intentando conectar a umv.
+[TRACE] 17:21:14:702 KERNEL/(3983:3988): ENVIO datos. socket: 6. buffer: 31
+[TRACE] 17:21:14:718 KERNEL/(3983:3988): RECIBO datos. socket: 6. buffer: 1
+[TRACE] 17:21:14:718 KERNEL/(3983:3988): Conectado a la UMV
+
+[TRACE] 17:21:14:739 KERNEL/(3983:3992): Escuchando conexiones entrantes PCP(8500).
+
+[TRACE] 17:21:14:793 KERNEL/(3983:3996): Levanto hilo dispositivo: Disco
+[TRACE] 17:21:14:834 KERNEL/(3983:3997): Levanto hilo dispositivo: Impresora
+[TRACE] 17:21:14:857 KERNEL/(3983:3988): Escuchando conexiones entrantes PLP(8000).
+
+[TRACE] 17:22:14:872 KERNEL/(3983:3992): RECIBO DATOS. socket: 9. buffer: 32
+[TRACE] 17:22:14:872 KERNEL/(3983:3992): nos ponemos a recibir 2
+[TRACE] 17:22:14:872 KERNEL/(3983:3992): Tipos de mensaje: 3
+[TRACE] 17:22:14:872 KERNEL/(3983:3992): HandShake
+[TRACE] 17:22:14:872 KERNEL/(3983:3992): tipo de cliente: 2
+[TRACE] 17:22:14:872 KERNEL/(3983:3992): creando CPU
+[TRACE] 17:22:14:873 KERNEL/(3983:3992): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 17:22:14:879 KERNEL/(3983:3992): RECIBO DATOS. socket: 9. buffer: L-
+[TRACE] 17:22:14:879 KERNEL/(3983:3992): nos ponemos a recibir 2
+[TRACE] 17:22:14:879 KERNEL/(3983:3992): Tipos de mensaje: L
+[TRACE] 17:22:14:879 KERNEL/(3983:3992): Se librera CPU: 9
+[TRACE] 17:22:14:879 KERNEL/(3983:3992): Lista CPU(cant 1):
+[CPU: 9,Estado: 0]
+[TRACE] 17:22:21:991 KERNEL/(3983:3992): RECIBO DATOS. socket: 9. buffer: 
+[TRACE] 17:22:21:991 KERNEL/(3983:3992): nos ponemos a recibir 0
+[TRACE] 17:22:21:991 KERNEL/(3983:3992): select PCP: socket 9 hung up
+
+[TRACE] 17:24:06:983 KERNEL/(4064:4064): Obteniendo cadenas: [sem1,sem2] [2,0]
+[TRACE] 17:24:06:985 KERNEL/(4064:4064): valores obtenidos: sem1, 2
+[TRACE] 17:24:06:985 KERNEL/(4064:4064): valores obtenidos: sem2, 0
+[TRACE] 17:24:06:986 KERNEL/(4064:4064): semaforo: sem1 valor: 2
+[TRACE] 17:24:06:986 KERNEL/(4064:4064): semaforo: sem2 valor: 0
+[TRACE] 17:24:06:986 KERNEL/(4064:4064): Obteniendo cadenas: [!o,!a] [3,5]
+[TRACE] 17:24:06:988 KERNEL/(4064:4064): valores obtenidos: !o, 3
+[TRACE] 17:24:06:989 KERNEL/(4064:4064): valores obtenidos: !a, 5
+[TRACE] 17:24:06:989 KERNEL/(4064:4064): Lista var Globales(cant 2):
+[variable: !o, valor: 3]
+[variable: !a, valor: 5]
+[TRACE] 17:24:06:990 KERNEL/(4064:4064): Obteniendo cadenas: [Disco,Impresora] [10,20]
+[TRACE] 17:24:06:990 KERNEL/(4064:4064): valores obtenidos: Disco, 10
+[TRACE] 17:24:06:994 KERNEL/(4064:4064): valores obtenidos: Impresora, 20
+[TRACE] 17:24:06:994 KERNEL/(4064:4064): Dispositivo: Disco valor: 10
+[TRACE] 17:24:06:994 KERNEL/(4064:4064): Dispositivo: Impresora valor: 20
+[TRACE] 17:24:06:5 KERNEL/(4064:4069): Intentando conectar a umv.
+[TRACE] 17:24:07:7 KERNEL/(4064:4069): ENVIO datos. socket: 6. buffer: 31
+[TRACE] 17:24:07:34 KERNEL/(4064:4069): RECIBO datos. socket: 6. buffer: 1
+[TRACE] 17:24:07:34 KERNEL/(4064:4069): Conectado a la UMV
+
+[TRACE] 17:24:07:47 KERNEL/(4064:4073): Escuchando conexiones entrantes PCP(8500).
+
+[TRACE] 17:24:07:132 KERNEL/(4064:4069): Escuchando conexiones entrantes PLP(8000).
+
+[TRACE] 17:24:07:150 KERNEL/(4064:4078): Levanto hilo dispositivo: Disco
+[TRACE] 17:24:07:169 KERNEL/(4064:4079): Levanto hilo dispositivo: Impresora
+[TRACE] 17:24:52:624 KERNEL/(4064:4073): RECIBO DATOS. socket: 9. buffer: 32
+[TRACE] 17:24:52:624 KERNEL/(4064:4073): nos ponemos a recibir 2
+[TRACE] 17:24:52:624 KERNEL/(4064:4073): Tipos de mensaje: 3
+[TRACE] 17:24:52:624 KERNEL/(4064:4073): HandShake
+[TRACE] 17:24:52:624 KERNEL/(4064:4073): tipo de cliente: 2
+[TRACE] 17:24:52:624 KERNEL/(4064:4073): creando CPU
+[TRACE] 17:24:52:624 KERNEL/(4064:4073): ENVIO datos. socket: 9. buffer: 1
+[TRACE] 17:24:52:625 KERNEL/(4064:4073): RECIBO DATOS. socket: 9. buffer: L-
+[TRACE] 17:24:52:626 KERNEL/(4064:4073): nos ponemos a recibir 2
+[TRACE] 17:24:52:626 KERNEL/(4064:4073): Tipos de mensaje: L
+[TRACE] 17:24:52:626 KERNEL/(4064:4073): Se librera CPU: 9
+[TRACE] 17:24:52:626 KERNEL/(4064:4073): Lista CPU(cant 1):
+[CPU: 9,Estado: 0]
+[TRACE] 17:24:58:891 KERNEL/(4064:4073): RECIBO DATOS. socket: 9. buffer: 
+[TRACE] 17:24:58:891 KERNEL/(4064:4073): nos ponemos a recibir 0
+[TRACE] 17:24:58:891 KERNEL/(4064:4073): select PCP: socket 9 hung up
+
+[TRACE] 17:25:57:793 KERNEL/(4064:4073): Lista CPU(cant 0):
