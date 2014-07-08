@@ -4,6 +4,7 @@
 //Sockets
 int ConexionConSocket(int puerto, char* IP );
 int EnviarDatos(int sRemoto, void *buffer);
+int EnviarDatosConTam(int socket, void *buffer, int tamanio);
 int RecibirDatos(int sRemoto, char *buffer);
 char* RecibirDatos2(int socket, char *buffer, int *bytesRecibidos);
 void Cerrar (int sRemoto);

@@ -32,7 +32,7 @@
 #include <commons/log.h>
 
 //Ruta del config
-#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
+#define PATH_CONFIG "config.cfg"
 
 //log
 t_log* logger;
@@ -865,6 +865,17 @@ int EnviarDatos(int socket, void *buffer) {
 
 	return bytecount;
 }
+int EnviarDatosConTam(int socket, void *buffer, int tamanio) {
+	int bytecount;
+
+	if ((bytecount = send(socket, buffer, tamanio, 0)) == -1)
+		Error("No puedo enviar información a al clientes. Socket: %d", socket);
+
+	log_trace(logger, "ENVIO datos. socket: %d. buffer: %s", socket,
+			(char*) buffer);
+
+	return bytecount;
+}
 
 //void error(int code, char *err) {
 //	char *msg = (char*) malloc(strlen(err) + 14);
@@ -941,6 +952,11 @@ int chartToInt(char x) {
 	int a = atoi(str);
 	return a;
 }
+
+union {
+	unsigned int numero;
+	unsigned char byte[4];
+} foo;
 
 int ComandoRecibirPrograma(char *buffer, int id) {
 	//QUITAR DEL BUFFER EL COD DE MSJ
@@ -1083,8 +1099,27 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 							string_append(&escribirEtiq,
 									string_itoa(
 											metadataprograma->etiquetas_size));
-							string_append(&escribirEtiq,
-									metadataprograma->etiquetas);
+
+							int x;
+							for (x = 0; x < metadataprograma->etiquetas_size;
+									x++) {
+								log_trace(logger, "%c",
+										metadataprograma->etiquetas[x]);
+
+								char * aux = malloc(1 * sizeof(char));
+								memset(aux, 0, 1);
+
+								if (metadataprograma->etiquetas[x] == '\0')
+									sprintf(aux, "%c", '!');
+								else
+									sprintf(aux, "%c",
+											metadataprograma->etiquetas[x]);
+
+								string_append(&escribirEtiq, aux);
+								free(aux);
+
+							}
+
 							EnviarDatos(socketumv, escribirEtiq);
 							if (RecibirDatos(socketumv, respuestaumv6) <= 0) {
 								ErrorFatal(
@@ -1156,8 +1191,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 									log_trace(logger, "offset %d: %d", i,
 											tamanio);
 
-									ceros1 = (4 - cantidadDigitos(comienzo));
-									ceros2 = (4 - cantidadDigitos(tamanio));
+									ceros1 = (8 - cantidadDigitos(comienzo));
+									ceros2 = (8 - cantidadDigitos(tamanio));
 									//LLenar de 0 el start
 									while (j < ceros1) {
 										string_append(&escribirCodex, "0");
