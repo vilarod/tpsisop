@@ -1072,10 +1072,10 @@ imprimirContextoActual()
             {
 
               string_append(&mensaje, "VARIABLE ");
-              string_append(&mensaje, string_substring(variables, pos, 1));
+              string_append(&mensaje, string_substring(variables, pos, DIG_NOM_VAR));
               string_append(&mensaje, ":");
               string_append(&mensaje,
-                  string_itoa(atoi(string_substring(variables, (pos + 1), 4))));
+                  string_itoa(atoi(string_substring(variables, (pos + 1), VAR_STACK - DIG_NOM_VAR))));
               string_append(&mensaje, " ");
               pos = pos + VAR_STACK;
             }
