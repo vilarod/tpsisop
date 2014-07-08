@@ -420,10 +420,12 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
   log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
   if (string_starts_with(msj, bien)) //si el mensaje es valido -> busca despl y longi
     {
-      *despl = atoi(string_substring(msj, 1, tamanio1));
+
+      *despl = *string_substring(msj, 1, tamanio1);
       log_trace(logger, "TRAZA - DESPLAZAMIENTO: %d", *despl);
 
-      *longi = atoi(string_substring(msj, tamanio1 + 1, tamanio2));
+      *longi = *string_substring(msj, tamanio1 + 1, tamanio2);
+
       log_trace(logger, "TRAZA - LONGITUD: %d", *longi);
     }
   else
@@ -1292,9 +1294,11 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ASIGNAR");
   int validar;
   char* mensaje=string_new();
-  int ceros = (DIG_VAL_VAR - cantidadDigitos(valor));
-  rellenarConCeros(ceros,&mensaje);
-  string_append(&mensaje, string_itoa(valor));
+
+  char* valor_char=malloc(sizeof(t_valor_variable));
+  *valor_char=valor;
+  memset(valor_char,0,sizeof(t_valor_variable));
+  string_append(&mensaje, valor_char);
 
   //int despl=(direccion_variable - programa->segmentoStack)+ DIG_NOM_VAR;
 
@@ -1461,7 +1465,7 @@ prim_retornar(t_valor_variable retorno)
   aux = aux - VAR_STACK;
   char *pedido = malloc(BUFFERSIZE * sizeof(char));
   memset(pedido,0,BUFFERSIZE);
-  pedido = getUMV(aux, 0, VAR_STACK);
+  pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
 
   if (string_starts_with(pedido,bien))
     {
@@ -1575,7 +1579,17 @@ prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA IrAlLabel");
 
+
+  int x;
+
+  for(x=0; x < programa->sizeIndiceEtiquetas; x ++)
+    {
+      if (*(etiquetas + x) == '!')
+        *(etiquetas + x)='\0';
+    }
+
   programa->programCounter = metadata_buscar_etiqueta(etiqueta, etiquetas,programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
+  programa->programCounter ++ ;
   log_trace(logger, "TRAZA - EL VALOR DEL PROGRAM COUNTER ES: %d",programa->programCounter);
 }
 
@@ -1631,7 +1645,7 @@ prim_definirVariable(t_nombre_variable identificador_variable)
 
   if ((dictionary_has_key(dicVariables, string_substring(var, 0, 1))) == false)
     {
-      if ((setUMV(programa->cursorStack, pos_var_stack, 1, string_substring(var, 0, 1))) > 0)
+      if ((setUMV(programa->segmentoStack, pos_var_stack, 1, string_substring(var, 0, 1))) > 0)
         {
           dictionary_put(dicVariables, string_substring(var, 0, 1),(void*) pos_var_stack); //la registro en el dicc de variables
           programa->sizeContextoActual++;
