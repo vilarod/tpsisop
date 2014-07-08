@@ -61,7 +61,7 @@
 int aux_conec_umv = 0;
 int aux_conec_ker = 0;
 
-const int TAM_INSTRUCCION = sizeof(t_intructions);
+const int TAM_INSTRUCCION = 20;
 const int DIG_VAL_VAR = 10;
 const int DIG_NOM_VAR = sizeof(t_nombre_variable);
 const int VAR_STACK = 11; //10 para el valor, 1 para el nombre
@@ -414,7 +414,7 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
 {
   int tamanio = 10;
 
-  //log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
+
 
   log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
   if (string_starts_with(msj, bien)) //si el mensaje es valido -> busca despl y longi
@@ -623,8 +623,8 @@ PedirSentencia(char** sentencia)
   instruccion = getUMV(programa->indiceCodigo,
       programa->programCounter * TAM_INSTRUCCION, TAM_INSTRUCCION);
 
-  if (string_starts_with(instruccion, bien)
-      && ((strlen(instruccion) - 1) == TAM_INSTRUCCION))
+  if ((string_starts_with(instruccion, bien)
+      && (strlen(string_substring(instruccion, 1, TAM_INSTRUCCION)) == TAM_INSTRUCCION)))
     {
       deserializarDesplLong(instruccion, &despl, &longi);
       instruccion = string_new();
