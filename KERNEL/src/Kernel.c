@@ -1130,7 +1130,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
 //							//Creacion segmento Indice codigo
-							int tamaniodeindice = (sizeof(t_intructions))
+							int tamaniodeindice = 20
 									* (metadataprograma->instrucciones_size);
 							char* codex = string_new();
 							int digitocode = cantidadDigitos(tamaniodeindice);
@@ -1191,8 +1191,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 									log_trace(logger, "offset %d: %d", i,
 											tamanio);
 
-									ceros1 = (8 - cantidadDigitos(comienzo));
-									ceros2 = (8 - cantidadDigitos(tamanio));
+									ceros1 = (10 - cantidadDigitos(comienzo));
+									ceros2 = (10 - cantidadDigitos(tamanio));
 									//LLenar de 0 el start
 									while (j < ceros1) {
 										string_append(&escribirCodex, "0");
