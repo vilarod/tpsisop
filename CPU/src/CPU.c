@@ -62,9 +62,9 @@ int aux_conec_umv = 0;
 int aux_conec_ker = 0;
 
 const int TAM_INSTRUCCION = sizeof(t_intructions);
-const int DIG_VAL_VAR = sizeof(t_valor_variable);
+const int DIG_VAL_VAR = 10;
 const int DIG_NOM_VAR = sizeof(t_nombre_variable);
-const int VAR_STACK = (sizeof(t_valor_variable) + sizeof(t_nombre_variable));
+const int VAR_STACK = 11; //10 para el valor, 1 para el nombre
 
 
 int socketUMV = 0;
@@ -412,8 +412,7 @@ serCadena(char ** msj, char* agr)
 void
 deserializarDesplLong(char * msj, int* despl, int* longi)
 {
-  int tamanio1 = sizeof(t_puntero_instruccion);
-  int tamanio2 = sizeof(t_size);
+  int tamanio = 10;
 
   //log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
 
@@ -421,10 +420,10 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
   if (string_starts_with(msj, bien)) //si el mensaje es valido -> busca despl y longi
     {
 
-      *despl = *string_substring(msj, 1, tamanio1);
+      *despl = atoi(string_substring(msj, 1, tamanio));
       log_trace(logger, "TRAZA - DESPLAZAMIENTO: %d", *despl);
 
-      *longi = *string_substring(msj, tamanio1 + 1, tamanio2);
+      *longi = atoi(string_substring(msj, tamanio + 1, tamanio));
 
       log_trace(logger, "TRAZA - LONGITUD: %d", *longi);
     }
@@ -1293,14 +1292,12 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ASIGNAR");
   int validar;
-  char* mensaje=string_new();
 
-  char* valor_char=malloc(sizeof(t_valor_variable));
-  *valor_char=valor;
-  memset(valor_char,0,sizeof(t_valor_variable));
-  string_append(&mensaje, valor_char);
+   char* mensaje=string_new();
+   int ceros = ((VAR_STACK - DIG_NOM_VAR) - cantidadDigitos(valor));
+   rellenarConCeros(ceros,&mensaje);
+   string_append(&mensaje, string_itoa(valor));
 
-  //int despl=(direccion_variable - programa->segmentoStack)+ DIG_NOM_VAR;
 
   validar = setUMV(programa->segmentoStack, direccion_variable + 1, DIG_VAL_VAR, mensaje);
   if (validar == 1) //si es <=0 el set aborta el proceso
@@ -1417,22 +1414,24 @@ prim_finalizar(void)
 
   if (aux > programa->segmentoStack)
     {
-      aux = aux - VAR_STACK;
+      aux = (aux - programa->segmentoStack) - VAR_STACK;
       char *pedido = malloc(BUFFERSIZE * sizeof(char));
       memset(pedido,0,BUFFERSIZE);
-      pedido = getUMV(aux, 0, VAR_STACK);
+      pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
 
       if (string_starts_with(pedido, bien))
         {
           programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
+
           log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d", programa->programCounter);
-          aux = aux - (VAR_STACK * 2);
-          pedido = getUMV(aux, 0, VAR_STACK);
+          aux = aux - VAR_STACK;
+          pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
           if (string_starts_with(pedido, bien))
             {
+              aux = aux - VAR_STACK;
               programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
               log_trace(logger, "TRAZA - EL CURSOR STACK ES: %d", programa->cursorStack);
-              programa->sizeContextoActual = ((aux - (programa->cursorStack))/ VAR_STACK);
+              programa->sizeContextoActual = ((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK);
               log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
               if (programa->sizeContextoActual > 0)
                 {
@@ -1462,10 +1461,11 @@ prim_retornar(t_valor_variable retorno)
 
   int retor;
   int aux = programa->cursorStack; //tengo que leer desde la base del stack anterior hacia abajo
-  aux = aux - VAR_STACK;
+  aux = (aux - programa->segmentoStack) - VAR_STACK;
   char *pedido = malloc(BUFFERSIZE * sizeof(char));
   memset(pedido,0,BUFFERSIZE);
   pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
+
 
   if (string_starts_with(pedido,bien))
     {
@@ -1476,21 +1476,21 @@ prim_retornar(t_valor_variable retorno)
 
       if (setUMV(programa->segmentoStack, retor + 1, DIG_VAL_VAR, string_itoa(retorno)) == 1)
         {
-          aux = aux - (VAR_STACK * 2);
-          pedido = getUMV(programa->segmentoStack, 0, VAR_STACK);
+          aux = aux - VAR_STACK;
+          pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
 
           if (string_starts_with(pedido, bien))
             {
               programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
               log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d",programa->programCounter);
-              aux = aux - (VAR_STACK * 3);
-              pedido = getUMV(aux, 0, VAR_STACK);
+              aux = aux - VAR_STACK;
+              pedido = getUMV(programa->segmentoStack,aux, VAR_STACK);
 
               if (string_starts_with(pedido, bien))
                 {
                   programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
                   log_trace(logger, "TRAZA - EL CURSOR DEL STACK ES: %d",programa->cursorStack);
-                  programa->sizeContextoActual =((aux - (programa->cursorStack)) / VAR_STACK);
+                  programa->sizeContextoActual =((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK);
                   log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
 
                   if (programa->sizeContextoActual > 0)
