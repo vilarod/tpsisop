@@ -32,7 +32,7 @@
 #include <commons/log.h>
 
 //Ruta del config
-#define PATH_CONFIG "/home/utnso/tp-2014-1c-garras/KERNEL/src/config.cfg"
+#define PATH_CONFIG "config.cfg"
 
 //log
 t_log* logger;
@@ -191,7 +191,7 @@ void *FinEjecucion(void *arg) {
 			pthread_mutex_unlock(&mutexFIN);
 		}
 
-		semsig(&multiCont);
+		//semsig(&multiCont); El estado Fin no cuenta como estado activo
 	}
 	return NULL ;
 }
@@ -268,22 +268,28 @@ void *moverEjecutar(void *arg) {
 			if (list_size(listaReady) > 0) {
 				auxList = list_take_and_remove(listaReady, 1);
 				auxPCB = list_get(auxList, 0);
-				pasarDatosPCB(auxcpu->idPCB, auxPCB);
-				string_append(&buffer, string_itoa(Quamtum));
-				string_append(&buffer, "-");
-				string_append(&buffer, string_itoa(Retardo));
-				string_append(&buffer, "-");
-				cadena = serializar_PCB(auxPCB);
-				string_append(&buffer, cadena);
-				edatos = EnviarDatos(auxcpu->idCPU, buffer);
-				auxcpu->libre = 1;
-				if (edatos > 0) {
-					imprimirListaReadyxTraza();
-					imprimirListaCPUxTraza();
-					free(auxPCB);
+				if (estaProgActivo(auxPCB->id)) {
+					pasarDatosPCB(auxcpu->idPCB, auxPCB);
+					string_append(&buffer, string_itoa(Quamtum));
+					string_append(&buffer, "-");
+					string_append(&buffer, string_itoa(Retardo));
+					string_append(&buffer, "-");
+					cadena = serializar_PCB(auxPCB);
+					string_append(&buffer, cadena);
+					edatos = EnviarDatos(auxcpu->idCPU, buffer);
+					auxcpu->libre = 1;
+					if (edatos > 0) {
+						imprimirListaReadyxTraza();
+						imprimirListaCPUxTraza();
+						free(auxPCB);
+					} else {
+						list_add_in_index(listaReady, 0, auxPCB);
+						llenarPCBconCeros(auxcpu->idPCB);
+					}
 				} else {
-					list_add_in_index(listaReady, 0, auxPCB);
-					llenarPCBconCeros(auxcpu->idPCB);
+					imprimirListaReadyxTraza();
+					mandarPCBaFIN(auxPCB, 1, "Programa inactivo");
+					semsig(&CPUCont);
 				}
 				list_clean(auxList);
 			}
@@ -337,23 +343,32 @@ void *bloqueados_fnc(void *arg) {
 			auxLista = list_take_and_remove(HIO->listaBloqueados, 1);
 			pthread_mutex_unlock(&(HIO->mutexBloqueados));
 			auxBloq = list_get(auxLista, 0);
-			//Procesando HIO
-			log_trace(logger, "Entrada HIO disp %s programa: %d tiempo: %d",
-					(char*) HIO->nombre, auxBloq->idPCB->id, auxBloq->tiempo);
-			sleep(HIO->valor * auxBloq->tiempo);
-			//Pasar a Ready
-			log_trace(logger, "Termino HIO programa: %d", auxBloq->idPCB->id);
 			auxPCB = auxBloq->idPCB;
 			auxBloq->idPCB = NULL;
-			imprimirListaBloqueadosPorUnDispositivoxTraza(HIO->listaBloqueados,
-					HIO->nombre);
-			pthread_mutex_lock(&mutexReady);
-			list_add(listaReady, auxPCB);
-			imprimirListaReadyxTraza();
-			pthread_mutex_unlock(&mutexReady);
-			semsig(&readyCont);
+			if (estaProgActivo(auxPCB->id)) {
+				//Procesando HIO
+				log_trace(logger, "Entrada HIO disp %s programa: %d tiempo: %d",
+						(char*) HIO->nombre, auxPCB->id, auxBloq->tiempo);
+				sleep(HIO->valor * auxBloq->tiempo / 1000);
+				log_trace(logger, "Termino HIO programa: %d", auxPCB->id);
+				imprimirListaBloqueadosPorUnDispositivoxTraza(
+						HIO->listaBloqueados, HIO->nombre);
+				//Pasar a Ready
+				if (estaProgActivo(auxPCB->id)) {
+					pthread_mutex_lock(&mutexReady);
+					list_add(listaReady, auxPCB);
+					imprimirListaReadyxTraza();
+					pthread_mutex_unlock(&mutexReady);
+					semsig(&readyCont);
+				} else {
+					mandarPCBaFIN(auxPCB, 1, "Programa inactivo");
+				}
+			} else {
+				mandarPCBaFIN(auxPCB, 1, "Programa inactivo");
+			}
 			list_clean_and_destroy_elements(auxLista,
 					(void*) bloqueado_destroy);
+
 		} else {
 			pthread_mutex_unlock(&(HIO->mutexBloqueados));
 		}
@@ -377,14 +392,18 @@ void *moverReadyDeNew(void *arg) {
 			auxNew = list_get(auxList, 0);
 			auxPCB = auxNew->idPCB;
 			auxNew->idPCB = NULL;
-			log_trace(logger, "Moviendo a ready programa: %d", auxPCB->id);
-			pthread_mutex_lock(&mutexReady);
-			list_add(listaReady, auxPCB);
-			imprimirListaReadyxTraza();
-			pthread_mutex_unlock(&mutexReady);
-			list_clean_and_destroy_elements(auxList, (void*) new_destroy);
-			imprimirListaNewxTraza();
-			semsig(&readyCont);
+			if (estaProgActivo(auxPCB->id)) {
+				log_trace(logger, "Moviendo a ready programa: %d", auxPCB->id);
+				pthread_mutex_lock(&mutexReady);
+				list_add(listaReady, auxPCB);
+				imprimirListaReadyxTraza();
+				pthread_mutex_unlock(&mutexReady);
+				list_clean_and_destroy_elements(auxList, (void*) new_destroy);
+				imprimirListaNewxTraza();
+				semsig(&readyCont);
+			} else {
+				mandarPCBaFIN(auxPCB, 1, "Prgrama inactivo");
+			}
 		} else {
 			pthread_mutex_unlock(&mutexNew);
 			semsig(&multiCont);
@@ -865,6 +884,17 @@ int EnviarDatos(int socket, void *buffer) {
 
 	return bytecount;
 }
+int EnviarDatosConTam(int socket, void *buffer, int tamanio) {
+	int bytecount;
+
+	if ((bytecount = send(socket, buffer, tamanio, 0)) == -1)
+		Error("No puedo enviar información a al clientes. Socket: %d", socket);
+
+	log_trace(logger, "ENVIO datos. socket: %d. buffer: %s", socket,
+			(char*) buffer);
+
+	return bytecount;
+}
 
 //void error(int code, char *err) {
 //	char *msg = (char*) malloc(strlen(err) + 14);
@@ -941,6 +971,11 @@ int chartToInt(char x) {
 	int a = atoi(str);
 	return a;
 }
+
+union {
+	unsigned int numero;
+	unsigned char byte[4];
+} foo;
 
 int ComandoRecibirPrograma(char *buffer, int id) {
 	//QUITAR DEL BUFFER EL COD DE MSJ
@@ -1083,8 +1118,27 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 							string_append(&escribirEtiq,
 									string_itoa(
 											metadataprograma->etiquetas_size));
-							string_append(&escribirEtiq,
-									metadataprograma->etiquetas);
+
+							int x;
+							for (x = 0; x < metadataprograma->etiquetas_size;
+									x++) {
+								log_trace(logger, "%c",
+										metadataprograma->etiquetas[x]);
+
+								char * aux = malloc(1 * sizeof(char));
+								memset(aux, 0, 1);
+
+								if (metadataprograma->etiquetas[x] == '\0')
+									sprintf(aux, "%c", '!');
+								else
+									sprintf(aux, "%c",
+											metadataprograma->etiquetas[x]);
+
+								string_append(&escribirEtiq, aux);
+								free(aux);
+
+							}
+
 							EnviarDatos(socketumv, escribirEtiq);
 							if (RecibirDatos(socketumv, respuestaumv6) <= 0) {
 								ErrorFatal(
@@ -1095,7 +1149,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 						if (analisarRespuestaUMV(respuestaumv6) != 0) {
 
 //							//Creacion segmento Indice codigo
-							int tamaniodeindice = (sizeof(t_intructions))
+							int tamaniodeindice = 20
 									* (metadataprograma->instrucciones_size);
 							char* codex = string_new();
 							int digitocode = cantidadDigitos(tamaniodeindice);
@@ -1156,8 +1210,8 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 									log_trace(logger, "offset %d: %d", i,
 											tamanio);
 
-									ceros1 = (4 - cantidadDigitos(comienzo));
-									ceros2 = (4 - cantidadDigitos(tamanio));
+									ceros1 = (10 - cantidadDigitos(comienzo));
+									ceros2 = (10 - cantidadDigitos(tamanio));
 									//LLenar de 0 el start
 									while (j < ceros1) {
 										string_append(&escribirCodex, "0");
@@ -1861,75 +1915,68 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 	char* nombre;
 	char* disp;
 	auxPCB = desearilizar_PCB(buffer, &pos);
-	int pos2 = pos + 2;
-	switch (buffer[pos]) {
-	case '0': //termino quamtum colocar en ready
-		log_trace(logger, "lo deseareliza %d", pos);
-		pthread_mutex_lock(&mutexReady);
-		list_add(listaReady, auxPCB);
-		imprimirListaReadyxTraza();
-		pthread_mutex_unlock(&mutexReady);
-		semsig(&readyCont);
-		log_trace(logger, "Final Quamtum mover a ready. Programa: %d",
-				auxPCB->id);
-		break;
-	case '1':	//Hay que hacer I/O
-		disp = obtenerParteDelMensaje(buffer, &pos2);
-		tiempo = obtenerValorDelMensaje(buffer, pos2);
-		t_HIO* auxHIO = encontrarDispositivo(disp);
-		if (auxHIO != NULL ) {
-			pthread_mutex_lock(&(auxHIO->mutexBloqueados));
-			list_add(auxHIO->listaBloqueados, bloqueado_create(auxPCB, tiempo));
-			imprimirListaBloqueadosPorUnDispositivoxTraza(
-					auxHIO->listaBloqueados, auxHIO->nombre);
-			pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
-			semsig(&(auxHIO->bloqueadosCont));
-			log_trace(logger,
-					"Final Quamtum programa: %d. Pide Dispositivo: %s",
-					auxPCB->id, (char*) auxHIO->nombre);
-		} else {
-			log_trace(logger, "No encontro dispositivo");
-			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin,
-					final_create(auxPCB, 1, "Dispositivo no encontrado"));
-			imprimirListaFinxTraza();
-			pthread_mutex_unlock(&mutexFIN);
-			semsig(&finalizarCont);
-			semsig(&multiCont);
-		}
-		break;
-	case '2':	//Bloqueado por semaforo
-		nombre = obtenerNombreMensaje(buffer, pos2);
-		pthread_mutex_lock(&mutexSemaforos);
-		t_sem* auxSem = encontrarSemaforo(nombre);
-		if (auxSem != NULL ) {
-			if (auxSem->valor < 0) {
-				//Bloquear Programa por semaforo
+	if (estaProgActivo(auxPCB->id)) {
+		int pos2 = pos + 2;
+		switch (buffer[pos]) {
+		case '0': //termino quamtum colocar en ready
+			log_trace(logger, "lo deseareliza %d", pos);
+			pthread_mutex_lock(&mutexReady);
+			list_add(listaReady, auxPCB);
+			imprimirListaReadyxTraza();
+			pthread_mutex_unlock(&mutexReady);
+			semsig(&readyCont);
+			log_trace(logger, "Final Quamtum mover a ready. Programa: %d",
+					auxPCB->id);
+			break;
+		case '1':	//Hay que hacer I/O
+			disp = obtenerParteDelMensaje(buffer, &pos2);
+			tiempo = obtenerValorDelMensaje(buffer, pos2);
+			t_HIO* auxHIO = encontrarDispositivo(disp);
+			if (auxHIO != NULL ) {
+				pthread_mutex_lock(&(auxHIO->mutexBloqueados));
+				list_add(auxHIO->listaBloqueados,
+						bloqueado_create(auxPCB, tiempo));
+				imprimirListaBloqueadosPorUnDispositivoxTraza(
+						auxHIO->listaBloqueados, auxHIO->nombre);
+				pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
+				semsig(&(auxHIO->bloqueadosCont));
 				log_trace(logger,
-						"Final Quamtum programa: %d. bloqueado por semaforo: %s",
-						auxPCB->id, (char*) auxSem->nombre);
-				list_add(auxSem->listaSem, auxPCB);
-				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
-						auxSem->nombre);
+						"Final Quamtum programa: %d. Pide Dispositivo: %s",
+						auxPCB->id, (char*) auxHIO->nombre);
 			} else {
-				//Desbloquar Programa
-				pthread_mutex_lock(&mutexReady);
-				list_add(listaReady, auxPCB);
-				imprimirListaReadyxTraza();
-				pthread_mutex_unlock(&mutexReady);
-				semsig(&readyCont);
+				log_trace(logger, "No encontro dispositivo");
+				mandarPCBaFIN(auxPCB, 1, "Dispositivo no encontrado");
 			}
-		} else {
-			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin,
-					final_create(auxPCB, 1, "semaforo no encontrado"));
-			imprimirListaFinxTraza();
-			pthread_mutex_unlock(&mutexFIN);
-			semsig(&finalizarCont);
-			semsig(&multiCont);
+			break;
+		case '2':	//Bloqueado por semaforo
+			nombre = obtenerNombreMensaje(buffer, pos2);
+			pthread_mutex_lock(&mutexSemaforos);
+			t_sem* auxSem = encontrarSemaforo(nombre);
+			if (auxSem != NULL ) {
+				if (auxSem->valor < 0) {
+					//Bloquear Programa por semaforo
+					log_trace(logger,
+							"Final Quamtum programa: %d. bloqueado por semaforo: %s",
+							auxPCB->id, (char*) auxSem->nombre);
+					list_add(auxSem->listaSem, auxPCB);
+					imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
+							auxSem->nombre);
+				} else {
+					//Desbloquar Programa
+					pthread_mutex_lock(&mutexReady);
+					list_add(listaReady, auxPCB);
+					imprimirListaReadyxTraza();
+					pthread_mutex_unlock(&mutexReady);
+					semsig(&readyCont);
+				}
+			} else {
+				mandarPCBaFIN(auxPCB, 1, "semaforo no encontrado");
+			}
+			pthread_mutex_unlock(&mutexSemaforos);
+			break;
 		}
-		pthread_mutex_unlock(&mutexSemaforos);
-		break;
+	} else {
+		mandarPCBaFIN(auxPCB, 1, "Programa inactivo");
 	}
 //Buscar CPU y Borrar Programa
 	borrarPCBenCPU(socket);
@@ -2026,12 +2073,7 @@ void comandoFinalizar(int socket, char* buffer) {
 //Pasa a estado fin
 	log_trace(logger, "Mandar a estado fin. programa: %d. buffer: ",
 			auxPCB->id);
-	pthread_mutex_lock(&mutexFIN);
-	list_add(listaFin, final_create(auxPCB, 0, "Finalizado OK"));
-	imprimirListaFinxTraza();
-	pthread_mutex_unlock(&mutexFIN);
-	semsig(&finalizarCont);
-	semsig(&multiCont);
+	mandarPCBaFIN(auxPCB, 0, "Finalizado OK");
 //Borra el viejo PCB en la lista de CPU
 	borrarPCBenCPU(socket);
 	EnviarDatos(socket, "1");
@@ -2190,12 +2232,7 @@ void comandoAbortar(char* buffer, int socket) {
 	if (auxCPU != NULL ) {
 		pasarDatosPCB(auxPCB, auxCPU->idPCB);
 		llenarPCBconCeros(auxCPU->idPCB);
-		pthread_mutex_lock(&mutexFIN);
-		list_add(listaFin, final_create(auxPCB, 1, msj));
-		imprimirListaFinxTraza();
-		pthread_mutex_unlock(&mutexFIN);
-		semsig(&finalizarCont);
-		semsig(&multiCont);
+		mandarPCBaFIN(auxPCB, 1, msj);
 	}
 	pthread_mutex_unlock(&mutexCPU);
 	EnviarDatos(socket, "1");
@@ -2207,12 +2244,7 @@ void mandarAFinProgramaPorBajaCPU(int socket) {
 	if (auxCPU->idPCB->id != 0) {
 		if (auxPCB != NULL ) {
 			pasarDatosPCB(auxPCB, auxCPU->idPCB);
-			pthread_mutex_lock(&mutexFIN);
-			list_add(listaFin, final_create(auxPCB, 1, "Se cayo CPU"));
-			imprimirListaFinxTraza();
-			pthread_mutex_unlock(&mutexFIN);
-			semsig(&finalizarCont);
-			semsig(&multiCont);
+			mandarPCBaFIN(auxPCB, 1, "Se cayo CPU");
 		}
 	}
 	eliminarCpu(socket);
@@ -2417,4 +2449,13 @@ void pasarDatosPCB(PCB* aPCB, PCB* dPCB) {
 	aPCB->segmentoStack = dPCB->segmentoStack;
 	aPCB->sizeContextoActual = dPCB->sizeContextoActual;
 	aPCB->sizeIndiceEtiquetas = dPCB->sizeIndiceEtiquetas;
+}
+
+void mandarPCBaFIN(PCB* auxPCB, int est, char* mensaje) {
+	pthread_mutex_lock(&mutexFIN);
+	list_add(listaFin, final_create(auxPCB, est, mensaje));
+	imprimirListaFinxTraza();
+	pthread_mutex_unlock(&mutexFIN);
+	semsig(&finalizarCont);
+	semsig(&multiCont);
 }

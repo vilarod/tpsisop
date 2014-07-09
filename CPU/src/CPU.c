@@ -61,10 +61,10 @@
 int aux_conec_umv = 0;
 int aux_conec_ker = 0;
 
-const int TAM_INSTRUCCION = sizeof(t_intructions);
-const int DIG_VAL_VAR = sizeof(t_valor_variable);
+const int TAM_INSTRUCCION = 20;
+const int DIG_VAL_VAR = 10;
 const int DIG_NOM_VAR = sizeof(t_nombre_variable);
-const int VAR_STACK = (sizeof(t_valor_variable) + sizeof(t_nombre_variable));
+const int VAR_STACK = 11; //10 para el valor, 1 para el nombre
 
 
 int socketUMV = 0;
@@ -412,18 +412,19 @@ serCadena(char ** msj, char* agr)
 void
 deserializarDesplLong(char * msj, int* despl, int* longi)
 {
-  int tamanio1 = sizeof(t_puntero_instruccion);
-  int tamanio2 = sizeof(t_size);
+  int tamanio = 10;
 
-  //log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
+
 
   log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s", msj);
   if (string_starts_with(msj, bien)) //si el mensaje es valido -> busca despl y longi
     {
-      *despl = atoi(string_substring(msj, 1, tamanio1));
+
+      *despl = atoi(string_substring(msj, 1, tamanio));
       log_trace(logger, "TRAZA - DESPLAZAMIENTO: %d", *despl);
 
-      *longi = atoi(string_substring(msj, tamanio1 + 1, tamanio2));
+      *longi = atoi(string_substring(msj, tamanio + 1, tamanio));
+
       log_trace(logger, "TRAZA - LONGITUD: %d", *longi);
     }
   else
@@ -622,8 +623,8 @@ PedirSentencia(char** sentencia)
   instruccion = getUMV(programa->indiceCodigo,
       programa->programCounter * TAM_INSTRUCCION, TAM_INSTRUCCION);
 
-  if (string_starts_with(instruccion, bien)
-      && ((strlen(instruccion) - 1) == TAM_INSTRUCCION))
+  if ((string_starts_with(instruccion, bien)
+      && (strlen(string_substring(instruccion, 1, TAM_INSTRUCCION)) == TAM_INSTRUCCION)))
     {
       deserializarDesplLong(instruccion, &despl, &longi);
       instruccion = string_new();
@@ -1071,10 +1072,10 @@ imprimirContextoActual()
             {
 
               string_append(&mensaje, "VARIABLE ");
-              string_append(&mensaje, string_substring(variables, pos, 1));
+              string_append(&mensaje, string_substring(variables, pos, DIG_NOM_VAR));
               string_append(&mensaje, ":");
               string_append(&mensaje,
-                  string_itoa(atoi(string_substring(variables, (pos + 1), 4))));
+                  string_itoa(atoi(string_substring(variables, (pos + 1), VAR_STACK - DIG_NOM_VAR))));
               string_append(&mensaje, " ");
               pos = pos + VAR_STACK;
             }
@@ -1291,12 +1292,12 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ASIGNAR");
   int validar;
-  char* mensaje=string_new();
-  int ceros = (DIG_VAL_VAR - cantidadDigitos(valor));
-  rellenarConCeros(ceros,&mensaje);
-  string_append(&mensaje, string_itoa(valor));
 
-  //int despl=(direccion_variable - programa->segmentoStack)+ DIG_NOM_VAR;
+   char* mensaje=string_new();
+   int ceros = ((VAR_STACK - DIG_NOM_VAR) - cantidadDigitos(valor));
+   rellenarConCeros(ceros,&mensaje);
+   string_append(&mensaje, string_itoa(valor));
+
 
   validar = setUMV(programa->segmentoStack, direccion_variable + 1, DIG_VAL_VAR, mensaje);
   if (validar == 1) //si es <=0 el set aborta el proceso
@@ -1413,22 +1414,24 @@ prim_finalizar(void)
 
   if (aux > programa->segmentoStack)
     {
-      aux = aux - VAR_STACK;
+      aux = (aux - programa->segmentoStack) - VAR_STACK;
       char *pedido = malloc(BUFFERSIZE * sizeof(char));
       memset(pedido,0,BUFFERSIZE);
-      pedido = getUMV(aux, 0, VAR_STACK);
+      pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
 
       if (string_starts_with(pedido, bien))
         {
           programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
+
           log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d", programa->programCounter);
-          aux = aux - (VAR_STACK * 2);
-          pedido = getUMV(aux, 0, VAR_STACK);
+          aux = aux - VAR_STACK;
+          pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
           if (string_starts_with(pedido, bien))
             {
+              aux = aux - VAR_STACK;
               programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
               log_trace(logger, "TRAZA - EL CURSOR STACK ES: %d", programa->cursorStack);
-              programa->sizeContextoActual = ((aux - (programa->cursorStack))/ VAR_STACK);
+              programa->sizeContextoActual = ((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK);
               log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
               if (programa->sizeContextoActual > 0)
                 {
@@ -1458,10 +1461,11 @@ prim_retornar(t_valor_variable retorno)
 
   int retor;
   int aux = programa->cursorStack; //tengo que leer desde la base del stack anterior hacia abajo
-  aux = aux - VAR_STACK;
+  aux = (aux - programa->segmentoStack) - VAR_STACK;
   char *pedido = malloc(BUFFERSIZE * sizeof(char));
   memset(pedido,0,BUFFERSIZE);
-  pedido = getUMV(aux, 0, VAR_STACK);
+  pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
+
 
   if (string_starts_with(pedido,bien))
     {
@@ -1472,21 +1476,21 @@ prim_retornar(t_valor_variable retorno)
 
       if (setUMV(programa->segmentoStack, retor + 1, DIG_VAL_VAR, string_itoa(retorno)) == 1)
         {
-          aux = aux - (VAR_STACK * 2);
-          pedido = getUMV(programa->segmentoStack, 0, VAR_STACK);
+          aux = aux - VAR_STACK;
+          pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
 
           if (string_starts_with(pedido, bien))
             {
               programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
               log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d",programa->programCounter);
-              aux = aux - (VAR_STACK * 3);
-              pedido = getUMV(aux, 0, VAR_STACK);
+              aux = aux - VAR_STACK;
+              pedido = getUMV(programa->segmentoStack,aux, VAR_STACK);
 
               if (string_starts_with(pedido, bien))
                 {
                   programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
                   log_trace(logger, "TRAZA - EL CURSOR DEL STACK ES: %d",programa->cursorStack);
-                  programa->sizeContextoActual =((aux - (programa->cursorStack)) / VAR_STACK);
+                  programa->sizeContextoActual =((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK);
                   log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d",programa->sizeContextoActual);
 
                   if (programa->sizeContextoActual > 0)
@@ -1575,7 +1579,17 @@ prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA IrAlLabel");
 
+
+  int x;
+
+  for(x=0; x < programa->sizeIndiceEtiquetas; x ++)
+    {
+      if (*(etiquetas + x) == '!')
+        *(etiquetas + x)='\0';
+    }
+
   programa->programCounter = metadata_buscar_etiqueta(etiqueta, etiquetas,programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
+  programa->programCounter ++ ;
   log_trace(logger, "TRAZA - EL VALOR DEL PROGRAM COUNTER ES: %d",programa->programCounter);
 }
 
@@ -1631,7 +1645,7 @@ prim_definirVariable(t_nombre_variable identificador_variable)
 
   if ((dictionary_has_key(dicVariables, string_substring(var, 0, 1))) == false)
     {
-      if ((setUMV(programa->cursorStack, pos_var_stack, 1, string_substring(var, 0, 1))) > 0)
+      if ((setUMV(programa->segmentoStack, pos_var_stack, 1, string_substring(var, 0, 1))) > 0)
         {
           dictionary_put(dicVariables, string_substring(var, 0, 1),(void*) pos_var_stack); //la registro en el dicc de variables
           programa->sizeContextoActual++;
