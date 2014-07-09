@@ -799,7 +799,7 @@ obtener_valor(t_nombre_compartida variable)
     {
       valor = atoi(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       log_trace(logger, "TRAZA - EL VALOR DE LA VARIABLE ES: %d \n", valor);
-      variable_ref = string_new();
+      variable_ref = "\0";
       variable_ref = variable;
     }
   else
@@ -972,7 +972,6 @@ RecuperarEtiquetas()
               if (*(etiquetas + x) == '!')
                 *(etiquetas + x)='\0';
             }
-          log_trace(logger, "TRAZA - INDICE DE ETIQUETAS OBTENIDO: %s \n", etiquetas);
         }
       else
         {
@@ -1136,7 +1135,7 @@ inciarVariables()
   tengoProg = 0;
   f = 0;
   motivo = string_new();
-  variable_ref = string_new();
+  variable_ref = "\0";
   etiquetas = string_new();
 }
 
@@ -1337,7 +1336,7 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
   string_append(&mensaje, string_itoa(programa->cursorStack));
 
   aux = (VAR_STACK * programa->sizeContextoActual);
-  int despl=(programa->segmentoStack - programa->cursorStack) + aux +1;
+  int despl=(programa->segmentoStack - programa->cursorStack) + aux;
 
 
   if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
@@ -1350,7 +1349,7 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
       despl=despl + VAR_STACK;
       if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
         {
-          programa->cursorStack = aux + (VAR_STACK * 2);
+          programa->cursorStack = programa->segmentoStack + despl + VAR_STACK;
           log_trace(logger, "TRAZA - EL CURSOR STACK APUNTA A: %d \n", programa->cursorStack);
           programa->sizeContextoActual = 0;
           prim_irAlLabel(etiqueta);
@@ -1375,7 +1374,7 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   string_append(&mensaje, string_itoa(programa->cursorStack));
 
   aux = (VAR_STACK * programa->sizeContextoActual);
-  int despl=(programa->segmentoStack - programa->cursorStack) + aux +1;
+  int despl=(programa->segmentoStack - programa->cursorStack) + aux;
 
   if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
     {
@@ -1399,7 +1398,7 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
           if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
             {
               log_trace(logger, "TRAZA - LA DIRECCION POR DONDE RETORNAR ES: %d \n",donde_retornar);
-              programa->cursorStack = aux + (VAR_STACK * 3);
+              programa->cursorStack = programa->segmentoStack + despl + VAR_STACK;
               log_trace(logger, "TRAZA - EL CURSOR STACK APUNTA A: %d \n",programa->cursorStack);
               programa->sizeContextoActual = 0;
               prim_irAlLabel(etiqueta);
@@ -1436,7 +1435,7 @@ prim_finalizar(void)
               aux = aux - VAR_STACK;
               programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
               log_trace(logger, "TRAZA - EL CURSOR STACK ES: %d \n", programa->cursorStack);
-              programa->sizeContextoActual = ((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK);
+              programa->sizeContextoActual = ((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK) + 1;
               log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
               if (programa->sizeContextoActual > 0)
                 {
@@ -1495,7 +1494,7 @@ prim_retornar(t_valor_variable retorno)
                 {
                   programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
                   log_trace(logger, "TRAZA - EL CURSOR DEL STACK ES: %d \n",programa->cursorStack);
-                  programa->sizeContextoActual =((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK);
+                  programa->sizeContextoActual =((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK) + 1;
                   log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
 
                   if (programa->sizeContextoActual > 0)
@@ -1555,9 +1554,9 @@ if  (string_starts_with(rtaKERNEL, bien))
   }
 
   free(rtaKERNEL);
-  free(variable_ref);
 
-  variable_ref = string_new();
+  variable_ref = "\0";
+
 }
 
 t_valor_variable
@@ -1585,7 +1584,7 @@ prim_irAlLabel(t_nombre_etiqueta etiqueta)
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA IrAlLabel \n");
 
   programa->programCounter = metadata_buscar_etiqueta(etiqueta, etiquetas,programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
-  programa->programCounter ++ ;
+  //programa->programCounter ++ ;
   log_trace(logger, "TRAZA - EL VALOR DEL PROGRAM COUNTER ES: %d \n",programa->programCounter);
 }
 
