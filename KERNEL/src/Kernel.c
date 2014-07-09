@@ -92,6 +92,7 @@ int main(int argv, char** argc) {
 	seminit(&CPUCont, 0);
 	seminit(&finalizarCont, 0);
 	seminit(&imprimirCont, 0);
+	seminit(&destruirCont, 0);
 	seminit(&multiCont, Multi);
 
 	//Crear Listas de estados
@@ -129,7 +130,7 @@ void *PLP(void *arg) {
 	//Me conecto a la UMV
 	conectarAUMV();
 	log_trace(logger, "%s\n", "Conectado a la UMV");
-	pthread_t pcp, Imprimir, Fin, plpNew;
+	pthread_t pcp, Imprimir, Fin, plpNew, borr;
 	//Creo el hilo de pcp
 	pthread_create(&pcp, NULL, PCP, NULL );
 	//Crear hilo de imprimir por consola
@@ -138,13 +139,15 @@ void *PLP(void *arg) {
 	pthread_create(&Fin, NULL, FinEjecucion, NULL );
 	//crear hilo de new
 	pthread_create(&plpNew, NULL, moverReadyDeNew, NULL );
+	//crear hilo para borrar programas inactivos
+	pthread_create(&borr, NULL, borradorPCB, NULL );
 	crearEscucha();
 
 	pthread_join(plpNew, NULL );
 	pthread_join(pcp, NULL );
 	pthread_join(Imprimir, NULL );
 	pthread_join(Fin, NULL );
-
+	pthread_join(borr, NULL );
 	return NULL ;
 }
 void *FinEjecucion(void *arg) {
@@ -2259,6 +2262,7 @@ void borrarSocket(int socket) {
 			(void*) _is_Socket);
 	if (auxiliar != NULL ) {
 		socket_destroy(auxiliar);
+		semsig(&destruirCont);
 	}
 	pthread_mutex_unlock(&mutexSocketProgramas);
 }
@@ -2458,4 +2462,43 @@ void mandarPCBaFIN(PCB* auxPCB, int est, char* mensaje) {
 	pthread_mutex_unlock(&mutexFIN);
 	semsig(&finalizarCont);
 	semsig(&multiCont);
+}
+
+void *borradorPCB(void *arg) {
+	int i, cont;
+	t_New* auxNew;
+	PCB* auxPCB;
+	while (1) {
+		semwait(&destruirCont);
+		cont=0;
+		pthread_mutex_lock(&mutexNew);
+		for (i = 0; i < list_size(listaNew); i++) {
+			auxNew = list_get(listaNew, i);
+			if (estaProgActivo(auxNew->idPCB->id) == 0) {
+				auxPCB = auxNew->idPCB;
+				auxNew->idPCB = NULL;
+				list_remove(listaNew, i);
+				mandarPCBaFIN(auxPCB, 1, "Programa Inactivo");
+				i--;
+				cont++;
+				new_destroy(auxNew);
+			}
+		}
+		if (cont>0) imprimirListaNewxTraza();
+		pthread_mutex_unlock(&mutexNew);
+		cont=0;
+		pthread_mutex_lock(&mutexReady);
+		for (i = 0; i<list_size(listaReady); i++) {
+			auxPCB = list_get(listaReady, i);
+			if (estaProgActivo(auxPCB->id) == 0) {
+				mandarPCBaFIN(auxPCB, 1, "Programa Inactivo");
+				list_remove(listaReady, i);
+				i--;
+				cont++;
+			}
+		}
+		pthread_mutex_unlock(&mutexReady);
+		if (cont>0) imprimirListaReadyxTraza();
+	}
+	return NULL ;
 }

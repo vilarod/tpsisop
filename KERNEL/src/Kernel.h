@@ -32,6 +32,7 @@ void *moverEjecutar(void *arg);
 void *hiloDispositivos(void *arg);
 void *moverReadyDeNew(void *arg);
 void *bloqueados_fnc(void *arg);
+void *borradorPCB(void *arg);
 
 //Manejo de errores
 //void error(int code, char *err);
@@ -104,6 +105,7 @@ void semwait(psem_t *ps);
 void seminit(psem_t *ps, int n);
 
 psem_t newCont,readyCont,CPUCont,finalizarCont, imprimirCont;
+psem_t destruirCont;
 psem_t multiCont; //limita la multiprogramacion
 
 //Lista de CPU
