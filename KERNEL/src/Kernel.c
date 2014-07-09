@@ -2465,12 +2465,15 @@ void mandarPCBaFIN(PCB* auxPCB, int est, char* mensaje) {
 }
 
 void *borradorPCB(void *arg) {
-	int i, cont;
+	int i, cont, j;
 	t_New* auxNew;
 	PCB* auxPCB;
+	t_sem* auxSem;
+	t_HIO* auxDisp;
+	t_bloqueado* auxBloq;
 	while (1) {
 		semwait(&destruirCont);
-		cont=0;
+		cont = 0;
 		pthread_mutex_lock(&mutexNew);
 		for (i = 0; i < list_size(listaNew); i++) {
 			auxNew = list_get(listaNew, i);
@@ -2484,11 +2487,12 @@ void *borradorPCB(void *arg) {
 				new_destroy(auxNew);
 			}
 		}
-		if (cont>0) imprimirListaNewxTraza();
+		if (cont > 0)
+			imprimirListaNewxTraza();
 		pthread_mutex_unlock(&mutexNew);
-		cont=0;
+		cont = 0;
 		pthread_mutex_lock(&mutexReady);
-		for (i = 0; i<list_size(listaReady); i++) {
+		for (i = 0; i < list_size(listaReady); i++) {
 			auxPCB = list_get(listaReady, i);
 			if (estaProgActivo(auxPCB->id) == 0) {
 				mandarPCBaFIN(auxPCB, 1, "Programa Inactivo");
@@ -2498,7 +2502,43 @@ void *borradorPCB(void *arg) {
 			}
 		}
 		pthread_mutex_unlock(&mutexReady);
-		if (cont>0) imprimirListaReadyxTraza();
+		if (cont > 0)
+			imprimirListaReadyxTraza();
+		pthread_mutex_lock(&mutexSemaforos);
+		for (j = 0; j < list_size(listaSemaforos); j++) {
+			auxSem = list_get(listaSemaforos, j);
+			cont = 0;
+			for (i = 0; i < list_size(auxSem->listaSem); i++) {
+				auxPCB = list_get(auxSem->listaSem, i);
+				if (estaProgActivo(auxPCB->id) == 0) {
+					list_remove(auxSem->listaSem, i);
+					mandarPCBaFIN(auxPCB, 1, "Programa Inactivo");
+					i--;
+					cont++;
+				}
+			}
+			if(cont>0) imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem, auxSem->nombre);
+		}
+		pthread_mutex_unlock(&mutexSemaforos);
+		for (j = 0; j < list_size(listaDispositivos); j++) {
+			auxDisp = list_get(listaDispositivos, j);
+			cont = 0;
+			pthread_mutex_lock(&(auxDisp->mutexBloqueados));
+			for (i = 0; i < list_size(auxDisp->listaBloqueados); i++) {
+				auxBloq = list_get(auxDisp->listaBloqueados, i);
+				auxPCB=auxBloq->idPCB;
+				if (estaProgActivo(auxPCB->id) == 0) {
+					auxBloq->idPCB=NULL;
+					list_remove(auxDisp->listaBloqueados, i);
+					mandarPCBaFIN(auxPCB, 1, "Programa Inactivo");
+					i--;
+					cont++;
+					bloqueado_destroy(auxBloq);
+				}
+			}
+			if(cont>0) imprimirListaBloqueadosPorUnDispositivoxTraza(auxDisp->listaBloqueados, auxDisp->nombre);
+			pthread_mutex_unlock(&(auxDisp->mutexBloqueados));
+		}
 	}
 	return NULL ;
 }

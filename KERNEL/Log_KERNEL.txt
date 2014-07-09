@@ -17930,3 +17930,393 @@ end
 [TRACE] 23:30:07:467 KERNEL/(5255:5264): Finalizo el programa:2 , MSJ= Programa Inactivo
 
 [TRACE] 23:30:07:469 KERNEL/(5255:5264): Lista Fin(cant 0):
+[TRACE] 05:05:14:990 KERNEL/(2081:2081): Obteniendo cadenas: [sem1,sem2] [2,0]
+[TRACE] 05:05:15:7 KERNEL/(2081:2081): valores obtenidos: sem1, 2
+[TRACE] 05:05:15:8 KERNEL/(2081:2081): valores obtenidos: sem2, 0
+[TRACE] 05:05:15:8 KERNEL/(2081:2081): semaforo: sem1 valor: 2
+[TRACE] 05:05:15:9 KERNEL/(2081:2081): semaforo: sem2 valor: 0
+[TRACE] 05:05:15:9 KERNEL/(2081:2081): Obteniendo cadenas: [!o,!a] [3,5]
+[TRACE] 05:05:15:10 KERNEL/(2081:2081): valores obtenidos: !o, 3
+[TRACE] 05:05:15:12 KERNEL/(2081:2081): valores obtenidos: !a, 5
+[TRACE] 05:05:15:12 KERNEL/(2081:2081): Lista var Globales(cant 2):
+[variable: !o, valor: 3]
+[variable: !a, valor: 5]
+[TRACE] 05:05:15:14 KERNEL/(2081:2081): Obteniendo cadenas: [Disco,Impresora] [10,20]
+[TRACE] 05:05:15:20 KERNEL/(2081:2081): valores obtenidos: Disco, 10
+[TRACE] 05:05:15:20 KERNEL/(2081:2081): valores obtenidos: Impresora, 20
+[TRACE] 05:05:15:21 KERNEL/(2081:2081): Dispositivo: Disco valor: 10
+[TRACE] 05:05:15:22 KERNEL/(2081:2081): Dispositivo: Impresora valor: 20
+[TRACE] 05:05:15:23 KERNEL/(2081:2086): Intentando conectar a umv.
+[TRACE] 05:05:15:28 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 31
+[TRACE] 05:05:15:35 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:05:15:35 KERNEL/(2081:2086): Conectado a la UMV
+
+[TRACE] 05:05:15:37 KERNEL/(2081:2086): Escuchando conexiones entrantes PLP(8000).
+
+[TRACE] 05:05:15:45 KERNEL/(2081:2093): Escuchando conexiones entrantes PCP(8500).
+
+[TRACE] 05:05:15:46 KERNEL/(2081:2097): Levanto hilo dispositivo: Impresora
+[TRACE] 05:05:15:47 KERNEL/(2081:2096): Levanto hilo dispositivo: Disco
+[TRACE] 05:05:20:461 KERNEL/(2081:2093): RECIBO DATOS. socket: 7. buffer: 32
+[TRACE] 05:05:20:461 KERNEL/(2081:2093): nos ponemos a recibir 2
+[TRACE] 05:05:20:461 KERNEL/(2081:2093): Tipos de mensaje: 3
+[TRACE] 05:05:20:461 KERNEL/(2081:2093): HandShake
+[TRACE] 05:05:20:462 KERNEL/(2081:2093): tipo de cliente: 2
+[TRACE] 05:05:20:462 KERNEL/(2081:2093): creando CPU
+[TRACE] 05:05:20:462 KERNEL/(2081:2093): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:05:20:465 KERNEL/(2081:2093): RECIBO DATOS. socket: 7. buffer: L-
+[TRACE] 05:05:20:465 KERNEL/(2081:2093): nos ponemos a recibir 2
+[TRACE] 05:05:20:465 KERNEL/(2081:2093): Tipos de mensaje: L
+[TRACE] 05:05:20:466 KERNEL/(2081:2093): Se librera CPU: 7
+[TRACE] 05:05:20:466 KERNEL/(2081:2093): Lista CPU(cant 1):
+[CPU: 7,Estado: 0]
+[TRACE] 05:07:27:877 KERNEL/(2081:2086): RECIBO DATOS. socket: 8. buffer: H
+[TRACE] 05:07:27:878 KERNEL/(2081:2086): nos ponemos a recibir 1
+[TRACE] 05:07:27:878 KERNEL/(2081:2086): Tipos de mensaje: H
+[TRACE] 05:07:27:879 KERNEL/(2081:2086): ENVIO datos. socket: 8. buffer: S
+[TRACE] 05:07:27:884 KERNEL/(2081:2086): RECIBO DATOS. socket: 8. buffer: Ebegin
+wait sem2
+io Disco 2000
+end
+
+
+
+[TRACE] 05:07:27:886 KERNEL/(2081:2086): nos ponemos a recibir 37
+[TRACE] 05:07:27:887 KERNEL/(2081:2086): Tipos de mensaje: E
+[TRACE] 05:07:27:891 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 411
+[TRACE] 05:07:27:892 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:07:27:892 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 511236
+[TRACE] 05:07:27:894 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 141544
+[TRACE] 05:07:27:895 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 24154410236begin
+wait sem2
+io Disco 2000
+end
+
+
+
+[TRACE] 05:07:27:920 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:07:27:922 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 5113256
+[TRACE] 05:07:27:925 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 143562
+[TRACE] 05:07:27:926 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 51111
+[TRACE] 05:07:27:934 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 145736
+[TRACE] 05:07:27:934 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 511260
+[TRACE] 05:07:27:943 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 147476
+[TRACE] 05:07:27:943 KERNEL/(2081:2086): comienzo 0: 6
+[TRACE] 05:07:27:944 KERNEL/(2081:2086): offset 0: 9
+[TRACE] 05:07:27:944 KERNEL/(2081:2086): comienzo 1: 16
+[TRACE] 05:07:27:945 KERNEL/(2081:2086): offset 1: 13
+[TRACE] 05:07:27:945 KERNEL/(2081:2086): comienzo 2: 30
+[TRACE] 05:07:27:946 KERNEL/(2081:2086): offset 2: 3
+[TRACE] 05:07:27:946 KERNEL/(2081:2086): ENVIO datos. socket: 4. buffer: 24747610260000000000600000000090000000016000000001300000000300000000003
+[TRACE] 05:07:27:949 KERNEL/(2081:2086): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:07:27:950 KERNEL/(2081:2086): Se creo un PCB con:  1-7476-3562-5736-0-1544-3562-0-0
+[TRACE] 05:07:27:950 KERNEL/(2081:2086): El PCB tiene peso: 3
+[TRACE] 05:07:27:951 KERNEL/(2081:2086): Lista New(cant 1): 
+[id: 1 peso: 3 Indice codigo: 7476]
+[TRACE] 05:07:27:953 KERNEL/(2081:2091): Moviendo a ready programa: 1
+[TRACE] 05:07:27:953 KERNEL/(2081:2091): Lista Ready(cant 1):
+[id: 1 Indice codigo: 7476]
+[TRACE] 05:07:27:953 KERNEL/(2081:2091): Lista New(cant 0): 
+[TRACE] 05:07:27:954 KERNEL/(2081:2094): ENVIO datos. socket: 7. buffer: 13-1500-1-1544-3562-3562-7476-5736-0-0-0-
+[TRACE] 05:07:27:955 KERNEL/(2081:2094): Lista Ready(cant 0):
+[TRACE] 05:07:27:955 KERNEL/(2081:2094): Lista CPU(cant 1):
+[CPU: 7,Estado: 1]
+[TRACE] 05:07:27:964 KERNEL/(2081:2086): ENVIO datos. socket: 8. buffer: S
+[TRACE] 05:07:28:13 KERNEL/(2081:2093): RECIBO DATOS. socket: 7. buffer: 8sem2-
+[TRACE] 05:07:28:13 KERNEL/(2081:2093): nos ponemos a recibir 6
+[TRACE] 05:07:28:13 KERNEL/(2081:2093): Tipos de mensaje: 8
+[TRACE] 05:07:28:14 KERNEL/(2081:2093): Wait semaforo: sem2. valor: -1
+[TRACE] 05:07:28:20 KERNEL/(2081:2093): ENVIO datos. socket: 7. buffer: 0
+[TRACE] 05:07:28:31 KERNEL/(2081:2093): RECIBO DATOS. socket: 7. buffer: 2NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL-
+[TRACE] 05:07:28:31 KERNEL/(2081:2093): nos ponemos a recibir 44
+[TRACE] 05:07:28:31 KERNEL/(2081:2093): Tipos de mensaje: 2
+[TRACE] 05:07:28:31 KERNEL/(2081:2093): Mandar a imprimir datos. programa: 1. buffer: NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:07:28:33 KERNEL/(2081:2086): RECIBO DATOS. socket: 8. buffer: S
+[TRACE] 05:07:28:33 KERNEL/(2081:2089): ENVIO datos. socket: 8. buffer: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:07:28:34 KERNEL/(2081:2093): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:07:28:34 KERNEL/(2081:2089): Envie a imprimir: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+
+[TRACE] 05:07:28:34 KERNEL/(2081:2086): nos ponemos a recibir 1
+[TRACE] 05:07:28:35 KERNEL/(2081:2086): Tipos de mensaje: S
+[TRACE] 05:07:28:51 KERNEL/(2081:2093): RECIBO DATOS. socket: 7. buffer: 41-1544-3562-3562-7476-5736-1-0-0-2-sem2-0-
+[TRACE] 05:07:28:51 KERNEL/(2081:2093): nos ponemos a recibir 43
+[TRACE] 05:07:28:51 KERNEL/(2081:2093): Tipos de mensaje: 4
+[TRACE] 05:07:28:52 KERNEL/(2081:2093): Final Quamtum programa: 1. bloqueado por semaforo: sem2
+[TRACE] 05:07:28:53 KERNEL/(2081:2093): Lista bloq por sem sem2(cant 1):
+[id: 1]
+[TRACE] 05:07:28:54 KERNEL/(2081:2093): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:07:28:76 KERNEL/(2081:2093): RECIBO DATOS. socket: 7. buffer: L-
+[TRACE] 05:07:28:76 KERNEL/(2081:2093): nos ponemos a recibir 2
+[TRACE] 05:07:28:77 KERNEL/(2081:2093): Tipos de mensaje: L
+[TRACE] 05:07:28:77 KERNEL/(2081:2093): Se librera CPU: 7
+[TRACE] 05:07:28:78 KERNEL/(2081:2093): Lista CPU(cant 1):
+[CPU: 7,Estado: 0]
+[TRACE] 05:07:45:0 KERNEL/(2081:2086): RECIBO DATOS. socket: 8. buffer: 
+[TRACE] 05:07:46:9 KERNEL/(2081:2086): nos ponemos a recibir 0
+[TRACE] 05:07:46:11 KERNEL/(2081:2092): Lista Fin(cant 1):
+[id: 1, estado: 1]
+[TRACE] 05:07:46:12 KERNEL/(2081:2092): Lista bloq por sem sem2(cant 0):
+[TRACE] 05:07:46:12 KERNEL/(2081:2090): ENVIO datos. socket: 4. buffer: 611
+[TRACE] 05:07:46:16 KERNEL/(2081:2090): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:07:46:16 KERNEL/(2081:2090): Finalizo el programa:1 , MSJ= Programa Inactivo
+
+[TRACE] 05:07:46:18 KERNEL/(2081:2090): Lista Fin(cant 0):
+[TRACE] 05:23:12:26 KERNEL/(2592:2592): Obteniendo cadenas: [sem1,sem2] [2,0]
+[TRACE] 05:23:13:30 KERNEL/(2592:2592): valores obtenidos: sem1, 2
+[TRACE] 05:23:13:32 KERNEL/(2592:2592): valores obtenidos: sem2, 0
+[TRACE] 05:23:13:40 KERNEL/(2592:2592): semaforo: sem1 valor: 2
+[TRACE] 05:23:13:41 KERNEL/(2592:2592): semaforo: sem2 valor: 0
+[TRACE] 05:23:13:42 KERNEL/(2592:2592): Obteniendo cadenas: [!o,!a] [3,5]
+[TRACE] 05:23:13:42 KERNEL/(2592:2592): valores obtenidos: !o, 3
+[TRACE] 05:23:13:43 KERNEL/(2592:2592): valores obtenidos: !a, 5
+[TRACE] 05:23:13:44 KERNEL/(2592:2592): Lista var Globales(cant 2):
+[variable: !o, valor: 3]
+[variable: !a, valor: 5]
+[TRACE] 05:23:13:48 KERNEL/(2592:2592): Obteniendo cadenas: [Disco,Impresora] [10,20]
+[TRACE] 05:23:13:52 KERNEL/(2592:2592): valores obtenidos: Disco, 10
+[TRACE] 05:23:13:53 KERNEL/(2592:2592): valores obtenidos: Impresora, 20
+[TRACE] 05:23:13:53 KERNEL/(2592:2592): Dispositivo: Disco valor: 10
+[TRACE] 05:23:13:54 KERNEL/(2592:2592): Dispositivo: Impresora valor: 20
+[TRACE] 05:23:13:59 KERNEL/(2592:2599): Intentando conectar a umv.
+[TRACE] 05:23:13:72 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 31
+[TRACE] 05:23:13:78 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:13:78 KERNEL/(2592:2599): Conectado a la UMV
+
+[TRACE] 05:23:13:80 KERNEL/(2592:2599): Escuchando conexiones entrantes PLP(8000).
+
+[TRACE] 05:23:13:96 KERNEL/(2592:2606): Escuchando conexiones entrantes PCP(8500).
+
+[TRACE] 05:23:13:97 KERNEL/(2592:2610): Levanto hilo dispositivo: Impresora
+[TRACE] 05:23:13:98 KERNEL/(2592:2609): Levanto hilo dispositivo: Disco
+[TRACE] 05:23:17:170 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 32
+[TRACE] 05:23:17:171 KERNEL/(2592:2606): nos ponemos a recibir 2
+[TRACE] 05:23:17:171 KERNEL/(2592:2606): Tipos de mensaje: 3
+[TRACE] 05:23:17:171 KERNEL/(2592:2606): HandShake
+[TRACE] 05:23:17:171 KERNEL/(2592:2606): tipo de cliente: 2
+[TRACE] 05:23:17:172 KERNEL/(2592:2606): creando CPU
+[TRACE] 05:23:17:172 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:23:17:174 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: L-
+[TRACE] 05:23:17:174 KERNEL/(2592:2606): nos ponemos a recibir 2
+[TRACE] 05:23:17:174 KERNEL/(2592:2606): Tipos de mensaje: L
+[TRACE] 05:23:17:174 KERNEL/(2592:2606): Se librera CPU: 7
+[TRACE] 05:23:17:174 KERNEL/(2592:2606): Lista CPU(cant 1):
+[CPU: 7,Estado: 0]
+[TRACE] 05:23:53:771 KERNEL/(2592:2599): RECIBO DATOS. socket: 8. buffer: H
+[TRACE] 05:23:53:771 KERNEL/(2592:2599): nos ponemos a recibir 1
+[TRACE] 05:23:53:771 KERNEL/(2592:2599): Tipos de mensaje: H
+[TRACE] 05:23:53:772 KERNEL/(2592:2599): ENVIO datos. socket: 8. buffer: S
+[TRACE] 05:23:53:782 KERNEL/(2592:2599): RECIBO DATOS. socket: 8. buffer: Ebegin
+io Disco 20000
+wait sem2
+end
+
+
+
+[TRACE] 05:23:53:790 KERNEL/(2592:2599): nos ponemos a recibir 38
+[TRACE] 05:23:53:790 KERNEL/(2592:2599): Tipos de mensaje: E
+[TRACE] 05:23:53:794 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 411
+[TRACE] 05:23:53:800 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:53:801 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 511237
+[TRACE] 05:23:53:803 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 141769
+[TRACE] 05:23:53:804 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 24176910237begin
+io Disco 20000
+wait sem2
+end
+
+
+
+[TRACE] 05:23:53:823 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:53:829 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 5113256
+[TRACE] 05:23:53:836 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 143401
+[TRACE] 05:23:53:837 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 51111
+[TRACE] 05:23:53:839 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 145326
+[TRACE] 05:23:53:844 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 511260
+[TRACE] 05:23:53:847 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 146843
+[TRACE] 05:23:53:847 KERNEL/(2592:2599): comienzo 0: 6
+[TRACE] 05:23:53:852 KERNEL/(2592:2599): offset 0: 14
+[TRACE] 05:23:53:853 KERNEL/(2592:2599): comienzo 1: 21
+[TRACE] 05:23:53:853 KERNEL/(2592:2599): offset 1: 9
+[TRACE] 05:23:53:853 KERNEL/(2592:2599): comienzo 2: 31
+[TRACE] 05:23:53:854 KERNEL/(2592:2599): offset 2: 3
+[TRACE] 05:23:53:855 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 24684310260000000000600000000140000000021000000000900000000310000000003
+[TRACE] 05:23:53:859 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:53:860 KERNEL/(2592:2599): Se creo un PCB con:  1-6843-3401-5326-0-1769-3401-0-0
+[TRACE] 05:23:53:860 KERNEL/(2592:2599): El PCB tiene peso: 3
+[TRACE] 05:23:53:861 KERNEL/(2592:2599): Lista New(cant 1): 
+[id: 1 peso: 3 Indice codigo: 6843]
+[TRACE] 05:23:53:862 KERNEL/(2592:2604): Moviendo a ready programa: 1
+[TRACE] 05:23:53:862 KERNEL/(2592:2604): Lista Ready(cant 1):
+[id: 1 Indice codigo: 6843]
+[TRACE] 05:23:53:863 KERNEL/(2592:2604): Lista New(cant 0): 
+[TRACE] 05:23:53:863 KERNEL/(2592:2607): ENVIO datos. socket: 7. buffer: 13-1500-1-1769-3401-3401-6843-5326-0-0-0-
+[TRACE] 05:23:53:868 KERNEL/(2592:2607): Lista Ready(cant 0):
+[TRACE] 05:23:53:868 KERNEL/(2592:2607): Lista CPU(cant 1):
+[CPU: 7,Estado: 1]
+[TRACE] 05:23:53:880 KERNEL/(2592:2599): ENVIO datos. socket: 8. buffer: S
+[TRACE] 05:23:53:949 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 2NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL-
+[TRACE] 05:23:53:950 KERNEL/(2592:2606): nos ponemos a recibir 44
+[TRACE] 05:23:53:950 KERNEL/(2592:2606): Tipos de mensaje: 2
+[TRACE] 05:23:53:953 KERNEL/(2592:2606): Mandar a imprimir datos. programa: 1. buffer: NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:23:53:955 KERNEL/(2592:2599): RECIBO DATOS. socket: 8. buffer: S
+[TRACE] 05:23:53:955 KERNEL/(2592:2602): ENVIO datos. socket: 8. buffer: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:23:53:956 KERNEL/(2592:2599): nos ponemos a recibir 1
+[TRACE] 05:23:53:957 KERNEL/(2592:2599): Tipos de mensaje: S
+[TRACE] 05:23:53:957 KERNEL/(2592:2602): Envie a imprimir: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+
+[TRACE] 05:23:53:961 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:23:53:977 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 41-1769-3401-3401-6843-5326-1-0-0-1-Disco-20000-
+[TRACE] 05:23:53:978 KERNEL/(2592:2606): nos ponemos a recibir 48
+[TRACE] 05:23:53:978 KERNEL/(2592:2606): Tipos de mensaje: 4
+[TRACE] 05:23:53:979 KERNEL/(2592:2606): obtenerValorMensaje: 20000, 20000
+[TRACE] 05:23:53:980 KERNEL/(2592:2606): nombre: Disco
+[TRACE] 05:23:53:980 KERNEL/(2592:2606): Lista bloq por disp Disco(cant 1):
+[id: 1, tiempo: 20000]
+[TRACE] 05:23:53:988 KERNEL/(2592:2609): Entrada HIO disp Disco programa: 1 tiempo: 20000
+[TRACE] 05:23:53:988 KERNEL/(2592:2606): Final Quamtum programa: 1. Pide Dispositivo: Disco
+[TRACE] 05:23:53:989 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:23:54:4 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: L-
+[TRACE] 05:23:54:5 KERNEL/(2592:2606): nos ponemos a recibir 2
+[TRACE] 05:23:54:5 KERNEL/(2592:2606): Tipos de mensaje: L
+[TRACE] 05:23:54:6 KERNEL/(2592:2606): Se librera CPU: 7
+[TRACE] 05:23:54:6 KERNEL/(2592:2606): Lista CPU(cant 1):
+[CPU: 7,Estado: 0]
+[TRACE] 05:23:57:14 KERNEL/(2592:2599): RECIBO DATOS. socket: 9. buffer: H
+[TRACE] 05:23:57:15 KERNEL/(2592:2599): nos ponemos a recibir 1
+[TRACE] 05:23:57:15 KERNEL/(2592:2599): Tipos de mensaje: H
+[TRACE] 05:23:57:15 KERNEL/(2592:2599): ENVIO datos. socket: 9. buffer: S
+[TRACE] 05:23:57:22 KERNEL/(2592:2599): RECIBO DATOS. socket: 9. buffer: Ebegin
+io Disco 20000
+wait sem2
+end
+
+
+
+[TRACE] 05:23:57:30 KERNEL/(2592:2599): nos ponemos a recibir 38
+[TRACE] 05:23:57:30 KERNEL/(2592:2599): Tipos de mensaje: E
+[TRACE] 05:23:57:34 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 412
+[TRACE] 05:23:57:40 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:57:40 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 512237
+[TRACE] 05:23:57:43 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 141536
+[TRACE] 05:23:57:44 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 24153610237begin
+io Disco 20000
+wait sem2
+end
+
+
+
+[TRACE] 05:23:57:58 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:57:62 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 5123256
+[TRACE] 05:23:57:72 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 143260
+[TRACE] 05:23:57:73 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 51211
+[TRACE] 05:23:57:83 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 145516
+[TRACE] 05:23:57:84 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 512260
+[TRACE] 05:23:57:93 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 147295
+[TRACE] 05:23:57:93 KERNEL/(2592:2599): comienzo 0: 6
+[TRACE] 05:23:57:94 KERNEL/(2592:2599): offset 0: 14
+[TRACE] 05:23:57:94 KERNEL/(2592:2599): comienzo 1: 21
+[TRACE] 05:23:57:94 KERNEL/(2592:2599): offset 1: 9
+[TRACE] 05:23:57:95 KERNEL/(2592:2599): comienzo 2: 31
+[TRACE] 05:23:57:95 KERNEL/(2592:2599): offset 2: 3
+[TRACE] 05:23:57:96 KERNEL/(2592:2599): ENVIO datos. socket: 4. buffer: 24729510260000000000600000000140000000021000000000900000000310000000003
+[TRACE] 05:23:57:101 KERNEL/(2592:2599): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:57:102 KERNEL/(2592:2599): Se creo un PCB con:  2-7295-3260-5516-0-1536-3260-0-0
+[TRACE] 05:23:57:103 KERNEL/(2592:2599): El PCB tiene peso: 3
+[TRACE] 05:23:57:103 KERNEL/(2592:2599): Lista New(cant 1): 
+[id: 2 peso: 3 Indice codigo: 7295]
+[TRACE] 05:23:57:106 KERNEL/(2592:2604): Moviendo a ready programa: 2
+[TRACE] 05:23:57:106 KERNEL/(2592:2604): Lista Ready(cant 1):
+[id: 2 Indice codigo: 7295]
+[TRACE] 05:23:57:107 KERNEL/(2592:2604): Lista New(cant 0): 
+[TRACE] 05:23:57:107 KERNEL/(2592:2607): ENVIO datos. socket: 7. buffer: 13-1500-2-1536-3260-3260-7295-5516-0-0-0-
+[TRACE] 05:23:57:112 KERNEL/(2592:2607): Lista Ready(cant 0):
+[TRACE] 05:23:57:113 KERNEL/(2592:2607): Lista CPU(cant 1):
+[CPU: 7,Estado: 1]
+[TRACE] 05:23:57:121 KERNEL/(2592:2599): ENVIO datos. socket: 9. buffer: S
+[TRACE] 05:23:57:172 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 2NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL-
+[TRACE] 05:23:57:173 KERNEL/(2592:2606): nos ponemos a recibir 44
+[TRACE] 05:23:57:173 KERNEL/(2592:2606): Tipos de mensaje: 2
+[TRACE] 05:23:57:174 KERNEL/(2592:2606): Mandar a imprimir datos. programa: 2. buffer: NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:23:57:176 KERNEL/(2592:2599): RECIBO DATOS. socket: 9. buffer: S
+[TRACE] 05:23:57:176 KERNEL/(2592:2602): ENVIO datos. socket: 9. buffer: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:23:57:179 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:23:57:179 KERNEL/(2592:2602): Envie a imprimir: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+
+[TRACE] 05:23:57:180 KERNEL/(2592:2599): nos ponemos a recibir 1
+[TRACE] 05:23:57:183 KERNEL/(2592:2599): Tipos de mensaje: S
+[TRACE] 05:23:57:194 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 42-1536-3260-3260-7295-5516-1-0-0-1-Disco-20000-
+[TRACE] 05:23:57:194 KERNEL/(2592:2606): nos ponemos a recibir 48
+[TRACE] 05:23:57:195 KERNEL/(2592:2606): Tipos de mensaje: 4
+[TRACE] 05:23:57:196 KERNEL/(2592:2606): obtenerValorMensaje: 20000, 20000
+[TRACE] 05:23:57:196 KERNEL/(2592:2606): nombre: Disco
+[TRACE] 05:23:57:197 KERNEL/(2592:2606): Lista bloq por disp Disco(cant 1):
+[id: 2, tiempo: 20000]
+[TRACE] 05:23:57:204 KERNEL/(2592:2606): Final Quamtum programa: 2. Pide Dispositivo: Disco
+[TRACE] 05:23:57:205 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:23:57:210 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: L-
+[TRACE] 05:23:57:211 KERNEL/(2592:2606): nos ponemos a recibir 2
+[TRACE] 05:23:57:212 KERNEL/(2592:2606): Tipos de mensaje: L
+[TRACE] 05:23:57:212 KERNEL/(2592:2606): Se librera CPU: 7
+[TRACE] 05:23:57:213 KERNEL/(2592:2606): Lista CPU(cant 1):
+[CPU: 7,Estado: 0]
+[TRACE] 05:23:59:49 KERNEL/(2592:2599): RECIBO DATOS. socket: 9. buffer: 
+[TRACE] 05:23:59:59 KERNEL/(2592:2599): nos ponemos a recibir 0
+[TRACE] 05:23:59:61 KERNEL/(2592:2605): Lista Fin(cant 1):
+[id: 2, estado: 1]
+[TRACE] 05:23:59:62 KERNEL/(2592:2605): Lista bloq por disp Disco(cant 0):
+[TRACE] 05:23:59:63 KERNEL/(2592:2603): ENVIO datos. socket: 4. buffer: 612
+[TRACE] 05:23:59:92 KERNEL/(2592:2603): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:23:59:94 KERNEL/(2592:2603): Finalizo el programa:2 , MSJ= Programa Inactivo
+
+[TRACE] 05:23:59:101 KERNEL/(2592:2603): Lista Fin(cant 0):
+[TRACE] 05:27:13:989 KERNEL/(2592:2609): Termino HIO programa: 1
+[TRACE] 05:27:13:990 KERNEL/(2592:2609): Lista bloq por disp Disco(cant 0):
+[TRACE] 05:27:13:990 KERNEL/(2592:2609): Lista Ready(cant 1):
+[id: 1 Indice codigo: 6843]
+[TRACE] 05:27:13:993 KERNEL/(2592:2607): ENVIO datos. socket: 7. buffer: 13-1500-1-1769-3401-3401-6843-5326-1-0-0-
+[TRACE] 05:27:13:995 KERNEL/(2592:2607): Lista Ready(cant 0):
+[TRACE] 05:27:13:997 KERNEL/(2592:2607): Lista CPU(cant 1):
+[CPU: 7,Estado: 1]
+[TRACE] 05:27:14:43 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 8sem2-
+[TRACE] 05:27:14:44 KERNEL/(2592:2606): nos ponemos a recibir 6
+[TRACE] 05:27:14:44 KERNEL/(2592:2606): Tipos de mensaje: 8
+[TRACE] 05:27:14:45 KERNEL/(2592:2606): Wait semaforo: sem2. valor: -1
+[TRACE] 05:27:14:45 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 0
+[TRACE] 05:27:14:53 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 2NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL-
+[TRACE] 05:27:14:54 KERNEL/(2592:2606): nos ponemos a recibir 44
+[TRACE] 05:27:14:54 KERNEL/(2592:2606): Tipos de mensaje: 2
+[TRACE] 05:27:14:54 KERNEL/(2592:2606): Mandar a imprimir datos. programa: 1. buffer: NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:27:14:56 KERNEL/(2592:2599): RECIBO DATOS. socket: 8. buffer: S
+[TRACE] 05:27:14:56 KERNEL/(2592:2602): ENVIO datos. socket: 8. buffer: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+[TRACE] 05:27:14:57 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:27:14:57 KERNEL/(2592:2602): Envie a imprimir: INO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL
+
+[TRACE] 05:27:14:58 KERNEL/(2592:2599): nos ponemos a recibir 1
+[TRACE] 05:27:14:58 KERNEL/(2592:2599): Tipos de mensaje: S
+[TRACE] 05:27:14:62 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 41-1769-3401-3401-6843-5326-2-0-0-2-sem2-0-
+[TRACE] 05:27:14:63 KERNEL/(2592:2606): nos ponemos a recibir 43
+[TRACE] 05:27:14:63 KERNEL/(2592:2606): Tipos de mensaje: 4
+[TRACE] 05:27:14:64 KERNEL/(2592:2606): Final Quamtum programa: 1. bloqueado por semaforo: sem2
+[TRACE] 05:27:14:65 KERNEL/(2592:2606): Lista bloq por sem sem2(cant 1):
+[id: 1]
+[TRACE] 05:27:14:69 KERNEL/(2592:2606): ENVIO datos. socket: 7. buffer: 1
+[TRACE] 05:27:14:75 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: L-
+[TRACE] 05:27:14:75 KERNEL/(2592:2606): nos ponemos a recibir 2
+[TRACE] 05:27:14:76 KERNEL/(2592:2606): Tipos de mensaje: L
+[TRACE] 05:27:14:76 KERNEL/(2592:2606): Se librera CPU: 7
+[TRACE] 05:27:14:77 KERNEL/(2592:2606): Lista CPU(cant 1):
+[CPU: 7,Estado: 0]
+[TRACE] 05:27:30:355 KERNEL/(2592:2606): RECIBO DATOS. socket: 7. buffer: 
+[TRACE] 05:27:30:356 KERNEL/(2592:2606): nos ponemos a recibir 0
+[TRACE] 05:27:30:356 KERNEL/(2592:2606): select PCP: socket 7 hung up
+
+[TRACE] 05:27:30:356 KERNEL/(2592:2606): Lista CPU(cant 0):
+[TRACE] 05:28:40:767 KERNEL/(2592:2599): RECIBO DATOS. socket: 8. buffer: 
+[TRACE] 05:28:40:768 KERNEL/(2592:2599): nos ponemos a recibir 0
+[TRACE] 05:28:40:768 KERNEL/(2592:2605): Lista Fin(cant 1):
+[id: 1, estado: 1]
+[TRACE] 05:28:40:769 KERNEL/(2592:2605): Lista bloq por sem sem2(cant 0):
+[TRACE] 05:28:40:769 KERNEL/(2592:2603): ENVIO datos. socket: 4. buffer: 611
+[TRACE] 05:28:40:772 KERNEL/(2592:2603): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 05:28:40:773 KERNEL/(2592:2603): Finalizo el programa:1 , MSJ= Programa Inactivo
+
+[TRACE] 05:28:40:774 KERNEL/(2592:2603): Lista Fin(cant 0):
