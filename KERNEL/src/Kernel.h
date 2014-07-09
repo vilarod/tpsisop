@@ -89,6 +89,7 @@ int chartToInt(char x);
 int posicionDeBufferAInt(char* buffer, int posicion);
 char* RespuestaClienteOk(char *buffer);
 void agregarNuevaCPU(int socket);
+void mandarPCBaFIN(PCB* auxPCB, int est, char* mensaje);	//incrementa multiprogramacion
 
 //Semaforo Contador
 typedef struct{
