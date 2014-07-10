@@ -342,7 +342,7 @@ int estaProgActivo(int idprog);
 
 //imprimir Listas
 void imprimirListaVarGlobalesxTraza();
-void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista,char* nombre );
+void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista,char* nombre, int valor);
 void imprimirListaReadyxTraza();
 void imprimirListaFinxTraza();
 void imprimirListaNewxTraza();

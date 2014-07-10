@@ -203,7 +203,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 		if (cont == 0) {
 			ErrorFatal("Se desconecto el Kernel");
 		}
-		i=0;
+		i = 0;
 		while ((finDeEjecucion != 0) && (i < cont)) {
 			//sacar mensaje
 			msj2 = string_new();
@@ -224,7 +224,8 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 				imprimirRespuesta(msj2);
 //				enviarConfirmacionDeRecepcionDeDatos(sockfd);
 			}
-			free(msj);
+			if (msj2 != NULL )
+				free(msj2);
 		}
 	}
 	txt_write_in_stdout("Fin de ejecucion\n");

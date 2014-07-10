@@ -1273,13 +1273,13 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	if (list_size(listaNew) == 0) {
 		list_add(listaNew, new_create(PCBAUX, pesito));
 
-	//Sino utilizo list_sort
+		//Sino utilizo list_sort
 	} else {
 		list_add(listaNew, new_create(PCBAUX, pesito));
 		bool menorPeso(t_New *pcb1, t_New *pcb2) {
 			return pcb1->peso < pcb2->peso;
 		}
-		list_sort(listaNew,(void*) menorPeso);
+		list_sort(listaNew, (void*) menorPeso);
 	}
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
@@ -1305,14 +1305,6 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 //CU_ASSERT_PTR_EQUAL(list_get(list, 3), ayudantes[1]);
 //
 //list_destroy(list);
-
-
-
-
-
-
-
-
 
 //char* crearSegmento(int digitosID, int id, int digitosSize, int size) {
 //	char* mensaje = string_new();
@@ -1670,7 +1662,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizado por mensaje Recibido incorrecto-");
+								EnviarDatos(i,
+										"AFinalizado por mensaje Recibido incorrecto-");
 							}
 							break;
 						case MSJ_CPU_HANDSHAKE:
@@ -1694,7 +1687,8 @@ void *HiloOrquestadorDeCPU() {
 								comandoFinalQuamtum(buffer, i);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_OBTENERVALORGLOBAL:
@@ -1715,7 +1709,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizo por mensaje incorrrecto-");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrrecto-");
 							}
 							break;
 						case MSJ_CPU_GRABARVALORGLOBAL:
@@ -1736,7 +1731,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_ABANDONA:
@@ -1767,7 +1763,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_SIGNAL:
@@ -1789,7 +1786,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_ABORTAR:
@@ -1798,7 +1796,8 @@ void *HiloOrquestadorDeCPU() {
 								comandoAbortar(buffer, i);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_FINAlIZAR:
@@ -1807,7 +1806,8 @@ void *HiloOrquestadorDeCPU() {
 								comandoFinalizar(i, buffer);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_LIBERAR:
@@ -2005,7 +2005,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 							auxPCB->id, (char*) auxSem->nombre);
 					list_add(auxSem->listaSem, auxPCB);
 					imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
-							auxSem->nombre);
+							auxSem->nombre, auxSem->valor);
 				} else {
 					//Desbloquar Programa
 					pthread_mutex_lock(&mutexReady);
@@ -2096,7 +2096,7 @@ void comandoSignal(char* buffer, int socket) {
 				pthread_mutex_unlock(&mutexReady);
 				list_clean(auxSem->listaSem);
 				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
-						auxSem->nombre);
+						auxSem->nombre, auxSem->valor);
 			}
 			for (i = 0; i < cant; i++) {
 				semsig(&readyCont);
@@ -2342,7 +2342,7 @@ void imprimirListaVarGlobalesxTraza() {
 	free(cadena);
 }
 
-void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre) {
+void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre, int valor) {
 	char* cadena = string_new();
 	int cant = list_size(lista), i;
 	PCB* auxPCB;
@@ -2352,8 +2352,8 @@ void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre) {
 		string_append(&cadena, string_itoa(auxPCB->id));
 		string_append(&cadena, "]");
 	}
-	log_trace(logger, "Lista bloq por sem %s(cant %d):%s", (char*) nombre, cant,
-			(char*) cadena);
+	log_trace(logger, "Lista bloq por sem %s(cant %d, valor sem: %d):%s",
+			(char*) nombre, cant, valor, (char*) cadena);
 	free(cadena);
 }
 
@@ -2561,7 +2561,7 @@ void *borradorPCB(void *arg) {
 			}
 			if (cont > 0)
 				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
-						auxSem->nombre);
+						auxSem->nombre, auxSem->valor);
 		}
 		pthread_mutex_unlock(&mutexSemaforos);
 		for (j = 0; j < list_size(listaDispositivos); j++) {
