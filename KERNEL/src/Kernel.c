@@ -1273,10 +1273,10 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	if (list_size(listaNew) == 0) {
 		list_add(listaNew, new_create(PCBAUX, pesito));
 
-	//Sino utilizo list_sort (nose si hay un error ahi, pero esta fallando)
+	//Sino utilizo list_sort
 	} else {
 		list_add(listaNew, new_create(PCBAUX, pesito));
-		bool menorPeso(PCB *pcb1, PCB *pcb2) {
+		bool menorPeso(t_New *pcb1, t_New *pcb2) {
 			return pcb1->peso < pcb2->peso;
 		}
 		list_sort(listaNew,(void*) menorPeso);
