@@ -2227,9 +2227,15 @@ void comandoObtenerValorGlobar(char* buffer, int socket) {
 			//falla al enviar
 		}
 	} else {
-		ndatos = EnviarDatos(socket, "0");
+		string_append(&respuesta, "Avariable global no encontrada: ");
+		string_append(&respuesta, variable);
+		string_append(&respuesta, "-");
+		ndatos = EnviarDatos(socket, respuesta);
 	}
-	free(respuesta);
+	if (respuesta != NULL )
+		free(respuesta);
+	if (variable != NULL )
+		free(variable);
 }
 
 t_varGlobal* encontrarVarGlobal(char* nombre) {
@@ -2246,6 +2252,7 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 	int valor;
 	int ndatos;
 	char* variable = string_new();
+	char* msj = string_new();
 	string_append(&variable, "!");
 	variable2 = obtenerParteDelMensaje(buffer, &pos);
 	string_append(&variable, variable2);
@@ -2264,8 +2271,15 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 		}
 	} else {
 		log_trace(logger, "Variable: %s no encontrada", (char*) variable);
-		ndatos = EnviarDatos(socket, "0");
+		string_append(&msj, "Avariable global no encontrada: ");
+		string_append(&msj, variable);
+		string_append(&msj, "-");
+		ndatos = EnviarDatos(socket, msj);
 	}
+	if (variable != NULL )
+		free(variable);
+	if (msj != NULL )
+		free(msj);
 }
 
 void comandoAbortar(char* buffer, int socket) {
@@ -2342,7 +2356,8 @@ void imprimirListaVarGlobalesxTraza() {
 	free(cadena);
 }
 
-void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre, int valor) {
+void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre,
+		int valor) {
 	char* cadena = string_new();
 	int cant = list_size(lista), i;
 	PCB* auxPCB;
