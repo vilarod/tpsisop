@@ -1662,7 +1662,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoImprimir(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1670,7 +1670,7 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizado por mensaje Recibido incorrecto-");
 							}
 							break;
 						case MSJ_CPU_HANDSHAKE:
@@ -1694,7 +1694,7 @@ void *HiloOrquestadorDeCPU() {
 								comandoFinalQuamtum(buffer, i);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_OBTENERVALORGLOBAL:
@@ -1707,7 +1707,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoObtenerValorGlobar(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1715,7 +1715,7 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizo por mensaje incorrrecto-");
 							}
 							break;
 						case MSJ_CPU_GRABARVALORGLOBAL:
@@ -1728,7 +1728,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoGrabarValorGlobar(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1736,7 +1736,7 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_ABANDONA:
@@ -1759,7 +1759,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoWait(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1767,7 +1767,7 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_SIGNAL:
@@ -1781,7 +1781,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoSignal(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1789,7 +1789,7 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_ABORTAR:
@@ -1798,7 +1798,7 @@ void *HiloOrquestadorDeCPU() {
 								comandoAbortar(buffer, i);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_FINAlIZAR:
@@ -1807,7 +1807,7 @@ void *HiloOrquestadorDeCPU() {
 								comandoFinalizar(i, buffer);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i, "AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_LIBERAR:
@@ -2043,7 +2043,7 @@ void comandoWait(char* buffer, int socket) {
 			n = EnviarDatos(socket, "1");
 		}
 	} else {
-		n = EnviarDatos(socket, "A");
+		n = EnviarDatos(socket, "ASemaforo no encontrado-");
 	}
 	if (n < 0) {
 		//error enviar datos

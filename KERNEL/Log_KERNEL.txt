@@ -784,3 +784,20 @@ end
 [id: 6 peso: 5 Indice codigo: 6941]
 [id: 5 peso: 403 Indice codigo: 6593]
 [TRACE] 01:59:56:799 KERNEL/(3837:3843): ENVIO datos. socket: 12. buffer: S
+[TRACE] 13:41:24:571 KERNEL/(1978:1978): Obteniendo cadenas: [sem1,sem2] [2,0]
+[TRACE] 13:41:24:597 KERNEL/(1978:1978): valores obtenidos: sem1, 2
+[TRACE] 13:41:24:597 KERNEL/(1978:1978): valores obtenidos: sem2, 0
+[TRACE] 13:41:24:598 KERNEL/(1978:1978): semaforo: sem1 valor: 2
+[TRACE] 13:41:24:598 KERNEL/(1978:1978): semaforo: sem2 valor: 0
+[TRACE] 13:41:24:599 KERNEL/(1978:1978): Obteniendo cadenas: [!o,!a] [3,5]
+[TRACE] 13:41:24:600 KERNEL/(1978:1978): valores obtenidos: !o, 3
+[TRACE] 13:41:24:600 KERNEL/(1978:1978): valores obtenidos: !a, 5
+[TRACE] 13:41:24:601 KERNEL/(1978:1978): Lista var Globales(cant 2):
+[variable: !o, valor: 3]
+[variable: !a, valor: 5]
+[TRACE] 13:41:24:603 KERNEL/(1978:1978): Obteniendo cadenas: [Disco,Impresora] [10,20]
+[TRACE] 13:41:24:604 KERNEL/(1978:1978): valores obtenidos: Disco, 10
+[TRACE] 13:41:24:604 KERNEL/(1978:1978): valores obtenidos: Impresora, 20
+[TRACE] 13:41:24:605 KERNEL/(1978:1978): Dispositivo: Disco valor: 10
+[TRACE] 13:41:24:605 KERNEL/(1978:1978): Dispositivo: Impresora valor: 20
+[TRACE] 13:41:24:610 KERNEL/(1978:1979): Intentando conectar a umv.
