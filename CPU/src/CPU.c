@@ -82,6 +82,7 @@ int io = 0; //proceso bloqueado por entrada/salida
 int down = 0; //proceso bloqueado por wait
 int ab = 0; //proceso abortado
 int f = 0;
+int eti=0;
 int retardo = 0; //tiempo que espero entre instruccion e instruccion
 int g_ImprimirTrazaPorConsola = 1;
 int senial_SIGUSR1 = 0; //seÃ±al kill
@@ -962,8 +963,8 @@ RecuperarEtiquetas()
       respuesta = getUMV(programa->indiceEtiquetas, 0,
           programa->sizeIndiceEtiquetas);
 
-      if (string_starts_with(respuesta, bien)
-          && ((strlen(respuesta) - 1) == programa->sizeIndiceEtiquetas))
+      if (string_starts_with(respuesta, bien))
+         // && ((strlen(respuesta) - 1) == programa->sizeIndiceEtiquetas))
         {
           etiquetas = string_substring(respuesta, 1, strlen(respuesta) - 1);
           int x;
@@ -1010,9 +1011,10 @@ RecuperarDicVariables()
       log_trace(logger, "TRAZA - CANTIDAD DE VARIABLES A RECUPERAR: %d \n", aux);
       ptr_posicion = programa->cursorStack - programa->segmentoStack;
 
+
       if (aux > 0) //tengo variables a recuperar
         {
-          respuesta = getUMV(programa->segmentoStack, 0, (VAR_STACK * aux));
+          respuesta = getUMV(programa->segmentoStack, ptr_posicion, (VAR_STACK * aux));
           if (string_starts_with(respuesta, bien))
             {
               variables = string_substring(respuesta, 1, strlen(respuesta) - 1);
@@ -1137,6 +1139,7 @@ inciarVariables()
   motivo = string_new();
   variable_ref = "\0";
   etiquetas = string_new();
+  eti=0;
 }
 
 int
@@ -1238,6 +1241,7 @@ main(void)
 
       while (quantum > 0) //mientras tengo quantum
         {
+          eti=0;
           log_trace(logger, "TRAZA - EL QUANTUM ES: %d \n", quantum);
           log_trace(logger, "TRAZA - LA INSTRUCCION A EJECUTAR ES: %d \n",programa->programCounter);
           sent = PedirSentencia(&sentencia);
@@ -1246,7 +1250,7 @@ main(void)
               parsearYejecutar(sentencia); //ejecuto sentencia
               esperarTiempoRetardo(); // espero X milisegundo para volver a ejecutar
               quantum--;
-              if (f==0)
+              if ((f==0) && (eti==0))
                 {
               programa->programCounter++; //Incremento el PC
               log_trace(logger, "TRAZA - LA PROXIMA INSTRUCCION ES: %d \n",
@@ -1336,13 +1340,13 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
   string_append(&mensaje, string_itoa(programa->cursorStack));
 
   aux = (VAR_STACK * programa->sizeContextoActual);
-  int despl=(programa->segmentoStack - programa->cursorStack) + aux;
+  int despl=(programa->cursorStack - programa->segmentoStack) + aux;
 
 
   if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
     {
       mensaje=string_new();
-      programa->programCounter ++;
+      //programa->programCounter ++;
       ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
       rellenarConCeros(ceros,&mensaje);
       string_append(&mensaje, string_itoa(programa->programCounter));
@@ -1374,12 +1378,12 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
   string_append(&mensaje, string_itoa(programa->cursorStack));
 
   aux = (VAR_STACK * programa->sizeContextoActual);
-  int despl=(programa->segmentoStack - programa->cursorStack) + aux;
+  int despl=(programa->cursorStack - programa->segmentoStack) + aux;
 
   if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
     {
       mensaje=string_new();
-      programa->programCounter ++;
+      //programa->programCounter ++;
       ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
       rellenarConCeros(ceros,&mensaje);
       string_append(&mensaje,string_itoa(programa->programCounter));
@@ -1586,6 +1590,7 @@ prim_irAlLabel(t_nombre_etiqueta etiqueta)
   programa->programCounter = metadata_buscar_etiqueta(etiqueta, etiquetas,programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
   //programa->programCounter ++ ;
   log_trace(logger, "TRAZA - EL VALOR DEL PROGRAM COUNTER ES: %d \n",programa->programCounter);
+  eti=1;
 }
 
 t_puntero
@@ -1610,6 +1615,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
   else
     {
     mensajeAbortar("LA VARIABLE NO EXISTE EN EL CONTEXTO DE EJECUCION");
+    posicion= -1;
     }
 
   free(var);
@@ -1628,7 +1634,7 @@ prim_definirVariable(t_nombre_variable identificador_variable)
   var[0] = identificador_variable;
 
   log_trace(logger, "TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s \n",string_substring(var, 0, 1));
-  pos_var_stack = programa->sizeContextoActual * VAR_STACK;
+  pos_var_stack = (programa->cursorStack - programa->segmentoStack) + programa->sizeContextoActual * VAR_STACK;
 
   log_trace(logger, "TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d \n",pos_var_stack);
 
@@ -1647,10 +1653,14 @@ prim_definirVariable(t_nombre_variable identificador_variable)
           log_trace(logger, "%s","TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE \n");
         }
       else
+        {
         mensajeAbortar("NO SE PUDO INGRESAR LA VARIABLE EN EL STACK");
+        }
     }
   else
+    {
    mensajeAbortar("LA VARIABLE YA SE ENCUENTRA EN EL CONTEXTO ACTUAL");
+    }
 
   free(var);
   return pos_var_stack; //devuelvo la pos en el stack
