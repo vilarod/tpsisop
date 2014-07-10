@@ -1741,7 +1741,7 @@ void *HiloOrquestadorDeCPU() {
 							pthread_mutex_lock(&mutexCPU);
 							eliminarCpu(i);
 							imprimirListaCPUxTraza();
-							pthread_mutex_lock(&mutexCPU);
+							pthread_mutex_unlock(&mutexCPU);
 							close(i); // bye!
 							FD_CLR(i, &master); // eliminar del conjunto maestro
 							break;
