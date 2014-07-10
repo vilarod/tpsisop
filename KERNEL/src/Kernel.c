@@ -221,7 +221,8 @@ void *IMPRIMIRConsola(void *arg) {
 				log_trace(logger, "%s%s\n", "Envie a imprimir: ", mensaje);
 			}
 			pthread_mutex_unlock(&mutexSocketProgramas);
-			free(mensaje);
+			if (mensaje != NULL )
+				free(mensaje);
 			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
 		} else {
 			pthread_mutex_unlock(&mutexImprimir);
@@ -288,18 +289,24 @@ void *moverEjecutar(void *arg) {
 						free(auxPCB);
 					} else {
 						list_add_in_index(listaReady, 0, auxPCB);
+						imprimirListaCPUxTraza();
 						llenarPCBconCeros(auxcpu->idPCB);
 					}
+					if (cadena != NULL )
+						free(cadena);
 				} else {
 					imprimirListaReadyxTraza();
 					mandarPCBaFIN(auxPCB, 1, "Programa inactivo");
 					semsig(&CPUCont);
 				}
 				list_clean(auxList);
+			} else {
+				semsig(&CPUCont);
 			}
 			pthread_mutex_unlock(&mutexCPU);
 			pthread_mutex_unlock(&mutexReady);
-			free(buffer);
+			if (buffer != NULL )
+				free(buffer);
 		}
 	}
 	return NULL ;
@@ -449,7 +456,7 @@ void crearEscucha() {
 	// SOCK_STREAM: Orientado a la conexion, TCP
 	// 0: Usar protocolo por defecto para AF_INET-SOCK_STREAM: Protocolo TCP/IPv4
 	if ((socketEscucha = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		perror("socket");
+		ErrorFatal("socket");
 		//return 1;
 	}
 
@@ -465,14 +472,14 @@ void crearEscucha() {
 	if (bind(socketEscucha, (struct sockaddr*) &socketInfo, sizeof(socketInfo))
 			!= 0) {
 
-		perror("Error al bindear socket escucha");
+		ErrorFatal("Error al bindear socket escucha");
 		//return EXIT_FAILURE;
 	}
 
 	// Escuchar nuevas conexiones entrantes.
 	if (listen(socketEscucha, 10) != 0) {
 
-		perror("Error al poner a escuchar socket");
+		ErrorFatal("Error al poner a escuchar socket");
 		//return EXIT_FAILURE;
 	}
 
@@ -485,7 +492,7 @@ void crearEscucha() {
 	for (;;) {
 		read_fds = master; // cópialo
 		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL ) == -1) {
-			perror("select");
+			ErrorFatal("select");
 			exit(1);
 		}
 		// explorar conexiones existentes en busca de datos que leer
@@ -496,7 +503,7 @@ void crearEscucha() {
 					// addrlen = sizeof(remoteaddr);
 					if ((socketNuevaConexion = accept(socketEscucha, NULL, 0))
 							== -1) {
-						perror("accept");
+						Error("accept");
 					} else {
 						FD_SET(socketNuevaConexion, &master); // añadir al conjunto maestro
 						if (socketNuevaConexion > fdmax) { // actualizar el máximo
@@ -517,15 +524,13 @@ void crearEscucha() {
 					buffer = string_new();
 					//Recibimos los datos del cliente
 					buffer = RecibirDatos2(i, buffer, &nbytesRecibidos);
-					log_trace(logger, "nos ponemos a recibir %d",
-							nbytesRecibidos);
 					if (nbytesRecibidos <= 0) {
 						// error o conexión cerrada por el cliente
 						if (nbytesRecibidos == 0) {
 							// conexión cerrada
 							printf("selectserver: socket %d hung up\n", i);
 						} else {
-							perror("recv");
+							Error("recv");
 						}
 						borrarSocket(i); // Borra de la lista de socket de pogramas
 						FD_CLR(i, &master); // eliminar del conjunto maestro
@@ -1259,7 +1264,6 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
-	PCBAUX->peso = pesito;
 	log_trace(logger, "%s %d-%d-%d-%d-%d-%d-%d-%d-%d", "Se creo un PCB con: ",
 			PCBAUX->id, PCBAUX->indiceCodigo, PCBAUX->cursorStack,
 			PCBAUX->indiceEtiquetas, PCBAUX->programCounter,
@@ -1280,10 +1284,10 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			return pcb1->peso < pcb2->peso;
 		}
 		list_sort(listaNew, (void*) menorPeso);
+		imprimirListaNewxTraza();
 	}
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
-	imprimirListaNewxTraza();
 	return 1;
 }
 
@@ -1740,7 +1744,7 @@ void *HiloOrquestadorDeCPU() {
 							pthread_mutex_lock(&mutexCPU);
 							eliminarCpu(i);
 							imprimirListaCPUxTraza();
-							pthread_mutex_lock(&mutexCPU);
+							pthread_mutex_unlock(&mutexCPU);
 							close(i); // bye!
 							FD_CLR(i, &master); // eliminar del conjunto maestro
 							break;
@@ -1831,7 +1835,7 @@ void *HiloOrquestadorDeCPU() {
 
 PCB* desearilizar_PCB(char* estructura, int* pos) {
 	printf("%s\n", estructura);
-	char* sub = string_new();
+	char* sub;
 	PCB* est_prog;
 	est_prog = (struct PCBs *) malloc(sizeof(PCB));
 	int aux;
@@ -1841,6 +1845,7 @@ PCB* desearilizar_PCB(char* estructura, int* pos) {
 
 	iniciarPCB(est_prog);
 	for (aux = 1; aux < 10; aux++) {
+		sub = string_new();
 		for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
 			sub = string_substring(estructura, inicio, 1);
 			inicio++;
@@ -1882,11 +1887,11 @@ PCB* desearilizar_PCB(char* estructura, int* pos) {
 					string_substring(estructura, indice, i));
 			break;
 		}
-		sub = "";
+		if (sub != NULL )
+			free(sub);
 		indice = inicio;
 	}
 	*pos = inicio;
-//	free(sub);
 	return est_prog;
 }
 
@@ -1964,7 +1969,6 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		int pos2 = pos + 2;
 		switch (buffer[pos]) {
 		case '0': //termino quamtum colocar en ready
-			log_trace(logger, "lo deseareliza %d", pos);
 			pthread_mutex_lock(&mutexReady);
 			list_add(listaReady, auxPCB);
 			imprimirListaReadyxTraza();
@@ -2008,6 +2012,12 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 							auxSem->nombre, auxSem->valor);
 				} else {
 					//Desbloquar Programa
+					log_trace(logger,
+							"Final Quamtum programa: %d. bloqueado por semaforo: %s",
+							auxPCB->id, (char*) auxSem->nombre);
+					log_trace(logger,
+							"desbloquea programa: %d. bloqueado por semaforo: %s",
+							auxPCB->id, (char*) auxSem->nombre);
 					pthread_mutex_lock(&mutexReady);
 					list_add(listaReady, auxPCB);
 					imprimirListaReadyxTraza();
@@ -2333,7 +2343,7 @@ int mensajeEstaOK(char* buffer, int longitud, int cantidad) {
 		}
 	}
 	free(sub);
-	if (cont == cantidad) {
+	if (cont >= cantidad) {
 		return 1;
 	} else {
 		return 0;

@@ -51,7 +51,6 @@ typedef struct PCBs {
 	int indiceEtiquetas;
 	int sizeContextoActual;
 	int sizeIndiceEtiquetas;
-	int peso;
 } PCB;
 
 //deserealizar
@@ -300,6 +299,7 @@ static t_socket *socket_create(int num)
 {
 	t_socket* new = malloc(sizeof(t_socket));
 	new->socket=num;
+	new->id=-1;
 	return new;
 }
 
