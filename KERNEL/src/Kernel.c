@@ -1260,7 +1260,6 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
-	PCBAUX->peso = pesito;
 	log_trace(logger, "%s %d-%d-%d-%d-%d-%d-%d-%d-%d", "Se creo un PCB con: ",
 			PCBAUX->id, PCBAUX->indiceCodigo, PCBAUX->cursorStack,
 			PCBAUX->indiceEtiquetas, PCBAUX->programCounter,

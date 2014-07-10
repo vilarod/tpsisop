@@ -51,7 +51,6 @@ typedef struct PCBs {
 	int indiceEtiquetas;
 	int sizeContextoActual;
 	int sizeIndiceEtiquetas;
-	int peso;
 } PCB;
 
 //deserealizar
