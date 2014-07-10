@@ -1498,6 +1498,7 @@ prim_retornar(t_valor_variable retorno)
               aux = aux - VAR_STACK;
               pedido = getUMV(programa->segmentoStack,aux, VAR_STACK);
 
+
               if (string_starts_with(pedido, bien))
                 {
                   aux=aux - VAR_STACK;
