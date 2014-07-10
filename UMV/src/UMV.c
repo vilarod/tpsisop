@@ -346,6 +346,8 @@ void ConsolaComandoHelp()
 	string_append_with_format(&mensajeHelp, "%s: Definir si se muestra la traza de ejecución por consola. \n", CMD_ACTIVAR_TRAZA);
 
 	printf("%s", mensajeHelp);
+
+	free(mensajeHelp);
 }
 
 void ConsolaComandoLeerMemoria()
@@ -1737,6 +1739,7 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 		string_append(&stringErrorAux, g_MensajeError);
 		SetearErrorGlobal("ERROR LEER MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", stringErrorAux, idProg, base, desplazamiento, longitudBuffer);
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
+		free(stringErrorAux);
 	}
 
 	if (lectura != NULL )
@@ -1796,6 +1799,7 @@ char* ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 			string_append(&stringErrorAux, g_MensajeError);
 			SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d, buffer: %s", stringErrorAux, idProg, base, desplazamiento, longitudBuffer, mensaje);
 			buffer = RespuestaClienteError(buffer, g_MensajeError);
+			free(stringErrorAux);
 		}
 
 		if (mensaje != NULL )
@@ -1945,6 +1949,9 @@ char* RespuestaClienteOk(char *buffer)
 	 memset(buffer, 0, tamanio * sizeof(char));
 	 sprintf(buffer, "%s", "1");*/
 
+	if (buffer!= NULL)
+		free(buffer);
+
 	buffer = string_new();
 	string_append(&buffer, "1");
 
@@ -1954,6 +1961,8 @@ char* RespuestaClienteOk(char *buffer)
 char* RespuestaClienteError(char *buffer, char *msj)
 {
 	//int cantidadBytesBuffer = strlen(buffer);
+	if (buffer!= NULL)
+			free(buffer);
 	buffer = string_new();
 	string_append(&buffer, "0");
 	string_append(&buffer, msj);
@@ -1962,6 +1971,7 @@ char* RespuestaClienteError(char *buffer, char *msj)
 	 buffer = realloc(buffer, tamanio * sizeof(char));
 	 memset(buffer, 0, tamanio * sizeof(char));
 	 sprintf(buffer, "%s%s", "0", msj);*/
+	free(msj);
 	return buffer;
 }
 
