@@ -2339,7 +2339,7 @@ int mensajeEstaOK(char* buffer, int longitud, int cantidad) {
 		}
 	}
 	free(sub);
-	if (cont == cantidad) {
+	if (cont >= cantidad) {
 		return 1;
 	} else {
 		return 0;

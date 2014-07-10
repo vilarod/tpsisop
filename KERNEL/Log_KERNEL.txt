@@ -30020,3 +30020,36 @@ end
 [TRACE] 17:32:10:150 KERNEL/(5672:5685): Lista Ready(cant 1):
 [id: 2 Indice codigo: 5846]
 [TRACE] 17:32:10:150 KERNEL/(5672:5685): Lista bloq por sem c(cant 0, valor sem: 0):
+[TRACE] 18:23:01:747 KERNEL/(6085:6085): Obteniendo cadenas: [sem1,sem2,b,c] [2,0,1,0]
+[TRACE] 18:23:01:753 KERNEL/(6085:6085): valores obtenidos: sem1, 2
+[TRACE] 18:23:01:753 KERNEL/(6085:6085): valores obtenidos: sem2, 0
+[TRACE] 18:23:01:754 KERNEL/(6085:6085): valores obtenidos: b, 1
+[TRACE] 18:23:01:754 KERNEL/(6085:6085): valores obtenidos: c, 0
+[TRACE] 18:23:01:754 KERNEL/(6085:6085): semaforo: sem1 valor: 2
+[TRACE] 18:23:01:754 KERNEL/(6085:6085): semaforo: sem2 valor: 0
+[TRACE] 18:23:01:754 KERNEL/(6085:6085): semaforo: b valor: 1
+[TRACE] 18:23:01:755 KERNEL/(6085:6085): semaforo: c valor: 0
+[TRACE] 18:23:01:755 KERNEL/(6085:6085): Obteniendo cadenas: [!o,!a,!colas] [3,5,0]
+[TRACE] 18:23:01:756 KERNEL/(6085:6085): valores obtenidos: !o, 3
+[TRACE] 18:23:01:756 KERNEL/(6085:6085): valores obtenidos: !a, 5
+[TRACE] 18:23:01:756 KERNEL/(6085:6085): valores obtenidos: !colas, 0
+[TRACE] 18:23:01:756 KERNEL/(6085:6085): Lista var Globales(cant 3):
+[variable: !o, valor: 3]
+[variable: !a, valor: 5]
+[variable: !colas, valor: 0]
+[TRACE] 18:23:01:757 KERNEL/(6085:6085): Obteniendo cadenas: [Disco,Impresora] [10,20]
+[TRACE] 18:23:01:763 KERNEL/(6085:6085): valores obtenidos: Disco, 10
+[TRACE] 18:23:01:764 KERNEL/(6085:6085): valores obtenidos: Impresora, 20
+[TRACE] 18:23:01:764 KERNEL/(6085:6085): Dispositivo: Disco valor: 10
+[TRACE] 18:23:01:764 KERNEL/(6085:6085): Dispositivo: Impresora valor: 20
+[TRACE] 18:23:01:766 KERNEL/(6085:6086): Intentando conectar a umv.
+[TRACE] 18:23:01:778 KERNEL/(6085:6086): ENVIO datos. socket: 4. buffer: 31
+[TRACE] 18:23:01:779 KERNEL/(6085:6086): RECIBO datos. socket: 4. buffer: 1
+[TRACE] 18:23:01:779 KERNEL/(6085:6086): Conectado a la UMV
+
+[TRACE] 18:23:01:780 KERNEL/(6085:6086): Escuchando conexiones entrantes PLP(8000).
+
+[TRACE] 18:23:01:785 KERNEL/(6085:6093): Escuchando conexiones entrantes PCP(8500).
+
+[TRACE] 18:23:01:785 KERNEL/(6085:6097): Levanto hilo dispositivo: Impresora
+[TRACE] 18:23:01:786 KERNEL/(6085:6096): Levanto hilo dispositivo: Disco
