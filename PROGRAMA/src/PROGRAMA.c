@@ -84,10 +84,10 @@ int main(int argc, char* argv[]) {
 	printf("nombre archivo: %s\n", nombreArchivo);
 	file = fopen(nombreArchivo, "r");    //abre el archivo en modo read
 	if (file == NULL ) {
-		log_trace(logger,"No existe el archivo %s\n", argv[1]); //No existe el archivo
+		log_trace(logger, "No existe el archivo %s\n", argv[1]); //No existe el archivo
 		exit(1);
 	}
-	log_trace(logger,"Abre el archivo:%s\n", argv[1]);
+	log_trace(logger, "Abre el archivo:%s\n", argv[1]);
 	free(nombreArchivo);
 	nombreArchivo = NULL;
 
@@ -98,13 +98,13 @@ int main(int argc, char* argv[]) {
 	contents = (char*) malloc(sizeof(char) * len + 1); //para guardar lo que lee
 	contents[len] = '\0'; // para indicar que termina el texto
 	if (contents == NULL ) {
-		log_trace(logger,"%s\n", "Error no hay memoria disponible");
+		log_trace(logger, "%s\n", "Error no hay memoria disponible");
 		exit(1);
 	}
 
 	bytesRead = fread(contents, sizeof(char), len, file); //bytes leidos
 	printf("File length: %d, bytes read: %d\n", len, bytesRead); //imprime la cantidad de bytes del archivo
-	log_trace(logger,"El programa en el script es:\n %s\n", contents);
+	log_trace(logger, "El programa en el script es:\n %s\n", contents);
 
 	txt_close_file(file); //cierro el archivo
 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 
 	programa = string_new(); //aca guardo el programa que envio al kernel
 	programa = string_substring(contents, final, strlen(contents) - final);
-	log_trace(logger,"El programa sin la primer linea:\n %s\n", programa);
+	log_trace(logger, "El programa sin la primer linea:\n %s\n", programa);
 	printf("%s", programa); //verifico que tengo el programa sin la primer linea
 	printf("\n");
 
@@ -155,7 +155,7 @@ char* obtenerIpKERNEL() {
 }
 
 void conectarAKERNEL(char *archivo) { //el parametro es el programa
-	log_trace(logger,"%s\n", "Intentando conectar a kernel");
+	log_trace(logger, "%s\n", "Intentando conectar a kernel");
 	int puerto = obtenerPuertoKERNEL(); //descomentar para la prueba en laboratorio
 	char *IP = obtenerIpKERNEL(); //idem anterior
 	int soquete = conexionConSocket(puerto, IP); // para la prueba en laboratorio
@@ -169,48 +169,65 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	char respuestaKERNEL[BUFFERSIZE];
 
 	enviarDatos(sockfd, HANDSHAKE); //HANDSHAKE ES H
-	log_trace(logger,"%s\n", "Envio handshake");
-	if (recibirDatos(sockfd, respuestaKERNEL)==0 ){
-			ErrorFatal("Se desconecto el Kernel");
-		}
+	log_trace(logger, "%s\n", "Envio handshake");
+	if (recibirDatos(sockfd, respuestaKERNEL) == 0) {
+		ErrorFatal("Se desconecto el Kernel");
+	}
 
 	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
 	} else
-		log_trace(logger,"%s\n", "Kernel recibio hanshake");
+		log_trace(logger, "%s\n", "Kernel recibio hanshake");
 	analizarRespuestaKERNEL(respuestaKERNEL);
 	char* msj = string_new();
 	string_append(&msj, "E");
 	string_append(&msj, programa);
-	log_trace(logger,"%s\n", "Envio programa");
+	log_trace(logger, "%s\n", "Envio programa");
 	enviarDatos(sockfd, msj); //envio el programa
-	if (recibirDatos(sockfd, respuestaKERNEL)==0 ){
-			ErrorFatal("Se desconecto el Kernel");
-		}
+	if (recibirDatos(sockfd, respuestaKERNEL) == 0) {
+		ErrorFatal("Se desconecto el Kernel");
+	}
 	if (respuestaKERNEL[0] == 'N') {
 		printf("Error del KERNEL");
 		exit(1);
 	}
-	log_trace(logger,"%s", "Kernel recibio el programa");
+	log_trace(logger, "%s", "Kernel recibio el programa");
 	int finDeEjecucion;
 	finDeEjecucion = analizarSiEsFinDeEjecucion(respuestaKERNEL);
+	char* msj2;
+	char* sub = string_new();
+	int cont, i;
 	while (finDeEjecucion != 0) {
-		if (recibirDatos(sockfd, respuestaKERNEL)==0 ){
-				ErrorFatal("Se desconecto el Kernel");
-			}
-
-		finDeEjecucion = analizarSiEsFinDeEjecucion(respuestaKERNEL);
-
-		if (finDeEjecucion != 0) {
-			analizarRespuestaKERNEL(respuestaKERNEL);
-			imprimirRespuesta(respuestaKERNEL);
-			enviarConfirmacionDeRecepcionDeDatos(sockfd);
+		cont = recibirDatos(sockfd, respuestaKERNEL);
+		if (cont == 0) {
+			ErrorFatal("Se desconecto el Kernel");
 		}
+		i=0;
+		while ((finDeEjecucion != 0) && (i < cont)) {
+			//sacar mensaje
+			msj2 = string_new();
+			sub = string_substring(respuestaKERNEL, i, 1);
+			i++;
+			while ((string_equals_ignore_case(sub, "\0") == 0) && (i < cont)) {
+				string_append(&msj2, sub);
+				sub = string_substring(respuestaKERNEL, i, 1);
+				i++;
+			}
+			if (i <= cont)
+				string_append(&msj2, sub);
+//			printf("\nmsj2: %s\n",msj2);
+			finDeEjecucion = analizarSiEsFinDeEjecucion(msj2);
 
+			if (finDeEjecucion != 0) {
+				analizarRespuestaKERNEL(msj2);
+				imprimirRespuesta(msj2);
+//				enviarConfirmacionDeRecepcionDeDatos(sockfd);
+			}
+			free(msj);
+		}
 	}
 	txt_write_in_stdout("Fin de ejecucion\n");
-
 	return analizarRespuestaKERNEL(respuestaKERNEL);
 
 }
@@ -218,7 +235,8 @@ int imprimirRespuesta(char *mensaje) {
 
 	if ((string_starts_with(mensaje, "I"))
 			&& (string_ends_with(mensaje, "\0"))) {
-		log_trace(logger,"%s\n", "Se imprime el mensaje enviado por el kernel");
+		log_trace(logger, "%s\n",
+				"Se imprime el mensaje enviado por el kernel");
 		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
 	}
 
@@ -228,18 +246,18 @@ int imprimirRespuesta(char *mensaje) {
 int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 
 	enviarDatos(sockfd, CONFIRMACION);
-	log_trace(logger,"%s\n", "Envio confirmacion de recepcion de datos");
+	log_trace(logger, "%s\n", "Envio confirmacion de recepcion de datos");
 	return 0;
 }
 
 int analizarSiEsFinDeEjecucion(char *mensaje) {
 	if ((string_starts_with(mensaje, "F"))
-				&& (string_ends_with(mensaje, "\0"))) {
-		    log_trace(logger,"%s\n", "Se imprime el mensaje enviado por el kernel");
-			printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
-			return 0;
-		}
-	else
+			&& (string_ends_with(mensaje, "\0"))) {
+		log_trace(logger, "%s\n",
+				"Se imprime el mensaje enviado por el kernel");
+		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
+		return 0;
+	} else
 		return 1;
 }
 
@@ -285,10 +303,12 @@ int recibirDatos(int socket, char *buffer) {
 	//Nos ponemos a la escucha de las peticiones que nos envie el kernel
 	//aca si recibo 0 bytes es que se desconecto el otro, cerrar el hilo.
 	if ((bytecount = recv(socket, buffer, BUFFERSIZE, 0)) == -1)
-		ErrorFatal("Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
+		ErrorFatal(
+				"Ocurrio un error al intentar recibir datos el kernel. Socket: %d",
 				socket);
 
-	log_trace(logger,"RECIBO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
+	log_trace(logger, "RECIBO datos. socket: %d. buffer: %s\n", socket,
+			(char*) buffer);
 	return bytecount;
 }
 
@@ -298,7 +318,8 @@ int enviarDatos(int socket, void *buffer) {
 	if ((bytecount = send(socket, buffer, strlen(buffer), 0)) == -1)
 		Error("No puedo enviar información al kernel. Socket: %d\n", socket);
 
-	log_trace(logger,"ENVIO datos. socket: %d. buffer: %s\n", socket, (char*) buffer);
+	log_trace(logger, "ENVIO datos. socket: %d. buffer: %s\n", socket,
+			(char*) buffer);
 
 	return bytecount;
 }
@@ -332,7 +353,8 @@ void ErrorFatal(char mensaje[], ...) {
 
 	char fin;
 
-	printf("El programa se cerrara. Presione ENTER para finalizar la ejecución.");
+	printf(
+			"El programa se cerrara. Presione ENTER para finalizar la ejecución.");
 	scanf("%c", &fin);
 
 	exit(EXIT_FAILURE);
