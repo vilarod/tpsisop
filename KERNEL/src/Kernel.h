@@ -300,6 +300,7 @@ static t_socket *socket_create(int num)
 {
 	t_socket* new = malloc(sizeof(t_socket));
 	new->socket=num;
+	new->id=-1;
 	return new;
 }
 
