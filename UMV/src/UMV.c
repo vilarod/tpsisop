@@ -1548,7 +1548,7 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 
 		SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no tiene asignado un segmento con base %d", idPrograma, base);
 		//Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
-		log_trace(logger, "SOLICITUD INVALIDA - %s", g_MensajeError);
+		log_trace(logger, "SOLICITUD INVALIDA %s", g_MensajeError);
 	}
 	else
 	{
@@ -1558,7 +1558,7 @@ int VerificarAccesoMemoria(int idPrograma, int base, int desplazamiento, int can
 		{
 			SetearErrorGlobal("SEGMENTATION FAULT. El programa (%d) no puede acceder a la posicion de memoria %d. (El segmento termina en la posicion %d)", idPrograma, posicionSolicitada, posicionMaximaDelSegmento);
 			//Traza("Ocurrio una violación en el acceso a segmentos. %s", g_MensajeError);
-			log_trace(logger, "SOLICITUD INVALIDA - %s", g_MensajeError);
+			log_trace(logger, "SOLICITUD INVALIDA %s", g_MensajeError);
 		}
 		else
 			accesoOk = 1;
