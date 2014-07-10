@@ -1258,19 +1258,60 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
+	PCBAUX->peso = pesito;
 	log_trace(logger, "%s %d-%d-%d-%d-%d-%d-%d-%d-%d", "Se creo un PCB con: ",
 			PCBAUX->id, PCBAUX->indiceCodigo, PCBAUX->cursorStack,
 			PCBAUX->indiceEtiquetas, PCBAUX->programCounter,
 			PCBAUX->segmentoCodigo, PCBAUX->segmentoStack,
 			PCBAUX->sizeContextoActual, PCBAUX->sizeIndiceEtiquetas);
 	log_trace(logger, "%s%d", "El PCB tiene peso: ", pesito);
+
 	pthread_mutex_lock(&mutexNew);
-	list_add(listaNew, new_create(PCBAUX, pesito));
-	imprimirListaNewxTraza();
+
+	//Si la lista esta vacia lo agrego directamente
+	if (list_size(listaNew) == 0) {
+		list_add(listaNew, new_create(PCBAUX, pesito));
+
+	//Sino utilizo list_sort (nose si hay un error ahi, pero esta fallando)
+	} else {
+		list_add(listaNew, new_create(PCBAUX, pesito));
+		bool menorPeso(PCB *pcb1, PCB *pcb2) {
+			return pcb1->peso < pcb2->peso;
+		}
+		list_sort(listaNew,(void*) menorPeso);
+	}
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
+	imprimirListaNewxTraza();
 	return 1;
 }
+
+//DE LAS TEST DE LAS COMMONS
+//list_add(list, ayudantes[0]);
+//list_add(list, ayudantes[1]);
+//list_add(list, ayudantes[2]);
+//list_add(list, ayudantes[3]);
+//
+//bool _ayudantes_menor(t_person *joven, t_person *menos_joven) {
+//	return joven->age < menos_joven->age;
+//}
+//
+//list_sort(list, (void*) _ayudantes_menor);
+//
+//CU_ASSERT_PTR_EQUAL(list_get(list, 0), ayudantes[3]);
+//CU_ASSERT_PTR_EQUAL(list_get(list, 1), ayudantes[2]);
+//CU_ASSERT_PTR_EQUAL(list_get(list, 2), ayudantes[0]);
+//CU_ASSERT_PTR_EQUAL(list_get(list, 3), ayudantes[1]);
+//
+//list_destroy(list);
+
+
+
+
+
+
+
+
 
 //char* crearSegmento(int digitosID, int id, int digitosSize, int size) {
 //	char* mensaje = string_new();
@@ -2517,7 +2558,9 @@ void *borradorPCB(void *arg) {
 					cont++;
 				}
 			}
-			if(cont>0) imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem, auxSem->nombre);
+			if (cont > 0)
+				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
+						auxSem->nombre);
 		}
 		pthread_mutex_unlock(&mutexSemaforos);
 		for (j = 0; j < list_size(listaDispositivos); j++) {
@@ -2526,9 +2569,9 @@ void *borradorPCB(void *arg) {
 			pthread_mutex_lock(&(auxDisp->mutexBloqueados));
 			for (i = 0; i < list_size(auxDisp->listaBloqueados); i++) {
 				auxBloq = list_get(auxDisp->listaBloqueados, i);
-				auxPCB=auxBloq->idPCB;
+				auxPCB = auxBloq->idPCB;
 				if (estaProgActivo(auxPCB->id) == 0) {
-					auxBloq->idPCB=NULL;
+					auxBloq->idPCB = NULL;
 					list_remove(auxDisp->listaBloqueados, i);
 					mandarPCBaFIN(auxPCB, 1, "Programa Inactivo");
 					i--;
@@ -2536,7 +2579,9 @@ void *borradorPCB(void *arg) {
 					bloqueado_destroy(auxBloq);
 				}
 			}
-			if(cont>0) imprimirListaBloqueadosPorUnDispositivoxTraza(auxDisp->listaBloqueados, auxDisp->nombre);
+			if (cont > 0)
+				imprimirListaBloqueadosPorUnDispositivoxTraza(
+						auxDisp->listaBloqueados, auxDisp->nombre);
 			pthread_mutex_unlock(&(auxDisp->mutexBloqueados));
 		}
 	}
