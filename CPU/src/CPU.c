@@ -1474,6 +1474,10 @@ prim_retornar(t_valor_variable retorno)
   memset(pedido,0,BUFFERSIZE);
   pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
 
+  char* mensj=string_new();
+    int ceros = ((VAR_STACK - DIG_NOM_VAR) - cantidadDigitos(retorno));
+    rellenarConCeros(ceros,&mensj);
+    string_append(&mensj, string_itoa(retorno));
 
   if (string_starts_with(pedido,bien))
     {
@@ -1482,7 +1486,7 @@ prim_retornar(t_valor_variable retorno)
 
      //int despl=(programa->segmentoStack - retor) + 1;
 
-      if (setUMV(programa->segmentoStack, retor + 1, DIG_VAL_VAR, string_itoa(retorno)) == 1)
+      if (setUMV(programa->segmentoStack, (retor + 1), DIG_VAL_VAR, mensj) == 1)
         {
           aux = aux - VAR_STACK;
           pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
@@ -1496,6 +1500,7 @@ prim_retornar(t_valor_variable retorno)
 
               if (string_starts_with(pedido, bien))
                 {
+                  aux=aux - VAR_STACK;
                   programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
                   log_trace(logger, "TRAZA - EL CURSOR DEL STACK ES: %d \n",programa->cursorStack);
                   programa->sizeContextoActual =((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK) + 1;
