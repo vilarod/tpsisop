@@ -221,7 +221,8 @@ void *IMPRIMIRConsola(void *arg) {
 				log_trace(logger, "%s%s\n", "Envie a imprimir: ", mensaje);
 			}
 			pthread_mutex_unlock(&mutexSocketProgramas);
-			free(mensaje);
+			if (mensaje != NULL )
+				free(mensaje);
 			list_clean_and_destroy_elements(auxList, (void*) imp_destroy);
 		} else {
 			pthread_mutex_unlock(&mutexImprimir);
@@ -291,18 +292,21 @@ void *moverEjecutar(void *arg) {
 						imprimirListaCPUxTraza();
 						llenarPCBconCeros(auxcpu->idPCB);
 					}
+					if (cadena != NULL )
+						free(cadena);
 				} else {
 					imprimirListaReadyxTraza();
 					mandarPCBaFIN(auxPCB, 1, "Programa inactivo");
 					semsig(&CPUCont);
 				}
 				list_clean(auxList);
-			}else{
+			} else {
 				semsig(&CPUCont);
 			}
 			pthread_mutex_unlock(&mutexCPU);
 			pthread_mutex_unlock(&mutexReady);
-			free(buffer);
+			if (buffer != NULL )
+				free(buffer);
 		}
 	}
 	return NULL ;
@@ -1832,7 +1836,7 @@ void *HiloOrquestadorDeCPU() {
 
 PCB* desearilizar_PCB(char* estructura, int* pos) {
 	printf("%s\n", estructura);
-	char* sub = string_new();
+	char* sub;
 	PCB* est_prog;
 	est_prog = (struct PCBs *) malloc(sizeof(PCB));
 	int aux;
@@ -1842,6 +1846,7 @@ PCB* desearilizar_PCB(char* estructura, int* pos) {
 
 	iniciarPCB(est_prog);
 	for (aux = 1; aux < 10; aux++) {
+		sub = string_new();
 		for (i = 0; string_equals_ignore_case(sub, "-") == 0; i++) {
 			sub = string_substring(estructura, inicio, 1);
 			inicio++;
@@ -1883,11 +1888,11 @@ PCB* desearilizar_PCB(char* estructura, int* pos) {
 					string_substring(estructura, indice, i));
 			break;
 		}
-		sub = "";
+		if (sub != NULL )
+			free(sub);
 		indice = inicio;
 	}
 	*pos = inicio;
-//	free(sub);
 	return est_prog;
 }
 
