@@ -213,6 +213,7 @@ void *IMPRIMIRConsola(void *arg) {
 			char* mensaje = string_new();
 			string_append(&mensaje, "I");
 			string_append(&mensaje, auxImp->mensaje);
+			string_append(&mensaje, "\0");
 			pthread_mutex_lock(&mutexSocketProgramas);
 			auxSocket = encontrarSocketPCB(auxImp->prog);
 			if (auxSocket != NULL ) {
@@ -1258,19 +1259,52 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	int pesito = (5 * (metadataprograma->etiquetas_size)
 			+ 3 * (metadataprograma->cantidad_de_funciones)
 			+ (metadataprograma->instrucciones_size));
+	PCBAUX->peso = pesito;
 	log_trace(logger, "%s %d-%d-%d-%d-%d-%d-%d-%d-%d", "Se creo un PCB con: ",
 			PCBAUX->id, PCBAUX->indiceCodigo, PCBAUX->cursorStack,
 			PCBAUX->indiceEtiquetas, PCBAUX->programCounter,
 			PCBAUX->segmentoCodigo, PCBAUX->segmentoStack,
 			PCBAUX->sizeContextoActual, PCBAUX->sizeIndiceEtiquetas);
 	log_trace(logger, "%s%d", "El PCB tiene peso: ", pesito);
+
 	pthread_mutex_lock(&mutexNew);
-	list_add(listaNew, new_create(PCBAUX, pesito));
-	imprimirListaNewxTraza();
+
+	//Si la lista esta vacia lo agrego directamente
+	if (list_size(listaNew) == 0) {
+		list_add(listaNew, new_create(PCBAUX, pesito));
+
+		//Sino utilizo list_sort
+	} else {
+		list_add(listaNew, new_create(PCBAUX, pesito));
+		bool menorPeso(t_New *pcb1, t_New *pcb2) {
+			return pcb1->peso < pcb2->peso;
+		}
+		list_sort(listaNew, (void*) menorPeso);
+	}
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
+	imprimirListaNewxTraza();
 	return 1;
 }
+
+//DE LAS TEST DE LAS COMMONS
+//list_add(list, ayudantes[0]);
+//list_add(list, ayudantes[1]);
+//list_add(list, ayudantes[2]);
+//list_add(list, ayudantes[3]);
+//
+//bool _ayudantes_menor(t_person *joven, t_person *menos_joven) {
+//	return joven->age < menos_joven->age;
+//}
+//
+//list_sort(list, (void*) _ayudantes_menor);
+//
+//CU_ASSERT_PTR_EQUAL(list_get(list, 0), ayudantes[3]);
+//CU_ASSERT_PTR_EQUAL(list_get(list, 1), ayudantes[2]);
+//CU_ASSERT_PTR_EQUAL(list_get(list, 2), ayudantes[0]);
+//CU_ASSERT_PTR_EQUAL(list_get(list, 3), ayudantes[1]);
+//
+//list_destroy(list);
 
 //char* crearSegmento(int digitosID, int id, int digitosSize, int size) {
 //	char* mensaje = string_new();
@@ -1620,7 +1654,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoImprimir(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1628,7 +1662,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizado por mensaje Recibido incorrecto-");
 							}
 							break;
 						case MSJ_CPU_HANDSHAKE:
@@ -1652,7 +1687,8 @@ void *HiloOrquestadorDeCPU() {
 								comandoFinalQuamtum(buffer, i);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_OBTENERVALORGLOBAL:
@@ -1665,7 +1701,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoObtenerValorGlobar(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1673,7 +1709,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrrecto-");
 							}
 							break;
 						case MSJ_CPU_GRABARVALORGLOBAL:
@@ -1686,7 +1723,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoGrabarValorGlobar(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1694,7 +1731,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_ABANDONA:
@@ -1717,7 +1755,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoWait(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1725,7 +1763,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_SIGNAL:
@@ -1739,7 +1778,7 @@ void *HiloOrquestadorDeCPU() {
 										comandoSignal(buffer, i);
 									} else {
 										Error("Programa no encontrado");
-										EnviarDatos(i, "A");
+										EnviarDatos(i, "APrograma Inactivo-");
 										pthread_mutex_unlock(&mutexCPU);
 									}
 								} else {
@@ -1747,7 +1786,8 @@ void *HiloOrquestadorDeCPU() {
 								}
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_ABORTAR:
@@ -1756,7 +1796,8 @@ void *HiloOrquestadorDeCPU() {
 								comandoAbortar(buffer, i);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_FINAlIZAR:
@@ -1765,7 +1806,8 @@ void *HiloOrquestadorDeCPU() {
 								comandoFinalizar(i, buffer);
 							} else {
 								Error("mensaje Recibido incorrecto");
-								EnviarDatos(i, "A");
+								EnviarDatos(i,
+										"AFinalizo por mensaje incorrecto-");
 							}
 							break;
 						case MSJ_CPU_LIBERAR:
@@ -1963,7 +2005,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 							auxPCB->id, (char*) auxSem->nombre);
 					list_add(auxSem->listaSem, auxPCB);
 					imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
-							auxSem->nombre);
+							auxSem->nombre, auxSem->valor);
 				} else {
 					//Desbloquar Programa
 					pthread_mutex_lock(&mutexReady);
@@ -2001,7 +2043,7 @@ void comandoWait(char* buffer, int socket) {
 			n = EnviarDatos(socket, "1");
 		}
 	} else {
-		n = EnviarDatos(socket, "A");
+		n = EnviarDatos(socket, "ASemaforo no encontrado-");
 	}
 	if (n < 0) {
 		//error enviar datos
@@ -2054,7 +2096,7 @@ void comandoSignal(char* buffer, int socket) {
 				pthread_mutex_unlock(&mutexReady);
 				list_clean(auxSem->listaSem);
 				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
-						auxSem->nombre);
+						auxSem->nombre, auxSem->valor);
 			}
 			for (i = 0; i < cant; i++) {
 				semsig(&readyCont);
@@ -2185,9 +2227,15 @@ void comandoObtenerValorGlobar(char* buffer, int socket) {
 			//falla al enviar
 		}
 	} else {
-		ndatos = EnviarDatos(socket, "0");
+		string_append(&respuesta, "Avariable global no encontrada: ");
+		string_append(&respuesta, variable);
+		string_append(&respuesta, "-");
+		ndatos = EnviarDatos(socket, respuesta);
 	}
-	free(respuesta);
+	if (respuesta != NULL )
+		free(respuesta);
+	if (variable != NULL )
+		free(variable);
 }
 
 t_varGlobal* encontrarVarGlobal(char* nombre) {
@@ -2204,6 +2252,7 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 	int valor;
 	int ndatos;
 	char* variable = string_new();
+	char* msj = string_new();
 	string_append(&variable, "!");
 	variable2 = obtenerParteDelMensaje(buffer, &pos);
 	string_append(&variable, variable2);
@@ -2222,8 +2271,15 @@ void comandoGrabarValorGlobar(char* buffer, int socket) {
 		}
 	} else {
 		log_trace(logger, "Variable: %s no encontrada", (char*) variable);
-		ndatos = EnviarDatos(socket, "0");
+		string_append(&msj, "Avariable global no encontrada: ");
+		string_append(&msj, variable);
+		string_append(&msj, "-");
+		ndatos = EnviarDatos(socket, msj);
 	}
+	if (variable != NULL )
+		free(variable);
+	if (msj != NULL )
+		free(msj);
 }
 
 void comandoAbortar(char* buffer, int socket) {
@@ -2300,7 +2356,8 @@ void imprimirListaVarGlobalesxTraza() {
 	free(cadena);
 }
 
-void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre) {
+void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre,
+		int valor) {
 	char* cadena = string_new();
 	int cant = list_size(lista), i;
 	PCB* auxPCB;
@@ -2310,8 +2367,8 @@ void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre) {
 		string_append(&cadena, string_itoa(auxPCB->id));
 		string_append(&cadena, "]");
 	}
-	log_trace(logger, "Lista bloq por sem %s(cant %d):%s", (char*) nombre, cant,
-			(char*) cadena);
+	log_trace(logger, "Lista bloq por sem %s(cant %d, valor sem: %d):%s",
+			(char*) nombre, cant, valor, (char*) cadena);
 	free(cadena);
 }
 
@@ -2517,7 +2574,9 @@ void *borradorPCB(void *arg) {
 					cont++;
 				}
 			}
-			if(cont>0) imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem, auxSem->nombre);
+			if (cont > 0)
+				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
+						auxSem->nombre, auxSem->valor);
 		}
 		pthread_mutex_unlock(&mutexSemaforos);
 		for (j = 0; j < list_size(listaDispositivos); j++) {
@@ -2526,9 +2585,9 @@ void *borradorPCB(void *arg) {
 			pthread_mutex_lock(&(auxDisp->mutexBloqueados));
 			for (i = 0; i < list_size(auxDisp->listaBloqueados); i++) {
 				auxBloq = list_get(auxDisp->listaBloqueados, i);
-				auxPCB=auxBloq->idPCB;
+				auxPCB = auxBloq->idPCB;
 				if (estaProgActivo(auxPCB->id) == 0) {
-					auxBloq->idPCB=NULL;
+					auxBloq->idPCB = NULL;
 					list_remove(auxDisp->listaBloqueados, i);
 					mandarPCBaFIN(auxPCB, 1, "Programa Inactivo");
 					i--;
@@ -2536,7 +2595,9 @@ void *borradorPCB(void *arg) {
 					bloqueado_destroy(auxBloq);
 				}
 			}
-			if(cont>0) imprimirListaBloqueadosPorUnDispositivoxTraza(auxDisp->listaBloqueados, auxDisp->nombre);
+			if (cont > 0)
+				imprimirListaBloqueadosPorUnDispositivoxTraza(
+						auxDisp->listaBloqueados, auxDisp->nombre);
 			pthread_mutex_unlock(&(auxDisp->mutexBloqueados));
 		}
 	}

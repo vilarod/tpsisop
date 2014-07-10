@@ -51,6 +51,7 @@ typedef struct PCBs {
 	int indiceEtiquetas;
 	int sizeContextoActual;
 	int sizeIndiceEtiquetas;
+	int peso;
 } PCB;
 
 //deserealizar
@@ -66,7 +67,6 @@ void iniciarPCB(PCB* prog);
 //manejo PCB
 void llenarPCBconCeros(PCB* auxPCB);
 void pasarDatosPCB(PCB* aPCB, PCB* dPCB);
-
 
 //Comando de mensajes
 void comandoLiberar(int socket);
@@ -342,7 +342,7 @@ int estaProgActivo(int idprog);
 
 //imprimir Listas
 void imprimirListaVarGlobalesxTraza();
-void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista,char* nombre );
+void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista,char* nombre, int valor);
 void imprimirListaReadyxTraza();
 void imprimirListaFinxTraza();
 void imprimirListaNewxTraza();
