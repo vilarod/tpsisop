@@ -128,7 +128,7 @@ ConexionConSocket(int* Conec, int socketConec, struct sockaddr_in destino)
 void
 Cerrar(int sRemoto)
 {
-  log_trace(logger, "TRAZA - SE CIERRA LA CONEXION SOCKET: %d \n", sRemoto);
+  log_trace(logger, "SE CIERRA LA CONEXION SOCKET: %d \n", sRemoto);
   close(sRemoto);
 }
 
@@ -169,6 +169,10 @@ saludar(int sld, int tipo, int sRemoto)
     ErrorFatal("%s", "ERROR - HANDSHAKE NO FUE EXITOSO \n");
   else
     aux = 1;
+
+  if (mensaje != NULL)
+    free(mensaje);
+
 
   return aux;
 }
@@ -332,7 +336,12 @@ RecibirProceso()
       motivo = "ERROR NO RECIBI DATOS VALIDOS";
     }
 
-  free(estructura);
+  if (estructura != NULL)
+    free(estructura);
+
+  if (sub != NULL)
+    free(sub);
+
   return r; //devuelve 0 si no tengo, -1 si fue error, >0 si recibi
 }
 
@@ -412,8 +421,6 @@ void
 deserializarDesplLong(char * msj, int* despl, int* longi)
 {
   int tamanio = 10;
-
-
 
   log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s \n", msj);
   if (string_starts_with(msj, bien)) //si el mensaje es valido -> busca despl y longi
@@ -540,6 +547,10 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
   if (*cantguiones == 9)
     log_trace(logger, "%s", "TRAZA - RECIBI TODO EL PCB \n");
 
+
+  if (sub != NULL)
+    free(sub);
+
   return est_prog;
 }
 
@@ -567,7 +578,7 @@ AbortarProceso()
     {
       //enviar "A" al kernel
       char *mensaje = string_new();
-      char respuesta[BUFFERSIZE];
+      char *respuesta=malloc(BUFFERSIZE*sizeof(char));
       string_append(&mensaje, AB_PROCESO);
       string_append(&mensaje, motivo);
       string_append(&mensaje, separador);
@@ -583,6 +594,13 @@ AbortarProceso()
                   kernelDesconectado();
               }
 
+            if (mensaje != NULL)
+              free(mensaje);
+            if (respuesta != NULL)
+              free(respuesta);
+            if (motivo != NULL)
+              free(motivo);
+
       motivo = string_new();
       quantum=0;
     }
@@ -590,7 +608,6 @@ AbortarProceso()
 }
 
 //Manejo de seÃ±al SIGUSR1---------------------------------------------------------------
-
 
 void
 AtenderSenial(int s)
@@ -600,7 +617,17 @@ AtenderSenial(int s)
   case SIGUSR1:
     {
       log_trace(logger, "%s", "TRAZA - RECIBI LA SENIAL SIGUSR1 \n");
+
+      if (quantum > 0)
+        {
       senial_SIGUSR1 = 1; // marco que recibi la seÃ±al
+      log_trace(logger, "%s", "Una vez finalizado el quantum, la CPU se desconectara. \n");
+        }
+      else
+        {
+          log_trace(logger, "%s","CPU sin programa en ejecucion. Se desconectara. \n");
+          exit(EXIT_FAILURE);
+        }
       break;
     }
 
@@ -654,6 +681,9 @@ PedirSentencia(char** sentencia)
         umvDesconectada();
     }
 
+  if (instruccion != NULL)
+    free(instruccion);
+
   return aux;
 }
 
@@ -681,6 +711,10 @@ getUMV(int base, int dsp, int tam)
         umvDesconectada();
     }
 
+  if (mensaje != NULL)
+      free(mensaje);
+
+
   return respuesta;
 }
 
@@ -698,7 +732,7 @@ int cantidadDigitos(int num) {
 int
 setUMV(int ptro, int dsp, int tam, char* valor)
 {
-  char respuesta[BUFFERSIZE];
+  char *respuesta = malloc(BUFFERSIZE * sizeof(char));
   char *mensaje = string_itoa(SET_UMV);
   int validar = 1;
 
@@ -726,6 +760,11 @@ setUMV(int ptro, int dsp, int tam, char* valor)
           validar = 0;
         }
     }
+
+  if (respuesta != NULL)
+    free(respuesta);
+  if (mensaje != NULL)
+    free(mensaje);
 
   return validar;
 
@@ -757,6 +796,9 @@ CambioProcesoActivo()
           else
             umvDesconectada();
         }
+
+      if (mensaje != NULL)
+        free(mensaje);
     }
 
 }
@@ -779,6 +821,9 @@ AvisarDescAKernel()
       string_append(&mensaje, separador);
       log_trace(logger, "%s", "TRAZA - AVISO AL KERNEL QUE LA CPU SE DESCONECTA \n");
       Enviar(socketKERNEL, mensaje);
+
+      if (mensaje != NULL)
+        free(mensaje);
     }
 }
 
@@ -787,7 +832,7 @@ obtener_valor(t_nombre_compartida variable)
 {
   t_valor_variable valor;
 
-  char respuesta[BUFFERSIZE];
+  char *respuesta= malloc(BUFFERSIZE+sizeof(char));
   char *mensaje = string_itoa(OBTENER_V_COMP);
 
   string_append(&mensaje, variable);
@@ -801,32 +846,24 @@ obtener_valor(t_nombre_compartida variable)
     {
       valor = atoi(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
       log_trace(logger, "TRAZA - EL VALOR DE LA VARIABLE ES: %d \n", valor);
-      variable_ref = "\0";
+      variable_ref = string_new();
       variable_ref = variable;
     }
-  else
-    {
-      if (string_starts_with(respuesta, mal))
-        mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
-      else
-        {
-          if (string_starts_with(respuesta, AB_PROCESO))
-                mensajeAbortar(string_substring(respuesta, 0, strlen(respuesta)));
+  analizarRtaKernel(respuesta);
 
-
-      else
-        kernelDesconectado();
-        }
-    }
-
+  if (mensaje != NULL)
   free(mensaje);
+
+  if(respuesta != NULL)
+    free(respuesta);
+
   return valor;
 }
 
 void
 grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
 {
-  char respuesta[BUFFERSIZE];
+  char *respuesta=malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = string_itoa(GRABAR_V_COMP);
 
   string_append(&mensaje, variable);
@@ -837,17 +874,15 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
       variable);
   Enviar(socketKERNEL, mensaje); //el mensaje que le mando es  PedidoVariableValor
 
+  if (mensaje != NULL)
+    free(mensaje);
+
   Recibir(socketKERNEL, respuesta);
-  if (string_starts_with(respuesta, bien))
-    log_trace(logger, "%s", "TRAZA - KERNEL PROCESO OK EL PEDIDO \n");
-  else
-    {
-      if (string_starts_with(respuesta, mal))
-        mensajeAbortar(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
-      else
-        kernelDesconectado();
-    }
-  free(mensaje);
+  analizarRtaKernel(respuesta);
+
+  if (respuesta != NULL)
+      free(respuesta);
+
 }
 
 void
@@ -857,7 +892,7 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
     {
       imprimirContextoActual();
       char *mensaje = string_itoa(FIN_QUANTUM);
-      char respuesta[BUFFERSIZE];
+      char *respuesta= malloc(BUFFERSIZE*sizeof(char));
 
       string_append(&mensaje, serializar_PCB(programa));
       string_append(&mensaje, string_itoa(que));
@@ -870,41 +905,59 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
           "TRAZA - INDICO AL KERNEL QUE EL PROCESO TERMINO EL QUANTUM CON MOTIVO : %d \n",
           que);
       Enviar(socketKERNEL, mensaje);
-      free(mensaje);
+
+      if (mensaje != NULL)
+        free(mensaje);
+
       Recibir(socketKERNEL,respuesta);
-      if  (string_starts_with(respuesta, mal))
-          Error("ERROR - KERNEL NO RECIBIO MENSAJE \n");
-      else
-        {
-          if ((string_starts_with(respuesta, bien)) == false)
-            kernelDesconectado();
-        }
+
+      analizarRtaKernel(respuesta);
+      if(respuesta != NULL)
+        free(respuesta);
 
     }
 }
+
+void analizarRtaKernel (char *respuesta)
+{
+  if (string_starts_with(respuesta, bien))
+            log_trace(logger, "%s", "TRAZA - KERNEL PROCESO OK EL PEDIDO \n");
+          else
+            {
+             if (string_starts_with(respuesta, AB_PROCESO) || string_starts_with(respuesta, mal))
+               Error("ERROR - KERNEL NO RECIBIO MENSAJE \n");
+              else{
+                 if (atoi(string_substring(respuesta, 0,1)) > 1)
+                    mensajeAbortar("FORMATO MENSAJE KERNEL NO VALIDO");
+                 else
+                     kernelDesconectado();
+                   }
+            }
+}
+
+
 
 void
 finalizarProceso()
 {
   log_trace(logger, "%s", "TRAZA - EL PROGRAMA FINALIZO \n");
   imprimirContextoActual();
-  char respuesta[BUFFERSIZE];
+  char *respuesta= malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = malloc(BUFFERSIZE * sizeof(char));
   memset(mensaje,0,BUFFERSIZE);
   string_append(&mensaje, FIN_PROCESO);
   string_append(&mensaje, serializar_PCB(programa));
   log_trace(logger, "TRAZA - EL MENSAJE QUE LE ENVIO AL KERNEL ES: %s \n", mensaje);
   Enviar(socketKERNEL, mensaje);
-  Recibir(socketKERNEL,respuesta);
-        if  (string_starts_with(respuesta, mal))
-            Error("ERROR - KERNEL NO RECIBIO MENSAJE \n");
-        else
-          {
-            if ((string_starts_with(respuesta, bien)) == false)
-              kernelDesconectado();
-          }
 
-  free(mensaje);
+  if (mensaje !=NULL)
+    free(mensaje);
+  Recibir(socketKERNEL,respuesta);
+
+  analizarRtaKernel(respuesta);
+
+  if (respuesta !=NULL)
+      free(respuesta);
   ab = 0;
   f = 1;
   quantum = 0;
@@ -958,7 +1011,7 @@ RecuperarEtiquetas()
   if ((ab == 0) && (f == 0) && (quantum > 0) && ((programa->sizeIndiceEtiquetas) > 0)) // Solo buscarÃ¡ los datos si el programa no se abortÃ³
     {
       log_trace(logger, "%s", "TRAZA - VOY A RECUPERAR EL INDICE DE ETIQUETAS \n");
-
+      etiquetas=string_new();
       char* respuesta = malloc(BUFFERSIZE * sizeof(char));
       memset(respuesta,0,BUFFERSIZE);
       respuesta = getUMV(programa->indiceEtiquetas, 0,
@@ -976,14 +1029,23 @@ RecuperarEtiquetas()
             }
         }
       else
-        {
-          if (string_starts_with(respuesta, mal))
-            mensajeAbortar("NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
-          else
-            umvDesconectada();
-        }
-      free(respuesta);
+        analizarRtaUMV(respuesta,"NO SE PUDO RECUPERAR LAS ETIQUETAS DEL PROCESO");
+
+      if (respuesta != NULL)
+        free(respuesta);
     }
+}
+void analizarRtaUMV (char *respuesta, char* mensaje)
+{
+          if (string_starts_with(respuesta, mal))
+            mensajeAbortar(mensaje);
+          else
+            {
+              if (atoi(string_substring(respuesta, 0,1)) > 1)
+                mensajeAbortar("FORMATO MENSAJE UMV NO VALIDO");
+                else
+                  umvDesconectada();
+            }
 }
 
 void
@@ -1028,22 +1090,17 @@ RecuperarDicVariables()
                 }
             }
           else
-            {
-              if (string_starts_with(respuesta, mal))
-                {
-                  mensajeAbortar(
-                      "NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
-                }
-              else
-                umvDesconectada();
-            }
+            analizarRtaUMV(respuesta,"NO SE PUDO RECUPERAR LA TOTALIDAD DEL CONTEXTO");
         }
       else
         log_trace(logger, "%s",
             "TRAZA - ES UN PROGRAMA NUEVO, NO TENGO CONTEXTO QUE RECUPERAR \n");
 
+      if (respuesta != NULL)
       free(respuesta);
+      if (variables != NULL)
       free(variables);
+      if (var !=NULL)
       free(var);
     }
 }
@@ -1054,7 +1111,7 @@ imprimirContextoActual()
   char *mensaje =  malloc(BUFFERSIZE * sizeof(char));
   memset(mensaje,0,BUFFERSIZE);
   mensaje = string_itoa(IMPRIMIR);
-  char rtaKERNEL[BUFFERSIZE];
+  char *rtaKERNEL=malloc(BUFFERSIZE * sizeof(char));
 
   int i;
   int aux = 0;
@@ -1074,6 +1131,7 @@ imprimirContextoActual()
       if (string_starts_with(respuesta, bien))
         {
           variables = string_substring(respuesta, 1, strlen(respuesta) - 1);
+
           for (i = 0; i < aux; i++)
             {
 
@@ -1087,14 +1145,7 @@ imprimirContextoActual()
             }
         }
       else
-        {
-          string_append(&mensaje, "ERROR AL RECUPERAR VALORES VARIABLES");
-          if (!(string_starts_with(respuesta, mal)))
-            {
-              umvDesconectada();
-              ab = 0;
-            }
-        }
+       analizarRtaUMV(respuesta,"ERROR AL RECUPERAR VALORES VARIABLES");
     }
   else
     string_append(&mensaje, "NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL");
@@ -1104,27 +1155,18 @@ imprimirContextoActual()
       mensaje);
   Enviar(socketKERNEL, mensaje);
 
-
-
   Recibir(socketKERNEL,rtaKERNEL);
+  analizarRtaKernel(rtaKERNEL);
 
-  if  (string_starts_with(rtaKERNEL, bien))
-    log_trace(logger, "%s","KERNEL RECIBIO \n");
-      else{
+  if (respuesta != NULL)
+    free(respuesta);
+  if (variables != NULL)
+    free(variables);
+  if (mensaje != NULL)
+    free(mensaje);
+  if (rtaKERNEL != NULL)
+      free(rtaKERNEL);
 
-      if  (string_starts_with(rtaKERNEL, mal))
-          Error("ERROR - KERNEL NO RECIBIO MENSAJE \n");
-      else
-        {
-          if ((string_starts_with(rtaKERNEL, bien)) == false)
-            kernelDesconectado();
-        }
-    }
-
-
-  free(respuesta);
-  free(variables);
-  free(mensaje);
 }
 
 void
@@ -1137,9 +1179,6 @@ inciarVariables()
   ab = 0;
   tengoProg = 0;
   f = 0;
-  motivo = string_new();
-  variable_ref = "\0";
-  etiquetas = string_new();
   eti=0;
 }
 
@@ -1222,7 +1261,7 @@ main(void)
       inciarVariables();
       CPULibre();
       log_trace(logger, "%s", "TRAZA - ESTOY CONECTADO CON KERNEL Y UMV \n");
-     log_trace(logger, "CANTIDAD DE PROGRAMAS QUE TENGO: %d \n", tengoProg);
+      log_trace(logger, "CANTIDAD DE PROGRAMAS QUE TENGO: %d \n", tengoProg);
 
       while (tengoProg == 0) //me fijo si tengo un prog que ejecutar
         {
@@ -1252,11 +1291,7 @@ main(void)
               esperarTiempoRetardo(); // espero X milisegundo para volver a ejecutar
               quantum--;
               if ((f==0) && (eti==0))
-                {
-              programa->programCounter++; //Incremento el PC
-              log_trace(logger, "TRAZA - LA PROXIMA INSTRUCCION ES: %d \n",
-                  programa->programCounter);
-                }
+                programa->programCounter++; //Incremento el PC
             }
           else
             {
@@ -1273,6 +1308,12 @@ main(void)
         AbortarProceso(); //proceso abortado por errores varios
       limpiarEstructuras();
 
+      if (sentencia != NULL)
+        free(sentencia);
+      if (programa != NULL)
+        free(programa);
+      if (etiquetas != NULL)
+        free(etiquetas);
     }
 
   AvisarDescAKernel(); //avisar al kernel asi me saca de sus recursos
@@ -1310,6 +1351,8 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
   if (validar == 1) //si es <=0 el set aborta el proceso
     log_trace(logger, "%s", "TRAZA - ASIGNACION EXITOSA \n");
 
+  if (mensaje != NULL)
+    free(mensaje);
 }
 
 t_valor_variable
@@ -1346,8 +1389,11 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 
   if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
     {
+
+      if (mensaje != NULL)
+        free(mensaje);
       mensaje=string_new();
-      //programa->programCounter ++;
+
       ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
       rellenarConCeros(ceros,&mensaje);
       string_append(&mensaje, string_itoa(programa->programCounter));
@@ -1363,6 +1409,10 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
           dictionary_clean(dicVariables); //limpio el dic de variables
         }
     }
+
+
+  if (mensaje != NULL)
+    free(mensaje);
 }
 
 void
@@ -1383,8 +1433,10 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 
   if (setUMV(programa->segmentoStack, despl, VAR_STACK, mensaje) == 1)
     {
+
+      if (mensaje != NULL)
+        free(mensaje);
       mensaje=string_new();
-      //programa->programCounter ++;
       ceros = (VAR_STACK - cantidadDigitos(programa->programCounter));
       rellenarConCeros(ceros,&mensaje);
       string_append(&mensaje,string_itoa(programa->programCounter));
@@ -1393,6 +1445,9 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 
       if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
         {
+
+          if (mensaje != NULL)
+            free(mensaje);
           mensaje=string_new();
           ceros = (VAR_STACK - cantidadDigitos(donde_retornar));
           rellenarConCeros(ceros,&mensaje);
@@ -1412,6 +1467,9 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
             }
         }
     }
+
+  if (mensaje != NULL)
+    free(mensaje);
 }
 
 void
@@ -1434,6 +1492,10 @@ prim_finalizar(void)
 
           log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d \n", programa->programCounter);
           aux = aux - VAR_STACK;
+
+          if (pedido != NULL)
+            free(pedido);
+          pedido=string_new();
           pedido = getUMV(programa->segmentoStack, aux, VAR_STACK);
           if (string_starts_with(pedido, bien))
             {
@@ -1451,12 +1513,13 @@ prim_finalizar(void)
                   finalizarProceso();
             }
           else
-              mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
+              analizarRtaUMV(pedido,"NO SE PUDO RECUPERAR CURSOR STACK");
         }
       else
-          mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
+        analizarRtaUMV(pedido,"NO SE PUDO RECUPERAR PROGRAM COUNTER");
 
-      free(pedido);
+      if (pedido != NULL)
+        free(pedido);
     }
   else
     finalizarProceso();
@@ -1485,7 +1548,6 @@ prim_retornar(t_valor_variable retorno)
       retor = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
       log_trace(logger, "TRAZA - LA DIRECCION DONDE RETORNAR ES: %d \n", retor);
 
-     //int despl=(programa->segmentoStack - retor) + 1;
 
       if (setUMV(programa->segmentoStack, (retor + 1), DIG_VAL_VAR, mensj) == 1)
         {
@@ -1515,16 +1577,18 @@ prim_retornar(t_valor_variable retorno)
                     }
                 }
               else
-                mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
+                analizarRtaUMV(pedido,"NO SE PUDO RECUPERAR CURSOR STACK");
             }
           else
-            mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
+            analizarRtaUMV(pedido,"NO SE PUDO RECUPERAR PROGRAM COUNTER");
         }
       else
-        mensajeAbortar(string_substring(pedido, 1, strlen(pedido) - 1));
-    }
+        analizarRtaUMV(pedido,"NO SE PUDO RETORNAR EL VALOR A LA VARIABLE");
+    }else
+      analizarRtaUMV(pedido,"NO SE PUDO RECUPERAR LA DIRECCION DE RETORNO");
 
-  free(pedido);
+  if (pedido != NULL)
+    free(pedido);
 
 }
 
@@ -1544,29 +1608,21 @@ prim_imprimir(t_valor_variable valor_mostrar)
   string_append(&mensaje, separador);
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION \n",valor_mostrar);
   Enviar(socketKERNEL, mensaje);
-free(mensaje);
+  if (mensaje != NULL)
+    free(mensaje);
 
 char *rtaKERNEL = malloc(BUFFERSIZE*sizeof(char));
   memset(rtaKERNEL,0,BUFFERSIZE);
 
 Recibir(socketKERNEL,rtaKERNEL);
 
-if  (string_starts_with(rtaKERNEL, bien))
-  log_trace(logger, "%s","KERNEL RECIBIO \n");
-    else{
+analizarRtaKernel(rtaKERNEL);
 
-    if  (string_starts_with(rtaKERNEL, mal))
-        Error("ERROR - KERNEL NO RECIBIO MENSAJE \n");
-    else
-      {
-        if (string_starts_with(rtaKERNEL, AB_PROCESO))
-          mensajeAbortar(string_substring(rtaKERNEL, 0, strlen(rtaKERNEL)));
-      }
-  }
+if (rtaKERNEL != NULL)
+free(rtaKERNEL);
 
-  free(rtaKERNEL);
-
-  variable_ref = "\0";
+if (variable_ref != NULL)
+  free(variable_ref);
 
 }
 
@@ -1585,6 +1641,9 @@ prim_dereferenciar(t_puntero direccion_variable)
     }
   else
     mensajeAbortar("ERROR AL LEER DIRECCION MEMORIA");
+
+  if (mensaje !=NULL)
+    free(mensaje);
 
   return valor;
 }
@@ -1617,6 +1676,8 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
       int* aux = dictionary_get(dicVariables, var);
       posicion = (t_puntero) aux;
       log_trace(logger, "TRAZA - ENCONTRE LA VARIABLE: %s, POSICION: %d \n", var, aux);
+
+      variable_ref=string_new();
       variable_ref = var;
     }
   else
@@ -1624,7 +1685,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
     mensajeAbortar("LA VARIABLE NO EXISTE EN EL CONTEXTO DE EJECUCION");
     posicion= -1;
     }
-
+  if (var !=NULL)
   free(var);
   return posicion; //devuelvo la posicion
 }
@@ -1645,12 +1706,6 @@ prim_definirVariable(t_nombre_variable identificador_variable)
 
   log_trace(logger, "TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d \n",pos_var_stack);
 
-  void algo (char* key, t_puntero puntero)
-  {
-    log_trace(logger, "key: %s, pos: %d \n",key,puntero);
-  }
-  dictionary_iterator(dicVariables,(void*)algo);
-
   if ((dictionary_has_key(dicVariables, string_substring(var, 0, 1))) == false)
     {
       if ((setUMV(programa->segmentoStack, pos_var_stack, 1, string_substring(var, 0, 1))) > 0)
@@ -1668,8 +1723,9 @@ prim_definirVariable(t_nombre_variable identificador_variable)
     {
    mensajeAbortar("LA VARIABLE YA SE ENCUENTRA EN EL CONTEXTO ACTUAL");
     }
-
+  if (var != NULL)
   free(var);
+
   return pos_var_stack; //devuelvo la pos en el stack
 }
 
@@ -1685,27 +1741,15 @@ prim_imprimirTexto(char* texto)
   string_append(&mensaje, separador);
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION \n",texto);
   Enviar(socketKERNEL, mensaje);
+  if (mensaje != NULL)
   free(mensaje);
-
 
   char *rtaKERNEL = malloc(BUFFERSIZE*sizeof(char));
     memset(rtaKERNEL,0,BUFFERSIZE);
 
   Recibir(socketKERNEL,rtaKERNEL);
-
-  if  (string_starts_with(rtaKERNEL, bien))
-    log_trace(logger, "%s","KERNEL RECIBIO \n");
-      else{
-
-      if  (string_starts_with(rtaKERNEL, mal))
-          Error("ERROR - KERNEL NO RECIBIO MENSAJE \n");
-      else
-        {
-          if (string_starts_with(rtaKERNEL, AB_PROCESO))
-            mensajeAbortar(string_substring(rtaKERNEL, 0, strlen(rtaKERNEL)));
-        }
-    }
-
+  analizarRtaKernel(rtaKERNEL);
+  if (rtaKERNEL !=NULL)
     free(rtaKERNEL);
 }
 
@@ -1725,7 +1769,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Wait \n");
   char* senial;
-  char respuesta[BUFFERSIZE];
+  char *respuesta= malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = string_itoa(S_WAIT);
 
   //el mensaje que le mando es  PedidoSemaforo
@@ -1757,13 +1801,20 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
             log_trace(logger, "%s", "TRAZA - EL PROCESO OBTUVO EL SEMAFORO \n");
         }
     }
+
+  if (mensaje !=NULL)
+    free(mensaje);
+  if (respuesta!=NULL)
+    free(respuesta);
+  if(senial !=NULL)
+    free(senial);
 }
 
 void
 prim_signal(t_nombre_semaforo identificador_semaforo)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Signal \n");
-  char respuesta[BUFFERSIZE];
+  char *respuesta=malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = string_itoa(S_SIGNAL);
 
   //el mensaje que le mando es  PedidoSemaforo
@@ -1772,13 +1823,18 @@ prim_signal(t_nombre_semaforo identificador_semaforo)
   log_trace(logger, "TRAZA - SOLICITO AL KERNEL LIBERAR UNA INSTANCIA DEL SEMAFORO: %s \n",identificador_semaforo);
   Enviar(socketKERNEL, mensaje);
   Recibir(socketKERNEL, respuesta);
-  if (string_equals_ignore_case(string_substring(respuesta, 0, 1), bien)) //si es -1 lo controla recibir
+  if (string_starts_with(respuesta, bien)) //si es -1 lo controla recibir
       log_trace(logger, "%s", "TRAZA - LA SOLICITUD INGRESO CORRECTAMENTE \n");
   else
     {
-      if (string_equals_ignore_case(string_substring(respuesta, 0, 1), mal))
-       mensajeAbortar("NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO \n");
+      if (string_starts_with(respuesta, bien))
+       mensajeAbortar("NO SE PUDO LIBERAR EL SEMAFORO SOLICITADO");
       else
+        {
+        if (atoi(string_substring(respuesta, 0, 1)) > 1)
+          mensajeAbortar("FORMATO MENSAJE KERNEL NO VALIDO");
+        else
         kernelDesconectado();
+        }
     }
 }
