@@ -854,7 +854,7 @@ void SetearErrorGlobal(const char* mensaje, ...)
 	va_list arguments;
 	va_start(arguments, mensaje);
 	if (g_MensajeError != NULL )
-		free(g_MensajeError);
+	// NMR COMENTADO POR ERROR A ULTIMO MOMENTO	free(g_MensajeError);
 	g_MensajeError = string_from_vformat(mensaje, arguments);
 	va_end(arguments);
 }
@@ -1739,7 +1739,8 @@ char* ComandoGetBytes(char *buffer, int idProg, int tipoCliente)
 		string_append(&stringErrorAux, g_MensajeError);
 		SetearErrorGlobal("ERROR LEER MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d", stringErrorAux, idProg, base, desplazamiento, longitudBuffer);
 		buffer = RespuestaClienteError(buffer, g_MensajeError);
-		free(stringErrorAux);
+		if (stringErrorAux != NULL )
+			free(stringErrorAux);
 	}
 
 	if (lectura != NULL )
@@ -1799,7 +1800,8 @@ char* ComandoSetBytes(char *buffer, int idProg, int tipoCliente)
 			string_append(&stringErrorAux, g_MensajeError);
 			SetearErrorGlobal("ERROR ESCRIBIR MEMORIA. %s. Id programa: %d, base: %d, desplazamiento: %d, longitud buffer: %d, buffer: %s", stringErrorAux, idProg, base, desplazamiento, longitudBuffer, mensaje);
 			buffer = RespuestaClienteError(buffer, g_MensajeError);
-			free(stringErrorAux);
+			if (stringErrorAux != NULL )
+				free(stringErrorAux);
 		}
 
 		if (mensaje != NULL )
@@ -1949,7 +1951,7 @@ char* RespuestaClienteOk(char *buffer)
 	 memset(buffer, 0, tamanio * sizeof(char));
 	 sprintf(buffer, "%s", "1");*/
 
-	if (buffer!= NULL)
+	if (buffer != NULL )
 		free(buffer);
 
 	buffer = string_new();
@@ -1961,8 +1963,8 @@ char* RespuestaClienteOk(char *buffer)
 char* RespuestaClienteError(char *buffer, char *msj)
 {
 	//int cantidadBytesBuffer = strlen(buffer);
-	if (buffer!= NULL)
-			free(buffer);
+	if (buffer != NULL )
+		free(buffer);
 	buffer = string_new();
 	string_append(&buffer, "0");
 	string_append(&buffer, msj);

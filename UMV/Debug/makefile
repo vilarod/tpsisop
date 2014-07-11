@@ -25,8 +25,11 @@ endif
 # All Target
 all: UMV
 
+dependents:
+	-cd /home/utnso/tp-2014-1c-garras/Commons/Debug && $(MAKE) all
+
 # Tool invocations
-UMV: $(OBJS) $(USER_OBJS)
+UMV: $(OBJS) $(USER_OBJS) /home/utnso/tp-2014-1c-garras/Commons/Debug/libcommons.so
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
 	gcc -L"/home/utnso/tp-2014-1c-garras/Commons/Debug" -o "UMV" $(OBJS) $(USER_OBJS) $(LIBS)
@@ -40,5 +43,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
+/home/utnso/tp-2014-1c-garras/Commons/Debug/libcommons.so:
 
 -include ../makefile.targets
