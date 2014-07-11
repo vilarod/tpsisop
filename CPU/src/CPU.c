@@ -1321,12 +1321,6 @@ main(void)
         AbortarProceso(); //proceso abortado por errores varios
       limpiarEstructuras();
 
-      if (sentencia != NULL)
-        free(sentencia);
-      if (programa != NULL)
-        free(programa);
-      if (etiquetas != NULL)
-        free(etiquetas);
     }
 
   AvisarDescAKernel(); //avisar al kernel asi me saca de sus recursos
