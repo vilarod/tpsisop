@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
 	int index;    //para parametros
 	for (index = 0; index < argc; index++)    //parametros
-		log_trace(logger,"  Parametro %d: %s\n", index, argv[index]);
+		log_trace(logger, "  Parametro %d: %s\n", index, argv[index]);
 
 	//argv[0] es el path: /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA/
 	//argv[1] es el nombre del programa
@@ -81,7 +81,6 @@ int main(int argc, char* argv[]) {
 		nombreArchivo = string_substring_from(argv[1], 2); //nombre del archivo sin ./ adelante
 	else
 		log_trace(logger, "Error al ingresar el archivo");
-
 
 	file = fopen(nombreArchivo, "r");    //abre el archivo en modo read
 	if (file == NULL ) {
@@ -125,13 +124,13 @@ int main(int argc, char* argv[]) {
 	programa = string_new(); //aca guardo el programa que envio al kernel
 	programa = string_substring(contents, final, strlen(contents) - final);
 
-	log_trace(logger,"El programa sin la primer linea:\n %s\n", programa);
+	log_trace(logger, "El programa sin la primer linea:\n %s\n", programa);
 
 	printf("\n");
 
 	int largo;
 	largo = strlen(programa);
-	log_trace(logger,"el tamanio del programa es: %d\n", largo);
+	log_trace(logger, "el tamanio del programa es: %d\n", largo);
 
 	conectarAKERNEL(programa);
 
@@ -188,12 +187,12 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 	log_trace(logger, "%s\n", "Envio programa");
 	enviarDatos(sockfd, msj); //envio el programa
 	free(msj);
-	msj=NULL;
+	msj = NULL;
 	if (recibirDatos(sockfd, respuestaKERNEL) == 0) {
 		ErrorFatal("Se desconecto el Kernel");
 	}
 	if (respuestaKERNEL[0] == 'N') {
-		log_trace(logger,"Error del KERNEL");
+		log_trace(logger, "Error del KERNEL");
 		exit(1);
 	}
 	log_trace(logger, "%s", "Kernel recibio el programa");
@@ -213,12 +212,13 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 			msj2 = string_new();
 			sub = string_substring(respuestaKERNEL, i, 1);
 			i++;
-			while ((string_equals_ignore_case(sub, "\0") == 0) && (i < cont) &&(string_equals_ignore_case(sub, "-") == 0)) {
+			while ((string_equals_ignore_case(sub, "\0") == 0) && (i < cont)
+					&& (string_equals_ignore_case(sub, "-") == 0)) {
 				string_append(&msj2, sub);
 				sub = string_substring(respuestaKERNEL, i, 1);
 				i++;
 			}
-			if (i <= cont)
+			if ((i <= cont) && (string_equals_ignore_case(sub, "-") == 0))
 				string_append(&msj2, sub);
 //			printf("\nmsj2: %s\n",msj2);
 			finDeEjecucion = analizarSiEsFinDeEjecucion(msj2);
@@ -228,8 +228,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 				imprimirRespuesta(msj2);
 //				enviarConfirmacionDeRecepcionDeDatos(sockfd);
 			}
-			if (msj2 != NULL )
-			{
+			if (msj2 != NULL ) {
 				free(msj2);
 			}
 		}
@@ -259,8 +258,9 @@ int enviarConfirmacionDeRecepcionDeDatos( sockfd) {
 }
 
 int analizarSiEsFinDeEjecucion(char *mensaje) {
-	if ((string_starts_with(mensaje, "F"))
-			&& (string_ends_with(mensaje, "\0"))) {
+//	if ((string_starts_with(mensaje, "F"))
+//			&& (string_ends_with(mensaje, "\0")))
+	if (string_starts_with(mensaje, "F")) {
 		log_trace(logger, "%s\n",
 				"Se imprime el mensaje enviado por el kernel");
 		printf("%s\n", string_substring(mensaje, 1, (strlen(mensaje) - 1)));
