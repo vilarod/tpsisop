@@ -237,18 +237,16 @@ void *PCP(void *arg) {
 	/// MAGIA DE DANI ///
 
 	//crear hilo de escucha CPU
-	pthread_t plpCPU, plpReady, plpBloqueado;
+	pthread_t plpCPU, plpReady;
 	pthread_create(&plpCPU, NULL, HiloOrquestadorDeCPU, NULL );
 
 	//crear hilo de ready
 	pthread_create(&plpReady, NULL, moverEjecutar, NULL );
 
-	//crear hilo de bloqueado
-	pthread_create(&plpBloqueado, NULL, hiloDispositivos, NULL );
-
+	//crear hillos para dispositvos
+	hiloDispositivos();
 	pthread_join(plpCPU, NULL );
 	pthread_join(plpReady, NULL );
-	pthread_join(plpBloqueado, NULL );
 
 	return NULL ;
 }
@@ -312,7 +310,7 @@ void *moverEjecutar(void *arg) {
 	return NULL ;
 }
 
-void *hiloDispositivos(void *arg) {
+void *hiloDispositivos() {
 	//crear los hilos de los dipositivos
 	pthread_mutex_lock(&mutexDispositivos);
 	t_list * listaHiloDispositivos = list_create();
@@ -1969,19 +1967,22 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 		int pos2 = pos + 2;
 		switch (buffer[pos]) {
 		case '0': //termino quamtum colocar en ready
+			log_trace(logger, "Final Quamtum mover a ready. Programa: %d",
+					auxPCB->id);
 			pthread_mutex_lock(&mutexReady);
 			list_add(listaReady, auxPCB);
 			imprimirListaReadyxTraza();
 			pthread_mutex_unlock(&mutexReady);
 			semsig(&readyCont);
-			log_trace(logger, "Final Quamtum mover a ready. Programa: %d",
-					auxPCB->id);
 			break;
 		case '1':	//Hay que hacer I/O
 			disp = obtenerParteDelMensaje(buffer, &pos2);
 			tiempo = obtenerValorDelMensaje(buffer, pos2);
 			t_HIO* auxHIO = encontrarDispositivo(disp);
 			if (auxHIO != NULL ) {
+								log_trace(logger,
+						"Final Quamtum programa: %d. Pide Dispositivo: %s",
+						auxPCB->id, (char*) auxHIO->nombre);
 				pthread_mutex_lock(&(auxHIO->mutexBloqueados));
 				list_add(auxHIO->listaBloqueados,
 						bloqueado_create(auxPCB, tiempo));
@@ -1989,9 +1990,6 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 						auxHIO->listaBloqueados, auxHIO->nombre);
 				pthread_mutex_unlock(&(auxHIO->mutexBloqueados));
 				semsig(&(auxHIO->bloqueadosCont));
-				log_trace(logger,
-						"Final Quamtum programa: %d. Pide Dispositivo: %s",
-						auxPCB->id, (char*) auxHIO->nombre);
 			} else {
 				log_trace(logger, "No encontro dispositivo");
 				mandarPCBaFIN(auxPCB, 1, "Dispositivo no encontrado");
@@ -2087,7 +2085,9 @@ t_sem* encontrarSemaforo(char* nombre) {
 
 void comandoSignal(char* buffer, int socket) {
 	char* nombre = obtenerNombreMensaje(buffer, 1);
-	int n, cant, i;
+	int n;
+	PCB* auxPCB;
+	t_list* auxList;
 	pthread_mutex_unlock(&mutexSemaforos);
 	t_sem* auxSem = encontrarSemaforo(nombre);
 	if (auxSem != NULL ) {
@@ -2095,25 +2095,22 @@ void comandoSignal(char* buffer, int socket) {
 		n = EnviarDatos(socket, "1");
 		log_trace(logger, "signal semaforo: %s valor: %d",
 				(char*) auxSem->nombre, auxSem->valor);
-		if (auxSem->valor == 0) {
-			cant = list_size(auxSem->listaSem);
-			if (cant > 0) {
-				log_trace(logger, "Desbloquea programas por semaforo: %s",
-						(char*) auxSem->nombre);
-				pthread_mutex_lock(&mutexReady);
-				list_add_all(listaReady, auxSem->listaSem);
-				imprimirListaReadyxTraza();
-				pthread_mutex_unlock(&mutexReady);
-				list_clean(auxSem->listaSem);
-				imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
-						auxSem->nombre, auxSem->valor);
-			}
-			for (i = 0; i < cant; i++) {
-				semsig(&readyCont);
-			}
+		if (list_size(auxSem->listaSem) > 0) {
+			auxList = list_take_and_remove(auxSem->listaSem, 1);
+			auxPCB = list_get(auxList, 0);
+			log_trace(logger, "Desbloquea programa %d por semaforo: %s",
+					auxPCB->id, (char*) auxSem->nombre);
+			pthread_mutex_lock(&mutexReady);
+			list_add(listaReady, auxPCB);
+			imprimirListaReadyxTraza();
+			pthread_mutex_unlock(&mutexReady);
+			list_clean(auxSem->listaSem);
+			imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
+					auxSem->nombre, auxSem->valor);
+			semsig(&readyCont);
 		}
 	} else {
-		n = EnviarDatos(socket, "0");
+		n = EnviarDatos(socket, "Asemaforo no encontrado-");
 	}
 	if (n < 0) {
 		//error enviar datos
@@ -2434,6 +2431,7 @@ void imprimirListaNewxTraza() {
 
 void imprimirListaCPUxTraza() {
 	char* cadena = string_new();
+	char* charPCB;
 	int cant = list_size(listCPU), i;
 	t_CPU* auxCPU;
 	for (i = 0; i < cant; i++) {
@@ -2442,7 +2440,11 @@ void imprimirListaCPUxTraza() {
 		string_append(&cadena, string_itoa(auxCPU->idCPU));
 		string_append(&cadena, ",Estado: ");
 		string_append(&cadena, string_itoa(auxCPU->libre));
+		string_append(&cadena, " PCB: ");
+		charPCB = serializar_PCB(auxCPU->idPCB);
+		string_append(&cadena, charPCB);
 		string_append(&cadena, "]");
+		free(charPCB);
 	}
 	log_trace(logger, "Lista CPU(cant %d):%s", cant, (char*) cadena);
 	free(cadena);

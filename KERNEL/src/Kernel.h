@@ -29,7 +29,7 @@ void *IMPRIMIRConsola(void *arg);
 void *FinEjecucion(void *arg);
 void *HiloOrquestadorDeCPU();
 void *moverEjecutar(void *arg);
-void *hiloDispositivos(void *arg);
+void *hiloDispositivos();
 void *moverReadyDeNew(void *arg);
 void *bloqueados_fnc(void *arg);
 void *borradorPCB(void *arg);
