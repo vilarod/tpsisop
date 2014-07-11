@@ -591,6 +591,7 @@ AbortarProceso()
 
 //Manejo de seÃ±al SIGUSR1---------------------------------------------------------------
 
+
 void
 AtenderSenial(int s)
 {
