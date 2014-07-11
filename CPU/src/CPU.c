@@ -159,7 +159,8 @@ int
 saludar(int sld, int tipo, int sRemoto)
 {
   char *respuesta=malloc(BUFFERSIZE*sizeof(char));
-  char *mensaje = string_itoa(sld);
+  char *mensaje = string_new();
+  mensaje=string_itoa(sld);
   string_append(&mensaje, string_itoa(tipo));
   int aux = 0;
   log_trace(logger, "%s", "TRAZA - VOY A ENVIAR HANDSHAKE \n");
@@ -691,7 +692,8 @@ getUMV(int base, int dsp, int tam)
 {
   char* respuesta = malloc(BUFFERSIZE * sizeof(char));
   memset(respuesta,0,BUFFERSIZE);
-  char *mensaje = string_itoa(GET_UMV);
+  char *mensaje = string_new();
+  mensaje=string_itoa(GET_UMV);
 
   serCadena(&mensaje, string_itoa(base)); //base
   serCadena(&mensaje, string_itoa(dsp)); //desplazamiento
@@ -732,7 +734,8 @@ int
 setUMV(int ptro, int dsp, int tam, char* valor)
 {
   char *respuesta = malloc(BUFFERSIZE * sizeof(char));
-  char *mensaje = string_itoa(SET_UMV);
+  char *mensaje = string_new();
+  mensaje=string_itoa(SET_UMV);
   int validar = 1;
 
   serCadena(&mensaje, string_itoa(ptro));
@@ -775,7 +778,8 @@ CambioProcesoActivo()
   if ((ab == 0) && (f == 0) && (quantum > 0))
     {
       char *respuesta=malloc(BUFFERSIZE*sizeof(char));
-      char *mensaje = string_itoa(CAMBIO_PROCESO);
+      char *mensaje = string_new();
+      mensaje=string_itoa(CAMBIO_PROCESO);
       serCadena(&mensaje, string_itoa(programa->id));
       log_trace(logger, "TRAZA - INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d \n", programa->id);
       Enviar(socketUMV, mensaje);
@@ -818,7 +822,8 @@ AvisarDescAKernel()
 {
   if (CONECTADO_KERNEL == 1) //hace esto solo si el kernel sigue conectado
     {
-      char *mensaje = string_itoa(AVISO_DESC);
+      char *mensaje = string_new();
+      mensaje=string_itoa(AVISO_DESC);
       string_append(&mensaje, separador);
       log_trace(logger, "%s", "TRAZA - AVISO AL KERNEL QUE LA CPU SE DESCONECTA \n");
       Enviar(socketKERNEL, mensaje);
@@ -834,7 +839,8 @@ obtener_valor(t_nombre_compartida variable)
   t_valor_variable valor;
 
   char *respuesta= malloc(BUFFERSIZE+sizeof(char));
-  char *mensaje = string_itoa(OBTENER_V_COMP);
+  char *mensaje = string_new();
+  mensaje=string_itoa(OBTENER_V_COMP);
 
   string_append(&mensaje, variable);
   string_append(&mensaje, separador);
@@ -865,7 +871,8 @@ void
 grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
 {
   char *respuesta=malloc(BUFFERSIZE*sizeof(char));
-  char *mensaje = string_itoa(GRABAR_V_COMP);
+  char *mensaje = string_new();
+  mensaje=string_itoa(GRABAR_V_COMP);
 
   string_append(&mensaje, variable);
   string_append(&mensaje, separador);
@@ -892,7 +899,8 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
   if (CONECTADO_KERNEL == 1)
     {
       imprimirContextoActual();
-      char *mensaje = string_itoa(FIN_QUANTUM);
+      char *mensaje =string_new();
+      mensaje=string_itoa(FIN_QUANTUM);
       char *respuesta= malloc(BUFFERSIZE*sizeof(char));
 
       string_append(&mensaje, serializar_PCB(programa));
@@ -1769,7 +1777,7 @@ void
 prim_wait(t_nombre_semaforo identificador_semaforo)
 {
   log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Wait \n");
-  char* senial;
+  char* senial=string_new();
   char *respuesta= malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = string_itoa(S_WAIT);
 
@@ -1788,6 +1796,17 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
       if (string_equals_ignore_case(senial, mal)) //senial==1 -> consegui el sem, senial==0 -> proceso bloqueado por sem
         {
           log_trace(logger, "%s","TRAZA - EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO \n");
+          Enviar(socketKERNEL, "2EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO-");
+
+          char *rtaKERNEL = malloc(BUFFERSIZE*sizeof(char));
+            memset(rtaKERNEL,0,BUFFERSIZE);
+
+          Recibir(socketKERNEL,rtaKERNEL);
+          analizarRtaKernel(rtaKERNEL);
+          if (rtaKERNEL !=NULL)
+            free(rtaKERNEL);
+
+
           down = 1;
           quantum = 0;
           tengoProg = 0;
@@ -1803,8 +1822,6 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
         }
     }
 
-  if (mensaje !=NULL)
-    free(mensaje);
   if (respuesta!=NULL)
     free(respuesta);
   if(senial !=NULL)
@@ -1838,4 +1855,7 @@ prim_signal(t_nombre_semaforo identificador_semaforo)
         kernelDesconectado();
         }
     }
+
+  if (respuesta != NULL)
+    free(respuesta);
 }
