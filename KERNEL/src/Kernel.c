@@ -1288,7 +1288,6 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	}
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
-	free (PCBAUX);
 	return 1;
 }
 
