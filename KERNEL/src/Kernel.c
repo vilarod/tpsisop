@@ -213,7 +213,7 @@ void *IMPRIMIRConsola(void *arg) {
 			char* mensaje = string_new();
 			string_append(&mensaje, "I");
 			string_append(&mensaje, auxImp->mensaje);
-			string_append(&mensaje, "\0");
+			string_append(&mensaje, "-");
 			pthread_mutex_lock(&mutexSocketProgramas);
 			auxSocket = encontrarSocketPCB(auxImp->prog);
 			if (auxSocket != NULL ) {

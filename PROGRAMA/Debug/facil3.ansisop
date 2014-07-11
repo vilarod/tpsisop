@@ -1,6 +1,6 @@
 #!/usr/bin/ansisop
 begin
-signal sem2
+	signal b
 end
 
 
