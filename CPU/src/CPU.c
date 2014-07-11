@@ -584,7 +584,7 @@ AbortarProceso()
       string_append(&mensaje, separador);
       log_trace(logger, "%s", "TRAZA - SE ABORTARA EL PROCESO \n");
       Enviar(socketKERNEL, mensaje);
-      free(mensaje);
+
       Recibir(socketKERNEL,respuesta);
             if  (string_starts_with(respuesta, mal))
                 Error("ERROR - KERNEL NO RECIBIO MENSAJE \n");
