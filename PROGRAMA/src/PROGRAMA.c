@@ -42,7 +42,7 @@
 
 //Mensajes aceptados
 //MSJ_IMPRIMI_ESTO comienza con "I" y termina con "\0"
-//MSJ_FIN_DE_EJECUCION "F"
+//MSJ_FIN_DE_EJECUCION comienza con "F"
 
 //Tamaño buffer
 #define BUFFERSIZE 40000
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 	//argv[0] es el path: /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA/
 	//argv[1] es el nombre del programa
 
-	//se creo el directorio ansisop en /usr/bin con sudo mkdir ansisop
+
 	//se uso sudo para poder ejecutar comandos que requieren permisos de administrador
 	//El symbolic link se hizo por consola:
 	// sudo ln -s /home/utnso/tp-2014-1c-garras/PROGRAMA/Debug/PROGRAMA /usr/bin/ansisop
