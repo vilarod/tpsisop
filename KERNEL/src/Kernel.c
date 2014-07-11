@@ -182,6 +182,7 @@ void *FinEjecucion(void *arg) {
 				auxSocket = encontrarSocketPCB(auxFinal->idPCB->id);
 				if (auxSocket != NULL )
 					EnviarDatos(auxSocket->socket, mensaje1);
+				free(mensaje1);
 			}
 			log_trace(logger, "%s%d , MSJ= %s\n", "Finalizo el programa:",
 					auxFinal->idPCB->id, auxFinal->mensaje);
@@ -988,7 +989,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	//QUITAR DEL BUFFER EL COD DE MSJ
 
 	int digitosID;
-	char* cadenaCambioContexto;
+	char* cadenaCambioContexto = string_new();
 	PCB* PCBAUX = malloc(sizeof(PCB));
 	PCBAUX->id = IDcontador;
 	digitosID = cantidadDigitos(PCBAUX->id);
@@ -1024,7 +1025,6 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	if (RecibirDatos(socketumv, respuestaumv) <= 0) {
 		ErrorFatal("Error en la comunicacion con la umv");
 	}
-
 	if (analisarRespuestaUMV(respuestaumv)) {
 
 		//Preparamos mensaje para Segmento Codigo
@@ -1037,6 +1037,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 		string_append(&cadenaSegmento, string_itoa(digitosProg));
 		string_append(&cadenaSegmento, string_itoa(strlen(prog)));
 		EnviarDatos(socketumv, cadenaSegmento);
+		
 		RecibirDatos(socketumv, respuestaumv2); //COD + DIGITO + BASE
 		if (analisarRespuestaUMV(respuestaumv2) != 0) {
 			char *codesegment = string_substring(respuestaumv2, 2,
@@ -1044,7 +1045,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 			//Valor Segmento Codigo asignado
 			PCBAUX->segmentoCodigo = atoi(codesegment);
-			int digitosBaseCOD = cantidadDigitos(PCBAUX->segmentoCodigo);
+						int digitosBaseCOD = cantidadDigitos(PCBAUX->segmentoCodigo);
 
 			//Escribimos el codigo
 			string_append(&escribodatos, string_itoa(2));
@@ -1056,6 +1057,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			string_append(&escribodatos, string_itoa(strlen(prog)));
 			string_append(&escribodatos, prog);
 			EnviarDatos(socketumv, escribodatos);
+			
 			if (RecibirDatos(socketumv, respuestaumv5) <= 0) {
 				ErrorFatal("Error en la comunicacion con la umv");
 			}
@@ -1098,7 +1100,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 					else
 						string_append(&etiqueta, "1");
 					EnviarDatos(socketumv, etiqueta);
-					if (RecibirDatos(socketumv, respuestaumv4) <= 0) {
+									if (RecibirDatos(socketumv, respuestaumv4) <= 0) {
 						ErrorFatal("Error en la comunicacion con la umv");
 					}
 					//COD + DIGITO + BASE
@@ -1106,7 +1108,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 						char *Etiquetasegment = string_substring(respuestaumv4,
 								2, strlen(respuestaumv4) - 2);
 						PCBAUX->indiceEtiquetas = atoi(Etiquetasegment);
-						if (metadataprograma->etiquetas_size != 0) {
+												if (metadataprograma->etiquetas_size != 0) {
 							//Grabar las etiquetas
 							char*escribirEtiq = string_new();
 							int digitosBaseEtiq = cantidadDigitos(
@@ -1166,6 +1168,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 							string_append(&codex, string_itoa(digitocode));
 							string_append(&codex, string_itoa(tamaniodeindice));
 							EnviarDatos(socketumv, codex);
+							
 							RecibirDatos(socketumv, respuestaumv7); //COD + DIGITO + BASE
 							if (analisarRespuestaUMV(respuestaumv7) != 0) {
 								char *codexsegment = string_substring(
@@ -1235,6 +1238,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 											string_itoa(tamanio));
 								}
 								EnviarDatos(socketumv, escribirCodex);
+								
 								if (RecibirDatos(socketumv, respuestaumv8)
 										<= 0) {
 									ErrorFatal(
@@ -1286,6 +1290,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	}
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
+	
 	return 1;
 }
 
