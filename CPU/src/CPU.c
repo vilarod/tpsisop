@@ -158,7 +158,7 @@ prepararDestino(struct sockaddr_in destino, int puerto, char* ip)
 int
 saludar(int sld, int tipo, int sRemoto)
 {
-  char respuesta[BUFFERSIZE];
+  char *respuesta=malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = string_itoa(sld);
   string_append(&mensaje, string_itoa(tipo));
   int aux = 0;
@@ -172,7 +172,8 @@ saludar(int sld, int tipo, int sRemoto)
 
   if (mensaje != NULL)
     free(mensaje);
-
+  if (respuesta !=NULL)
+    free(respuesta);
 
   return aux;
 }
@@ -598,8 +599,6 @@ AbortarProceso()
               free(mensaje);
             if (respuesta != NULL)
               free(respuesta);
-            if (motivo != NULL)
-              free(motivo);
 
       motivo = string_new();
       quantum=0;
@@ -775,7 +774,7 @@ CambioProcesoActivo()
 {
   if ((ab == 0) && (f == 0) && (quantum > 0))
     {
-      char respuesta[BUFFERSIZE];
+      char *respuesta=malloc(BUFFERSIZE*sizeof(char));
       char *mensaje = string_itoa(CAMBIO_PROCESO);
       serCadena(&mensaje, string_itoa(programa->id));
       log_trace(logger, "TRAZA - INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d \n", programa->id);
@@ -799,6 +798,8 @@ CambioProcesoActivo()
 
       if (mensaje != NULL)
         free(mensaje);
+      if (respuesta != NULL)
+        free(respuesta);
     }
 
 }
