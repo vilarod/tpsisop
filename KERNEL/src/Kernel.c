@@ -1025,7 +1025,6 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	if (RecibirDatos(socketumv, respuestaumv) <= 0) {
 		ErrorFatal("Error en la comunicacion con la umv");
 	}
-	if (cadenaCambioContexto != NULL) free(cadenaCambioContexto);
 	if (analisarRespuestaUMV(respuestaumv)) {
 
 		//Preparamos mensaje para Segmento Codigo
