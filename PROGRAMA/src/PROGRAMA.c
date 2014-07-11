@@ -213,7 +213,7 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 			msj2 = string_new();
 			sub = string_substring(respuestaKERNEL, i, 1);
 			i++;
-			while ((string_equals_ignore_case(sub, "\0") == 0) && (i < cont)) {
+			while ((string_equals_ignore_case(sub, "\0") == 0) && (i < cont) &&(string_equals_ignore_case(sub, "-") == 0)) {
 				string_append(&msj2, sub);
 				sub = string_substring(respuestaKERNEL, i, 1);
 				i++;
@@ -231,11 +231,9 @@ int hacerhandshakeKERNEL(int sockfd, char *programa) {
 			if (msj2 != NULL )
 			{
 				free(msj2);
-				msj2 = NULL;
 			}
 		}
 		free(sub);
-		sub = NULL;
 	}
 	txt_write_in_stdout("Fin de ejecucion\n");
 	return analizarRespuestaKERNEL(respuestaKERNEL);
