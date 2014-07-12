@@ -1282,8 +1282,9 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			return pcb1->peso < pcb2->peso;
 		}
 		list_sort(listaNew, (void*) menorPeso);
-		imprimirListaNewxTraza();
+
 	}
+	imprimirListaNewxTraza();
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
 
@@ -2003,7 +2004,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			pthread_mutex_lock(&mutexSemaforos);
 			t_sem* auxSem = encontrarSemaforo(nombre);
 			if (auxSem != NULL ) {
-				if (auxSem->valor < 0) {
+				if (list_size(auxSem->listaSem) < (-1) * auxSem->valor) {
 					//Bloquear Programa por semaforo
 					log_trace(logger,
 							"Final Quamtum programa: %d. bloqueado por semaforo: %s",
