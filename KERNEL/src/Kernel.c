@@ -992,10 +992,12 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	PCBAUX->id = IDcontador;
 	digitosID = cantidadDigitos(PCBAUX->id);
 	IDcontador++;
+	pthread_mutex_lock(&mutexSocketProgramas);
 	t_socket* auxSocket = encontrarSocket(id);
 	if (auxSocket != NULL ) {
 		auxSocket->id = PCBAUX->id;
 	}
+	pthread_mutex_unlock(&mutexSocketProgramas);
 	cadenaCambioContexto = string_new();
 	string_append(&cadenaCambioContexto, string_itoa(4));
 	string_append(&cadenaCambioContexto, string_itoa(digitosID));
@@ -2479,14 +2481,17 @@ void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre) 
 }
 
 int estaProgActivo(int idprog) {
-
+	pthread_mutex_lock(&mutexSocketProgramas);
 	int _is_Prog_Act(t_socket *p) {
 		return encontrarInt(p->id, idprog);
 	}
 	if (list_any_satisfy(listaSocketProgramas, (void*) _is_Prog_Act)) {
+		pthread_mutex_unlock(&mutexSocketProgramas);
 		return 1;
 	}
+	pthread_mutex_unlock(&mutexSocketProgramas);
 	return 0;
+
 }
 
 t_socket* encontrarSocket(int socket) {
