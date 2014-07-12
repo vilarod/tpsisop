@@ -1,0 +1,97 @@
+#!/bin/bash
+DIR="$(cd "$( dirname "${BASH_SOURCE[0]}")" &&pwd)"
+
+#SE HACE MAKE CLEAN DE TODOS LOS PROYECTOS
+cd $DIR/so-commons-library/Debug
+make clean
+
+cd $DIR/so-commons-static-library/Debug
+make clean
+
+cd $DIR/plataforma/Debug
+make clean
+
+cd $DIR/nivel/Debug
+make clean
+
+cd $DIR/personaje/Debug
+make clean
+
+cd $DIR/grasa_fs/Debug
+make clean
+
+# MAKE DE TODOS LOS PROYECTOS, INCLUIDO KOOPA
+cd $DIR/so-commons-library/Debug
+make
+
+cd $DIR/so-commons-static-library/Debug
+make
+
+cd $DIR/plataforma/Debug
+make
+
+cd $DIR/nivel/Debug
+make
+
+cd $DIR/personaje/Debug
+make
+
+cd $DIR/grasa_fs/Debug
+make
+
+cd $DIR/koopa/Release
+make all
+
+#Se crean soft links
+#Personajes Esquema2
+cd $DIR/tests/Esquema1/Personajes
+ln -s $DIR/tests/Esquema1/Personajes/Luigi.cfg $DIR/personaje/Debug/Luigi1.cfg
+ln -s $DIR/tests/Esquema1/Personajes/Mario.cfg $DIR/personaje/Debug/Mario1.cfg
+ln -s $DIR/tests/Esquema1/Personajes/Koopa.cfg $DIR/personaje/Debug/Koopa1.cfg
+#Personajes Esquema2
+cd $DIR/tests/Esquema2/Personajes
+ln -s $DIR/tests/Esquema2/Personajes/Luigi.cfg $DIR/personaje/Debug/Luigi2.cfg
+ln -s $DIR/tests/Esquema2/Personajes/Mario.cfg $DIR/personaje/Debug/Mario2.cfg
+ln -s $DIR/tests/Esquema2/Personajes/Tortuga.cfg $DIR/personaje/Debug/Tortuga.cfg
+ln -s $DIR/tests/Esquema2/Personajes/Goomba.cfg $DIR/personaje/Debug/Goomba.cfg
+
+#Plataforma (es la misma en los dos esquemas)
+cd $DIR/tests/Esquema1
+ln -s $DIR/tests/Esquema1/plataforma.cfg $DIR/plataforma/Debug/plataforma.cfg
+
+#Niveles Esquema2
+cd $DIR/tests/Esquema1/Niveles
+cp $DIR/tests/Esquema1/Niveles/Nivel1.cfg $DIR/nivel/Debug/Nivel1.cfg
+cp $DIR/tests/Esquema1/Niveles/Nivel2.cfg $DIR/nivel/Debug/Nivel2.cfg
+cp $DIR/tests/Esquema1/Niveles/Nivel3.cfg $DIR/nivel/Debug/Nivel3.cfg
+cp $DIR/tests/Esquema1/Niveles/Nivel8.cfg $DIR/nivel/Debug/Nivel8.cfg
+
+#Niveles Esquema2
+cd $DIR/tests/Esquema2/Niveles
+cp $DIR/tests/Esquema2/Niveles/DeadLock.cfg $DIR/nivel/Debug/DeadLock.cfg
+
+# CREACION DE EL DISCO.BIN EN /home/utnso
+dd if=/dev/urandom of=/home/utnso/disco.bin bs=1024 count=102400
+
+# CREACION DE CARPETA DE MONTAJE FUSE
+mkdir /home/utnso/fuse
+
+# PERMISOS DE ACCESO AL SCRIPT fuse.sh
+chmod 777 $DIR/tests/Esquema1/fuse.sh
+
+#MUEVO EL GRASA FORMA AL RAIZ
+cd $DIR/tests
+mv grasa-format /home/utnso/
+mv grasa-dump /home/utnso/
+
+# Se hace el export en el .bashrc
+echo >> /home/utnso/.bashrc
+echo export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$DIR/so-commons-library/Debug >> /home/utnso/.bashrc
+
+#Se hace EL EXPORT DE LINKEO DE LA COMMONS EN CADA PROYECTO QUE LA USE
+export LD_LIBRARY_PATH=$DIR/so-commons-library/Debug:$DIR/plataforma/Debug
+export LD_LIBRARY_PATH=$DIR/so-commons-library/Debug:$DIR/personaje/Debug
+export LD_LIBRARY_PATH=$DIR/so-commons-library/Debug:$DIR/nivel/Debug
+export LD_LIBRARY_PATH=$DIR/so-commons-library/Debug:$DIR/grasa_fs/Debug
+
+cd $DIR
