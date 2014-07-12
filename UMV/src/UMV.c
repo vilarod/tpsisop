@@ -994,7 +994,7 @@ char* RecibirDatos(int socket, char *buffer, int *bytesRecibidos)
 int EnviarDatos(int socket, char *buffer)
 {
 // Retardo antes de contestar una solicitud (Se solicita en enunciado de TP)
-	sleep(g_Retardo / 1000);
+	usleep(g_Retardo);
 
 	int bytecount;
 	int cantidadDeBytesAEnviar = strlen(buffer);
