@@ -2112,7 +2112,7 @@ void comandoSignal(char* buffer, int socket) {
 			list_add(listaReady, auxPCB);
 			imprimirListaReadyxTraza();
 			pthread_mutex_unlock(&mutexReady);
-			list_clean(auxSem->listaSem);
+			list_clean(auxList);
 			imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
 					auxSem->nombre, auxSem->valor);
 			semsig(&readyCont);
@@ -2315,13 +2315,15 @@ void comandoAbortar(char* buffer, int socket) {
 void mandarAFinProgramaPorBajaCPU(int socket) {
 	t_CPU* auxCPU = encontrarCPU(socket);
 	PCB* auxPCB = malloc(sizeof(PCB));
-	if (auxCPU->idPCB->id != 0) {
-		if (auxPCB != NULL ) {
-			pasarDatosPCB(auxPCB, auxCPU->idPCB);
-			mandarPCBaFIN(auxPCB, 1, "Se cayo CPU");
+	if (auxCPU != NULL ) {
+		if (auxCPU->idPCB->id != 0) {
+			if (auxPCB != NULL ) {
+				pasarDatosPCB(auxPCB, auxCPU->idPCB);
+				mandarPCBaFIN(auxPCB, 1, "Se cayo CPU");
+			}
 		}
+		eliminarCpu(socket);
 	}
-	eliminarCpu(socket);
 }
 
 void borrarSocket(int socket) {
@@ -2329,11 +2331,14 @@ void borrarSocket(int socket) {
 		return encontrarInt(p->socket, socket);
 	}
 	pthread_mutex_lock(&mutexSocketProgramas);
-	t_socket* auxiliar = list_remove_by_condition(listaSocketProgramas,
-			(void*) _is_Socket);
-	if (auxiliar != NULL ) {
-		socket_destroy(auxiliar);
-		semsig(&destruirCont);
+	t_socket* auxiliar2 = encontrarSocket(socket);
+	if (auxiliar2 != NULL ) {
+		t_socket* auxiliar = list_remove_by_condition(listaSocketProgramas,
+				(void*) _is_Socket);
+		if (auxiliar != NULL ) {
+			socket_destroy(auxiliar);
+			semsig(&destruirCont);
+		}
 	}
 	pthread_mutex_unlock(&mutexSocketProgramas);
 }

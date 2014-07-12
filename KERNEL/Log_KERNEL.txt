@@ -1,0 +1,82 @@
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): Obteniendo cadenas: [b,c] [1,0]
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): valores obtenidos: b, 1
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): valores obtenidos: c, 0
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): semaforo: b valor: 1
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): semaforo: c valor: 0
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): Obteniendo cadenas: [!colas,!compartida] [3,5]
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): valores obtenidos: !colas, 3
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): valores obtenidos: !compartida, 5
+[TRACE] 13:01:05:183 KERNEL/(13291:13291): Lista var Globales(cant 2):
+[variable: !colas, valor: 3]
+[variable: !compartida, valor: 5]
+[TRACE] 13:01:05:184 KERNEL/(13291:13291): Obteniendo cadenas: [HDD1,LPT1] [500,200]
+[TRACE] 13:01:05:184 KERNEL/(13291:13291): valores obtenidos: HDD1, 500
+[TRACE] 13:01:05:184 KERNEL/(13291:13291): valores obtenidos: LPT1, 200
+[TRACE] 13:01:05:184 KERNEL/(13291:13291): Dispositivo: HDD1 valor: 500
+[TRACE] 13:01:05:184 KERNEL/(13291:13291): Dispositivo: LPT1 valor: 200
+[TRACE] 13:01:05:185 KERNEL/(13291:13292): Intentando conectar a umv.
+[TRACE] 13:06:22:667 KERNEL/(13482:13482): Obteniendo cadenas: [b,c] [1,0]
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): valores obtenidos: b, 1
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): valores obtenidos: c, 0
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): semaforo: b valor: 1
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): semaforo: c valor: 0
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): Obteniendo cadenas: [!colas,!compartida] [3,5]
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): valores obtenidos: !colas, 3
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): valores obtenidos: !compartida, 5
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): Lista var Globales(cant 2):
+[variable: !colas, valor: 3]
+[variable: !compartida, valor: 5]
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): Obteniendo cadenas: [HDD1,LPT1] [500,200]
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): valores obtenidos: HDD1, 500
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): valores obtenidos: LPT1, 200
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): Dispositivo: HDD1 valor: 500
+[TRACE] 13:06:22:668 KERNEL/(13482:13482): Dispositivo: LPT1 valor: 200
+[TRACE] 13:06:22:673 KERNEL/(13482:13511): Intentando conectar a umv.
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): Obteniendo cadenas: [b,c] [1,0]
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): valores obtenidos: b, 1
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): valores obtenidos: c, 0
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): semaforo: b valor: 1
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): semaforo: c valor: 0
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): Obteniendo cadenas: [!colas,!compartida] [3,5]
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): valores obtenidos: !colas, 3
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): valores obtenidos: !compartida, 5
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): Lista var Globales(cant 2):
+[variable: !colas, valor: 3]
+[variable: !compartida, valor: 5]
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): Obteniendo cadenas: [HDD1,LPT1] [500,200]
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): valores obtenidos: HDD1, 500
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): valores obtenidos: LPT1, 200
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): Dispositivo: HDD1 valor: 500
+[TRACE] 13:06:52:59 KERNEL/(13543:13543): Dispositivo: LPT1 valor: 200
+[TRACE] 13:06:52:65 KERNEL/(13543:13548): Intentando conectar a umv.
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): Obteniendo cadenas: [b,c] [1,0]
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): valores obtenidos: b, 1
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): valores obtenidos: c, 0
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): semaforo: b valor: 1
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): semaforo: c valor: 0
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): Obteniendo cadenas: [!colas,!compartida] [3,5]
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): valores obtenidos: !colas, 3
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): valores obtenidos: !compartida, 5
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): Lista var Globales(cant 2):
+[variable: !colas, valor: 3]
+[variable: !compartida, valor: 5]
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): Obteniendo cadenas: [HDD1,LPT1] [500,200]
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): valores obtenidos: HDD1, 500
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): valores obtenidos: LPT1, 200
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): Dispositivo: HDD1 valor: 500
+[TRACE] 13:07:50:801 KERNEL/(13579:13579): Dispositivo: LPT1 valor: 200
+[TRACE] 13:07:50:807 KERNEL/(13579:13585): Intentando conectar a umv.
+[TRACE] 13:07:50:869 KERNEL/(13579:13585): ENVIO datos. socket: 6. buffer: 31
+[TRACE] 13:07:50:878 KERNEL/(13579:13585): RECIBO datos. socket: 6. buffer: 1
+[TRACE] 13:07:50:878 KERNEL/(13579:13585): Conectado a la UMV
+
+[TRACE] 13:07:50:882 KERNEL/(13579:13589): Escuchando conexiones entrantes PCP(8500).
+
+[TRACE] 13:07:50:892 KERNEL/(13579:13591): Levanto hilo dispositivo: HDD1
+[TRACE] 13:07:50:900 KERNEL/(13579:13593): Levanto hilo dispositivo: LPT1
+[TRACE] 13:07:50:902 KERNEL/(13579:13585): Escuchando conexiones entrantes PLP(8000).
+
+[TRACE] 13:07:58:422 KERNEL/(13579:13589): RECIBO DATOS. socket: 9. buffer: 
+[TRACE] 13:07:58:422 KERNEL/(13579:13589): nos ponemos a recibir 0
+[TRACE] 13:07:58:422 KERNEL/(13579:13589): select PCP: socket 9 hung up
+
