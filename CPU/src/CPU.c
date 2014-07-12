@@ -147,7 +147,7 @@ prepararDestino(struct sockaddr_in destino, int puerto, char* ip)
   struct hostent *he, *
   gethostbyname();
   he = gethostbyname(ip);
-  log_trace(logger, "TRAZA - PREPARO SOCKET DESTINO.PUERTO: %d IP: %s \n", puerto, ip);
+  log_trace(logger, "PREPARO SOCKET DESTINO.PUERTO: %d IP: %s \n", puerto, ip);
   destino.sin_family = AF_INET;
   destino.sin_port = htons(puerto);
   bcopy(he->h_addr, &(destino.sin_addr.s_addr),he->h_length);
@@ -163,7 +163,7 @@ saludar(int sld, int tipo, int sRemoto)
   string_append(&mensaje,string_itoa(sld));
   string_append(&mensaje, string_itoa(tipo));
   int aux = 0;
-  log_trace(logger, "%s", "TRAZA - VOY A ENVIAR HANDSHAKE \n");
+  log_trace(logger, "%s", "VOY A ENVIAR HANDSHAKE \n");
   Enviar(sRemoto, mensaje);
   Recibir(sRemoto, respuesta);
   if (!(string_starts_with(respuesta, bien)))
@@ -269,7 +269,7 @@ RecibirProceso()
   int inicio = 0;
   int control = 0;
 
-  log_trace(logger, "%s", "TRAZA - ESTOY ESPERANDO RECIBIR UN QUANTUM + RETARDO + PCB \n");
+  log_trace(logger, "%s", "ESTOY ESPERANDO RECIBIR UN QUANTUM + RETARDO + PCB \n");
   r = Recibir(socketKERNEL, estructura);
 
   if (r > 0)
@@ -296,13 +296,13 @@ RecibirProceso()
               case 1:
                 {
                   quantum = atoi(string_substring(estructura, indice, i));
-                  log_trace(logger, "TRAZA - EL QUANTUM QUE RECIBI ES: %d \n", quantum);
+                  log_trace(logger, "EL QUANTUM QUE RECIBI ES: %d \n", quantum);
                 }
                 break;
               case 2:
                 {
                   retardo = atoi(string_substring(estructura, indice, i));
-                  log_trace(logger, "TRAZA - EL RETARDO QUE RECIBI ES: %d \n", retardo);
+                  log_trace(logger, "EL RETARDO QUE RECIBI ES: %d \n", retardo);
                 }
                 break;
               case 3:
@@ -384,7 +384,7 @@ serializar_PCB(PCB* prog)
 {
   char* cadena = string_new();
 
-  log_trace(logger, "%s", "TRAZA - PREPARO PCB SERIALIZADO \n");
+  log_trace(logger, "%s", "PREPARO PCB SERIALIZADO \n");
 
 
   string_append(&cadena, string_itoa(prog->id));
@@ -424,16 +424,16 @@ deserializarDesplLong(char * msj, int* despl, int* longi)
 {
   int tamanio = 10;
 
-  log_trace(logger, "TRAZA - DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s \n", msj);
+  log_trace(logger, "DESERIALIZO DESPLAZAMIENTO Y LONGITUD DE: %s \n", msj);
   if (string_starts_with(msj, bien)) //si el mensaje es valido -> busca despl y longi
     {
 
       *despl = atoi(string_substring(msj, 1, tamanio));
-      log_trace(logger, "TRAZA - DESPLAZAMIENTO: %d \n", *despl);
+      log_trace(logger, "DESPLAZAMIENTO: %d \n", *despl);
 
       *longi = atoi(string_substring(msj, tamanio + 1, tamanio));
 
-      log_trace(logger, "TRAZA - LONGITUD: %d \n", *longi);
+      log_trace(logger, "LONGITUD: %d \n", *longi);
     }
   else
     Error("%s", "ERROR - EL MENSAJE NO PUEDE SER DESERIALIZADO \n");
@@ -450,7 +450,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
   int indice = pos;
   int inicio = pos;
 
-  log_trace(logger, "%s", "TRAZA - DESERIALIZO EL PCB RECIBIDO \n");
+  log_trace(logger, "%s", "DESERIALIZO EL PCB RECIBIDO \n");
   iniciarPCB(est_prog);
 
   for (aux = 1; aux < 10; aux++)
@@ -469,14 +469,14 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
           case 1:
             {
               est_prog->id = atoi(string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL ID DE PROCESO ES: %d \n", est_prog->id);
+              log_trace(logger, "EL ID DE PROCESO ES: %d \n", est_prog->id);
               break;
             }
           case 2:
             {
               est_prog->segmentoCodigo = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL SEGMENTO DE CODIGO ES: %d \n",
+              log_trace(logger, "EL SEGMENTO DE CODIGO ES: %d \n",
                   est_prog->segmentoCodigo);
               break;
             }
@@ -484,7 +484,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->segmentoStack = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL SEGMENTO DE STACK ES: %d \n",
+              log_trace(logger, "EL SEGMENTO DE STACK ES: %d \n",
                   est_prog->segmentoStack);
               break;
             }
@@ -492,14 +492,14 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->cursorStack = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL CURSOR DE STACK ES: %d \n", est_prog->cursorStack);
+              log_trace(logger, "EL CURSOR DE STACK ES: %d \n", est_prog->cursorStack);
               break;
             }
           case 5:
             {
               est_prog->indiceCodigo = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL INDICE DE CODIGO ES: %d \n",
+              log_trace(logger, "EL INDICE DE CODIGO ES: %d \n",
                   est_prog->indiceCodigo);
               break;
             }
@@ -507,7 +507,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->indiceEtiquetas = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL INDICE DE ETIQUETAS ES: %d \n",
+              log_trace(logger, "EL INDICE DE ETIQUETAS ES: %d \n",
                   est_prog->indiceEtiquetas);
               break;
             }
@@ -515,7 +515,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->programCounter = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d \n",
+              log_trace(logger, "EL PROGRAM COUNTER ES: %d \n",
                   est_prog->programCounter);
               break;
             }
@@ -523,7 +523,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->sizeContextoActual = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",
+              log_trace(logger, "EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",
                   est_prog->sizeContextoActual);
               break;
             }
@@ -531,7 +531,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
             {
               est_prog->sizeIndiceEtiquetas = atoi(
                   string_substring(estructura, indice, i));
-              log_trace(logger, "TRAZA - EL SIZE DEL INDICE DE ETIQUETAS ES: %d \n",
+              log_trace(logger, "EL SIZE DEL INDICE DE ETIQUETAS ES: %d \n",
                   est_prog->sizeIndiceEtiquetas);
               break;
             }
@@ -547,7 +547,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
     }
 
   if (*cantguiones == 9)
-    log_trace(logger, "%s", "TRAZA - RECIBI TODO EL PCB \n");
+    log_trace(logger, "%s", "RECIBI TODO EL PCB \n");
 
 
   if (sub != NULL)
@@ -559,7 +559,7 @@ deserializar_PCB(char* estructura, int pos, int* cantguiones)
 void
 iniciarPCB(PCB* prog)
 {
-  log_trace(logger, "%s", "TRAZA - INICIALIZO UNA ESTRUCTURA PCB CON 0 \n");
+  log_trace(logger, "%s", "INICIALIZO UNA ESTRUCTURA PCB CON 0 \n");
   prog->id = 0;
   prog->segmentoCodigo = 0;
   prog->segmentoStack = 0;
@@ -584,7 +584,7 @@ AbortarProceso()
       string_append(&mensaje, AB_PROCESO);
       string_append(&mensaje, motivo);
       string_append(&mensaje, separador);
-      log_trace(logger, "%s", "TRAZA - SE ABORTARA EL PROCESO \n");
+      log_trace(logger, "%s", "SE ABORTARA EL PROCESO \n");
       Enviar(socketKERNEL, mensaje);
 
       Recibir(socketKERNEL,respuesta);
@@ -616,7 +616,7 @@ AtenderSenial(int s)
     {
   case SIGUSR1:
     {
-      log_trace(logger, "%s", "TRAZA - RECIBI LA SENIAL SIGUSR1 \n");
+      log_trace(logger, "%s", "RECIBI LA SENIAL SIGUSR1 \n");
 
       if (quantum > 0)
         {
@@ -626,6 +626,7 @@ AtenderSenial(int s)
       else
         {
           log_trace(logger, "%s","CPU sin programa en ejecucion. Se desconectara. \n");
+          finalizarTodo();
           exit(EXIT_FAILURE);
         }
       break;
@@ -643,7 +644,7 @@ PedirSentencia(char** sentencia)
   int longi = 0;
   int aux = 0;
 
-  log_trace(logger, "%s", "TRAZA - SOLICITO SENTENCIA A LA UMV \n");
+  log_trace(logger, "%s", "SOLICITO SENTENCIA A LA UMV \n");
   char* instruccion = malloc(BUFFERSIZE * sizeof(char));
   memset(instruccion,0,BUFFERSIZE);
 
@@ -699,7 +700,7 @@ getUMV(int base, int dsp, int tam)
   serCadena(&mensaje, string_itoa(dsp)); //desplazamiento
   serCadena(&mensaje, string_itoa(tam)); //longitud
   log_trace(logger,
-      "TRAZA - SOLICITO DATOS A MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMANIO: %d \n",
+      "SOLICITO DATOS A MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMANIO: %d \n",
       base, dsp, tam);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
@@ -743,7 +744,7 @@ setUMV(int ptro, int dsp, int tam, char* valor)
   serCadena(&mensaje, string_itoa(tam));
   string_append(&mensaje, valor);
   log_trace(logger,
-      "TRAZA - SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMANIO: %d VALOR: %s \n",
+      "SOLICITO GRABAR EN MEMORIA.BASE: %d DESPLAZAMIENTO: %d TAMANIO: %d VALOR: %s \n",
       ptro, dsp, tam, valor);
   Enviar(socketUMV, mensaje);
   Recibir(socketUMV, respuesta);
@@ -781,12 +782,12 @@ CambioProcesoActivo()
       char *mensaje = string_new();
       string_append(&mensaje,string_itoa(CAMBIO_PROCESO));
       serCadena(&mensaje, string_itoa(programa->id));
-      log_trace(logger, "TRAZA - INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d \n", programa->id);
+      log_trace(logger, "INFORMO A UMV QUE MI PROCESO ACTIVO ES: %d \n", programa->id);
       Enviar(socketUMV, mensaje);
       Recibir(socketUMV, respuesta);
       if (string_starts_with(respuesta, bien))
         log_trace(logger, "%s",
-            "TRAZA - SE INFORMO CORRECTAMENTE EL CAMBIO DE PROCESO ACTIVO \n");
+            "SE INFORMO CORRECTAMENTE EL CAMBIO DE PROCESO ACTIVO \n");
       else
         {
           if (string_starts_with(respuesta, mal))
@@ -825,7 +826,7 @@ AvisarDescAKernel()
       char *mensaje = string_new();
       string_append(&mensaje,string_itoa(AVISO_DESC));
       string_append(&mensaje, separador);
-      log_trace(logger, "%s", "TRAZA - AVISO AL KERNEL QUE LA CPU SE DESCONECTA \n");
+      log_trace(logger, "%s", "AVISO AL KERNEL QUE LA CPU SE DESCONECTA \n");
       Enviar(socketKERNEL, mensaje);
 
       if (mensaje != NULL)
@@ -844,7 +845,7 @@ obtener_valor(t_nombre_compartida variable)
 
   string_append(&mensaje, variable);
   string_append(&mensaje, separador);
-  log_trace(logger, "TRAZA - SOLICITO VALOR DE LA VARIABLE COMPARTIDA: %s \n", variable);
+  log_trace(logger, "SOLICITO VALOR DE LA VARIABLE COMPARTIDA: %s \n", variable);
   Enviar(socketKERNEL, mensaje);  //envio PedidoVariable
 
   Recibir(socketKERNEL, respuesta);  //recibo EstadoValor
@@ -852,8 +853,9 @@ obtener_valor(t_nombre_compartida variable)
   if (string_starts_with(respuesta, bien)) //si comienza con 1 -> recibi un mensj valido
     {
       valor = atoi(string_substring(respuesta, 1, (strlen(respuesta) - 1)));
-      log_trace(logger, "TRAZA - EL VALOR DE LA VARIABLE ES: %d \n", valor);
+      log_trace(logger, "EL VALOR DE LA VARIABLE ES: %d \n", valor);
       variable_ref = string_new();
+      string_append(&variable_ref,"!");
       string_append(&variable_ref,variable);
     }
   analizarRtaKernel(respuesta);
@@ -878,7 +880,7 @@ grabar_valor(t_nombre_compartida variable, t_valor_variable valor)
   string_append(&mensaje, separador);
   string_append(&mensaje, string_itoa(valor));
   string_append(&mensaje, separador);
-  log_trace(logger, "TRAZA - SOLICITO AL KERNEL ASIGNAR: %d A LA VARIABLE: %s \n", valor,
+  log_trace(logger, "SOLICITO AL KERNEL ASIGNAR: %d A LA VARIABLE: %s \n", valor,
       variable);
   Enviar(socketKERNEL, mensaje); //el mensaje que le mando es  PedidoVariableValor
 
@@ -911,7 +913,7 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
       string_append(&mensaje, string_itoa(cuanto));
       string_append(&mensaje, separador);
       log_trace(logger,
-          "TRAZA - INDICO AL KERNEL QUE EL PROCESO TERMINO EL QUANTUM CON MOTIVO : %d \n",
+          "INDICO AL KERNEL QUE EL PROCESO TERMINO EL QUANTUM CON MOTIVO : %d \n",
           que);
       Enviar(socketKERNEL, mensaje);
 
@@ -930,7 +932,7 @@ procesoTerminoQuantum(int que, char* donde, int cuanto)
 void analizarRtaKernel (char *respuesta)
 {
   if (string_starts_with(respuesta, bien))
-            log_trace(logger, "%s", "TRAZA - KERNEL PROCESO OK EL PEDIDO \n");
+            log_trace(logger, "%s", "KERNEL PROCESO OK EL PEDIDO \n");
           else
             {
               if(string_starts_with(respuesta, AB_PROCESO))
@@ -953,14 +955,14 @@ void analizarRtaKernel (char *respuesta)
 void
 finalizarProceso()
 {
-  log_trace(logger, "%s", "TRAZA - EL PROGRAMA FINALIZO \n");
+  log_trace(logger, "%s", "EL PROGRAMA FINALIZO \n");
   imprimirContextoActual();
   char *respuesta= malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = malloc(BUFFERSIZE * sizeof(char));
   memset(mensaje,0,BUFFERSIZE);
   string_append(&mensaje, FIN_PROCESO);
   string_append(&mensaje, serializar_PCB(programa));
-  log_trace(logger, "TRAZA - EL MENSAJE QUE LE ENVIO AL KERNEL ES: %s \n", mensaje);
+  log_trace(logger, "EL MENSAJE QUE LE ENVIO AL KERNEL ES: %s \n", mensaje);
   Enviar(socketKERNEL, mensaje);
 
   if (mensaje !=NULL)
@@ -990,7 +992,7 @@ mensajeAbortar(char* mensaje)
 void
 parsearYejecutar(char* instr)
 {
-  log_trace(logger, "TRAZA - LA SENTENCIA: %s SE ENVIARA AL PARSER \n", instr);
+  log_trace(logger, "LA SENTENCIA: %s SE ENVIARA AL PARSER \n", instr);
 
   analizadorLinea(instr, &funciones_p, &funciones_k);
 }
@@ -998,7 +1000,7 @@ parsearYejecutar(char* instr)
 void
 esperarTiempoRetardo()
 {
-  log_trace(logger, "TRAZA - TENGO UN TIEMPO DE ESPERA DE: %d MILISEGUNDOS \n", retardo);
+  log_trace(logger, "TENGO UN TIEMPO DE ESPERA DE: %d MILISEGUNDOS \n", retardo);
   usleep(retardo); //retardo en milisegundos
 }
 
@@ -1007,14 +1009,14 @@ esperarTiempoRetardo()
 void
 limpiarEstructuras()
 {
-  log_trace(logger, "%s", "TRAZA - LIMPIO ESTRUCTURAS AUXILIARES \n");
+  log_trace(logger, "%s", "LIMPIO ESTRUCTURAS AUXILIARES \n");
   dictionary_clean(dicVariables);
 }
 
 void
 destruirEstructuras()
 {
-  log_trace(logger, "%s", "TRAZA - DESTRUYO ESTRUCTURAS AUXILIARES \n");
+  log_trace(logger, "%s", "DESTRUYO ESTRUCTURAS AUXILIARES \n");
   dictionary_destroy(dicVariables);
 }
 
@@ -1023,7 +1025,7 @@ RecuperarEtiquetas()
 {
   if ((ab == 0) && (f == 0) && (quantum > 0) && ((programa->sizeIndiceEtiquetas) > 0)) // Solo buscarÃ¡ los datos si el programa no se abortÃ³
     {
-      log_trace(logger, "%s", "TRAZA - VOY A RECUPERAR EL INDICE DE ETIQUETAS \n");
+      log_trace(logger, "%s", "VOY A RECUPERAR EL INDICE DE ETIQUETAS \n");
       etiquetas=string_new();
       char* respuesta = malloc(BUFFERSIZE * sizeof(char));
       memset(respuesta,0,BUFFERSIZE);
@@ -1082,9 +1084,9 @@ RecuperarDicVariables()
       char* variables = malloc(BUFFERSIZE * sizeof(char));
       memset(variables,0,BUFFERSIZE);
 
-      log_trace(logger, "%s", "TRAZA - VOY A RECUPERAR EL DICCIONARIO DE VARIABLES \n");
+      log_trace(logger, "%s", "VOY A RECUPERAR EL DICCIONARIO DE VARIABLES \n");
       aux = programa->sizeContextoActual;
-      log_trace(logger, "TRAZA - CANTIDAD DE VARIABLES A RECUPERAR: %d \n", aux);
+      log_trace(logger, "CANTIDAD DE VARIABLES A RECUPERAR: %d \n", aux);
       ptr_posicion = programa->cursorStack - programa->segmentoStack;
 
 
@@ -1107,7 +1109,7 @@ RecuperarDicVariables()
         }
       else
         log_trace(logger, "%s",
-            "TRAZA - ES UN PROGRAMA NUEVO, NO TENGO CONTEXTO QUE RECUPERAR \n");
+            "ES UN PROGRAMA NUEVO, NO TENGO CONTEXTO QUE RECUPERAR \n");
 
       if (respuesta != NULL)
       free(respuesta);
@@ -1164,7 +1166,7 @@ imprimirContextoActual()
     string_append(&mensaje, "NO EXISTEN VARIABLES EN EL CONTEXTO ACTUAL");
 
   string_append(&mensaje,separador);
-  log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION \n",
+  log_trace(logger, "SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION \n",
       mensaje);
   Enviar(socketKERNEL, mensaje);
 
@@ -1208,7 +1210,7 @@ estoyConectado()
 void *
 SENIAL(void *arg)
 {
-  log_trace(logger, "%s", "TRAZA - HOT PLUG ACTIVO \n");
+  log_trace(logger, "%s", "HOT PLUG ACTIVO \n");
   signal(SIGUSR1, AtenderSenial);
 
   return NULL ;
@@ -1235,7 +1237,7 @@ main(void)
 
   int sent = 0;
 
-  log_trace(logger, "%s", "TRAZA - INICIA LA CPU \n");
+  log_trace(logger, "%s", "INICIA LA CPU \n");
 
   //Creacion del hilo senial
   pthread_t senial;
@@ -1257,12 +1259,12 @@ main(void)
   if (aux_conec_umv == saludar(HandU, tCPUU, socketUMV))
     {
       CONECTADO_UMV = 1;
-      log_trace(logger, "%s", "TRAZA - UMV CONTESTO HANDSHAKE OK \n");
+      log_trace(logger, "%s", "UMV CONTESTO HANDSHAKE OK \n");
     }
   if (aux_conec_ker == saludar(HandK, tCPUK, socketKERNEL))
     {
       CONECTADO_KERNEL = 1;
-      log_trace(logger, "%s", "TRAZA - KERNEL CONTESTO HANDSHAKE OK \n");
+      log_trace(logger, "%s", "KERNEL CONTESTO HANDSHAKE OK \n");
     }
 
   //Creo los diccionarios
@@ -1273,7 +1275,7 @@ main(void)
     {
       inciarVariables();
       CPULibre();
-      log_trace(logger, "%s", "TRAZA - ESTOY CONECTADO CON KERNEL Y UMV \n");
+      log_trace(logger, "%s", "ESTOY CONECTADO CON KERNEL Y UMV \n");
       log_trace(logger, "CANTIDAD DE PROGRAMAS QUE TENGO: %d \n", tengoProg);
 
       while (tengoProg == 0) //me fijo si tengo un prog que ejecutar
@@ -1295,8 +1297,8 @@ main(void)
       while (quantum > 0) //mientras tengo quantum
         {
           eti=0;
-          log_trace(logger, "TRAZA - EL QUANTUM ES: %d \n", quantum);
-          log_trace(logger, "TRAZA - LA INSTRUCCION A EJECUTAR ES: %d \n",programa->programCounter);
+          log_trace(logger, "EL QUANTUM ES: %d \n", quantum);
+          log_trace(logger, "LA INSTRUCCION A EJECUTAR ES: %d \n",programa->programCounter);
           sent = PedirSentencia(&sentencia);
           if (sent == 1) //la sentencia es valida
             {
@@ -1323,12 +1325,17 @@ main(void)
 
     }
 
+finalizarTodo();
+
+  return EXIT_SUCCESS;
+}
+
+void finalizarTodo()
+{
   AvisarDescAKernel(); //avisar al kernel asi me saca de sus recursos
   destruirEstructuras();
   Cerrar(socketKERNEL);
   Cerrar(socketUMV);
-
-  return EXIT_SUCCESS;
 }
 
 void rellenarConCeros(int cuanto,char **mensaje)
@@ -1346,7 +1353,7 @@ void rellenarConCeros(int cuanto,char **mensaje)
 void
 prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ASIGNAR \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA ASIGNAR \n");
   int validar;
 
    char* mensaje=string_new();
@@ -1356,7 +1363,7 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 
   validar = setUMV(programa->segmentoStack, direccion_variable + 1, DIG_VAL_VAR, mensaje);
   if (validar == 1) //si es <=0 el set aborta el proceso
-    log_trace(logger, "%s", "TRAZA - ASIGNACION EXITOSA \n");
+    log_trace(logger, "%s", "ASIGNACION EXITOSA \n");
 
   if (mensaje != NULL)
     free(mensaje);
@@ -1365,7 +1372,7 @@ prim_asignar(t_puntero direccion_variable, t_valor_variable valor)
 t_valor_variable
 prim_obtenerValorCompartida(t_nombre_compartida variable)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ObtenerValorCompartida \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA ObtenerValorCompartida \n");
   return obtener_valor(variable); //devuelve el valor de la variable
 }
 
@@ -1373,7 +1380,7 @@ t_valor_variable
 prim_asignarValorCompartida(t_nombre_compartida variable,
     t_valor_variable valor)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA AsignarValorCompartida \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA AsignarValorCompartida \n");
   grabar_valor(variable, valor);
   return valor; //devuelve el valor asignado
 }
@@ -1381,7 +1388,7 @@ prim_asignarValorCompartida(t_nombre_compartida variable,
 void
 prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA LlamarSinRetorno \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA LlamarSinRetorno \n");
   //preservar el contexto de ejecucion actual y resetear estructuras. necesito un contexto vacio ahora
   int aux;
 
@@ -1408,10 +1415,10 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
       if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
         {
           programa->cursorStack = programa->segmentoStack + despl + VAR_STACK;
-          log_trace(logger, "TRAZA - EL CURSOR STACK APUNTA A: %d \n", programa->cursorStack);
+          log_trace(logger, "EL CURSOR STACK APUNTA A: %d \n", programa->cursorStack);
           programa->sizeContextoActual = 0;
           prim_irAlLabel(etiqueta);
-          log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",
+          log_trace(logger, "EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",
               programa->sizeContextoActual);
           dictionary_clean(dicVariables); //limpio el dic de variables
         }
@@ -1425,7 +1432,7 @@ prim_llamarSinRetorno(t_nombre_etiqueta etiqueta)
 void
 prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA LlamarConRetorno \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA LlamarConRetorno \n");
   //preservar el contexto actual para retornar al mismo
 
   int aux;
@@ -1464,12 +1471,12 @@ prim_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar)
 
           if (setUMV(programa->segmentoStack, despl, VAR_STACK,mensaje) == 1)
             {
-              log_trace(logger, "TRAZA - LA DIRECCION POR DONDE RETORNAR ES: %d \n",donde_retornar);
+              log_trace(logger, "LA DIRECCION POR DONDE RETORNAR ES: %d \n",donde_retornar);
               programa->cursorStack = programa->segmentoStack + despl + VAR_STACK;
-              log_trace(logger, "TRAZA - EL CURSOR STACK APUNTA A: %d \n",programa->cursorStack);
+              log_trace(logger, "EL CURSOR STACK APUNTA A: %d \n",programa->cursorStack);
               programa->sizeContextoActual = 0;
               prim_irAlLabel(etiqueta);
-              log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
+              log_trace(logger, "EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
               dictionary_clean(dicVariables); //limpio el dic de variables
             }
         }
@@ -1483,7 +1490,7 @@ void
 prim_finalizar(void)
 {
   //recuperar pc y contexto apilados en stack
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Finalizar \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA Finalizar \n");
   int aux = programa->cursorStack; //tengo que leer desde la base del stack anterior hacia abajo
 
   if (aux > programa->segmentoStack)
@@ -1497,7 +1504,7 @@ prim_finalizar(void)
         {
           programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
 
-          log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d \n", programa->programCounter);
+          log_trace(logger, "EL PROGRAM COUNTER ES: %d \n", programa->programCounter);
           aux = aux - VAR_STACK;
 
           if (pedido != NULL)
@@ -1508,9 +1515,9 @@ prim_finalizar(void)
             {
               aux = aux - VAR_STACK;
               programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
-              log_trace(logger, "TRAZA - EL CURSOR STACK ES: %d \n", programa->cursorStack);
+              log_trace(logger, "EL CURSOR STACK ES: %d \n", programa->cursorStack);
               programa->sizeContextoActual = ((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK) + 1;
-              log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
+              log_trace(logger, "EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
               if (programa->sizeContextoActual > 0)
                 {
                   dictionary_clean(dicVariables); //limpio el dic de variables
@@ -1536,7 +1543,7 @@ prim_finalizar(void)
 void
 prim_retornar(t_valor_variable retorno)
 {  //acÃ¡ tengo que volver a retorno
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Retornar \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA Retornar \n");
 
   int retor;
   int aux = programa->cursorStack; //tengo que leer desde la base del stack anterior hacia abajo
@@ -1553,7 +1560,7 @@ prim_retornar(t_valor_variable retorno)
   if (string_starts_with(pedido,bien))
     {
       retor = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
-      log_trace(logger, "TRAZA - LA DIRECCION DONDE RETORNAR ES: %d \n", retor);
+      log_trace(logger, "LA DIRECCION DONDE RETORNAR ES: %d \n", retor);
 
 
       if (setUMV(programa->segmentoStack, (retor + 1), DIG_VAL_VAR, mensj) == 1)
@@ -1564,7 +1571,7 @@ prim_retornar(t_valor_variable retorno)
           if (string_starts_with(pedido, bien))
             {
               programa->programCounter = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
-              log_trace(logger, "TRAZA - EL PROGRAM COUNTER ES: %d \n",programa->programCounter);
+              log_trace(logger, "EL PROGRAM COUNTER ES: %d \n",programa->programCounter);
               aux = aux - VAR_STACK;
               pedido = getUMV(programa->segmentoStack,aux, VAR_STACK);
 
@@ -1573,9 +1580,9 @@ prim_retornar(t_valor_variable retorno)
                 {
                   aux=aux - VAR_STACK;
                   programa->cursorStack = atoi(string_substring(pedido, 1, strlen(pedido) - 1));
-                  log_trace(logger, "TRAZA - EL CURSOR DEL STACK ES: %d \n",programa->cursorStack);
+                  log_trace(logger, "EL CURSOR DEL STACK ES: %d \n",programa->cursorStack);
                   programa->sizeContextoActual =((aux - (programa->cursorStack - programa->segmentoStack)) / VAR_STACK) + 1;
-                  log_trace(logger, "TRAZA - EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
+                  log_trace(logger, "EL SIZE DEL CONTEXTO ACTUAL ES: %d \n",programa->sizeContextoActual);
 
                   if (programa->sizeContextoActual > 0)
                     {
@@ -1603,7 +1610,7 @@ void
 prim_imprimir(t_valor_variable valor_mostrar)
 {
   //acÃ¡ me conecto con el kernel y le paso el mensaje
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Imprimir \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA Imprimir \n");
 
   char *mensaje = malloc(BUFFERSIZE*sizeof(char));
   memset(mensaje,0,BUFFERSIZE);
@@ -1613,7 +1620,7 @@ prim_imprimir(t_valor_variable valor_mostrar)
   string_append(&mensaje, ":");
   string_append(&mensaje, string_itoa(valor_mostrar)); //por el momento muestra valor
   string_append(&mensaje, separador);
-  log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION \n",valor_mostrar);
+  log_trace(logger, "SOLICITO AL KERNEL IMPRIMIR: %d EN EL PROGRAMA EN EJECUCION \n",valor_mostrar);
   Enviar(socketKERNEL, mensaje);
   if (mensaje != NULL)
     free(mensaje);
@@ -1636,7 +1643,7 @@ if (variable_ref != NULL)
 t_valor_variable
 prim_dereferenciar(t_puntero direccion_variable)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Dereferenciar \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA Dereferenciar \n");
   t_valor_variable valor = 0;
   char* mensaje = malloc(1 * sizeof(char));
 
@@ -1644,7 +1651,7 @@ prim_dereferenciar(t_puntero direccion_variable)
   if (string_starts_with(mensaje, bien)) //si comienza con 1 -> recibi un mensj valido
     {
     valor = atoi(string_substring(mensaje, 1, (strlen(mensaje) - 1)));
-    log_trace(logger, "TRAZA - EL VALOR EXISTENTE EN ESA POSICION ES: %d \n", valor);
+    log_trace(logger, "EL VALOR EXISTENTE EN ESA POSICION ES: %d \n", valor);
     }
   else
     mensajeAbortar("ERROR AL LEER DIRECCION MEMORIA");
@@ -1658,20 +1665,18 @@ prim_dereferenciar(t_puntero direccion_variable)
 void
 prim_irAlLabel(t_nombre_etiqueta etiqueta)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA IrAlLabel \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA IrAlLabel \n");
 
   programa->programCounter = metadata_buscar_etiqueta(etiqueta, etiquetas,programa->sizeIndiceEtiquetas); //asigno la primer instruccion ejecutable de etiqueta al PC
-  //programa->programCounter ++ ;
-  log_trace(logger, "TRAZA - EL VALOR DEL PROGRAM COUNTER ES: %d \n",programa->programCounter);
+  log_trace(logger, "EL VALOR DEL PROGRAM COUNTER ES: %d \n",programa->programCounter);
   eti=1;
 }
 
 t_puntero
 prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ObtenerPosicionVariable \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA ObtenerPosicionVariable \n");
   t_puntero posicion = 0;
-
 
   char* var = string_new();
   sprintf(var,"%c",identificador_variable);
@@ -1682,7 +1687,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
     {
       int* aux = dictionary_get(dicVariables, var);
       posicion = (t_puntero) aux;
-      log_trace(logger, "TRAZA - ENCONTRE LA VARIABLE: %s, POSICION: %d \n", var, aux);
+      log_trace(logger, "ENCONTRE LA VARIABLE: %s, POSICION: %d \n", var, aux);
 
       variable_ref=string_new();
       string_append(&variable_ref,var);
@@ -1701,7 +1706,7 @@ prim_obtenerPosicionVariable(t_nombre_variable identificador_variable)
 t_puntero
 prim_definirVariable(t_nombre_variable identificador_variable)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA DefinirVariable \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA DefinirVariable \n");
   // reserva espacio para la variable,
   //la registra en el stack
   t_puntero pos_var_stack;
@@ -1709,10 +1714,10 @@ prim_definirVariable(t_nombre_variable identificador_variable)
   char* var = malloc(DIG_NOM_VAR);
   var[0] = identificador_variable;
 
-  log_trace(logger, "TRAZA - LA VARIABLE QUE SE QUIERE DEFINIR ES: %s \n",string_substring(var, 0, 1));
+  log_trace(logger, "LA VARIABLE QUE SE QUIERE DEFINIR ES: %s \n",string_substring(var, 0, 1));
   pos_var_stack = (programa->cursorStack - programa->segmentoStack) + programa->sizeContextoActual * VAR_STACK;
 
-  log_trace(logger, "TRAZA - LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d \n",pos_var_stack);
+  log_trace(logger, "LA POSICION DONDE SE QUIERE DEFINIR LA VARIABLE ES: %d \n",pos_var_stack);
 
   if ((dictionary_has_key(dicVariables, string_substring(var, 0, 1))) == false)
     {
@@ -1720,7 +1725,7 @@ prim_definirVariable(t_nombre_variable identificador_variable)
         {
           dictionary_put(dicVariables, string_substring(var, 0, 1),(void*) pos_var_stack); //la registro en el dicc de variables
           programa->sizeContextoActual++;
-          log_trace(logger, "%s","TRAZA - SE DEFINIO CORRECTAMENTE LA VARIABLE \n");
+          log_trace(logger, "%s","SE DEFINIO CORRECTAMENTE LA VARIABLE \n");
         }
       else
         {
@@ -1740,14 +1745,14 @@ prim_definirVariable(t_nombre_variable identificador_variable)
 void
 prim_imprimirTexto(char* texto)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA ImprimirTexto \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA ImprimirTexto \n");
 
   char *mensaje = malloc(BUFFERSIZE*sizeof(char));
   memset(mensaje,0,BUFFERSIZE);
   string_append(&mensaje,string_itoa(IMPRIMIR));
   string_append(&mensaje, texto);
   string_append(&mensaje, separador);
-  log_trace(logger, "TRAZA - SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION \n",texto);
+  log_trace(logger, "SOLICITO AL KERNEL IMPRIMIR: %s EN EL PROGRAMA EN EJECUCION \n",texto);
   Enviar(socketKERNEL, mensaje);
   if (mensaje != NULL)
   free(mensaje);
@@ -1764,8 +1769,8 @@ prim_imprimirTexto(char* texto)
 void
 prim_entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA EntradaSalida \n");
-  log_trace(logger,"TRAZA - DISPOSITIVO QUE SOLICITA: %s \n",dispositivo);
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA EntradaSalida \n");
+  log_trace(logger,"DISPOSITIVO QUE SOLICITA: %s \n",dispositivo);
   quantum = 0; //para que salga del ciclo
   io = 1; //seÃ±al de que paso por entrada y salida...ya le envio el pcb al kernel
   programa->programCounter ++; //cuando vuelva, que siga la proxima instruccion
@@ -1775,7 +1780,7 @@ prim_entradaSalida(t_nombre_dispositivo dispositivo, int tiempo)
 void
 prim_wait(t_nombre_semaforo identificador_semaforo)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Wait \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA Wait \n");
   char* senial=string_new();
   char *respuesta= malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = string_itoa(S_WAIT);
@@ -1783,7 +1788,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
   //el mensaje que le mando es  PedidoSemaforo
   string_append(&mensaje, identificador_semaforo);
   string_append(&mensaje,separador);
-  log_trace(logger, "TRAZA - SOLICITO AL KERNEL EL SEMAFORO: %s \n", identificador_semaforo);
+  log_trace(logger, "SOLICITO AL KERNEL EL SEMAFORO: %s \n", identificador_semaforo);
   Enviar(socketKERNEL, mensaje);
   Recibir(socketKERNEL, respuesta);
   senial = string_substring(respuesta, 0, 1);
@@ -1794,18 +1799,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
     {
       if (string_equals_ignore_case(senial, mal)) //senial==1 -> consegui el sem, senial==0 -> proceso bloqueado por sem
         {
-          log_trace(logger, "%s","TRAZA - EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO \n");
-          Enviar(socketKERNEL, "2EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO-");
-
-          char *rtaKERNEL = malloc(BUFFERSIZE*sizeof(char));
-            memset(rtaKERNEL,0,BUFFERSIZE);
-
-          Recibir(socketKERNEL,rtaKERNEL);
-          analizarRtaKernel(rtaKERNEL);
-          if (rtaKERNEL !=NULL)
-            free(rtaKERNEL);
-
-
+          log_trace(logger, "%s","EL PROCESO QUEDO BLOQUEADO A LA ESPERA DEL SEMAFORO \n");
           down = 1;
           quantum = 0;
           tengoProg = 0;
@@ -1819,7 +1813,7 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
           else
             {
               if (string_equals_ignore_case(senial, bien))
-                log_trace(logger, "%s", "TRAZA - EL PROCESO OBTUVO EL SEMAFORO \n");
+                log_trace(logger, "%s", "EL PROCESO OBTUVO EL SEMAFORO \n");
               else
             kernelDesconectado();
             }
@@ -1835,18 +1829,18 @@ prim_wait(t_nombre_semaforo identificador_semaforo)
 void
 prim_signal(t_nombre_semaforo identificador_semaforo)
 {
-  log_trace(logger, "%s", "TRAZA - EJECUTO PRIMITIVA Signal \n");
+  log_trace(logger, "%s", "EJECUTO PRIMITIVA Signal \n");
   char *respuesta=malloc(BUFFERSIZE*sizeof(char));
   char *mensaje = string_itoa(S_SIGNAL);
 
   //el mensaje que le mando es  PedidoSemaforo
   string_append(&mensaje, identificador_semaforo);
   string_append(&mensaje,separador);
-  log_trace(logger, "TRAZA - SOLICITO AL KERNEL LIBERAR UNA INSTANCIA DEL SEMAFORO: %s \n",identificador_semaforo);
+  log_trace(logger, "SOLICITO AL KERNEL LIBERAR UNA INSTANCIA DEL SEMAFORO: %s \n",identificador_semaforo);
   Enviar(socketKERNEL, mensaje);
   Recibir(socketKERNEL, respuesta);
   if (string_starts_with(respuesta, bien)) //si es -1 lo controla recibir
-      log_trace(logger, "%s", "TRAZA - LA SOLICITUD INGRESO CORRECTAMENTE \n");
+      log_trace(logger, "%s", "LA SOLICITUD INGRESO CORRECTAMENTE \n");
   else
     {
       if (string_starts_with(respuesta, mal))

@@ -121,6 +121,8 @@ RecibirProceso(); //para recibir el pcb, el retardo y el quantum
 int
 PedirSentencia(char** sentencia); //para recibir la instruccion
 
+void finalizarTodo();
+
 void analizarRtaKernel (char *respuesta);
 void analizarRtaUMV (char *respuesta, char* mensaje);
 void
