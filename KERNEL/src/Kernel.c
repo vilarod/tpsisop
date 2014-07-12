@@ -361,7 +361,7 @@ void *bloqueados_fnc(void *arg) {
 						"Entrada HIO disp %s programa: %d tiempo: %d milisegundos",
 						(char*) HIO->nombre, auxPCB->id,
 						HIO->valor * auxBloq->tiempo);
-				sleep(HIO->valor * auxBloq->tiempo / 1000);
+				usleep(HIO->valor * auxBloq->tiempo);
 				log_trace(logger, "Termino HIO programa: %d", auxPCB->id);
 				imprimirListaBloqueadosPorUnDispositivoxTraza(
 						HIO->listaBloqueados, HIO->nombre);
@@ -992,12 +992,10 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 	PCBAUX->id = IDcontador;
 	digitosID = cantidadDigitos(PCBAUX->id);
 	IDcontador++;
-	pthread_mutex_lock(&mutexSocketProgramas);
 	t_socket* auxSocket = encontrarSocket(id);
 	if (auxSocket != NULL ) {
 		auxSocket->id = PCBAUX->id;
 	}
-	pthread_mutex_unlock(&mutexSocketProgramas);
 	cadenaCambioContexto = string_new();
 	string_append(&cadenaCambioContexto, string_itoa(4));
 	string_append(&cadenaCambioContexto, string_itoa(digitosID));
@@ -2016,9 +2014,6 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 					list_add(auxSem->listaSem, auxPCB);
 					imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
 							auxSem->nombre, auxSem->valor);
-					pthread_mutex_lock(&mutexReady);
-					imprimirListaReadyxTraza();
-					pthread_mutex_unlock(&mutexReady);
 				} else {
 					//Desbloquar Programa
 					log_trace(logger,
@@ -2117,7 +2112,7 @@ void comandoSignal(char* buffer, int socket) {
 			list_add(listaReady, auxPCB);
 			imprimirListaReadyxTraza();
 			pthread_mutex_unlock(&mutexReady);
-			list_clean(auxList);
+			list_clean(auxSem->listaSem);
 			imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
 					auxSem->nombre, auxSem->valor);
 			semsig(&readyCont);
@@ -2379,36 +2374,32 @@ void imprimirListaVarGlobalesxTraza() {
 void imprimirListaBloqueadosPorUnSemaroxTraza(t_list* lista, char* nombre,
 		int valor) {
 	char* cadena = string_new();
-	char* charPCB;
 	int cant = list_size(lista), i;
 	PCB* auxPCB;
 	for (i = 0; i < cant; i++) {
 		auxPCB = list_get(lista, i);
-		string_append(&cadena, "\n[PCB: ");
-		charPCB = serializar_PCB(auxPCB);
-		string_append(&cadena, charPCB);
+		string_append(&cadena, "\n[id: ");
+		string_append(&cadena, string_itoa(auxPCB->id));
 		string_append(&cadena, "]");
-		free(charPCB);
 	}
-	log_trace(logger, "\nLista bloq por sem %s(cant %d, valor sem: %d):%s",
+	log_trace(logger, "Lista bloq por sem %s(cant %d, valor sem: %d):%s",
 			(char*) nombre, cant, valor, (char*) cadena);
 	free(cadena);
 }
 
 void imprimirListaReadyxTraza() {
 	char* cadena = string_new();
-	char* charPCB;
 	int cant = list_size(listaReady), i;
 	PCB* auxPCB;
 	for (i = 0; i < cant; i++) {
 		auxPCB = list_get(listaReady, i);
-		string_append(&cadena, "\n[PCB: ");
-		charPCB = serializar_PCB(auxPCB);
-		string_append(&cadena, charPCB);
+		string_append(&cadena, "\n[id: ");
+		string_append(&cadena, string_itoa(auxPCB->id));
+		string_append(&cadena, " Indice codigo: ");
+		string_append(&cadena, string_itoa(auxPCB->indiceCodigo));
 		string_append(&cadena, "]");
-		free(charPCB);
 	}
-	log_trace(logger, "\nLista Ready(cant %d):%s", cant, (char*) cadena);
+	log_trace(logger, "Lista Ready(cant %d):%s", cant, (char*) cadena);
 	free(cadena);
 }
 
@@ -2424,7 +2415,7 @@ void imprimirListaFinxTraza() {
 		string_append(&cadena, string_itoa(auxFin->finalizo));
 		string_append(&cadena, "]");
 	}
-	log_trace(logger, "\nLista Fin(cant %d):%s", cant, (char*) cadena);
+	log_trace(logger, "Lista Fin(cant %d):%s", cant, (char*) cadena);
 	free(cadena);
 }
 
@@ -2442,7 +2433,7 @@ void imprimirListaNewxTraza() {
 		string_append(&cadena, string_itoa(auxNew->idPCB->indiceCodigo));
 		string_append(&cadena, "]");
 	}
-	log_trace(logger, "\nLista New(cant %d): %s", cant, (char*) cadena);
+	log_trace(logger, "Lista New(cant %d): %s", cant, (char*) cadena);
 	free(cadena);
 }
 
@@ -2463,43 +2454,35 @@ void imprimirListaCPUxTraza() {
 		string_append(&cadena, "]");
 		free(charPCB);
 	}
-	log_trace(logger, "\nLista CPU(cant %d):%s", cant, (char*) cadena);
+	log_trace(logger, "Lista CPU(cant %d):%s", cant, (char*) cadena);
 	free(cadena);
 }
 
 void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre) {
 	char* cadena = string_new();
-	char* charPCB;
 	int cant = list_size(lista), i;
 	t_bloqueado* auxBloq;
 	for (i = 0; i < cant; i++) {
 		auxBloq = list_get(lista, i);
-		string_append(&cadena, "\n[PCB: ");
+		string_append(&cadena, "\n[id: ");
 		string_append(&cadena, string_itoa(auxBloq->idPCB->id));
-		charPCB = serializar_PCB(auxBloq->idPCB);
-		string_append(&cadena, charPCB);
 		string_append(&cadena, ", tiempo: ");
 		string_append(&cadena, string_itoa(auxBloq->tiempo));
 		string_append(&cadena, "]");
-		free(charPCB);
 	}
-	log_trace(logger, "\nLista bloq por disp %s(cant %d):%s", (char*) nombre,
+	log_trace(logger, "Lista bloq por disp %s(cant %d):%s", (char*) nombre,
 			cant, (char*) cadena);
 	free(cadena);
 }
 
 int estaProgActivo(int idprog) {
-	pthread_mutex_lock(&mutexSocketProgramas);
 	int _is_Prog_Act(t_socket *p) {
 		return encontrarInt(p->id, idprog);
 	}
 	if (list_any_satisfy(listaSocketProgramas, (void*) _is_Prog_Act)) {
-		pthread_mutex_unlock(&mutexSocketProgramas);
 		return 1;
 	}
-	pthread_mutex_unlock(&mutexSocketProgramas);
 	return 0;
-
 }
 
 t_socket* encontrarSocket(int socket) {
