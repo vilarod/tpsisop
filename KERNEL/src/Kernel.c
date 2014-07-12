@@ -357,8 +357,10 @@ void *bloqueados_fnc(void *arg) {
 			auxBloq->idPCB = NULL;
 			if (estaProgActivo(auxPCB->id)) {
 				//Procesando HIO
-				log_trace(logger, "Entrada HIO disp %s programa: %d tiempo: %d milisegundos",
-						(char*) HIO->nombre, auxPCB->id, HIO->valor * auxBloq->tiempo);
+				log_trace(logger,
+						"Entrada HIO disp %s programa: %d tiempo: %d milisegundos",
+						(char*) HIO->nombre, auxPCB->id,
+						HIO->valor * auxBloq->tiempo);
 				sleep(HIO->valor * auxBloq->tiempo / 1000);
 				log_trace(logger, "Termino HIO programa: %d", auxPCB->id);
 				imprimirListaBloqueadosPorUnDispositivoxTraza(
@@ -2012,6 +2014,9 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 					list_add(auxSem->listaSem, auxPCB);
 					imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
 							auxSem->nombre, auxSem->valor);
+					pthread_mutex_lock(&mutexReady);
+					imprimirListaReadyxTraza();
+					pthread_mutex_unlock(&mutexReady);
 				} else {
 					//Desbloquar Programa
 					log_trace(logger,
@@ -2026,7 +2031,8 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 					pthread_mutex_unlock(&mutexReady);
 					semsig(&readyCont);
 				}
-				if (nombre!=NULL) free(nombre);
+				if (nombre != NULL )
+					free(nombre);
 			} else {
 				mandarPCBaFIN(auxPCB, 1, "semaforo no encontrado");
 			}
@@ -2109,7 +2115,7 @@ void comandoSignal(char* buffer, int socket) {
 			list_add(listaReady, auxPCB);
 			imprimirListaReadyxTraza();
 			pthread_mutex_unlock(&mutexReady);
-			list_clean(auxSem->listaSem);
+			list_clean(auxList);
 			imprimirListaBloqueadosPorUnSemaroxTraza(auxSem->listaSem,
 					auxSem->nombre, auxSem->valor);
 			semsig(&readyCont);
@@ -2473,6 +2479,7 @@ void imprimirListaBloqueadosPorUnDispositivoxTraza(t_list* lista, char* nombre) 
 }
 
 int estaProgActivo(int idprog) {
+
 	int _is_Prog_Act(t_socket *p) {
 		return encontrarInt(p->id, idprog);
 	}
