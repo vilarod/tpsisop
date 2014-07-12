@@ -1229,8 +1229,8 @@ main(void)
   int KERNEL_PUERTO = ObtenerPuertoKernel();
   char* UMV_IP = ObtenerIPUmv();
   char* KERNEL_IP = ObtenerIPKernel();
-  char* temp_file = tmpnam(NULL );
-  logger = log_create(temp_file, "CPU", g_ImprimirTrazaPorConsola,
+  //char* temp_file = tmpnam(NULL );
+  logger = log_create("Log_CPU.txt", "CPU", g_ImprimirTrazaPorConsola,
       LOG_LEVEL_TRACE);
 
   char* sentencia = string_new();
