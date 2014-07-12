@@ -357,8 +357,8 @@ void *bloqueados_fnc(void *arg) {
 			auxBloq->idPCB = NULL;
 			if (estaProgActivo(auxPCB->id)) {
 				//Procesando HIO
-				log_trace(logger, "Entrada HIO disp %s programa: %d tiempo: %d",
-						(char*) HIO->nombre, auxPCB->id, auxBloq->tiempo);
+				log_trace(logger, "Entrada HIO disp %s programa: %d tiempo: %d milisegundos",
+						(char*) HIO->nombre, auxPCB->id, HIO->valor * auxBloq->tiempo);
 				sleep(HIO->valor * auxBloq->tiempo / 1000);
 				log_trace(logger, "Termino HIO programa: %d", auxPCB->id);
 				imprimirListaBloqueadosPorUnDispositivoxTraza(
@@ -698,8 +698,6 @@ void llenarDispositConfig() {
 	int sfin = 1;
 	char* sub1, *sub2;
 	char* nombre1, *nombre2;
-	sub1 = "";
-	sub2 = "";
 	nombre1 = string_new();
 	nombre2 = string_new();
 	int valor;
@@ -768,8 +766,6 @@ void llenarVarGlobConfig() {
 	int sfin = 1;
 	char* sub1, *sub2;
 	char* nombre1, *nombre2;
-	sub1 = "";
-	sub2 = "";
 	nombre1 = string_new();
 	nombre2 = string_new();
 	int valor;
@@ -1037,7 +1033,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 		string_append(&cadenaSegmento, string_itoa(digitosProg));
 		string_append(&cadenaSegmento, string_itoa(strlen(prog)));
 		EnviarDatos(socketumv, cadenaSegmento);
-		
+
 		RecibirDatos(socketumv, respuestaumv2); //COD + DIGITO + BASE
 		if (analisarRespuestaUMV(respuestaumv2) != 0) {
 			char *codesegment = string_substring(respuestaumv2, 2,
@@ -1045,7 +1041,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 
 			//Valor Segmento Codigo asignado
 			PCBAUX->segmentoCodigo = atoi(codesegment);
-						int digitosBaseCOD = cantidadDigitos(PCBAUX->segmentoCodigo);
+			int digitosBaseCOD = cantidadDigitos(PCBAUX->segmentoCodigo);
 
 			//Escribimos el codigo
 			string_append(&escribodatos, string_itoa(2));
@@ -1057,7 +1053,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			string_append(&escribodatos, string_itoa(strlen(prog)));
 			string_append(&escribodatos, prog);
 			EnviarDatos(socketumv, escribodatos);
-			
+
 			if (RecibirDatos(socketumv, respuestaumv5) <= 0) {
 				ErrorFatal("Error en la comunicacion con la umv");
 			}
@@ -1100,7 +1096,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 					else
 						string_append(&etiqueta, "1");
 					EnviarDatos(socketumv, etiqueta);
-									if (RecibirDatos(socketumv, respuestaumv4) <= 0) {
+					if (RecibirDatos(socketumv, respuestaumv4) <= 0) {
 						ErrorFatal("Error en la comunicacion con la umv");
 					}
 					//COD + DIGITO + BASE
@@ -1108,7 +1104,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 						char *Etiquetasegment = string_substring(respuestaumv4,
 								2, strlen(respuestaumv4) - 2);
 						PCBAUX->indiceEtiquetas = atoi(Etiquetasegment);
-												if (metadataprograma->etiquetas_size != 0) {
+						if (metadataprograma->etiquetas_size != 0) {
 							//Grabar las etiquetas
 							char*escribirEtiq = string_new();
 							int digitosBaseEtiq = cantidadDigitos(
@@ -1168,7 +1164,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 							string_append(&codex, string_itoa(digitocode));
 							string_append(&codex, string_itoa(tamaniodeindice));
 							EnviarDatos(socketumv, codex);
-							
+
 							RecibirDatos(socketumv, respuestaumv7); //COD + DIGITO + BASE
 							if (analisarRespuestaUMV(respuestaumv7) != 0) {
 								char *codexsegment = string_substring(
@@ -1238,7 +1234,7 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 											string_itoa(tamanio));
 								}
 								EnviarDatos(socketumv, escribirCodex);
-								
+
 								if (RecibirDatos(socketumv, respuestaumv8)
 										<= 0) {
 									ErrorFatal(
@@ -1286,11 +1282,12 @@ int ComandoRecibirPrograma(char *buffer, int id) {
 			return pcb1->peso < pcb2->peso;
 		}
 		list_sort(listaNew, (void*) menorPeso);
-		imprimirListaNewxTraza();
+
 	}
+	imprimirListaNewxTraza();
 	pthread_mutex_unlock(&mutexNew);
 	semsig(&newCont);
-	
+
 	return 1;
 }
 
@@ -1985,7 +1982,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 			tiempo = obtenerValorDelMensaje(buffer, pos2);
 			t_HIO* auxHIO = encontrarDispositivo(disp);
 			if (auxHIO != NULL ) {
-								log_trace(logger,
+				log_trace(logger,
 						"Final Quamtum programa: %d. Pide Dispositivo: %s",
 						auxPCB->id, (char*) auxHIO->nombre);
 				pthread_mutex_lock(&(auxHIO->mutexBloqueados));
@@ -1999,13 +1996,15 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 				log_trace(logger, "No encontro dispositivo");
 				mandarPCBaFIN(auxPCB, 1, "Dispositivo no encontrado");
 			}
+			if (disp != NULL )
+				free(disp);
 			break;
 		case '2':	//Bloqueado por semaforo
 			nombre = obtenerNombreMensaje(buffer, pos2);
 			pthread_mutex_lock(&mutexSemaforos);
 			t_sem* auxSem = encontrarSemaforo(nombre);
 			if (auxSem != NULL ) {
-				if (auxSem->valor < 0) {
+				if (list_size(auxSem->listaSem) < (-1) * auxSem->valor) {
 					//Bloquear Programa por semaforo
 					log_trace(logger,
 							"Final Quamtum programa: %d. bloqueado por semaforo: %s",
@@ -2027,6 +2026,7 @@ void comandoFinalQuamtum(char *buffer, int socket) {
 					pthread_mutex_unlock(&mutexReady);
 					semsig(&readyCont);
 				}
+				if (nombre!=NULL) free(nombre);
 			} else {
 				mandarPCBaFIN(auxPCB, 1, "semaforo no encontrado");
 			}
